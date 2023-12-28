@@ -60,8 +60,8 @@ all: main-build
 main-build: H7-Test-Firmware.elf secondary-outputs
 
 # Tool invocations
-H7-Test-Firmware.elf H7-Test-Firmware.map: $(OBJS) $(USER_OBJS) /Users/shanewoods/cubesat/workspace/H7-Test-Firmware/STM32H753ZITX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "H7-Test-Firmware.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"/Users/shanewoods/cubesat/workspace/H7-Test-Firmware/STM32H753ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="H7-Test-Firmware.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+H7-Test-Firmware.elf H7-Test-Firmware.map: $(OBJS) $(USER_OBJS) /Users/shanewoods/cubesat/workspace/H7-Instrument-Software/H7-Test-Firmware/STM32H753ZITX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "H7-Test-Firmware.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"/Users/shanewoods/cubesat/workspace/H7-Instrument-Software/H7-Test-Firmware/STM32H753ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="H7-Test-Firmware.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
