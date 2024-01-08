@@ -589,7 +589,7 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
  800072a:	4b74      	ldr	r3, [pc, #464]	; (80008fc <HAL_TIM_OC_DelayElapsedCallback+0x2f4>)
  800072c:	781b      	ldrb	r3, [r3, #0]
  800072e:	2b00      	cmp	r3, #0
- 8000730:	f000 829e 	beq.w	8000c70 <HAL_TIM_OC_DelayElapsedCallback+0x668>
+ 8000730:	f000 829d 	beq.w	8000c6e <HAL_TIM_OC_DelayElapsedCallback+0x666>
       {
         if (hk_counter == HK_CADENCE)
  8000734:	4b72      	ldr	r3, [pc, #456]	; (8000900 <HAL_TIM_OC_DelayElapsedCallback+0x2f8>)
@@ -1258,7 +1258,7 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 
   /* Timer 3 also called but doesn't need to do anything on IT */
 }
- 8000bb6:	e05b      	b.n	8000c70 <HAL_TIM_OC_DelayElapsedCallback+0x668>
+ 8000bb6:	e05a      	b.n	8000c6e <HAL_TIM_OC_DelayElapsedCallback+0x666>
           hk_counter++;
  8000bb8:	4b08      	ldr	r3, [pc, #32]	; (8000bdc <HAL_TIM_OC_DelayElapsedCallback+0x5d4>)
  8000bba:	681b      	ldr	r3, [r3, #0]
@@ -1266,7 +1266,7 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
  8000bbe:	4a07      	ldr	r2, [pc, #28]	; (8000bdc <HAL_TIM_OC_DelayElapsedCallback+0x5d4>)
  8000bc0:	6013      	str	r3, [r2, #0]
 }
- 8000bc2:	e055      	b.n	8000c70 <HAL_TIM_OC_DelayElapsedCallback+0x668>
+ 8000bc2:	e054      	b.n	8000c6e <HAL_TIM_OC_DelayElapsedCallback+0x666>
  8000bc4:	2400050c 	.word	0x2400050c
  8000bc8:	24000050 	.word	0x24000050
  8000bcc:	2400054c 	.word	0x2400054c
@@ -1278,12 +1278,12 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
  8000be0:	687b      	ldr	r3, [r7, #4]
  8000be2:	4a25      	ldr	r2, [pc, #148]	; (8000c78 <HAL_TIM_OC_DelayElapsedCallback+0x670>)
  8000be4:	4293      	cmp	r3, r2
- 8000be6:	d143      	bne.n	8000c70 <HAL_TIM_OC_DelayElapsedCallback+0x668>
+ 8000be6:	d142      	bne.n	8000c6e <HAL_TIM_OC_DelayElapsedCallback+0x666>
       if (PMT_ON)
  8000be8:	4b24      	ldr	r3, [pc, #144]	; (8000c7c <HAL_TIM_OC_DelayElapsedCallback+0x674>)
  8000bea:	781b      	ldrb	r3, [r3, #0]
  8000bec:	2b00      	cmp	r3, #0
- 8000bee:	d03f      	beq.n	8000c70 <HAL_TIM_OC_DelayElapsedCallback+0x668>
+ 8000bee:	d03e      	beq.n	8000c6e <HAL_TIM_OC_DelayElapsedCallback+0x666>
     	while(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_8));
  8000bf0:	bf00      	nop
  8000bf2:	f44f 7180 	mov.w	r1, #256	; 0x100
@@ -1301,66 +1301,66 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 		pmt_raw = SPI1->RXDR;
  8000c0e:	4b1f      	ldr	r3, [pc, #124]	; (8000c8c <HAL_TIM_OC_DelayElapsedCallback+0x684>)
  8000c10:	6b1b      	ldr	r3, [r3, #48]	; 0x30
- 8000c12:	461a      	mov	r2, r3
- 8000c14:	4b1e      	ldr	r3, [pc, #120]	; (8000c90 <HAL_TIM_OC_DelayElapsedCallback+0x688>)
- 8000c16:	601a      	str	r2, [r3, #0]
-		int r = pmt_raw;
- 8000c18:	4b1d      	ldr	r3, [pc, #116]	; (8000c90 <HAL_TIM_OC_DelayElapsedCallback+0x688>)
- 8000c1a:	681b      	ldr	r3, [r3, #0]
- 8000c1c:	637b      	str	r3, [r7, #52]	; 0x34
+ 8000c12:	4a1f      	ldr	r2, [pc, #124]	; (8000c90 <HAL_TIM_OC_DelayElapsedCallback+0x688>)
+ 8000c14:	6013      	str	r3, [r2, #0]
+		uint32_t r = pmt_raw;
+ 8000c16:	4b1e      	ldr	r3, [pc, #120]	; (8000c90 <HAL_TIM_OC_DelayElapsedCallback+0x688>)
+ 8000c18:	681b      	ldr	r3, [r3, #0]
+ 8000c1a:	637b      	str	r3, [r7, #52]	; 0x34
     	  pmt_buf[0] = pmt_sync;
- 8000c1e:	22bb      	movs	r2, #187	; 0xbb
- 8000c20:	4b1c      	ldr	r3, [pc, #112]	; (8000c94 <HAL_TIM_OC_DelayElapsedCallback+0x68c>)
- 8000c22:	701a      	strb	r2, [r3, #0]
+ 8000c1c:	22bb      	movs	r2, #187	; 0xbb
+ 8000c1e:	4b1d      	ldr	r3, [pc, #116]	; (8000c94 <HAL_TIM_OC_DelayElapsedCallback+0x68c>)
+ 8000c20:	701a      	strb	r2, [r3, #0]
 		  pmt_buf[1] = pmt_sync;
- 8000c24:	22bb      	movs	r2, #187	; 0xbb
- 8000c26:	4b1b      	ldr	r3, [pc, #108]	; (8000c94 <HAL_TIM_OC_DelayElapsedCallback+0x68c>)
- 8000c28:	705a      	strb	r2, [r3, #1]
+ 8000c22:	22bb      	movs	r2, #187	; 0xbb
+ 8000c24:	4b1b      	ldr	r3, [pc, #108]	; (8000c94 <HAL_TIM_OC_DelayElapsedCallback+0x68c>)
+ 8000c26:	705a      	strb	r2, [r3, #1]
 		  pmt_buf[2] = ((pmt_seq & 0xFF00) >> 8);
- 8000c2a:	4b1b      	ldr	r3, [pc, #108]	; (8000c98 <HAL_TIM_OC_DelayElapsedCallback+0x690>)
- 8000c2c:	881b      	ldrh	r3, [r3, #0]
- 8000c2e:	0a1b      	lsrs	r3, r3, #8
- 8000c30:	b29b      	uxth	r3, r3
- 8000c32:	b2da      	uxtb	r2, r3
- 8000c34:	4b17      	ldr	r3, [pc, #92]	; (8000c94 <HAL_TIM_OC_DelayElapsedCallback+0x68c>)
- 8000c36:	709a      	strb	r2, [r3, #2]
+ 8000c28:	4b1b      	ldr	r3, [pc, #108]	; (8000c98 <HAL_TIM_OC_DelayElapsedCallback+0x690>)
+ 8000c2a:	881b      	ldrh	r3, [r3, #0]
+ 8000c2c:	0a1b      	lsrs	r3, r3, #8
+ 8000c2e:	b29b      	uxth	r3, r3
+ 8000c30:	b2da      	uxtb	r2, r3
+ 8000c32:	4b18      	ldr	r3, [pc, #96]	; (8000c94 <HAL_TIM_OC_DelayElapsedCallback+0x68c>)
+ 8000c34:	709a      	strb	r2, [r3, #2]
 		  pmt_buf[3] = (pmt_seq & 0xFF);
- 8000c38:	4b17      	ldr	r3, [pc, #92]	; (8000c98 <HAL_TIM_OC_DelayElapsedCallback+0x690>)
- 8000c3a:	881b      	ldrh	r3, [r3, #0]
- 8000c3c:	b2da      	uxtb	r2, r3
- 8000c3e:	4b15      	ldr	r3, [pc, #84]	; (8000c94 <HAL_TIM_OC_DelayElapsedCallback+0x68c>)
- 8000c40:	70da      	strb	r2, [r3, #3]
+ 8000c36:	4b18      	ldr	r3, [pc, #96]	; (8000c98 <HAL_TIM_OC_DelayElapsedCallback+0x690>)
+ 8000c38:	881b      	ldrh	r3, [r3, #0]
+ 8000c3a:	b2da      	uxtb	r2, r3
+ 8000c3c:	4b15      	ldr	r3, [pc, #84]	; (8000c94 <HAL_TIM_OC_DelayElapsedCallback+0x68c>)
+ 8000c3e:	70da      	strb	r2, [r3, #3]
 		  pmt_buf[4] = ((pmt_raw & 0xFF00) >> 8);
- 8000c42:	4b13      	ldr	r3, [pc, #76]	; (8000c90 <HAL_TIM_OC_DelayElapsedCallback+0x688>)
- 8000c44:	681b      	ldr	r3, [r3, #0]
- 8000c46:	121b      	asrs	r3, r3, #8
- 8000c48:	b2da      	uxtb	r2, r3
- 8000c4a:	4b12      	ldr	r3, [pc, #72]	; (8000c94 <HAL_TIM_OC_DelayElapsedCallback+0x68c>)
- 8000c4c:	711a      	strb	r2, [r3, #4]
+ 8000c40:	4b13      	ldr	r3, [pc, #76]	; (8000c90 <HAL_TIM_OC_DelayElapsedCallback+0x688>)
+ 8000c42:	681b      	ldr	r3, [r3, #0]
+ 8000c44:	0a1b      	lsrs	r3, r3, #8
+ 8000c46:	b2da      	uxtb	r2, r3
+ 8000c48:	4b12      	ldr	r3, [pc, #72]	; (8000c94 <HAL_TIM_OC_DelayElapsedCallback+0x68c>)
+ 8000c4a:	711a      	strb	r2, [r3, #4]
 		  pmt_buf[5] = (pmt_raw & 0xFF);
- 8000c4e:	4b10      	ldr	r3, [pc, #64]	; (8000c90 <HAL_TIM_OC_DelayElapsedCallback+0x688>)
- 8000c50:	681b      	ldr	r3, [r3, #0]
- 8000c52:	b2da      	uxtb	r2, r3
- 8000c54:	4b0f      	ldr	r3, [pc, #60]	; (8000c94 <HAL_TIM_OC_DelayElapsedCallback+0x68c>)
- 8000c56:	715a      	strb	r2, [r3, #5]
+ 8000c4c:	4b10      	ldr	r3, [pc, #64]	; (8000c90 <HAL_TIM_OC_DelayElapsedCallback+0x688>)
+ 8000c4e:	681b      	ldr	r3, [r3, #0]
+ 8000c50:	b2da      	uxtb	r2, r3
+ 8000c52:	4b10      	ldr	r3, [pc, #64]	; (8000c94 <HAL_TIM_OC_DelayElapsedCallback+0x68c>)
+ 8000c54:	715a      	strb	r2, [r3, #5]
 		  pmt_seq++;
- 8000c58:	4b0f      	ldr	r3, [pc, #60]	; (8000c98 <HAL_TIM_OC_DelayElapsedCallback+0x690>)
- 8000c5a:	881b      	ldrh	r3, [r3, #0]
- 8000c5c:	3301      	adds	r3, #1
- 8000c5e:	b29a      	uxth	r2, r3
- 8000c60:	4b0d      	ldr	r3, [pc, #52]	; (8000c98 <HAL_TIM_OC_DelayElapsedCallback+0x690>)
- 8000c62:	801a      	strh	r2, [r3, #0]
+ 8000c56:	4b10      	ldr	r3, [pc, #64]	; (8000c98 <HAL_TIM_OC_DelayElapsedCallback+0x690>)
+ 8000c58:	881b      	ldrh	r3, [r3, #0]
+ 8000c5a:	3301      	adds	r3, #1
+ 8000c5c:	b29a      	uxth	r2, r3
+ 8000c5e:	4b0e      	ldr	r3, [pc, #56]	; (8000c98 <HAL_TIM_OC_DelayElapsedCallback+0x690>)
+ 8000c60:	801a      	strh	r2, [r3, #0]
 		  HAL_UART_Transmit(&huart1, pmt_buf, sizeof(pmt_buf), 100);
- 8000c64:	2364      	movs	r3, #100	; 0x64
- 8000c66:	2206      	movs	r2, #6
- 8000c68:	490a      	ldr	r1, [pc, #40]	; (8000c94 <HAL_TIM_OC_DelayElapsedCallback+0x68c>)
- 8000c6a:	480c      	ldr	r0, [pc, #48]	; (8000c9c <HAL_TIM_OC_DelayElapsedCallback+0x694>)
- 8000c6c:	f00b f9fa 	bl	800c064 <HAL_UART_Transmit>
+ 8000c62:	2364      	movs	r3, #100	; 0x64
+ 8000c64:	2206      	movs	r2, #6
+ 8000c66:	490b      	ldr	r1, [pc, #44]	; (8000c94 <HAL_TIM_OC_DelayElapsedCallback+0x68c>)
+ 8000c68:	480c      	ldr	r0, [pc, #48]	; (8000c9c <HAL_TIM_OC_DelayElapsedCallback+0x694>)
+ 8000c6a:	f00b f9fb 	bl	800c064 <HAL_UART_Transmit>
 }
- 8000c70:	bf00      	nop
- 8000c72:	3740      	adds	r7, #64	; 0x40
- 8000c74:	46bd      	mov	sp, r7
- 8000c76:	bd80      	pop	{r7, pc}
+ 8000c6e:	bf00      	nop
+ 8000c70:	3740      	adds	r7, #64	; 0x40
+ 8000c72:	46bd      	mov	sp, r7
+ 8000c74:	bd80      	pop	{r7, pc}
+ 8000c76:	bf00      	nop
  8000c78:	24000378 	.word	0x24000378
  8000c7c:	24000020 	.word	0x24000020
  8000c80:	58020000 	.word	0x58020000
@@ -3024,9 +3024,9 @@ static void MX_SPI1_Init(void)
  80015d0:	4b1e      	ldr	r3, [pc, #120]	; (800164c <MX_SPI1_Init+0xa8>)
  80015d2:	f04f 6280 	mov.w	r2, #67108864	; 0x4000000
  80015d6:	619a      	str	r2, [r3, #24]
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_128;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
  80015d8:	4b1c      	ldr	r3, [pc, #112]	; (800164c <MX_SPI1_Init+0xa8>)
- 80015da:	f04f 42c0 	mov.w	r2, #1610612736	; 0x60000000
+ 80015da:	f04f 42e0 	mov.w	r2, #1879048192	; 0x70000000
  80015de:	61da      	str	r2, [r3, #28]
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
  80015e0:	4b1a      	ldr	r3, [pc, #104]	; (800164c <MX_SPI1_Init+0xa8>)
@@ -3147,9 +3147,9 @@ static void MX_SPI2_Init(void)
  8001680:	4b1e      	ldr	r3, [pc, #120]	; (80016fc <MX_SPI2_Init+0xa8>)
  8001682:	f04f 6280 	mov.w	r2, #67108864	; 0x4000000
  8001686:	619a      	str	r2, [r3, #24]
-  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_128;
+  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
  8001688:	4b1c      	ldr	r3, [pc, #112]	; (80016fc <MX_SPI2_Init+0xa8>)
- 800168a:	f04f 42c0 	mov.w	r2, #1610612736	; 0x60000000
+ 800168a:	f04f 42e0 	mov.w	r2, #1879048192	; 0x70000000
  800168e:	61da      	str	r2, [r3, #28]
   hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
  8001690:	4b1a      	ldr	r3, [pc, #104]	; (80016fc <MX_SPI2_Init+0xa8>)
