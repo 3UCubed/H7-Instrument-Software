@@ -97,8 +97,6 @@ int up = 1;
 int raw; // Stores raw value from SPI Transfer
 uint8_t spi1RxBuffer[2];
 uint8_t spi2RxBuffer[2];
-const int WRITE = 0x1; // Hex 0x1 that is sent to external ADC to trigger transfer of data
-const int WRITE2 = 0x1; // Hex 0x1 that is sent to external ADC to trigger transfer of data
 
 
 /* UART Variables */
