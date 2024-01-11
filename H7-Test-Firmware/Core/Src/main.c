@@ -95,9 +95,11 @@ int up = 1;
 
 /* SPI Variables */
 int raw; // Stores raw value from SPI Transfer
-uint32_t pmt_raw;
-int erpa_raw;
+uint8_t spi1RxBuffer[2];
+uint8_t spi2RxBuffer[2];
 const int WRITE = 0x1; // Hex 0x1 that is sent to external ADC to trigger transfer of data
+const int WRITE2 = 0x1; // Hex 0x1 that is sent to external ADC to trigger transfer of data
+
 
 /* UART Variables */
 uint8_t erpa_buf[14]; // buffer that is filled with ERPA packet info
@@ -158,8 +160,10 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 
         /* Write to SPI (begin transfer?) */
 
-		while(HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_11));
-					//check pin state
+
+		while(HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_11)) { 	//check pin state
+
+		}
 
 		/**
 		 * TIM1_CH1 Interrupt
@@ -168,11 +172,11 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 		 * +/- 0.5v Every 100ms
 		*/
 
-		  /* Write to SPI (begin transfer?) */
-		HAL_SPI_Transmit(&hspi2, (uint8_t * ) &WRITE, 1, 1);
-		//SPI2->CR1 |= 1<<10; // THIS IS NEEDED TO STOP SPI1_SCK FROM GENERATING CLOCK PULSES
-	    erpa_raw = SPI2->RXDR;
-
+		/* Write to SPI (begin transfer?) */
+		HAL_SPI_Receive(&hspi2,(uint8_t *)spi2RxBuffer, 1, 1);
+		uint8_t SPI2_LSB = ((spi2RxBuffer[0] & 0xFF00) >> 8);
+		uint8_t SPI2_MSB = (spi2RxBuffer[1] & 0xFF);
+		hspi2.Instance->CR1 |= 1<<10; // THIS IS NEEDED TO STOP SPI2_SCK FROM GENERATING CLOCK PULSES
 
 		DAC1->DHR12R1 = DAC_OUT[step];
 
@@ -194,8 +198,8 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 		erpa_buf[9] = (PB0 & 0xFF);               		// TEMPURATURE 1 LSB
 		erpa_buf[10] = ((PB1 & 0xFF00) >> 8);     		// TEMPURATURE 2 MSB
 		erpa_buf[11] = (PB1 & 0xFF);                    // TEMPURATURE 2 LSB
-		erpa_buf[12] = ((erpa_raw & 0xFF00) >> 8);      // ERPA eADC MSB
-		erpa_buf[13] = (erpa_raw & 0xFF);               // ERPA eADC LSB
+		erpa_buf[12] = SPI2_MSB;					    // ERPA eADC MSB
+		erpa_buf[13] = SPI2_LSB;          				// ERPA eADC LSB
 
 		erpa_seq++;
 		if (ERPA_ON)
@@ -397,7 +401,9 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
       if (PMT_ON)
       { // check pin state
 
-    	while(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_8));
+    	while(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_8)) {
+
+    	}
 
 		/**
 		 * TIM1_CH1 Interrupt
@@ -407,14 +413,10 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 
 
 		/* Write to SPI (begin transfer?) */
-  		HAL_SPI_Transmit(&hspi1, (uint8_t * ) &WRITE, 1, 1);
-		//SPI1->CR1 |= 1<<10; // THIS IS NEEDED TO STOP SPI1_SCK FROM GENERATING CLOCK PULSES
-
-		//RXNE here
-
-		pmt_raw = SPI1->RXDR;
-
-		uint32_t r = pmt_raw;
+  		HAL_SPI_Receive(&hspi1, (uint8_t *)spi1RxBuffer, 1, 1);
+  		uint8_t SPI1_LSB = ((spi1RxBuffer[0] & 0xFF00) >> 8);
+  		uint8_t SPI1_MSB = (spi1RxBuffer[1] & 0xFF);
+		hspi1.Instance->CR1 |= 1<<10; // THIS IS NEEDED TO STOP SPI1_SCK FROM GENERATING CLOCK PULSES
 
 
     	/*
@@ -424,16 +426,16 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 
     	uint8_t* abstraction_test_buf = fill_pmt_data(data);
     	*/
-    	  pmt_buf[0] = pmt_sync;
-		  pmt_buf[1] = pmt_sync;
-		  pmt_buf[2] = ((pmt_seq & 0xFF00) >> 8);
-		  pmt_buf[3] = (pmt_seq & 0xFF);
-		  pmt_buf[4] = ((pmt_raw & 0xFF00) >> 8);
-		  pmt_buf[5] = (pmt_raw & 0xFF);
+		pmt_buf[0] = pmt_sync;
+		pmt_buf[1] = pmt_sync;
+		pmt_buf[2] = ((pmt_seq & 0xFF00) >> 8);
+		pmt_buf[3] = (pmt_seq & 0xFF);
+		pmt_buf[4] = SPI1_MSB;
+		pmt_buf[5] = SPI1_LSB;
 
-		  pmt_seq++;
-		  HAL_UART_Transmit(&huart1, pmt_buf, sizeof(pmt_buf), 100);
-		  /*HAL_UART_Transmit(&huart1, abstraction_test_buf, sizeof(abstraction_test_buf), 100);*/
+		pmt_seq++;
+		HAL_UART_Transmit(&huart1, pmt_buf, sizeof(pmt_buf), 100);
+		/*HAL_UART_Transmit(&huart1, abstraction_test_buf, sizeof(abstraction_test_buf), 100);*/
       }
     }
   }
