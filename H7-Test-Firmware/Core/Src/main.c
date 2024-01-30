@@ -39,6 +39,7 @@ const gpio_pins gpios[] = {{GPIOB, GPIO_PIN_5}, {GPIOB, GPIO_PIN_6}, {GPIOC, GPI
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define ADC_CONVERTED_DATA_BUFFER_SIZE   ((uint32_t)  32)
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -50,7 +51,6 @@ const gpio_pins gpios[] = {{GPIOB, GPIO_PIN_5}, {GPIOB, GPIO_PIN_6}, {GPIOC, GPI
 ADC_HandleTypeDef hadc1;
 ADC_HandleTypeDef hadc3;
 DMA_HandleTypeDef hdma_adc1;
-DMA_HandleTypeDef hdma_adc3;
 
 DAC_HandleTypeDef hdac1;
 
@@ -83,9 +83,7 @@ static const uint8_t ADT7410_4 = 0x4B << 1;
  * and just get that working but had no luck. This youtube video might help:
  * https://www.youtube.com/watch?v=AloHXBk6Bfk&t=255s
  */
-#define ADCRESULTSDMA_LENGTH 15
-volatile uint16_t adcResultsDMA[ADCRESULTSDMA_LENGTH]; // array to store results of Internal ADC Poll (not sure if it has to be "volatile")
-const int adcChannelCount = sizeof(adcResultsDMA) / sizeof(adcResultsDMA[0]); // variable to store the number of ADCs in use
+ALIGN_32BYTES (static uint16_t   aADCxConvertedData[ADC_CONVERTED_DATA_BUFFER_SIZE]);
 
 /* DAC Variables for SWP */
 /* uint32_t DAC_OUT[] = {0, 683, 1365, 2048, 2730, 3413}; */
@@ -132,9 +130,9 @@ static void MX_I2C1_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_SPI2_Init(void);
 static void MX_DMA_Init(void);
-static void MX_USART1_UART_Init(void);
-static void MX_ADC3_Init(void);
 static void MX_ADC1_Init(void);
+static void MX_ADC3_Init(void);
+static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -178,22 +176,29 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 
 		DAC1->DHR12R1 = DAC_OUT[step];
 
-		HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adcResultsDMA,adcChannelCount);
-		uint16_t PA0 = adcResultsDMA[0]; 				// ADC_IN0, END_mon: entrance/collimator monitor
-		uint16_t PA7 = adcResultsDMA[6]; 				// ADC_IN7, SWP_mon: Sweep voltage monitor
-		uint16_t PB0 = adcResultsDMA[7]; 				// ADC_IN8, TMP 1: Sweep temperature
-		uint16_t PB1 = adcResultsDMA[8]; 				// ADC_IN9, TMP 2: feedbacks
+//        HAL_ADC_Stop_DMA(&hadc1);
+//		if (HAL_ADC_Start_DMA(&hadc1,
+//			(uint32_t *)aADCxConvertedData,
+//			 ADC_CONVERTED_DATA_BUFFER_SIZE
+//		) != HAL_OK) {
+//		     Error_Handler();
+//		}
+
+		uint16_t PF11 = aADCxConvertedData[0]; 			// ENDmon -- non responsive
+		uint16_t PA6 = aADCxConvertedData[1]; 			// SWPmon
+		uint16_t PC4 = aADCxConvertedData[13]; 			// TEMP1 -- non responsive
+		uint16_t PB1 = aADCxConvertedData[14];			// TEMP2 -- non responsive
 
 		erpa_buf[0] = erpa_sync;                  		// ERPA SYNC 0xAA MSB
 		erpa_buf[1] = erpa_sync;                  		// ERPA SYNC 0xAA LSB
 		erpa_buf[2] = ((erpa_seq & 0xFF00) >> 8); 		// ERPA SEQ # MSB
 		erpa_buf[3] = (erpa_seq & 0xFF);          		// ERPA SEQ # MSB
-		erpa_buf[4] = ((PA0 & 0xFF00) >> 8); 	  		// ENDmon MSB
-		erpa_buf[5] = (PA0 & 0xFF);               		// ENDmon LSB
-		erpa_buf[6] = ((PA7 & 0xFF00) >> 8);      		// SWP Monitored MSB
-		erpa_buf[7] = (PA7 & 0xFF);               		// SWP Monitored LSB
-		erpa_buf[8] = ((PB0 & 0xFF00) >> 8);      		// TEMPURATURE 1 MSB
-		erpa_buf[9] = (PB0 & 0xFF);               		// TEMPURATURE 1 LSB
+		erpa_buf[4] = ((PF11 & 0xFF00) >> 8); 	  		// ENDmon MSB
+		erpa_buf[5] = (PF11 & 0xFF);               		// ENDmon LSB
+		erpa_buf[6] = ((PA6 & 0xFF00) >> 8);      		// SWP Monitored MSB
+		erpa_buf[7] = (PA6 & 0xFF);               		// SWP Monitored LSB
+		erpa_buf[8] = ((PC4 & 0xFF00) >> 8);      		// TEMPURATURE 1 MSB
+		erpa_buf[9] = (PC4 & 0xFF);               		// TEMPURATURE 1 LSB
 		erpa_buf[10] = ((PB1 & 0xFF00) >> 8);     		// TEMPURATURE 2 MSB
 		erpa_buf[11] = (PB1 & 0xFF);                    // TEMPURATURE 2 LSB
 		erpa_buf[12] = SPI2_MSB;					    // ERPA eADC MSB
@@ -321,32 +326,47 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
             }
           }
 
-          HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adcResultsDMA,
-                            adcChannelCount);
-
-          uint16_t PA1 = adcResultsDMA[1];       // ADC_IN1, BUS_Vmon: instrument bus voltage monitor
-          uint16_t PA2 = adcResultsDMA[2];       // ADC_IN2, BUS_Imon: instrument bus current monitor
-          uint16_t PA3 = adcResultsDMA[3];       // ADC_IN3, 3v3_mon: Accurate 5V for ADC monitor
-          uint16_t PA5 = adcResultsDMA[4];       // ADC_IN5, n150v_mon: n150 voltage monitor
-          uint16_t PA6 = adcResultsDMA[5];       // ADC_IN6, n800v_mon: n800 voltage monitor
-          uint16_t PC0 = adcResultsDMA[9];       // ADC_IN10, 2v5_mon: 2.5v voltage monitor
-          uint16_t PC1 = adcResultsDMA[10];      // ADC_IN11, n5v_mon: n5v voltage monitor
-          uint16_t PC2 = adcResultsDMA[11];      // ADC_IN12, 5v_mon: 5v voltage monitor
-          uint16_t PC3 = adcResultsDMA[12];      // ADC_IN13, n3v3_mon: n3v3 voltage monitor
-          uint16_t PC4 = adcResultsDMA[13];      // ADC_IN14, 5vref_mon: 5v reference voltage monitor
-          uint16_t PC5 = adcResultsDMA[14];      // ADC_IN15, 15v_mon: 15v voltage monitor
-          uint16_t MCU_TEMP =  0;   // adcResultsDMA[15]; //(internally connected) ADC_IN16, VSENSE
-          uint16_t MCU_VREF =  0;  // adcResultsDMA[16]; //(internally connected) ADC_IN17, VREFINT
+//          HAL_ADC_Stop_DMA(&hadc3);
+//          if (HAL_ADC_Start_DMA(&hadc3,
+//          (uint32_t *)aADCxConvertedData,
+//          ADC_CONVERTED_DATA_BUFFER_SIZE)
+//          != HAL_OK) {
+//             Error_Handler();
+//          }
+//
+//          uint16_t vrefint = aADCxConvertedData[0];
+//          uint16_t vsense = aADCxConvertedData[1];
 
 
-          hk_buf[0] = hk_sync;                     // HK SYNC 0xCC MSB					0 SYNC
-          hk_buf[1] = hk_sync;                     // HK SYNC 0xCC LSB
-          hk_buf[2] = ((hk_seq & 0xFF00) >> 8);    // HK SEQ # MSB		1 SEQUENCE
-          hk_buf[3] = (hk_seq & 0xFF);             // HK SEQ # LSB
-          hk_buf[4] = ((MCU_TEMP & 0xFF00) >> 8); // VSENSE MSB		13 VSENSE
-          hk_buf[5] = (MCU_TEMP & 0xFF);          // VSENSE LSB
-          hk_buf[6] = ((MCU_VREF & 0xFF00) >> 8);
-          hk_buf[7] = (MCU_VREF & 0xFF);
+          HAL_ADC_Stop_DMA(&hadc1);
+          if (HAL_ADC_Start_DMA(&hadc1,
+          	(uint32_t *)aADCxConvertedData,
+          	ADC_CONVERTED_DATA_BUFFER_SIZE)
+        	!= HAL_OK) {
+          	Error_Handler();
+          }
+
+          uint16_t PF12 = aADCxConvertedData[2];		// BUSVmon -- sending as ENDMON
+          uint16_t PA7 = aADCxConvertedData[3];			// BUSImon -- sending as n800vmon
+          uint16_t PC5 = aADCxConvertedData[4];			// 2v5mon -- verified sending as TMP1 too
+          uint16_t PB0 = aADCxConvertedData[5];			// 3v3mon -- verified sending as TMP2 too
+          uint16_t PC0 = aADCxConvertedData[6];			// 5vmon -- verified
+          uint16_t PC1 = aADCxConvertedData[7];			// n3v3mon -- verified sending as SWPMon too
+          uint16_t PA2 = aADCxConvertedData[8];			// n5vmon -- verified
+          uint16_t PA3 = aADCxConvertedData[9];			// 15vmon -- verified
+          uint16_t PA0 = aADCxConvertedData[10];		// 5vrefmon -- verified
+          uint16_t PA1 = aADCxConvertedData[11];		// n200vmon -- verified
+          uint16_t PA5 = aADCxConvertedData[12];		// n800vmon -- verified
+
+
+          hk_buf[0] = hk_sync;                     		// HK SYNC 0xCC MSB					0 SYNC
+          hk_buf[1] = hk_sync;                     		// HK SYNC 0xCC LSB
+          hk_buf[2] = ((hk_seq & 0xFF00) >> 8);    		// HK SEQ # MSB		1 SEQUENCE
+          hk_buf[3] = (hk_seq & 0xFF);             		// HK SEQ # LSB
+          hk_buf[4] = ((0 & 0xFF00) >> 8);
+          hk_buf[5] = (0 & 0xFF);
+          hk_buf[6] = ((0 & 0xFF00) >> 8);
+          hk_buf[7] = (0 & 0xFF);
           hk_buf[8] = ((output1 & 0xFF00) >> 8);
           hk_buf[9] = (output1 & 0xFF);
           hk_buf[10] = ((output2 & 0xFF00) >> 8);
@@ -355,28 +375,29 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
           hk_buf[13] = (output3 & 0xFF);
           hk_buf[14] = ((output4 & 0xFF00) >> 8);
           hk_buf[15] = (output4 & 0xFF);
-          hk_buf[16] = ((PA1 & 0xFF00) >> 8);       // BUS_Vmon MSB			2 BUS_VMON PA1
-          hk_buf[17] = (PA1 & 0xFF);                // BUS_Vmon LSB
-          hk_buf[18] = ((PA2 & 0xFF00) >> 8);       // BUS_Imon MSB			3 BUS_IMON PA2
-          hk_buf[19] = (PA2 & 0xFF);                // BUS_Imon LSB
-          hk_buf[20] = ((PC0 & 0xFF00) >> 8);      	// 2v5_mon MSB			7 2V5_MON PC0
-          hk_buf[21] = (PC0 & 0xFF);               	// 2v5_mon LSB
-          hk_buf[22] = ((PA3 & 0xFF00) >> 8);       // 3v3_mon MSB			4 3v3_MON PA3
-          hk_buf[23] = (PA3 & 0xFF);                // 3v3_mon LSB
-          hk_buf[24] = ((PC2 & 0xFF00) >> 8);      	// 5v_mon MSB			9 5V_MON PC2
-          hk_buf[25] = (PC2 & 0xFF);               	// 5v_mon LSB
-          hk_buf[26] = ((PC3 & 0xFF00) >> 8);      	// n3v3_mon MSB			10 N3V3_MON PC3
-          hk_buf[27] = (PC3 & 0xFF);               	// n3v3_mon LSB
-          hk_buf[28] = ((PC1 & 0xFF00) >> 8);      	// n5v_mon MSB			8 N5V_MON PC1
-          hk_buf[29] = (PC1 & 0xFF);               	// n5v_mon LSB
-          hk_buf[30] = ((PC5 & 0xFF00) >> 8);      	// 15v_mon MSB			12 15V_MON PC5
-          hk_buf[31] = (PC5 & 0xFF);               	// 15v_mon LSB
-          hk_buf[32] = ((PC4 & 0xFF00) >> 8);      	// 5vref_mon MSB		11 5VREF_MON PC4
-          hk_buf[33] = (PC4 & 0xFF);               	// 5vref_mon LSB
-          hk_buf[34] = ((PA5 & 0xFF00) >> 8);      	// n150v_mon MSB		5 N150V_MON PA5
-          hk_buf[35] = (PA5 & 0xFF);               	// n150v_mon LSB
-          hk_buf[36] = ((PA6 & 0xFF00) >> 8);      	// n800v_mon MSB		6 N800V_MON PA6
-          hk_buf[37] = (PA6 & 0xFF);               	// n800v_mon LSB
+          hk_buf[16] = (PF12 & 0xFF);
+          hk_buf[17] = (PF12 & 0xFF);
+          hk_buf[18] = ((PA7 & 0xFF00) >> 8);
+          hk_buf[19] = (PA7 & 0xFF);
+          hk_buf[20] = ((PC5 & 0xFF00) >> 8);
+          hk_buf[21] = (PC5 & 0xFF);
+          hk_buf[22] = ((PB0 & 0xFF00) >> 8);
+          hk_buf[23] = (PB0 & 0xFF);
+          hk_buf[24] = ((PC0 & 0xFF00) >> 8);
+          hk_buf[25] = (PC0 & 0xFF);
+          hk_buf[26] = ((PC1 & 0xFF00) >> 8);
+          hk_buf[27] = (PC1 & 0xFF);
+          hk_buf[28] = ((PA2 & 0xFF00) >> 8);
+          hk_buf[29] = (PA2 & 0xFF);
+          hk_buf[30] = ((PA3 & 0xFF00) >> 8);
+          hk_buf[31] = (PA3 & 0xFF);
+          hk_buf[32] = ((PA0 & 0xFF00) >> 8);
+          hk_buf[33] = (PA0 & 0xFF);
+          hk_buf[34] = ((PA1 & 0xFF00) >> 8);
+          hk_buf[35] = (PA1 & 0xFF);
+          hk_buf[36] = ((PA5 & 0xFF00) >> 8);
+          hk_buf[37] = (PA5 & 0xFF);
+
 
           if (HK_ON)
           {
@@ -648,12 +669,24 @@ int main(void)
   MX_SPI1_Init();
   MX_SPI2_Init();
   MX_DMA_Init();
-  MX_USART1_UART_Init();
-  MX_ADC3_Init();
   MX_ADC1_Init();
+  MX_ADC3_Init();
+  MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 
   HAL_DAC_Start(&hdac1, DAC_CHANNEL_1);
+
+  if (HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_OFFSET_LINEARITY, ADC_SINGLE_ENDED) != HAL_OK)
+  {
+    /* Calibration Error */
+    Error_Handler();
+  }
+
+  if (HAL_ADCEx_Calibration_Start(&hadc3, ADC_CALIB_OFFSET_LINEARITY, ADC_SINGLE_ENDED) != HAL_OK)
+  {
+	/* Calibration Error */
+	Error_Handler();
+  }
 
   /* Start Timers with OC & Interrupt */
   HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_1);
@@ -682,6 +715,7 @@ int main(void)
   while (1)
   {
 	HAL_UART_Receive_IT(&huart1, rx_buf, 1);
+
 
     /* USER CODE END WHILE */
 
@@ -801,18 +835,18 @@ static void MX_ADC1_Init(void)
   /** Common config
   */
   hadc1.Instance = ADC1;
-  hadc1.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV1;
+  hadc1.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV2;
   hadc1.Init.Resolution = ADC_RESOLUTION_12B;
   hadc1.Init.ScanConvMode = ADC_SCAN_ENABLE;
   hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
   hadc1.Init.LowPowerAutoWait = DISABLE;
-  hadc1.Init.ContinuousConvMode = DISABLE;
+  hadc1.Init.ContinuousConvMode = ENABLE;
   hadc1.Init.NbrOfConversion = 15;
   hadc1.Init.DiscontinuousConvMode = DISABLE;
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
-  hadc1.Init.ConversionDataManagement = ADC_CONVERSIONDATA_DR;
-  hadc1.Init.Overrun = ADC_OVR_DATA_PRESERVED;
+  hadc1.Init.ConversionDataManagement = ADC_CONVERSIONDATA_DMA_CIRCULAR;
+  hadc1.Init.Overrun = ADC_OVR_DATA_OVERWRITTEN;
   hadc1.Init.LeftBitShift = ADC_LEFTBITSHIFT_NONE;
   hadc1.Init.OversamplingMode = DISABLE;
   if (HAL_ADC_Init(&hadc1) != HAL_OK)
@@ -830,9 +864,9 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_11;
+  sConfig.Channel = ADC_CHANNEL_2;
   sConfig.Rank = ADC_REGULAR_RANK_1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
+  sConfig.SamplingTime = ADC_SAMPLETIME_810CYCLES_5;
   sConfig.SingleDiff = ADC_SINGLE_ENDED;
   sConfig.OffsetNumber = ADC_OFFSET_NONE;
   sConfig.Offset = 0;
@@ -844,7 +878,7 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_2;
+  sConfig.Channel = ADC_CHANNEL_3;
   sConfig.Rank = ADC_REGULAR_RANK_2;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -853,6 +887,7 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
+  sConfig.Channel = ADC_CHANNEL_4;
   sConfig.Rank = ADC_REGULAR_RANK_3;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -861,6 +896,7 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
+  sConfig.Channel = ADC_CHANNEL_5;
   sConfig.Rank = ADC_REGULAR_RANK_4;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -869,6 +905,7 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
+  sConfig.Channel = ADC_CHANNEL_6;
   sConfig.Rank = ADC_REGULAR_RANK_5;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -877,6 +914,7 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
+  sConfig.Channel = ADC_CHANNEL_7;
   sConfig.Rank = ADC_REGULAR_RANK_6;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -885,6 +923,7 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
+  sConfig.Channel = ADC_CHANNEL_8;
   sConfig.Rank = ADC_REGULAR_RANK_7;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -893,6 +932,7 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
+  sConfig.Channel = ADC_CHANNEL_9;
   sConfig.Rank = ADC_REGULAR_RANK_8;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -901,6 +941,7 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
+  sConfig.Channel = ADC_CHANNEL_10;
   sConfig.Rank = ADC_REGULAR_RANK_9;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -909,6 +950,7 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
+  sConfig.Channel = ADC_CHANNEL_11;
   sConfig.Rank = ADC_REGULAR_RANK_10;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -917,6 +959,7 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
+  sConfig.Channel = ADC_CHANNEL_14;
   sConfig.Rank = ADC_REGULAR_RANK_11;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -925,6 +968,7 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
+  sConfig.Channel = ADC_CHANNEL_15;
   sConfig.Rank = ADC_REGULAR_RANK_12;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -933,6 +977,7 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
+  sConfig.Channel = ADC_CHANNEL_16;
   sConfig.Rank = ADC_REGULAR_RANK_13;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -941,6 +986,7 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
+  sConfig.Channel = ADC_CHANNEL_17;
   sConfig.Rank = ADC_REGULAR_RANK_14;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -949,6 +995,7 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
+  sConfig.Channel = ADC_CHANNEL_19;
   sConfig.Rank = ADC_REGULAR_RANK_15;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -981,12 +1028,12 @@ static void MX_ADC3_Init(void)
   /** Common config
   */
   hadc3.Instance = ADC3;
-  hadc3.Init.Resolution = ADC_RESOLUTION_12B;
-  hadc3.Init.ScanConvMode = ADC_SCAN_ENABLE;
+  hadc3.Init.Resolution = ADC_RESOLUTION_16B;
+  hadc3.Init.ScanConvMode = ADC_SCAN_DISABLE;
   hadc3.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
   hadc3.Init.LowPowerAutoWait = DISABLE;
   hadc3.Init.ContinuousConvMode = DISABLE;
-  hadc3.Init.NbrOfConversion = 4;
+  hadc3.Init.NbrOfConversion = 1;
   hadc3.Init.DiscontinuousConvMode = DISABLE;
   hadc3.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc3.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
@@ -1001,38 +1048,13 @@ static void MX_ADC3_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_TEMPSENSOR;
+  sConfig.Channel = ADC_CHANNEL_VREFINT;
   sConfig.Rank = ADC_REGULAR_RANK_1;
   sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
   sConfig.SingleDiff = ADC_SINGLE_ENDED;
   sConfig.OffsetNumber = ADC_OFFSET_NONE;
   sConfig.Offset = 0;
   sConfig.OffsetSignedSaturation = DISABLE;
-  if (HAL_ADC_ConfigChannel(&hadc3, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  /** Configure Regular Channel
-  */
-  sConfig.Channel = ADC_CHANNEL_1;
-  sConfig.Rank = ADC_REGULAR_RANK_2;
-  if (HAL_ADC_ConfigChannel(&hadc3, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  /** Configure Regular Channel
-  */
-  sConfig.Rank = ADC_REGULAR_RANK_3;
-  if (HAL_ADC_ConfigChannel(&hadc3, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  /** Configure Regular Channel
-  */
-  sConfig.Rank = ADC_REGULAR_RANK_4;
   if (HAL_ADC_ConfigChannel(&hadc3, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -1410,9 +1432,6 @@ static void MX_DMA_Init(void)
   /* DMA1_Stream0_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA1_Stream0_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA1_Stream0_IRQn);
-  /* DMA1_Stream1_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Stream1_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Stream1_IRQn);
 
 }
 
@@ -1478,6 +1497,26 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
+void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc)
+{
+  /* Invalidate Data Cache to get the updated content of the SRAM on the first half of the ADC converted data buffer: 32 bytes */
+  SCB_InvalidateDCache_by_Addr((uint32_t *) &aADCxConvertedData[0], ADC_CONVERTED_DATA_BUFFER_SIZE);
+  HAL_ADC_Stop_DMA(hadc);
+
+}
+
+/**
+  * @brief  Conversion DMA half-transfer callback in non-blocking mode
+  * @param  hadc: ADC handle
+  * @retval None
+  */
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
+{
+   /* Invalidate Data Cache to get the updated content of the SRAM on the second half of the ADC converted data buffer: 32 bytes */
+  SCB_InvalidateDCache_by_Addr((uint32_t *) &aADCxConvertedData[ADC_CONVERTED_DATA_BUFFER_SIZE/2], ADC_CONVERTED_DATA_BUFFER_SIZE);
+  HAL_ADC_Stop_DMA(hadc);
+
+}
 /* USER CODE END 4 */
 
 /**
