@@ -31,7 +31,6 @@ typedef struct
   GPIO_TypeDef *gpio;
   uint16_t pin;
 } gpio_pins;
-const int HK_CADENCE = 1; //Should be set at 5
 const gpio_pins gpios[] = {{GPIOB, GPIO_PIN_5}, {GPIOB, GPIO_PIN_6}, {GPIOC, GPIO_PIN_10}, {GPIOC, GPIO_PIN_13}, {GPIOC, GPIO_PIN_7}, {GPIOC, GPIO_PIN_8}, {GPIOC, GPIO_PIN_9}, {GPIOC, GPIO_PIN_6}, {GPIOF, GPIO_PIN_6}, {GPIOF, GPIO_PIN_7}};
 
 
@@ -97,6 +96,13 @@ int up = 1;
 int raw; // Stores raw value from SPI Transfer
 uint8_t spi1RxBuffer[2];
 uint8_t spi2RxBuffer[2];
+int erpa_ext_count = 0;
+const int ERPA_CADENCE = 1;
+int pmt_ext_count = 0;
+const int PMT_CADENCE = 1;
+int hk_counter = 1; // counter to know when to send HK packet (sent every 100 ERPA packets)
+					// we put them in the same routine and send HK when this count == 100
+const int HK_CADENCE = 10; //Should be set at 5
 
 
 /* UART Variables */
@@ -110,8 +116,7 @@ uint8_t hk_buf[38]; // buffer that is filled with HK packet info
 const uint8_t hk_sync = 0xCC; // SYNC byte to let packet interpreter / OBC know which packet is which
 uint16_t hk_seq = 0; // SEQ byte which keeps track of what # HK packet is being sent (0-65535)
 
-int hk_counter = 0; // counter to know when to send HK packet (sent every 50 ERPA packets)
-					// we put them in the same routine and send HK when this count == 50
+
 int startupTimer = 0;
 uint8_t PMT_ON = 1;
 uint8_t ERPA_ON = 1;
@@ -170,20 +175,33 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 		 * +/- 0.5v Every 100ms
 		*/
 
-		/* Write to SPI (begin transfer?) */
-		HAL_SPI_Receive(&hspi2,(uint8_t *)spi2RxBuffer, 1, 1);
+		erpa_ext_count += 1;
+
+
+		if (erpa_ext_count == ERPA_CADENCE) {
+			/* Write to SPI (begin transfer?) */
+			HAL_SPI_Receive(&hspi2,(uint8_t *)spi2RxBuffer, 1, 1);
+
+		}
+
 		uint8_t SPI2_LSB = ((spi2RxBuffer[0] & 0xFF00) >> 8);
 		uint8_t SPI2_MSB = (spi2RxBuffer[1] & 0xFF);
+
 		hspi2.Instance->CR1 |= 1<<10; // THIS IS NEEDED TO STOP SPI2_SCK FROM GENERATING CLOCK PULSES
 
-		DAC1->DHR12R1 = DAC_OUT[step];
 
-        HAL_ADC_Stop_DMA(&hadc1);
-		if (HAL_ADC_Start_DMA(&hadc1,
-			(uint32_t *)aADCxConvertedData,
-			 ADC_CONVERTED_DATA_BUFFER_SIZE
-		) != HAL_OK) {
-		     Error_Handler();
+		if (erpa_ext_count == ERPA_CADENCE) {
+
+			DAC1->DHR12R1 = DAC_OUT[step];
+
+			HAL_ADC_Stop_DMA(&hadc1);
+			if (HAL_ADC_Start_DMA(&hadc1,
+				(uint32_t *)aADCxConvertedData,
+				 ADC_CONVERTED_DATA_BUFFER_SIZE
+			) != HAL_OK) {
+				 Error_Handler();
+			}
+			erpa_ext_count = 0;
 		}
 
 		uint16_t PF11 = aADCxConvertedData[13]; 		// ENDmon -- verified
@@ -207,6 +225,9 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 		erpa_buf[13] = SPI2_LSB;          				// ERPA eADC LSB
 
 		erpa_seq++;
+		if (erpa_seq == 65535) {
+			erpa_seq = 0;
+		}
 		if (ERPA_ON)
 		{
 		  HAL_UART_Transmit(&huart1, erpa_buf, sizeof(erpa_buf), 100);
@@ -415,7 +436,7 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
       }
     }
   }
-  else if (htim == &htim1)
+  if (htim == &htim1)
   {
     if (1)
     {
@@ -432,9 +453,13 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 		 * Every 125ms
 		 */
 
+    	pmt_ext_count += 1;
 
-		/* Write to SPI (begin transfer?) */
-  		HAL_SPI_Receive(&hspi1, (uint8_t *)spi1RxBuffer, 1, 1);
+    	if (pmt_ext_count == PMT_CADENCE) {
+			/* Write to SPI (begin transfer?) */
+			HAL_SPI_Receive(&hspi1, (uint8_t *)spi1RxBuffer, 1, 1);
+			pmt_ext_count = 0;
+    	}
   		uint8_t SPI1_LSB = ((spi1RxBuffer[0] & 0xFF00) >> 8);
   		uint8_t SPI1_MSB = (spi1RxBuffer[1] & 0xFF);
 		hspi1.Instance->CR1 |= 1<<10; // THIS IS NEEDED TO STOP SPI1_SCK FROM GENERATING CLOCK PULSES
@@ -455,6 +480,9 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 		pmt_buf[5] = SPI1_LSB;
 
 		pmt_seq++;
+		if (pmt_seq == 65535) {
+			pmt_seq = 0;
+		}
 		HAL_UART_Transmit(&huart1, pmt_buf, sizeof(pmt_buf), 100);
 		/*HAL_UART_Transmit(&huart1, abstraction_test_buf, sizeof(abstraction_test_buf), 100);*/
       }
@@ -1105,11 +1133,18 @@ static void MX_DAC1_Init(void)
   /** DAC channel OUT1 config
   */
   sConfig.DAC_SampleAndHold = DAC_SAMPLEANDHOLD_DISABLE;
-  sConfig.DAC_Trigger = DAC_TRIGGER_NONE;
+  sConfig.DAC_Trigger = DAC_TRIGGER_SOFTWARE;
   sConfig.DAC_OutputBuffer = DAC_OUTPUTBUFFER_ENABLE;
   sConfig.DAC_ConnectOnChipPeripheral = DAC_CHIPCONNECT_DISABLE;
   sConfig.DAC_UserTrimming = DAC_TRIMMING_FACTORY;
   if (HAL_DAC_ConfigChannel(&hdac1, &sConfig, DAC_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Configure Triangle wave generation on DAC OUT1
+  */
+  if (HAL_DACEx_TriangleWaveGenerate(&hdac1, DAC_CHANNEL_1, DAC_TRIANGLEAMPLITUDE_1) != HAL_OK)
   {
     Error_Handler();
   }
@@ -1285,7 +1320,7 @@ static void MX_TIM1_Init(void)
   htim1.Instance = TIM1;
   htim1.Init.Prescaler = 100 - 1;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 60000 - 1;
+  htim1.Init.Period = 600 - 1;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -1301,7 +1336,7 @@ static void MX_TIM1_Init(void)
     Error_Handler();
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 480 -1;
+  sConfigOC.Pulse = 7 -1;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
@@ -1354,7 +1389,7 @@ static void MX_TIM2_Init(void)
   htim2.Instance = TIM2;
   htim2.Init.Prescaler = 100 -1;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 48000 - 1;
+  htim2.Init.Period = 480 - 1;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_PWM_Init(&htim2) != HAL_OK)
@@ -1368,7 +1403,7 @@ static void MX_TIM2_Init(void)
     Error_Handler();
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 480 - 1;
+  sConfigOC.Pulse = 5 - 1;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_4) != HAL_OK)
