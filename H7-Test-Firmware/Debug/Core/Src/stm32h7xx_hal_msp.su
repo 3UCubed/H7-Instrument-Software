@@ -11,4 +11,4 @@
 ../Core/Src/stm32h7xx_hal_msp.c:575:6:HAL_TIM_MspPostInit	48	static
 ../Core/Src/stm32h7xx_hal_msp.c:627:6:HAL_TIM_PWM_MspDeInit	16	static
 ../Core/Src/stm32h7xx_hal_msp.c:669:6:HAL_UART_MspInit	232	static
-../Core/Src/stm32h7xx_hal_msp.c:716:6:HAL_UART_MspDeInit	16	static
+../Core/Src/stm32h7xx_hal_msp.c:719:6:HAL_UART_MspDeInit	16	static

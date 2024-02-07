@@ -117,6 +117,9 @@ uint8_t PMT_ON = 1;
 uint8_t ERPA_ON = 1;
 uint8_t HK_ON = 1;
 
+int is_increasing = 1;
+
+
 static const uint8_t REG_TEMP = 0x00;
 
 /* USER CODE END PV */
@@ -176,7 +179,11 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 		uint8_t SPI2_MSB = (spi2RxBuffer[1] & 0xFF);
 		hspi2.Instance->CR1 |= 1<<10; // THIS IS NEEDED TO STOP SPI2_SCK FROM GENERATING CLOCK PULSES
 
-		DAC1->DHR12R1 = DAC_OUT[step];
+		uint32_t current_step = DAC_OUT[step];
+		HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, DAC_OUT[step]);
+		HAL_DAC_Start(&hdac1, DAC_CHANNEL_1);
+
+
 
         HAL_ADC_Stop_DMA(&hadc1);
 		if (HAL_ADC_Start_DMA(&hadc1,
@@ -205,6 +212,7 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 		erpa_buf[11] = (PB1 & 0xFF);                    // TEMPURATURE 2 LSB
 		erpa_buf[12] = SPI2_MSB;					    // ERPA eADC MSB
 		erpa_buf[13] = SPI2_LSB;          				// ERPA eADC LSB
+
 
 		erpa_seq++;
 		if (ERPA_ON)
@@ -678,6 +686,7 @@ int main(void)
 
   HAL_DAC_Start(&hdac1, DAC_CHANNEL_1);
 
+
   if (HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_OFFSET_LINEARITY, ADC_SINGLE_ENDED) != HAL_OK)
   {
     /* Calibration Error */
@@ -1105,7 +1114,7 @@ static void MX_DAC1_Init(void)
   /** DAC channel OUT1 config
   */
   sConfig.DAC_SampleAndHold = DAC_SAMPLEANDHOLD_DISABLE;
-  sConfig.DAC_Trigger = DAC_TRIGGER_NONE;
+  sConfig.DAC_Trigger = DAC_TRIGGER_SOFTWARE;
   sConfig.DAC_OutputBuffer = DAC_OUTPUTBUFFER_ENABLE;
   sConfig.DAC_ConnectOnChipPeripheral = DAC_CHIPCONNECT_DISABLE;
   sConfig.DAC_UserTrimming = DAC_TRIMMING_FACTORY;
