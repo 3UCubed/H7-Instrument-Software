@@ -91,6 +91,8 @@ ALIGN_32BYTES (static uint16_t   aADC3ConvertedData[ADC_CONVERTED_DATA_BUFFER_SI
 /* uint32_t DAC_OUT[] = {0, 683, 1365, 2048, 2730, 3413}; */
 uint32_t DAC_OUT[8] = {0, 620, 1241, 1861, 2482, 3103, 3723, 4095}; // For 3.3 volts
 uint8_t step = 0;
+int is_increasing = 1;
+int auto_sweep = 0;
 int up = 1;
 
 /* SPI Variables */
@@ -116,8 +118,6 @@ int startupTimer = 0;
 uint8_t PMT_ON = 1;
 uint8_t ERPA_ON = 1;
 uint8_t HK_ON = 1;
-
-int is_increasing = 1;
 
 
 static const uint8_t REG_TEMP = 0x00;
@@ -182,6 +182,20 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 		uint32_t current_step = DAC_OUT[step];
 		HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, DAC_OUT[step]);
 		HAL_DAC_Start(&hdac1, DAC_CHANNEL_1);
+
+		if (auto_sweep) {
+			if (step == 7) {
+				is_increasing = 0;
+			} else if (step == 0) {
+				is_increasing = 1;
+			}
+
+			if (is_increasing) {
+				step++;
+			} else {
+				step--;
+			}
+		}
 
 
 
@@ -344,8 +358,9 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
              Error_Handler();
           }
 
-          uint16_t vrefint = aADC3ConvertedData[0];
-          uint16_t vsense = aADC3ConvertedData[1];
+          uint16_t vrefint = aADC3ConvertedData[1];
+          uint16_t vsense = aADC3ConvertedData[2];
+          uint16_t PF9 = aADC3ConvertedData[0];
 
 
           HAL_ADC_Stop_DMA(&hadc1);
@@ -366,7 +381,6 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
           uint16_t PA3 = aADCxConvertedData[9];			// 15vmon -- verified
           uint16_t PA0 = aADCxConvertedData[10];		// 5vrefmon -- verified
           uint16_t PA1 = aADCxConvertedData[11];		// n200vmon -- verified
-          uint16_t PA5 = aADCxConvertedData[12];		// n800vmon -- verified
 
 
           hk_buf[0] = hk_sync;                     		// HK SYNC 0xCC MSB					0 SYNC
@@ -405,8 +419,8 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
           hk_buf[33] = (PA0 & 0xFF);
           hk_buf[34] = ((PA1 & 0xFF00) >> 8);
           hk_buf[35] = (PA1 & 0xFF);
-          hk_buf[36] = ((PA5 & 0xFF00) >> 8);
-          hk_buf[37] = (PA5 & 0xFF);
+          hk_buf[36] = ((PF9 & 0xFF00) >> 8);
+          hk_buf[37] = (PF9 & 0xFF);
 
 
           if (HK_ON)
@@ -518,6 +532,16 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
     }
     break;
   }
+  case 0x1D: {
+	if (!auto_sweep) {
+		auto_sweep = 1;
+		step = 0;
+	} else {
+		auto_sweep = 0;
+		step = 0;
+	}
+  	break;
+   }
   case 0x00:
   {
     HAL_GPIO_WritePin(gpios[0].gpio, gpios[0].pin, GPIO_PIN_SET);
@@ -684,7 +708,6 @@ int main(void)
   MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
 
-  HAL_DAC_Start(&hdac1, DAC_CHANNEL_1);
 
 
   if (HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_OFFSET_LINEARITY, ADC_SINGLE_ENDED) != HAL_OK)
@@ -852,7 +875,7 @@ static void MX_ADC1_Init(void)
   hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
   hadc1.Init.LowPowerAutoWait = DISABLE;
   hadc1.Init.ContinuousConvMode = ENABLE;
-  hadc1.Init.NbrOfConversion = 15;
+  hadc1.Init.NbrOfConversion = 14;
   hadc1.Init.DiscontinuousConvMode = DISABLE;
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
@@ -1003,15 +1026,6 @@ static void MX_ADC1_Init(void)
   {
     Error_Handler();
   }
-
-  /** Configure Regular Channel
-  */
-  sConfig.Channel = ADC_CHANNEL_19;
-  sConfig.Rank = ADC_REGULAR_RANK_15;
-  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
   /* USER CODE BEGIN ADC1_Init 2 */
 
   /* USER CODE END ADC1_Init 2 */
@@ -1044,7 +1058,7 @@ static void MX_ADC3_Init(void)
   hadc3.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
   hadc3.Init.LowPowerAutoWait = DISABLE;
   hadc3.Init.ContinuousConvMode = ENABLE;
-  hadc3.Init.NbrOfConversion = 2;
+  hadc3.Init.NbrOfConversion = 3;
   hadc3.Init.DiscontinuousConvMode = DISABLE;
   hadc3.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc3.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
@@ -1075,6 +1089,15 @@ static void MX_ADC3_Init(void)
   */
   sConfig.Channel = ADC_CHANNEL_TEMPSENSOR;
   sConfig.Rank = ADC_REGULAR_RANK_2;
+  if (HAL_ADC_ConfigChannel(&hadc3, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Configure Regular Channel
+  */
+  sConfig.Channel = ADC_CHANNEL_2;
+  sConfig.Rank = ADC_REGULAR_RANK_3;
   if (HAL_ADC_ConfigChannel(&hadc3, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -1119,6 +1142,13 @@ static void MX_DAC1_Init(void)
   sConfig.DAC_ConnectOnChipPeripheral = DAC_CHIPCONNECT_DISABLE;
   sConfig.DAC_UserTrimming = DAC_TRIMMING_FACTORY;
   if (HAL_DAC_ConfigChannel(&hdac1, &sConfig, DAC_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** DAC channel OUT2 config
+  */
+  if (HAL_DAC_ConfigChannel(&hdac1, &sConfig, DAC_CHANNEL_2) != HAL_OK)
   {
     Error_Handler();
   }
