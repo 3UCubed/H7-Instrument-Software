@@ -57,6 +57,8 @@ DAC_HandleTypeDef hdac1;
 
 I2C_HandleTypeDef hi2c1;
 
+RAMECC_HandleTypeDef hramecc1_m1;
+
 SPI_HandleTypeDef hspi1;
 SPI_HandleTypeDef hspi2;
 
@@ -130,16 +132,17 @@ static const uint8_t REG_TEMP = 0x00;
 void SystemClock_Config(void);
 void PeriphCommonClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_DAC1_Init(void);
+static void MX_DMA_Init(void);
 static void MX_TIM1_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_SPI1_Init(void);
-static void MX_DMA_Init(void);
+static void MX_DAC1_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_ADC3_Init(void);
 static void MX_SPI2_Init(void);
+static void MX_RAMECC_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -744,18 +747,24 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_DAC1_Init();
+  MX_DMA_Init();
   MX_TIM1_Init();
   MX_TIM2_Init();
   MX_I2C1_Init();
   MX_SPI1_Init();
-  MX_DMA_Init();
+  MX_DAC1_Init();
   MX_ADC1_Init();
   MX_USART1_UART_Init();
   MX_ADC3_Init();
   MX_SPI2_Init();
+  MX_RAMECC_Init();
   /* USER CODE BEGIN 2 */
 
+  HAL_RAMECC_Init(&hramecc1_m1);
+  HAL_RAMECC_EnableNotification(&hramecc1_m1, RAMECC_IT_GLOBAL_ALL);
+  HAL_NVIC_SetPriority(ECC_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(ECC_IRQn);
+  HAL_RAMECC_StartMonitor(&hramecc1_m1);
 
 
   if (HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_OFFSET_LINEARITY, ADC_SINGLE_ENDED) != HAL_OK)
@@ -1252,6 +1261,35 @@ static void MX_I2C1_Init(void)
   /* USER CODE BEGIN I2C1_Init 2 */
 
   /* USER CODE END I2C1_Init 2 */
+
+}
+
+/**
+  * @brief RAMECC Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_RAMECC_Init(void)
+{
+
+  /* USER CODE BEGIN RAMECC_Init 0 */
+
+  /* USER CODE END RAMECC_Init 0 */
+
+  /* USER CODE BEGIN RAMECC_Init 1 */
+
+  /* USER CODE END RAMECC_Init 1 */
+
+  /** Initialize RAMECC1 M1 : AXI SRAM
+  */
+  hramecc1_m1.Instance = RAMECC1_Monitor1;
+  if (HAL_RAMECC_Init(&hramecc1_m1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN RAMECC_Init 2 */
+
+  /* USER CODE END RAMECC_Init 2 */
 
 }
 

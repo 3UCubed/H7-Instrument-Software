@@ -23,6 +23,7 @@
 "./Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_mdma.o"
 "./Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pwr.o"
 "./Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pwr_ex.o"
+"./Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_ramecc.o"
 "./Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_rcc.o"
 "./Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_rcc_ex.o"
 "./Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_spi.o"
