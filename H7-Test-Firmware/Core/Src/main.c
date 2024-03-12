@@ -21,7 +21,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <string.h>
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -90,12 +91,9 @@ ALIGN_32BYTES (static uint16_t   aADC3ConvertedData[ADC_CONVERTED_DATA_BUFFER_SI
 /* DAC Variables for SWP */
 /* uint32_t DAC_OUT[] = {0, 683, 1365, 2048, 2730, 3413}; */
 uint32_t DAC_OUT[8] = {0, 620, 1241, 1861, 2482, 3103, 3723, 4095}; // For 3.3 volts
-uint32_t DAC_2_OUT = 0;
 uint8_t step = 0;
-int is_increasing_1 = 1;
-int is_increasing_2 = 1;
-int auto_sweep_1 = 0;
-int auto_sweep_2 = 0;
+int is_increasing = 1;
+int auto_sweep = 0;
 
 /* SPI Variables */
 int raw; // Stores raw value from SPI Transfer
@@ -117,9 +115,9 @@ uint16_t hk_seq = 0; // SEQ byte which keeps track of what # HK packet is being 
 int hk_counter = 0; // counter to know when to send HK packet (sent every 50 ERPA packets)
 					// we put them in the same routine and send HK when this count == 50
 int startupTimer = 0;
-uint8_t PMT_ON = 1;
-uint8_t ERPA_ON = 1;
-uint8_t HK_ON = 1;
+uint8_t PMT_ON = 0;
+uint8_t ERPA_ON = 0;
+uint8_t HK_ON = 0;
 
 
 static const uint8_t REG_TEMP = 0x00;
@@ -184,46 +182,6 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 		uint32_t current_step = DAC_OUT[step];
 		HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, DAC_OUT[step]);
 		HAL_DAC_Start(&hdac1, DAC_CHANNEL_1);
-
-		HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_2, DAC_ALIGN_12B_R, DAC_2_OUT);
-		HAL_DAC_Start(&hdac1, DAC_CHANNEL_2);
-
-
-		/*
-		 * Commented out for now
-		if (auto_sweep_2) {
-			if (DAC_2_OUT >= 4055) {
-				is_increasing_2 = 0;
-			} else if (DAC_2_OUT <= 0) {
-				is_increasing_2 = 1;
-			}
-
-			if (is_increasing_2) {
-				DAC_2_OUT += 40.95;
-			} else {
-				DAC_2_OUT -= 40.95;
-			}
-		}
-		*/
-
-		/*
-		 * Commented out for now
-		if (auto_sweep_1) {
-			if (step == 7) {
-				is_increasing_1 = 0;
-			} else if (step == 0) {
-				is_increasing_1 = 1;
-			}
-
-			if (is_increasing_1) {
-				step++;
-			} else {
-				step--;
-			}
-		}
-		*/
-
-
 
         HAL_ADC_Stop_DMA(&hadc1);
 		if (HAL_ADC_Start_DMA(&hadc1,
@@ -559,37 +517,15 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
     break;
   }
   case 0x1D: {
-	if (!auto_sweep_1) {
-		auto_sweep_1 = 1;
+	if (!auto_sweep) {
+		auto_sweep = 1;
 		step = 0;
 	} else {
-		auto_sweep_1 = 0;
+		auto_sweep = 0;
 		step = 0;
 	}
   	break;
    }
-  case 0x1E: {
-	if (DAC_2_OUT <= 4055) {
-		DAC_2_OUT += 40.95;
-	}
-	break;
-  }
-  case 0x1F: {
-	  if (DAC_2_OUT >= 0) {
-		  DAC_2_OUT -= 40.95;
-	  }
-	  break;
-  }
-  case 0x20: {
-	  if (!auto_sweep_2) {
-		  auto_sweep_2 = 1;
-		  DAC_2_OUT = 0;
-	  } else {
-		  auto_sweep_2 = 0;
-		  DAC_2_OUT = 0;
-	  }
-	  break;
-  }
   case 0x00:
   {
     HAL_GPIO_WritePin(gpios[0].gpio, gpios[0].pin, GPIO_PIN_SET);
