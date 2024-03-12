@@ -144,6 +144,65 @@ static void MX_SPI2_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+
+/**
+ * @brief function to poll individual i2c sensor
+ *
+ * @param TEMP_ADDR address of individual i2c sensor
+ * @return int16_t integer result from sensor
+ */
+int16_t poll_i2c_sensor(const uint8_t TEMP_ADDR)
+{
+  int16_t output;
+  uint8_t buf[2];
+  HAL_StatusTypeDef ret;
+  buf[0] = REG_TEMP;
+  ret = HAL_I2C_Master_Transmit(&hi2c1, TEMP_ADDR, buf, 1,
+                                1000);
+  if (ret != HAL_OK)
+  {
+    strcpy((char *)buf, "Error Tx\r\n");
+  }
+  else
+  {
+    /* Read 2 bytes from the temperature register */
+    ret = HAL_I2C_Master_Receive(&hi2c1, TEMP_ADDR, buf, 2,
+                                 1000);
+    if (ret != HAL_OK)
+    {
+      strcpy((char *)buf, "Error Rx\r\n");
+    }
+    else
+    {
+      output = (int16_t)(buf[0] << 8);
+      output = (output | buf[1]) >> 3;
+    }
+  }
+  return output;
+}
+
+/**
+ * @brief called in hk routine to poll each i2c sensor
+ *
+ * @return int16_t* size 4 buffer to return i2c values
+ */
+int16_t *i2c()
+{
+  int16_t output1 = poll_i2c_sensor(ADT7410_1);
+  int16_t output2 = poll_i2c_sensor(ADT7410_2);
+  int16_t output3 = poll_i2c_sensor(ADT7410_3);
+  int16_t output4 = poll_i2c_sensor(ADT7410_4);
+
+  int16_t *results = malloc(4 * sizeof(int16_t));
+  results[0] = output1;
+  results[1] = output2;
+  results[2] = output3;
+  results[3] = output4;
+  return results;
+}
+
+
 void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 {
   if (htim == &htim2)
@@ -222,149 +281,40 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
       {
         if (hk_counter == HK_CADENCE)
         {
-          uint8_t buf[2];
-          int16_t val;
-          HAL_StatusTypeDef ret;
-          float temp_c;
-          int16_t output1;
-          int16_t output2;
-          int16_t output3;
-          int16_t output4;
 
-          buf[0] = REG_TEMP;
-          ret = HAL_I2C_Master_Transmit(&hi2c1, ADT7410_1, buf, 1,
-                                        1000);
-          if (ret != HAL_OK)
-          {
-            strcpy((char *)buf, "Error Tx\r\n");
-          }
-          else
-          {
+        	int16_t *i2c_values = i2c();
 
-            /* Read 2 bytes from the temperature register */
-            ret = HAL_I2C_Master_Receive(&hi2c1, ADT7410_1, buf, 2,
-                                         1000);
-            if (ret != HAL_OK)
-            {
-              strcpy((char *)buf, "Error Rx\r\n");
-            }
-            else
-            {
-              output1 = (int16_t)(buf[0] << 8);
-              output1 = (output1 | buf[1]) >> 3;
-            }
-          }
+        	HAL_ADC_Stop_DMA(&hadc3);
 
-          /* Tell ADT7410_2 that we want to read from the temperature register */
-          buf[0] = REG_TEMP;
-          ret = HAL_I2C_Master_Transmit(&hi2c1, ADT7410_2, buf, 1,
-                                        1000);
-          /* I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint8_t *pData, uint16_t Size, uint32_t Timeout) */
-          if (ret != HAL_OK)
-          {
-            strcpy((char *)buf, "Error Tx\r\n");
-          }
-          else
-          {
+        	if (HAL_ADC_Start_DMA(&hadc3,
+        			(uint32_t *)aADC3ConvertedData,
+					ADC_CONVERTED_DATA_BUFFER_SIZE)
+        			!= HAL_OK) {
+        		Error_Handler();
+        	}
 
-            /* Read 2 bytes from the temperature register */
-            ret = HAL_I2C_Master_Receive(&hi2c1, ADT7410_2, buf, 2,
-                                         1000);
-            if (ret != HAL_OK)
-            {
-              strcpy((char *)buf, "Error Rx\r\n");
-            }
-            else
-            {
+        	uint16_t vrefint = aADC3ConvertedData[1];
+        	uint16_t vsense = aADC3ConvertedData[2];
+        	uint16_t PF9 = aADC3ConvertedData[0];
 
-              output2 = (int16_t)(buf[0] << 8);
-              output2 = (output2 | buf[1]) >> 3;
-            }
-          }
-          // TEMP SENSOR 3
-          buf[0] = REG_TEMP;
-          ret = HAL_I2C_Master_Transmit(&hi2c1, ADT7410_3, buf, 1,
-                                        1000);
-          /* I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint8_t *pData, uint16_t Size, uint32_t Timeout) */
-          if (ret != HAL_OK)
-          {
-            strcpy((char *)buf, "Error Tx\r\n");
-          }
-          else
-          {
+        	HAL_ADC_Stop_DMA(&hadc1);
+        	if (HAL_ADC_Start_DMA(&hadc1,
+        			(uint32_t *)aADCxConvertedData,
+					ADC_CONVERTED_DATA_BUFFER_SIZE)
+        			!= HAL_OK) {
+        		Error_Handler();
+        	}
 
-            /* Read 2 bytes from the temperature register */
-            ret = HAL_I2C_Master_Receive(&hi2c1, ADT7410_3, buf, 2,
-                                         1000);
-            if (ret != HAL_OK)
-            {
-              strcpy((char *)buf, "Error Rx\r\n");
-            }
-            else
-            {
-
-              output3 = (int16_t)(buf[0] << 8);
-              output3 = (output3 | buf[1]) >> 3;
-            }
-          }
-          /* TEMP SENSOR 4 */
-          buf[0] = REG_TEMP;
-          ret = HAL_I2C_Master_Transmit(&hi2c1, ADT7410_4, buf, 1,
-                                        1000);
-          /* I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint8_t *pData, uint16_t Size, uint32_t Timeout) */
-          if (ret != HAL_OK)
-          {
-            strcpy((char *)buf, "Error Tx\r\n");
-          }
-          else
-          {
-
-            /* Read 2 bytes from the temperature register */
-            ret = HAL_I2C_Master_Receive(&hi2c1, ADT7410_4, buf, 2,
-                                         1000);
-            if (ret != HAL_OK)
-            {
-              strcpy((char *)buf, "Error Rx\r\n");
-            }
-            else
-            {
-
-              output4 = (int16_t)(buf[0] << 8);
-              output4 = (output4 | buf[1]) >> 3;
-            }
-          }
-
-          HAL_ADC_Stop_DMA(&hadc3);
-          if (HAL_ADC_Start_DMA(&hadc3,
-          (uint32_t *)aADC3ConvertedData,
-          ADC_CONVERTED_DATA_BUFFER_SIZE)
-          != HAL_OK) {
-             Error_Handler();
-          }
-
-          uint16_t vrefint = aADC3ConvertedData[1];
-          uint16_t vsense = aADC3ConvertedData[2];
-          uint16_t PF9 = aADC3ConvertedData[0];
-
-
-          HAL_ADC_Stop_DMA(&hadc1);
-          if (HAL_ADC_Start_DMA(&hadc1,
-          	(uint32_t *)aADCxConvertedData,
-          	ADC_CONVERTED_DATA_BUFFER_SIZE)
-        	!= HAL_OK) {
-          	Error_Handler();
-          }
-
-          uint16_t PF12 = aADCxConvertedData[2];		// BUSVmon -- sending as ENDMON
-          uint16_t PA7 = aADCxConvertedData[1];			// BUSImon -- sending as n800vmon
-          uint16_t PC5 = aADCxConvertedData[4];			// 2v5mon -- verified sending as TMP1 too
-          uint16_t PB0 = aADCxConvertedData[5];			// 3v3mon -- verified sending as TMP2 too
-          uint16_t PC0 = aADCxConvertedData[6];			// 5vmon -- verified
-          uint16_t PC1 = aADCxConvertedData[7];			// n3v3mon -- verified sending as SWPMon too
-          uint16_t PA2 = aADCxConvertedData[8];			// n5vmon -- verified
-          uint16_t PA3 = aADCxConvertedData[9];			// 15vmon -- verified
-          uint16_t PA0 = aADCxConvertedData[10];		// 5vrefmon -- verified
-          uint16_t PA1 = aADCxConvertedData[11];		// n200vmon -- verified
+        	uint16_t PF12 = aADCxConvertedData[2];		// BUSVmon -- sending as ENDMON
+        	uint16_t PA7 = aADCxConvertedData[1];			// BUSImon -- sending as n800vmon
+        	uint16_t PC5 = aADCxConvertedData[4];			// 2v5mon -- verified sending as TMP1 too
+        	uint16_t PB0 = aADCxConvertedData[5];			// 3v3mon -- verified sending as TMP2 too
+        	uint16_t PC0 = aADCxConvertedData[6];			// 5vmon -- verified
+        	uint16_t PC1 = aADCxConvertedData[7];			// n3v3mon -- verified sending as SWPMon too
+        	uint16_t PA2 = aADCxConvertedData[8];			// n5vmon -- verified
+        	uint16_t PA3 = aADCxConvertedData[9];			// 15vmon -- verified
+        	uint16_t PA0 = aADCxConvertedData[10];		// 5vrefmon -- verified
+        	uint16_t PA1 = aADCxConvertedData[11];		// n200vmon -- verified
 
 
           hk_buf[0] = hk_sync;                     		// HK SYNC 0xCC MSB					0 SYNC
@@ -375,14 +325,14 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
           hk_buf[5] = (vsense & 0xFF);
           hk_buf[6] = ((vrefint & 0xFF00) >> 8);
           hk_buf[7] = (vrefint & 0xFF);
-          hk_buf[8] = ((output1 & 0xFF00) >> 8);
-          hk_buf[9] = (output1 & 0xFF);
-          hk_buf[10] = ((output2 & 0xFF00) >> 8);
-          hk_buf[11] = (output2 & 0xFF);
-          hk_buf[12] = ((output3 & 0xFF00) >> 8);
-          hk_buf[13] = (output3 & 0xFF);
-          hk_buf[14] = ((output4 & 0xFF00) >> 8);
-          hk_buf[15] = (output4 & 0xFF);
+          hk_buf[8] = ((i2c_values[0] & 0xFF00) >> 8);
+            hk_buf[9] = (i2c_values[0] & 0xFF);
+            hk_buf[10] = ((i2c_values[1] & 0xFF00) >> 8);
+            hk_buf[11] = (i2c_values[1] & 0xFF);
+            hk_buf[12] = ((i2c_values[2] & 0xFF00) >> 8);
+            hk_buf[13] = (i2c_values[2] & 0xFF);
+            hk_buf[14] = ((i2c_values[3] & 0xFF00) >> 8);
+            hk_buf[15] = (i2c_values[3] & 0xFF);
           hk_buf[16] = ((PF12 & 0xFF00) >> 8);
           hk_buf[17] = (PF12 & 0xFF);
           hk_buf[18] = ((PA7 & 0xFF00) >> 8);
@@ -413,6 +363,9 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
           }
           hk_counter = 1;
           hk_seq++;
+
+          free(i2c_values);
+
         }
         else
         {
