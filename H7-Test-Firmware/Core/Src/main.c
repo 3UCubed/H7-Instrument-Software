@@ -69,10 +69,8 @@ UART_HandleTypeDef huart1;
 /* USER CODE BEGIN PV */
 #define BUFFER_SIZE 100
 unsigned char rx_buf[BUFFER_SIZE];
-UART_WakeUpTypeDef WakeUpSelection;
 
 /* Hexadecimal Addresses for I2C Temperature Sensors */
-static const uint8_t I2C_addresses[4] = {(0x48 << 1), (0x4A << 1), (0x49 << 1), (0x4B << 1)};
 static const uint8_t ADT7410_1 = 0x48 << 1;
 static const uint8_t ADT7410_2 = 0x4A << 1;
 static const uint8_t ADT7410_3 = 0x49 << 1;
@@ -85,28 +83,21 @@ static const uint8_t ADT7410_4 = 0x4B << 1;
  * and just get that working but had no luck. This youtube video might help:
  * https://www.youtube.com/watch?v=AloHXBk6Bfk&t=255s
  */
-ALIGN_32BYTES (static uint16_t   aADCxConvertedData[ADC_CONVERTED_DATA_BUFFER_SIZE]);
-ALIGN_32BYTES (static uint16_t   aADC3ConvertedData[ADC_CONVERTED_DATA_BUFFER_SIZE]);
+ALIGN_32BYTES (static uint16_t   ADC1Data[ADC_CONVERTED_DATA_BUFFER_SIZE]);
+ALIGN_32BYTES (static uint16_t   ADC3Data[ADC_CONVERTED_DATA_BUFFER_SIZE]);
+
 
 /* DAC Variables for SWP */
-/* uint32_t DAC_OUT[] = {0, 683, 1365, 2048, 2730, 3413}; */
 uint32_t DAC_OUT[8] = {0, 620, 1241, 1861, 2482, 3103, 3723, 4095}; // For 3.3 volts
 uint8_t step = 0;
 int is_increasing = 1;
 int auto_sweep = 0;
 
-/* SPI Variables */
-int raw; // Stores raw value from SPI Transfer
-
-
 /* UART Variables */
-uint8_t erpa_buf[14]; // buffer that is filled with ERPA packet info
 const uint8_t erpa_sync = 0xAA; // SYNC byte to let packet interpreter / OBC know which packet is which
 uint16_t erpa_seq = 0; // SEQ byte which keeps track of what # ERPA packet is being sent (0-65535)
-uint8_t pmt_buf[6]; // buffer that is filled with PMT packet info
 const uint8_t pmt_sync = 0xBB; // SYNC byte to let packet interpreter / OBC know which packet is which
 uint16_t pmt_seq = 0; // SEQ byte which keeps track of what # ERPA packet is being sent (0-65535)
-uint8_t hk_buf[38]; // buffer that is filled with HK packet info
 const uint8_t hk_sync = 0xCC; // SYNC byte to let packet interpreter / OBC know which packet is which
 uint16_t hk_seq = 0; // SEQ byte which keeps track of what # HK packet is being sent (0-65535)
 
@@ -264,16 +255,16 @@ uint16_t* erpa_adc() {
 
 	HAL_ADC_Stop_DMA(&hadc1);
 	if (HAL_ADC_Start_DMA(&hadc1,
-		(uint32_t *)aADCxConvertedData,
+		(uint32_t *)ADC1Data,
 		 ADC_CONVERTED_DATA_BUFFER_SIZE
 	) != HAL_OK) {
 		 Error_Handler();
 	}
 
-	uint16_t PF11 = aADCxConvertedData[13]; 		// ENDmon -- verified
-	uint16_t PA6 = aADCxConvertedData[14]; 			// SWPmon -- verified
-	uint16_t PC4 = aADCxConvertedData[15]; 			// TEMP1 -- verified
-	uint16_t PB1 = aADCxConvertedData[0];			// TEMP2 -- verified
+	uint16_t PF11 = ADC1Data[0]; 		// ENDmon -- verified
+	uint16_t PA6 = ADC1Data[0]; 			// SWPmon -- verified
+	uint16_t PC4 = ADC1Data[0]; 			// TEMP1 -- verified
+	uint16_t PB1 = ADC1Data[0];			// TEMP2 -- verified
 
 	uint16_t* results = malloc(4 * sizeof(uint16_t));
 	results[0] = PF11;
@@ -290,22 +281,22 @@ uint16_t* hk_adc1() {
 
 	HAL_ADC_Stop_DMA(&hadc1);
 	if (HAL_ADC_Start_DMA(&hadc1,
-			(uint32_t *)aADCxConvertedData,
+			(uint32_t *)ADC1Data,
 			ADC_CONVERTED_DATA_BUFFER_SIZE)
 			!= HAL_OK) {
 		Error_Handler();
 	}
 
-	uint16_t PF12 = aADCxConvertedData[2];			// BUSVmon -- sending as ENDMON
-	uint16_t PA7 = aADCxConvertedData[1];			// BUSImon -- sending as n800vmon
-	uint16_t PC5 = aADCxConvertedData[4];			// 2v5mon -- verified sending as TMP1 too
-	uint16_t PB0 = aADCxConvertedData[5];			// 3v3mon -- verified sending as TMP2 too
-	uint16_t PC0 = aADCxConvertedData[6];			// 5vmon -- verified
-	uint16_t PC1 = aADCxConvertedData[7];			// n3v3mon -- verified sending as SWPMon too
-	uint16_t PA2 = aADCxConvertedData[8];			// n5vmon -- verified
-	uint16_t PA3 = aADCxConvertedData[9];			// 15vmon -- verified
-	uint16_t PA0 = aADCxConvertedData[10];			// 5vrefmon -- verified
-	uint16_t PA1 = aADCxConvertedData[11];			// n200vmon -- verified
+	uint16_t PF12 = ADC1Data[14];			// BUSVmon -- sending as ENDMON
+	uint16_t PA7 = ADC1Data[1];			// BUSImon -- sending as n800vmon
+	uint16_t PC5 = ADC1Data[4];			// 2v5mon -- verified sending as TMP1 too
+	uint16_t PB0 = ADC1Data[5];			// 3v3mon -- verified sending as TMP2 too
+	uint16_t PC0 = ADC1Data[6];			// 5vmon -- verified
+	uint16_t PC1 = ADC1Data[7];			// n3v3mon -- verified sending as SWPMon too
+	uint16_t PA2 = ADC1Data[8];			// n5vmon -- verified
+	uint16_t PA3 = ADC1Data[9];			// 15vmon -- verified
+	uint16_t PA0 = ADC1Data[10];			// 5vrefmon -- verified
+	uint16_t PA1 = ADC1Data[11];			// n200vmon -- verified
 
 	uint16_t* results = malloc(10 * sizeof(uint16_t));
 	results[0] = PF12;
@@ -324,19 +315,18 @@ uint16_t* hk_adc1() {
 }
 
 uint16_t* hk_adc3() {
-	ALIGN_32BYTES (static uint16_t   adc_data[ADC_CONVERTED_DATA_BUFFER_SIZE]);
 
 	HAL_ADC_Stop_DMA(&hadc3);
 	if (HAL_ADC_Start_DMA(&hadc3,
-			(uint32_t *)adc_data,
+			(uint32_t *)ADC3Data,
 			ADC_CONVERTED_DATA_BUFFER_SIZE)
 			!= HAL_OK) {
 		Error_Handler();
 	}
 
-	uint16_t vrefint = aADC3ConvertedData[1];
-	uint16_t vsense = aADC3ConvertedData[2];
-	uint16_t PF9 = aADC3ConvertedData[0];
+	uint16_t vrefint = ADC3Data[1];
+	uint16_t vsense = ADC3Data[2];
+	uint16_t PF9 = ADC3Data[0];
 
 	uint16_t* results = malloc(3 * sizeof(uint16_t));
 	results[0] = vrefint;
@@ -439,6 +429,9 @@ void send_hk_packet(int16_t *i2c_values, uint16_t *hk_adc1_results, uint16_t *hk
  */
 void send_pmt_packet(uint8_t* pmt_spi)
 {
+
+	uint8_t pmt_buf[6];
+
 	pmt_buf[0] = pmt_sync;
 	pmt_buf[1] = pmt_sync;
 	pmt_buf[2] = ((pmt_seq & 0xFF00) >> 8);
@@ -729,8 +722,6 @@ int main(void)
   MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
 
-
-
   if (HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_OFFSET_LINEARITY, ADC_SINGLE_ENDED) != HAL_OK)
   {
     /* Calibration Error */
@@ -750,19 +741,6 @@ int main(void)
 
   while (__HAL_UART_GET_FLAG(&huart1, USART_ISR_BUSY) == SET);
   while (__HAL_UART_GET_FLAG(&huart1, USART_ISR_REACK) == RESET);
-
-  WakeUpSelection.WakeUpEvent = UART_WAKEUP_ON_ADDRESS;
-  WakeUpSelection.AddressLength = UART_ADDRESS_DETECT_7B;
-  WakeUpSelection.Address = 0x5B; // send "["
-
-  if (HAL_UARTEx_StopModeWakeUpSourceConfig(&huart1, WakeUpSelection) != HAL_OK) {
-      Error_Handler();
-  }
-  /* Enable the LPUART Wake UP from stop mode Interrupt */
-  __HAL_UART_ENABLE_IT(&huart1, UART_IT_WUF);
-
-  /* enable MCU wake-up by LPUART */
-  HAL_UARTEx_EnableStopMode(&huart1);
 
   /* USER CODE END 2 */
 
@@ -1577,10 +1555,10 @@ void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc)
 
 	/* Invalidate Data Cache to get the updated content of the SRAM on the first half of the ADC converted data buffer: 32 bytes */
 	if (hadc == &hadc1) {
-		SCB_InvalidateDCache_by_Addr((uint32_t *) &aADCxConvertedData[0], ADC_CONVERTED_DATA_BUFFER_SIZE);
+		SCB_InvalidateDCache_by_Addr((uint32_t *) &ADC1Data[0], ADC_CONVERTED_DATA_BUFFER_SIZE);
 		HAL_ADC_Stop_DMA(&hadc1);
 	} else if (hadc == &hadc3) {
-		SCB_InvalidateDCache_by_Addr((uint32_t *) &aADCxConvertedData[0], ADC_CONVERTED_DATA_BUFFER_SIZE);
+		SCB_InvalidateDCache_by_Addr((uint32_t *) &ADC3Data[0], ADC_CONVERTED_DATA_BUFFER_SIZE);
 		HAL_ADC_Stop_DMA(&hadc3);
 	}
 
@@ -1595,10 +1573,10 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
 	/* Invalidate Data Cache to get the updated content of the SRAM on the second half of the ADC converted data buffer: 32 bytes */
 	if (hadc == &hadc1) {
-		SCB_InvalidateDCache_by_Addr((uint32_t *) &aADCxConvertedData[ADC_CONVERTED_DATA_BUFFER_SIZE/2], ADC_CONVERTED_DATA_BUFFER_SIZE);
+		SCB_InvalidateDCache_by_Addr((uint32_t *) &ADC1Data[ADC_CONVERTED_DATA_BUFFER_SIZE/2], ADC_CONVERTED_DATA_BUFFER_SIZE);
 		HAL_ADC_Stop_DMA(&hadc1);
 	} else if (hadc == &hadc3) {
-		SCB_InvalidateDCache_by_Addr((uint32_t *) &aADC3ConvertedData[ADC_CONVERTED_DATA_BUFFER_SIZE/2], ADC_CONVERTED_DATA_BUFFER_SIZE);
+		SCB_InvalidateDCache_by_Addr((uint32_t *) &ADC3Data[ADC_CONVERTED_DATA_BUFFER_SIZE/2], ADC_CONVERTED_DATA_BUFFER_SIZE);
 		HAL_ADC_Stop_DMA(&hadc3);
 
 	}
