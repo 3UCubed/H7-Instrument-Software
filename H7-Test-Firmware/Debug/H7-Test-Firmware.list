@@ -23,23 +23,23 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
   9 .ARM.attributes 0000002e  00000000  00000000  00030098  2**0
                   CONTENTS, READONLY
- 10 .debug_info   00023b52  00000000  00000000  000300c6  2**0
+ 10 .debug_info   00023b2b  00000000  00000000  000300c6  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 11 .debug_abbrev 00003711  00000000  00000000  00053c18  2**0
+ 11 .debug_abbrev 00003711  00000000  00000000  00053bf1  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 12 .debug_aranges 00001b58  00000000  00000000  00057330  2**3
+ 12 .debug_aranges 00001b58  00000000  00000000  00057308  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 13 .debug_ranges 00001a10  00000000  00000000  00058e88  2**3
+ 13 .debug_ranges 00001a10  00000000  00000000  00058e60  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_macro  0003b1ff  00000000  00000000  0005a898  2**0
+ 14 .debug_macro  0003b1ff  00000000  00000000  0005a870  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_line   000240f3  00000000  00000000  00095a97  2**0
+ 15 .debug_line   000240f3  00000000  00000000  00095a6f  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_str    00180631  00000000  00000000  000b9b8a  2**0
+ 16 .debug_str    00180623  00000000  00000000  000b9b62  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .comment      00000050  00000000  00000000  0023a1bb  2**0
+ 17 .comment      00000050  00000000  00000000  0023a185  2**0
                   CONTENTS, READONLY
- 18 .debug_frame  0000795c  00000000  00000000  0023a20c  2**2
+ 18 .debug_frame  0000795c  00000000  00000000  0023a1d8  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -747,21 +747,21 @@ uint16_t* erpa_adc() {
  8000814:	f001 fb40 	bl	8001e98 <Error_Handler>
 	}
 
-	uint16_t PF11 = ADC1Data[0]; 		// ENDmon -- verified
+	uint16_t PA0 = ADC1Data[2]; 			// ENDmon -- verified
  8000818:	4b13      	ldr	r3, [pc, #76]	; (8000868 <erpa_adc+0x70>)
- 800081a:	881b      	ldrh	r3, [r3, #0]
+ 800081a:	889b      	ldrh	r3, [r3, #4]
  800081c:	81fb      	strh	r3, [r7, #14]
-	uint16_t PA6 = ADC1Data[0]; 			// SWPmon -- verified
+	uint16_t PA7 = ADC1Data[0]; 			// SWPmon --
  800081e:	4b12      	ldr	r3, [pc, #72]	; (8000868 <erpa_adc+0x70>)
  8000820:	881b      	ldrh	r3, [r3, #0]
  8000822:	81bb      	strh	r3, [r7, #12]
-	uint16_t PC4 = ADC1Data[0]; 			// TEMP1 -- verified
+	uint16_t PC4 = ADC1Data[0]; 			// TEMP1 --
  8000824:	4b10      	ldr	r3, [pc, #64]	; (8000868 <erpa_adc+0x70>)
  8000826:	881b      	ldrh	r3, [r3, #0]
  8000828:	817b      	strh	r3, [r7, #10]
-	uint16_t PB1 = ADC1Data[0];			// TEMP2 -- verified
+	uint16_t PB1 = ADC1Data[3];				// TEMP2 --
  800082a:	4b0f      	ldr	r3, [pc, #60]	; (8000868 <erpa_adc+0x70>)
- 800082c:	881b      	ldrh	r3, [r3, #0]
+ 800082c:	88db      	ldrh	r3, [r3, #6]
  800082e:	813b      	strh	r3, [r7, #8]
 
 	uint16_t* results = malloc(4 * sizeof(uint16_t));
@@ -769,11 +769,11 @@ uint16_t* erpa_adc() {
  8000832:	f00f fad3 	bl	800fddc <malloc>
  8000836:	4603      	mov	r3, r0
  8000838:	607b      	str	r3, [r7, #4]
-	results[0] = PF11;
+	results[0] = PA0;
  800083a:	687b      	ldr	r3, [r7, #4]
  800083c:	89fa      	ldrh	r2, [r7, #14]
  800083e:	801a      	strh	r2, [r3, #0]
-	results[1] = PA6;
+	results[1] = PA7;
  8000840:	687b      	ldr	r3, [r7, #4]
  8000842:	3302      	adds	r3, #2
  8000844:	89ba      	ldrh	r2, [r7, #12]
@@ -827,43 +827,43 @@ uint16_t* hk_adc1() {
  8000888:	f001 fb06 	bl	8001e98 <Error_Handler>
 	}
 
-	uint16_t PF12 = ADC1Data[14];			// BUSVmon -- sending as ENDMON
+	uint16_t PF12 = ADC1Data[14];			// BUSVmon --
  800088c:	4b28      	ldr	r3, [pc, #160]	; (8000930 <hk_adc1+0xc4>)
  800088e:	8b9b      	ldrh	r3, [r3, #28]
  8000890:	82fb      	strh	r3, [r7, #22]
-	uint16_t PA7 = ADC1Data[1];			// BUSImon -- sending as n800vmon
+	uint16_t PA6 = ADC1Data[1];				// BUSImon --
  8000892:	4b27      	ldr	r3, [pc, #156]	; (8000930 <hk_adc1+0xc4>)
  8000894:	885b      	ldrh	r3, [r3, #2]
  8000896:	82bb      	strh	r3, [r7, #20]
-	uint16_t PC5 = ADC1Data[4];			// 2v5mon -- verified sending as TMP1 too
+	uint16_t PC5 = ADC1Data[4];				// 2v5mon --
  8000898:	4b25      	ldr	r3, [pc, #148]	; (8000930 <hk_adc1+0xc4>)
  800089a:	891b      	ldrh	r3, [r3, #8]
  800089c:	827b      	strh	r3, [r7, #18]
-	uint16_t PB0 = ADC1Data[5];			// 3v3mon -- verified sending as TMP2 too
+	uint16_t PB0 = ADC1Data[5];				// 3v3mon --
  800089e:	4b24      	ldr	r3, [pc, #144]	; (8000930 <hk_adc1+0xc4>)
  80008a0:	895b      	ldrh	r3, [r3, #10]
  80008a2:	823b      	strh	r3, [r7, #16]
-	uint16_t PC0 = ADC1Data[6];			// 5vmon -- verified
+	uint16_t PC0 = ADC1Data[6];				// 5vmon --
  80008a4:	4b22      	ldr	r3, [pc, #136]	; (8000930 <hk_adc1+0xc4>)
  80008a6:	899b      	ldrh	r3, [r3, #12]
  80008a8:	81fb      	strh	r3, [r7, #14]
-	uint16_t PC1 = ADC1Data[7];			// n3v3mon -- verified sending as SWPMon too
+	uint16_t PC1 = ADC1Data[7];				// n3v3mon --
  80008aa:	4b21      	ldr	r3, [pc, #132]	; (8000930 <hk_adc1+0xc4>)
  80008ac:	89db      	ldrh	r3, [r3, #14]
  80008ae:	81bb      	strh	r3, [r7, #12]
-	uint16_t PA2 = ADC1Data[8];			// n5vmon -- verified
+	uint16_t PA2 = ADC1Data[8];				// n5vmon --
  80008b0:	4b1f      	ldr	r3, [pc, #124]	; (8000930 <hk_adc1+0xc4>)
  80008b2:	8a1b      	ldrh	r3, [r3, #16]
  80008b4:	817b      	strh	r3, [r7, #10]
-	uint16_t PA3 = ADC1Data[9];			// 15vmon -- verified
+	uint16_t PA3 = ADC1Data[9];				// 15vmon --
  80008b6:	4b1e      	ldr	r3, [pc, #120]	; (8000930 <hk_adc1+0xc4>)
  80008b8:	8a5b      	ldrh	r3, [r3, #18]
  80008ba:	813b      	strh	r3, [r7, #8]
-	uint16_t PA0 = ADC1Data[10];			// 5vrefmon -- verified
+	uint16_t PF11 = ADC1Data[10];			// 5vrefmon --
  80008bc:	4b1c      	ldr	r3, [pc, #112]	; (8000930 <hk_adc1+0xc4>)
  80008be:	8a9b      	ldrh	r3, [r3, #20]
  80008c0:	80fb      	strh	r3, [r7, #6]
-	uint16_t PA1 = ADC1Data[11];			// n200vmon -- verified
+	uint16_t PA1 = ADC1Data[11];			// n200vmon --
  80008c2:	4b1b      	ldr	r3, [pc, #108]	; (8000930 <hk_adc1+0xc4>)
  80008c4:	8adb      	ldrh	r3, [r3, #22]
  80008c6:	80bb      	strh	r3, [r7, #4]
@@ -877,7 +877,7 @@ uint16_t* hk_adc1() {
  80008d2:	683b      	ldr	r3, [r7, #0]
  80008d4:	8afa      	ldrh	r2, [r7, #22]
  80008d6:	801a      	strh	r2, [r3, #0]
-	results[1] = PA7;
+	results[1] = PA6;
  80008d8:	683b      	ldr	r3, [r7, #0]
  80008da:	3302      	adds	r3, #2
  80008dc:	8aba      	ldrh	r2, [r7, #20]
@@ -912,7 +912,7 @@ uint16_t* hk_adc1() {
  800090a:	330e      	adds	r3, #14
  800090c:	893a      	ldrh	r2, [r7, #8]
  800090e:	801a      	strh	r2, [r3, #0]
-	results[8] = PA0;
+	results[8] = PF11;
  8000910:	683b      	ldr	r3, [r7, #0]
  8000912:	3310      	adds	r3, #16
  8000914:	88fa      	ldrh	r2, [r7, #6]

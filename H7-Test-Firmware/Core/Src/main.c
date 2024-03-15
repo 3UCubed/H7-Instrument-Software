@@ -108,7 +108,6 @@ uint8_t PMT_ON = 0;
 uint8_t ERPA_ON = 0;
 uint8_t HK_ON = 0;
 
-
 static const uint8_t REG_TEMP = 0x00;
 
 /* USER CODE END PV */
@@ -261,14 +260,14 @@ uint16_t* erpa_adc() {
 		 Error_Handler();
 	}
 
-	uint16_t PF11 = ADC1Data[0]; 		// ENDmon -- verified
-	uint16_t PA6 = ADC1Data[0]; 			// SWPmon -- verified
-	uint16_t PC4 = ADC1Data[0]; 			// TEMP1 -- verified
-	uint16_t PB1 = ADC1Data[0];			// TEMP2 -- verified
+	uint16_t PA0 = ADC1Data[2]; 			// ENDmon -- verified
+	uint16_t PA7 = ADC1Data[0]; 			// SWPmon --
+	uint16_t PC4 = ADC1Data[0]; 			// TEMP1 --
+	uint16_t PB1 = ADC1Data[3];				// TEMP2 --
 
 	uint16_t* results = malloc(4 * sizeof(uint16_t));
-	results[0] = PF11;
-	results[1] = PA6;
+	results[0] = PA0;
+	results[1] = PA7;
 	results[2] = PC4;
 	results[3] = PB1;
 
@@ -287,27 +286,27 @@ uint16_t* hk_adc1() {
 		Error_Handler();
 	}
 
-	uint16_t PF12 = ADC1Data[14];			// BUSVmon -- sending as ENDMON
-	uint16_t PA7 = ADC1Data[1];			// BUSImon -- sending as n800vmon
-	uint16_t PC5 = ADC1Data[4];			// 2v5mon -- verified sending as TMP1 too
-	uint16_t PB0 = ADC1Data[5];			// 3v3mon -- verified sending as TMP2 too
-	uint16_t PC0 = ADC1Data[6];			// 5vmon -- verified
-	uint16_t PC1 = ADC1Data[7];			// n3v3mon -- verified sending as SWPMon too
-	uint16_t PA2 = ADC1Data[8];			// n5vmon -- verified
-	uint16_t PA3 = ADC1Data[9];			// 15vmon -- verified
-	uint16_t PA0 = ADC1Data[10];			// 5vrefmon -- verified
-	uint16_t PA1 = ADC1Data[11];			// n200vmon -- verified
+	uint16_t PF12 = ADC1Data[14];			// BUSVmon --
+	uint16_t PA6 = ADC1Data[1];				// BUSImon --
+	uint16_t PC5 = ADC1Data[4];				// 2v5mon --
+	uint16_t PB0 = ADC1Data[5];				// 3v3mon --
+	uint16_t PC0 = ADC1Data[6];				// 5vmon --
+	uint16_t PC1 = ADC1Data[7];				// n3v3mon --
+	uint16_t PA2 = ADC1Data[8];				// n5vmon --
+	uint16_t PA3 = ADC1Data[9];				// 15vmon --
+	uint16_t PF11 = ADC1Data[10];			// 5vrefmon --
+	uint16_t PA1 = ADC1Data[11];			// n200vmon --
 
 	uint16_t* results = malloc(10 * sizeof(uint16_t));
 	results[0] = PF12;
-	results[1] = PA7;
+	results[1] = PA6;
 	results[2] = PC5;
 	results[3] = PB0;
 	results[4] = PC0;
 	results[5] = PC1;
 	results[6] = PA2;
 	results[7] = PA3;
-	results[8] = PA0;
+	results[8] = PF11;
 	results[9] = PA1;
 
 	return results;
