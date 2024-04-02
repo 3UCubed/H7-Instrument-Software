@@ -88,7 +88,7 @@ ALIGN_32BYTES (static uint16_t   ADC3Data[ADC_CONVERTED_DATA_BUFFER_SIZE]);
 
 
 /* DAC Variables for SWP */
-uint32_t DAC_OUT[8] = {0, 620, 1241, 1861, 2482, 3103, 3723, 4095}; // For 3.3 volts
+uint32_t DAC_OUT[10] = {0, 0, 620, 1241, 1861, 2482, 3103, 3723, 4095, 4095}; // For 3.3 volts
 uint8_t step = 0;
 int is_increasing = 1;
 int auto_sweep = 0;
@@ -196,23 +196,29 @@ int16_t *i2c()
  */
 void do_auto_sweep()
 {
-  if (step == 7)
-  {
-    is_increasing = 0;
-  }
-  else if (step == 0)
-  {
-    is_increasing = 1;
-  }
+	if (step == 9)
+	  {
+		  is_increasing = 0;
+		  step--;
+	  }
+	  else if (step == 0)
+	  {
+	    is_increasing = 1;
+	    step++;
+	  }
 
-  if (is_increasing)
-  {
-    step++;
-  }
-  else
-  {
-    step--;
-  }
+	  if (is_increasing)
+	  {
+	    step++;
+	  }
+	  else
+	  {
+	    step--;
+	  }
+
+	HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, DAC_OUT[step]);
+	HAL_DAC_Start(&hdac1, DAC_CHANNEL_1);
+
 }
 
 /**
@@ -260,16 +266,14 @@ uint16_t* erpa_adc() {
 		 Error_Handler();
 	}
 
-	uint16_t PA0 = ADC1Data[2]; 			// ENDmon -- verified
-	uint16_t PA7 = ADC1Data[0]; 			// SWPmon --
-	uint16_t PC4 = ADC1Data[0]; 			// TEMP1 --
-	uint16_t PB1 = ADC1Data[3];				// TEMP2 --
+	uint16_t PA0 = ADC1Data[10]; 			// ENDmon -- verified
+	uint16_t PA7 = ADC1Data[3]; 			// SWPmon -- verified
+	uint16_t PB0 = ADC1Data[5]; 			// TEMP1 -- verified
 
-	uint16_t* results = malloc(4 * sizeof(uint16_t));
+	uint16_t* results = malloc(3 * sizeof(uint16_t));
 	results[0] = PA0;
 	results[1] = PA7;
-	results[2] = PC4;
-	results[3] = PB1;
+	results[2] = PB0;
 
 	return results;
 
@@ -286,28 +290,30 @@ uint16_t* hk_adc1() {
 		Error_Handler();
 	}
 
-	uint16_t PF12 = ADC1Data[14];			// BUSVmon --
-	uint16_t PA6 = ADC1Data[1];				// BUSImon --
-	uint16_t PC5 = ADC1Data[4];				// 2v5mon --
-	uint16_t PB0 = ADC1Data[5];				// 3v3mon --
-	uint16_t PC0 = ADC1Data[6];				// 5vmon --
-	uint16_t PC1 = ADC1Data[7];				// n3v3mon --
-	uint16_t PA2 = ADC1Data[8];				// n5vmon --
-	uint16_t PA3 = ADC1Data[9];				// 15vmon --
-	uint16_t PF11 = ADC1Data[10];			// 5vrefmon --
-	uint16_t PA1 = ADC1Data[11];			// n200vmon --
+	uint16_t PA1 = ADC1Data[14];			// BUSVmon -- NEEDS TO CHANGE FOR 100 PIN VERSION
+	uint16_t PA2 = ADC1Data[1];				// BUSImon --
+	uint16_t PC0 = ADC1Data[4];				// 2v5mon --
+	uint16_t PA3 = ADC1Data[5];				// 3v3mon --
+	uint16_t PC2 = ADC1Data[6];				// 5vmon --
+	uint16_t PC3 = ADC1Data[7];				// n3v3mon --
+	uint16_t PC1 = ADC1Data[8];				// n5vmon --
+	uint16_t PC5 = ADC1Data[9];				// 15vmon --
+	uint16_t PB1 = ADC1Data[10];			// 5vrefmon -- NEEDS TO CHANGE FOR 100 PIN VERSION
+	uint16_t PA5 = ADC1Data[11];			// n200vmon --
+	uint16_t PA6 = ADC1Data[12];			// n800vmon --
 
-	uint16_t* results = malloc(10 * sizeof(uint16_t));
-	results[0] = PF12;
-	results[1] = PA6;
-	results[2] = PC5;
-	results[3] = PB0;
-	results[4] = PC0;
-	results[5] = PC1;
-	results[6] = PA2;
-	results[7] = PA3;
-	results[8] = PF11;
-	results[9] = PA1;
+	uint16_t* results = malloc(11 * sizeof(uint16_t));
+	results[0] = PA1;
+	results[1] = PA2;
+	results[2] = PC0;
+	results[3] = PA3;
+	results[4] = PC2;
+	results[5] = PC3;
+	results[6] = PC1;
+	results[7] = PC5;
+	results[8] = PB1;
+	results[9] = PA5;
+	results[10] = PA6;
 
 	return results;
 
@@ -325,12 +331,14 @@ uint16_t* hk_adc3() {
 
 	uint16_t vrefint = ADC3Data[1];
 	uint16_t vsense = ADC3Data[2];
-	uint16_t PF9 = ADC3Data[0];
+	uint16_t PC2_C = ADC3Data[0]; 		// -- NEEDS TO CHANGE FOR 100 PIN VERSION
+	uint16_t PC3_C = ADC3Data[0];
 
-	uint16_t* results = malloc(3 * sizeof(uint16_t));
+	uint16_t* results = malloc(4 * sizeof(uint16_t));
 	results[0] = vrefint;
 	results[1] = vsense;
-	results[2] = PF9;
+	results[2] = PC2_C;
+	results[3] = PC3_C;
 
 	return results;
 }
@@ -354,8 +362,8 @@ void send_erpa_packet(uint8_t* erpa_spi, uint16_t *erpa_adc_results)
 	erpa_buf[7] = (erpa_adc_results[1] & 0xFF);               		// SWP Monitored LSB
 	erpa_buf[8] = ((erpa_adc_results[2] & 0xFF00) >> 8);      		// TEMPURATURE 1 MSB
 	erpa_buf[9] = (erpa_adc_results[2] & 0xFF);               		// TEMPURATURE 1 LSB
-	erpa_buf[10] = ((erpa_adc_results[3] & 0xFF00) >> 8);     		// TEMPURATURE 2 MSB
-	erpa_buf[11] = (erpa_adc_results[3] & 0xFF);                    // TEMPURATURE 2 LSB
+	erpa_buf[10] = ((0 & 0xFF00) >> 8);     		// TEMPURATURE 2 MSB
+	erpa_buf[11] = (0 & 0xFF);                    // TEMPURATURE 2 LSB
 	erpa_buf[12] = erpa_spi[0];									// ERPA eADC MSB
 	erpa_buf[13] = erpa_spi[1];									// ERPA eADC LSB
 
@@ -455,12 +463,14 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 
 		uint8_t* spi2_results = spi(hspi2);
         uint16_t *erpa_adc_results = erpa_adc();
-		set_erpa_sweep();
 
-		if (auto_sweep)
+        if (auto_sweep)
 		{
 		  do_auto_sweep();
+		} else {
+		  set_erpa_sweep();
 		}
+
 
 		send_erpa_packet(spi2_results, erpa_adc_results);
 
@@ -531,11 +541,11 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
   }
   case 0x1B:
   {
-    if (step < 7)
-    {
-      step++;
-    }
-    break;
+	  if (step < 9)
+	  {
+		step++;
+	  }
+	  break;
   }
   case 0x1C:
   {
@@ -874,7 +884,7 @@ static void MX_ADC1_Init(void)
   hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
   hadc1.Init.LowPowerAutoWait = DISABLE;
   hadc1.Init.ContinuousConvMode = ENABLE;
-  hadc1.Init.NbrOfConversion = 14;
+  hadc1.Init.NbrOfConversion = 12;
   hadc1.Init.DiscontinuousConvMode = DISABLE;
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
@@ -897,7 +907,7 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_2;
+  sConfig.Channel = ADC_CHANNEL_3;
   sConfig.Rank = ADC_REGULAR_RANK_1;
   sConfig.SamplingTime = ADC_SAMPLETIME_810CYCLES_5;
   sConfig.SingleDiff = ADC_SINGLE_ENDED;
@@ -911,7 +921,7 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_3;
+  sConfig.Channel = ADC_CHANNEL_4;
   sConfig.Rank = ADC_REGULAR_RANK_2;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -920,7 +930,7 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_4;
+  sConfig.Channel = ADC_CHANNEL_5;
   sConfig.Rank = ADC_REGULAR_RANK_3;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -929,7 +939,7 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_5;
+  sConfig.Channel = ADC_CHANNEL_7;
   sConfig.Rank = ADC_REGULAR_RANK_4;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -938,7 +948,7 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_6;
+  sConfig.Channel = ADC_CHANNEL_8;
   sConfig.Rank = ADC_REGULAR_RANK_5;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -947,7 +957,7 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_7;
+  sConfig.Channel = ADC_CHANNEL_9;
   sConfig.Rank = ADC_REGULAR_RANK_6;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -956,7 +966,7 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_8;
+  sConfig.Channel = ADC_CHANNEL_10;
   sConfig.Rank = ADC_REGULAR_RANK_7;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -965,7 +975,7 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_9;
+  sConfig.Channel = ADC_CHANNEL_11;
   sConfig.Rank = ADC_REGULAR_RANK_8;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -974,7 +984,7 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_10;
+  sConfig.Channel = ADC_CHANNEL_14;
   sConfig.Rank = ADC_REGULAR_RANK_9;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -983,7 +993,7 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_11;
+  sConfig.Channel = ADC_CHANNEL_15;
   sConfig.Rank = ADC_REGULAR_RANK_10;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -992,7 +1002,7 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_14;
+  sConfig.Channel = ADC_CHANNEL_16;
   sConfig.Rank = ADC_REGULAR_RANK_11;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -1001,26 +1011,8 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_15;
-  sConfig.Rank = ADC_REGULAR_RANK_12;
-  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  /** Configure Regular Channel
-  */
-  sConfig.Channel = ADC_CHANNEL_16;
-  sConfig.Rank = ADC_REGULAR_RANK_13;
-  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  /** Configure Regular Channel
-  */
   sConfig.Channel = ADC_CHANNEL_17;
-  sConfig.Rank = ADC_REGULAR_RANK_14;
+  sConfig.Rank = ADC_REGULAR_RANK_12;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -1057,7 +1049,7 @@ static void MX_ADC3_Init(void)
   hadc3.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
   hadc3.Init.LowPowerAutoWait = DISABLE;
   hadc3.Init.ContinuousConvMode = ENABLE;
-  hadc3.Init.NbrOfConversion = 3;
+  hadc3.Init.NbrOfConversion = 4;
   hadc3.Init.DiscontinuousConvMode = DISABLE;
   hadc3.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc3.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
@@ -1095,8 +1087,17 @@ static void MX_ADC3_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_2;
+  sConfig.Channel = ADC_CHANNEL_0;
   sConfig.Rank = ADC_REGULAR_RANK_3;
+  if (HAL_ADC_ConfigChannel(&hadc3, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Configure Regular Channel
+  */
+  sConfig.Channel = ADC_CHANNEL_1;
+  sConfig.Rank = ADC_REGULAR_RANK_4;
   if (HAL_ADC_ConfigChannel(&hadc3, &sConfig) != HAL_OK)
   {
     Error_Handler();
