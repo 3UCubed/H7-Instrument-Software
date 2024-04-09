@@ -40,7 +40,8 @@ const gpio_pins gpios[] = {{GPIOB, GPIO_PIN_5}, {GPIOB, GPIO_PIN_6}, {GPIOC, GPI
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define ADC_CONVERTED_DATA_BUFFER_SIZE   ((uint32_t)  32)
+#define ADC1NumChannels 12
+#define ADC3NumChannels 4
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -83,8 +84,8 @@ static const uint8_t ADT7410_4 = 0x4B << 1;
  * and just get that working but had no luck. This youtube video might help:
  * https://www.youtube.com/watch?v=AloHXBk6Bfk&t=255s
  */
-ALIGN_32BYTES (static uint16_t   ADC1Data[ADC_CONVERTED_DATA_BUFFER_SIZE]);
-ALIGN_32BYTES (static uint16_t   ADC3Data[ADC_CONVERTED_DATA_BUFFER_SIZE]);
+ALIGN_32BYTES (static uint16_t   ADC1Data[ADC1NumChannels]);
+ALIGN_32BYTES (static uint16_t   ADC3Data[ADC3NumChannels]);
 
 
 /* DAC Variables for SWP */
@@ -258,14 +259,6 @@ void set_erpa_sweep()
  */
 uint16_t* erpa_adc() {
 
-	HAL_ADC_Stop_DMA(&hadc1);
-	if (HAL_ADC_Start_DMA(&hadc1,
-		(uint32_t *)ADC1Data,
-		 ADC_CONVERTED_DATA_BUFFER_SIZE
-	) != HAL_OK) {
-		 Error_Handler();
-	}
-
 	uint16_t PA0 = ADC1Data[10]; 			// ENDmon -- verified
 	uint16_t PA7 = ADC1Data[3]; 			// SWPmon -- verified
 	uint16_t PB0 = ADC1Data[5]; 			// TEMP1 -- verified
@@ -282,27 +275,17 @@ uint16_t* erpa_adc() {
 
 uint16_t* hk_adc1() {
 
-	HAL_ADC_Stop_DMA(&hadc1);
-	if (HAL_ADC_Start_DMA(&hadc1,
-			(uint32_t *)ADC1Data,
-			ADC_CONVERTED_DATA_BUFFER_SIZE)
-			!= HAL_OK) {
-		Error_Handler();
-	}
+	uint16_t PA1 = ADC1Data[11];			// BUSVmon -- verified
+	uint16_t PA2 = ADC1Data[1];				// BUSImon -- acting weird I beleive this is because of soldering
+	uint16_t PC0 = ADC1Data[6];				// 2v5mon -- verified
+	uint16_t PA3 = ADC1Data[9];				// 3v3mon -- verified
+	uint16_t PC2 = ADC1Data[0];				// 5vmon -- NOT VERIFIED, ISSUES WITH PC2_C
+	uint16_t PC3 = ADC1Data[8];				// n3v3mon -- NOT VERIFIED, ISSUES WITH PC3_C
+	uint16_t PC1 = ADC1Data[7];				// n5vmon -- verified
+	uint16_t PC5 = ADC1Data[4];				// 15vmon -- verified
+	uint16_t PB1 = ADC1Data[2];				// 5vrefmon -- verified
 
-	uint16_t PA1 = ADC1Data[14];			// BUSVmon -- NEEDS TO CHANGE FOR 100 PIN VERSION
-	uint16_t PA2 = ADC1Data[1];				// BUSImon --
-	uint16_t PC0 = ADC1Data[4];				// 2v5mon --
-	uint16_t PA3 = ADC1Data[5];				// 3v3mon --
-	uint16_t PC2 = ADC1Data[6];				// 5vmon --
-	uint16_t PC3 = ADC1Data[7];				// n3v3mon --
-	uint16_t PC1 = ADC1Data[8];				// n5vmon --
-	uint16_t PC5 = ADC1Data[9];				// 15vmon --
-	uint16_t PB1 = ADC1Data[10];			// 5vrefmon -- NEEDS TO CHANGE FOR 100 PIN VERSION
-	uint16_t PA5 = ADC1Data[11];			// n200vmon --
-	uint16_t PA6 = ADC1Data[12];			// n800vmon --
-
-	uint16_t* results = malloc(11 * sizeof(uint16_t));
+	uint16_t* results = malloc(9 * sizeof(uint16_t));
 	results[0] = PA1;
 	results[1] = PA2;
 	results[2] = PC0;
@@ -312,8 +295,6 @@ uint16_t* hk_adc1() {
 	results[6] = PC1;
 	results[7] = PC5;
 	results[8] = PB1;
-	results[9] = PA5;
-	results[10] = PA6;
 
 	return results;
 
@@ -321,18 +302,10 @@ uint16_t* hk_adc1() {
 
 uint16_t* hk_adc3() {
 
-	HAL_ADC_Stop_DMA(&hadc3);
-	if (HAL_ADC_Start_DMA(&hadc3,
-			(uint32_t *)ADC3Data,
-			ADC_CONVERTED_DATA_BUFFER_SIZE)
-			!= HAL_OK) {
-		Error_Handler();
-	}
-
 	uint16_t vrefint = ADC3Data[1];
 	uint16_t vsense = ADC3Data[2];
-	uint16_t PC2_C = ADC3Data[0]; 		// -- NEEDS TO CHANGE FOR 100 PIN VERSION
-	uint16_t PC3_C = ADC3Data[0];
+	uint16_t PC2_C = ADC3Data[0]; 		// n200v
+	uint16_t PC3_C = ADC3Data[3];		// n800v
 
 	uint16_t* results = malloc(4 * sizeof(uint16_t));
 	results[0] = vrefint;
@@ -351,6 +324,7 @@ uint16_t* hk_adc3() {
  */
 void send_erpa_packet(uint8_t* erpa_spi, uint16_t *erpa_adc_results)
 {
+
 	uint8_t erpa_buf[14];
 	erpa_buf[0] = erpa_sync;                  						// ERPA SYNC 0xAA MSB
 	erpa_buf[1] = erpa_sync;                  						// ERPA SYNC 0xAA LSB
@@ -362,10 +336,10 @@ void send_erpa_packet(uint8_t* erpa_spi, uint16_t *erpa_adc_results)
 	erpa_buf[7] = (erpa_adc_results[1] & 0xFF);               		// SWP Monitored LSB
 	erpa_buf[8] = ((erpa_adc_results[2] & 0xFF00) >> 8);      		// TEMPURATURE 1 MSB
 	erpa_buf[9] = (erpa_adc_results[2] & 0xFF);               		// TEMPURATURE 1 LSB
-	erpa_buf[10] = ((0 & 0xFF00) >> 8);     		// TEMPURATURE 2 MSB
-	erpa_buf[11] = (0 & 0xFF);                    // TEMPURATURE 2 LSB
-	erpa_buf[12] = erpa_spi[0];									// ERPA eADC MSB
-	erpa_buf[13] = erpa_spi[1];									// ERPA eADC LSB
+	erpa_buf[10] = ((0 & 0xFF00) >> 8);     						// TEMPURATURE 2 MSB
+	erpa_buf[11] = (0 & 0xFF);                    					// TEMPURATURE 2 LSB
+	erpa_buf[12] = erpa_spi[0];										// ERPA eADC MSB
+	erpa_buf[13] = erpa_spi[1];										// ERPA eADC LSB
 
 	HAL_UART_Transmit(&huart1, erpa_buf, sizeof(erpa_buf), 100);
 	erpa_seq++;
@@ -417,10 +391,10 @@ void send_hk_packet(int16_t *i2c_values, uint16_t *hk_adc1_results, uint16_t *hk
 	hk_buf[31] = (hk_adc1_results[7] & 0xFF);
 	hk_buf[32] = ((hk_adc1_results[8] & 0xFF00) >> 8);
 	hk_buf[33] = (hk_adc1_results[8] & 0xFF);
-	hk_buf[34] = ((hk_adc1_results[9] & 0xFF00) >> 8);
-	hk_buf[35] = (hk_adc1_results[9] & 0xFF);
-	hk_buf[36] = ((hk_adc3_results[2] & 0xFF00) >> 8);
-	hk_buf[37] = (hk_adc3_results[2] & 0xFF);
+	hk_buf[34] = ((hk_adc3_results[2] & 0xFF00) >> 8);
+	hk_buf[35] = (hk_adc3_results[2] & 0xFF);
+	hk_buf[36] = ((hk_adc3_results[3] & 0xFF00) >> 8);
+	hk_buf[37] = (hk_adc3_results[3] & 0xFF);
 
 	HAL_UART_Transmit(&huart1, hk_buf, sizeof(hk_buf), 100);
 	hk_seq++;
@@ -655,21 +629,27 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
   case 0x0D:
   {
     PMT_ON = 1;
+    HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_1);
     break;
   }
   case 0x10:
   {
     PMT_ON = 0;
+    HAL_TIM_OC_Stop_IT(&htim1, TIM_CHANNEL_1);
+
     break;
   }
   case 0x0E:
   {
     ERPA_ON = 1;
+    HAL_TIM_OC_Start_IT(&htim2, TIM_CHANNEL_4);
     break;
   }
   case 0x11:
   {
     ERPA_ON = 0;
+    HAL_TIM_OC_Stop_IT(&htim2, TIM_CHANNEL_4);
+
     break;
   }
   case 0x0F:
@@ -731,10 +711,20 @@ int main(void)
   MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
 
+//  SYSCFG->PMCR &= ~(1 << 27);
+//  SYSCFG->PMCR &= ~(1 << 26);
+
   if (HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_OFFSET_LINEARITY, ADC_SINGLE_ENDED) != HAL_OK)
   {
     /* Calibration Error */
     Error_Handler();
+  }
+
+  if (HAL_ADC_Start_DMA(&hadc1,
+		  (uint32_t *)ADC1Data,
+		  ADC1NumChannels
+		  ) != HAL_OK) {
+	  Error_Handler();
   }
 
   if (HAL_ADCEx_Calibration_Start(&hadc3, ADC_CALIB_OFFSET_LINEARITY, ADC_SINGLE_ENDED) != HAL_OK)
@@ -743,10 +733,13 @@ int main(void)
 	Error_Handler();
   }
 
+  if (HAL_ADC_Start_DMA(&hadc3,
+		  (uint32_t *)ADC3Data,
+		  ADC3NumChannels)
+		  != HAL_OK) {
+	  Error_Handler();
+  }
 
-  /* Start Timers with OC & Interrupt */
-  HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_1);
-  HAL_TIM_OC_Start_IT(&htim2, TIM_CHANNEL_4);
 
   while (__HAL_UART_GET_FLAG(&huart1, USART_ISR_BUSY) == SET);
   while (__HAL_UART_GET_FLAG(&huart1, USART_ISR_REACK) == RESET);
@@ -1550,20 +1543,6 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
-void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc)
-{
-
-	/* Invalidate Data Cache to get the updated content of the SRAM on the first half of the ADC converted data buffer: 32 bytes */
-	if (hadc == &hadc1) {
-		SCB_InvalidateDCache_by_Addr((uint32_t *) &ADC1Data[0], ADC_CONVERTED_DATA_BUFFER_SIZE);
-		HAL_ADC_Stop_DMA(&hadc1);
-	} else if (hadc == &hadc3) {
-		SCB_InvalidateDCache_by_Addr((uint32_t *) &ADC3Data[0], ADC_CONVERTED_DATA_BUFFER_SIZE);
-		HAL_ADC_Stop_DMA(&hadc3);
-	}
-
-}
-
 /**
   * @brief  Conversion DMA half-transfer callback in non-blocking mode
   * @param  hadc: ADC handle
@@ -1573,11 +1552,9 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
 	/* Invalidate Data Cache to get the updated content of the SRAM on the second half of the ADC converted data buffer: 32 bytes */
 	if (hadc == &hadc1) {
-		SCB_InvalidateDCache_by_Addr((uint32_t *) &ADC1Data[ADC_CONVERTED_DATA_BUFFER_SIZE/2], ADC_CONVERTED_DATA_BUFFER_SIZE);
-		HAL_ADC_Stop_DMA(&hadc1);
+		SCB_InvalidateDCache_by_Addr((uint32_t *) &ADC1Data[ADC1NumChannels/2], ADC1NumChannels);
 	} else if (hadc == &hadc3) {
-		SCB_InvalidateDCache_by_Addr((uint32_t *) &ADC3Data[ADC_CONVERTED_DATA_BUFFER_SIZE/2], ADC_CONVERTED_DATA_BUFFER_SIZE);
-		HAL_ADC_Stop_DMA(&hadc3);
+		SCB_InvalidateDCache_by_Addr((uint32_t *) &ADC3Data[ADC3NumChannels/2], ADC3NumChannels);
 
 	}
 
