@@ -276,25 +276,25 @@ uint16_t* erpa_adc() {
 uint16_t* hk_adc1() {
 
 	uint16_t PA1 = ADC1Data[11];			// BUSVmon -- verified
-	uint16_t PA2 = ADC1Data[1];				// BUSImon -- acting weird I beleive this is because of soldering
+	uint16_t PA2 = ADC1Data[8];				// BUSImon -- verified
 	uint16_t PC0 = ADC1Data[6];				// 2v5mon -- verified
 	uint16_t PA3 = ADC1Data[9];				// 3v3mon -- verified
-	uint16_t PC2 = ADC1Data[0];				// 5vmon -- NOT VERIFIED, ISSUES WITH PC2_C
-	uint16_t PC3 = ADC1Data[8];				// n3v3mon -- NOT VERIFIED, ISSUES WITH PC3_C
+	uint16_t PB1 = ADC1Data[2];				// n200v -- verified
+	uint16_t PA6 = ADC1Data[0];				// n800v -- verified
 	uint16_t PC1 = ADC1Data[7];				// n5vmon -- verified
 	uint16_t PC5 = ADC1Data[4];				// 15vmon -- verified
-	uint16_t PB1 = ADC1Data[2];				// 5vrefmon -- verified
+	uint16_t PC4 = ADC1Data[1];				// 5vrefmon -- verified
 
 	uint16_t* results = malloc(9 * sizeof(uint16_t));
 	results[0] = PA1;
 	results[1] = PA2;
 	results[2] = PC0;
 	results[3] = PA3;
-	results[4] = PC2;
-	results[5] = PC3;
+	results[4] = PB1;
+	results[5] = PA6;
 	results[6] = PC1;
 	results[7] = PC5;
-	results[8] = PB1;
+	results[8] = PC4;
 
 	return results;
 
@@ -302,16 +302,16 @@ uint16_t* hk_adc1() {
 
 uint16_t* hk_adc3() {
 
-	uint16_t vrefint = ADC3Data[1];
-	uint16_t vsense = ADC3Data[2];
-	uint16_t PC2_C = ADC3Data[0]; 		// n200v
-	uint16_t PC3_C = ADC3Data[3];		// n800v
+	uint16_t vrefint = ADC3Data[0];
+	uint16_t vsense = ADC3Data[1];
+	uint16_t PC2 = ADC3Data[2]; 		// 5vmon --
+	uint16_t PC3 = ADC3Data[3];			// n3v3mon
 
 	uint16_t* results = malloc(4 * sizeof(uint16_t));
 	results[0] = vrefint;
 	results[1] = vsense;
-	results[2] = PC2_C;
-	results[3] = PC3_C;
+	results[2] = PC2;
+	results[3] = PC3;
 
 	return results;
 }
@@ -381,20 +381,20 @@ void send_hk_packet(int16_t *i2c_values, uint16_t *hk_adc1_results, uint16_t *hk
 	hk_buf[21] = (hk_adc1_results[2] & 0xFF);
 	hk_buf[22] = ((hk_adc1_results[3] & 0xFF00) >> 8);
 	hk_buf[23] = (hk_adc1_results[3] & 0xFF);
-	hk_buf[24] = ((hk_adc1_results[4] & 0xFF00) >> 8);
-	hk_buf[25] = (hk_adc1_results[4] & 0xFF);
-	hk_buf[26] = ((hk_adc1_results[5] & 0xFF00) >> 8);
-	hk_buf[27] = (hk_adc1_results[5] & 0xFF);
+	hk_buf[24] = ((hk_adc3_results[2] & 0xFF00) >> 8);
+	hk_buf[25] = (hk_adc3_results[2] & 0xFF);
+	hk_buf[26] = ((hk_adc3_results[3] & 0xFF00) >> 8);
+	hk_buf[27] = (hk_adc3_results[3] & 0xFF);
 	hk_buf[28] = ((hk_adc1_results[6] & 0xFF00) >> 8);
 	hk_buf[29] = (hk_adc1_results[6] & 0xFF);
 	hk_buf[30] = ((hk_adc1_results[7] & 0xFF00) >> 8);
 	hk_buf[31] = (hk_adc1_results[7] & 0xFF);
 	hk_buf[32] = ((hk_adc1_results[8] & 0xFF00) >> 8);
 	hk_buf[33] = (hk_adc1_results[8] & 0xFF);
-	hk_buf[34] = ((hk_adc3_results[2] & 0xFF00) >> 8);
-	hk_buf[35] = (hk_adc3_results[2] & 0xFF);
-	hk_buf[36] = ((hk_adc3_results[3] & 0xFF00) >> 8);
-	hk_buf[37] = (hk_adc3_results[3] & 0xFF);
+	hk_buf[34] = ((hk_adc1_results[4] & 0xFF00) >> 8);
+	hk_buf[35] = (hk_adc1_results[4] & 0xFF);
+	hk_buf[36] = ((hk_adc1_results[5] & 0xFF00) >> 8);
+	hk_buf[37] = (hk_adc1_results[5] & 0xFF);
 
 	HAL_UART_Transmit(&huart1, hk_buf, sizeof(hk_buf), 100);
 	hk_seq++;
@@ -1138,13 +1138,6 @@ static void MX_DAC1_Init(void)
   {
     Error_Handler();
   }
-
-  /** DAC channel OUT2 config
-  */
-  if (HAL_DAC_ConfigChannel(&hdac1, &sConfig, DAC_CHANNEL_2) != HAL_OK)
-  {
-    Error_Handler();
-  }
   /* USER CODE BEGIN DAC1_Init 2 */
 
   /* USER CODE END DAC1_Init 2 */
@@ -1496,7 +1489,6 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOH_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
-  __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOF, GPIO_PIN_6|GPIO_PIN_7, GPIO_PIN_RESET);
@@ -1523,14 +1515,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : PD5 PD6 */
-  GPIO_InitStruct.Pin = GPIO_PIN_5|GPIO_PIN_6;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  GPIO_InitStruct.Alternate = GPIO_AF7_USART2;
-  HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PB5 PB6 */
   GPIO_InitStruct.Pin = GPIO_PIN_5|GPIO_PIN_6;
