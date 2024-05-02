@@ -33,14 +33,14 @@ typedef struct
   uint16_t pin;
 } gpio_pins;
 const int HK_CADENCE = 1; //Should be set at 5
-const gpio_pins gpios[] = {{GPIOB, GPIO_PIN_5}, {GPIOB, GPIO_PIN_6}, {GPIOC, GPIO_PIN_10}, {GPIOC, GPIO_PIN_13}, {GPIOC, GPIO_PIN_7}, {GPIOC, GPIO_PIN_8}, {GPIOC, GPIO_PIN_9}, {GPIOC, GPIO_PIN_6}, {GPIOF, GPIO_PIN_6}, {GPIOF, GPIO_PIN_7}};
+const gpio_pins gpios[] = {{GPIOB, GPIO_PIN_5}, {GPIOB, GPIO_PIN_6}, {GPIOC, GPIO_PIN_10}, {GPIOC, GPIO_PIN_13}, {GPIOC, GPIO_PIN_7}, {GPIOC, GPIO_PIN_8}, {GPIOC, GPIO_PIN_9}, {GPIOC, GPIO_PIN_6}, {GPIOB, GPIO_PIN_2}};
 
 
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define ADC1NumChannels 12
+#define ADC1NumChannels 11
 #define ADC3NumChannels 4
 /* USER CODE END PD */
 
@@ -117,16 +117,16 @@ static const uint8_t REG_TEMP = 0x00;
 void SystemClock_Config(void);
 void PeriphCommonClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_USART1_UART_Init(void);
+static void MX_ADC1_Init(void);
+static void MX_ADC3_Init(void);
 static void MX_DAC1_Init(void);
-static void MX_TIM1_Init(void);
-static void MX_TIM2_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_SPI1_Init(void);
-static void MX_DMA_Init(void);
-static void MX_ADC1_Init(void);
-static void MX_USART1_UART_Init(void);
-static void MX_ADC3_Init(void);
 static void MX_SPI2_Init(void);
+static void MX_TIM1_Init(void);
+static void MX_DMA_Init(void);
+static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -259,14 +259,12 @@ void set_erpa_sweep()
  */
 uint16_t* erpa_adc() {
 
-	uint16_t PA0 = ADC1Data[10]; 			// ENDmon -- verified
-	uint16_t PA7 = ADC1Data[3]; 			// SWPmon -- verified
-	uint16_t PB0 = ADC1Data[5]; 			// TEMP1 -- verified
+	uint16_t PC4 = ADC1Data[1]; 			// SWPmon --
+	uint16_t PB0 = ADC1Data[5]; 			// TEMP1 -- verified doesn't need to change
 
-	uint16_t* results = malloc(3 * sizeof(uint16_t));
-	results[0] = PA0;
-	results[1] = PA7;
-	results[2] = PB0;
+	uint16_t* results = malloc(2 * sizeof(uint16_t));
+	results[0] = PC4;
+	results[1] = PB0;
 
 	return results;
 
@@ -275,15 +273,15 @@ uint16_t* erpa_adc() {
 
 uint16_t* hk_adc1() {
 
-	uint16_t PA1 = ADC1Data[11];			// BUSVmon -- verified
-	uint16_t PA2 = ADC1Data[8];				// BUSImon -- verified
-	uint16_t PC0 = ADC1Data[6];				// 2v5mon -- verified
-	uint16_t PA3 = ADC1Data[9];				// 3v3mon -- verified
-	uint16_t PB1 = ADC1Data[2];				// n200v -- verified
-	uint16_t PA6 = ADC1Data[0];				// n800v -- verified
-	uint16_t PC1 = ADC1Data[7];				// n5vmon -- verified
-	uint16_t PC5 = ADC1Data[4];				// 15vmon -- verified
-	uint16_t PC4 = ADC1Data[1];				// 5vrefmon -- verified
+	uint16_t PA1 = ADC1Data[10];			// BUSVmon -- verified doesn't need to change
+	uint16_t PA2 = ADC1Data[8];				// BUSImon -- verified doesn't need to change
+	uint16_t PC0 = ADC1Data[6];				// 2v5mon -- verified doesn't need to change
+	uint16_t PA3 = ADC1Data[9];				// n3v3mon --
+	uint16_t PB1 = ADC1Data[2];				// n200v -- verified doesn't need to change
+	uint16_t PA7 = ADC1Data[3];				// n800v --
+	uint16_t PC1 = ADC1Data[7];				// 5vmon --
+	uint16_t PC5 = ADC1Data[4];				// 15vmon -- verified doesn't need to change
+	uint16_t PA6 = ADC1Data[0];				// 5vrefmon --
 
 	uint16_t* results = malloc(9 * sizeof(uint16_t));
 	results[0] = PA1;
@@ -291,10 +289,10 @@ uint16_t* hk_adc1() {
 	results[2] = PC0;
 	results[3] = PA3;
 	results[4] = PB1;
-	results[5] = PA6;
+	results[5] = PA7;
 	results[6] = PC1;
 	results[7] = PC5;
-	results[8] = PC4;
+	results[8] = PA6;
 
 	return results;
 
@@ -304,8 +302,8 @@ uint16_t* hk_adc3() {
 
 	uint16_t vrefint = ADC3Data[0];
 	uint16_t vsense = ADC3Data[1];
-	uint16_t PC2 = ADC3Data[2]; 		// 5vmon --
-	uint16_t PC3 = ADC3Data[3];			// n3v3mon
+	uint16_t PC2 = ADC3Data[2]; 		// n5vmon --
+	uint16_t PC3 = ADC3Data[3];			// 3v3mon --
 
 	uint16_t* results = malloc(4 * sizeof(uint16_t));
 	results[0] = vrefint;
@@ -330,12 +328,12 @@ void send_erpa_packet(uint8_t* erpa_spi, uint16_t *erpa_adc_results)
 	erpa_buf[1] = erpa_sync;                  						// ERPA SYNC 0xAA LSB
 	erpa_buf[2] = ((erpa_seq & 0xFF00) >> 8); 						// ERPA SEQ # MSB
 	erpa_buf[3] = (erpa_seq & 0xFF);          						// ERPA SEQ # MSB
-	erpa_buf[4] = ((erpa_adc_results[0] & 0xFF00) >> 8); 	  		// ENDmon MSB
-	erpa_buf[5] = (erpa_adc_results[0] & 0xFF);               		// ENDmon LSB
-	erpa_buf[6] = ((erpa_adc_results[1] & 0xFF00) >> 8);      		// SWP Monitored MSB
-	erpa_buf[7] = (erpa_adc_results[1] & 0xFF);               		// SWP Monitored LSB
-	erpa_buf[8] = ((erpa_adc_results[2] & 0xFF00) >> 8);      		// TEMPURATURE 1 MSB
-	erpa_buf[9] = (erpa_adc_results[2] & 0xFF);               		// TEMPURATURE 1 LSB
+	erpa_buf[4] = ((0 & 0xFF00) >> 8); 	  							// ENDmon MSB
+	erpa_buf[5] = (0 & 0xFF);               						// ENDmon LSB
+	erpa_buf[6] = ((erpa_adc_results[0] & 0xFF00) >> 8);      		// SWP Monitored MSB
+	erpa_buf[7] = (erpa_adc_results[0] & 0xFF);               		// SWP Monitored LSB
+	erpa_buf[8] = ((erpa_adc_results[1] & 0xFF00) >> 8);      		// TEMPURATURE 1 MSB
+	erpa_buf[9] = (erpa_adc_results[1] & 0xFF);               		// TEMPURATURE 1 LSB
 	erpa_buf[10] = ((0 & 0xFF00) >> 8);     						// TEMPURATURE 2 MSB
 	erpa_buf[11] = (0 & 0xFF);                    					// TEMPURATURE 2 LSB
 	erpa_buf[12] = erpa_spi[0];										// ERPA eADC MSB
@@ -355,46 +353,46 @@ void send_erpa_packet(uint8_t* erpa_spi, uint16_t *erpa_adc_results)
 void send_hk_packet(int16_t *i2c_values, uint16_t *hk_adc1_results, uint16_t *hk_adc3_results)
 {
 
-	uint8_t hk_buf[38];
+	uint8_t hk_buf[38];									// GUI Structure
 
-	hk_buf[0] = hk_sync;                     		// HK SYNC 0xCC MSB					0 SYNC
-	hk_buf[1] = hk_sync;                     		// HK SYNC 0xCC LSB
-	hk_buf[2] = ((hk_seq & 0xFF00) >> 8);    		// HK SEQ # MSB		1 SEQUENCE
-	hk_buf[3] = (hk_seq & 0xFF);             		// HK SEQ # LSB
-	hk_buf[4] = ((hk_adc3_results[1] & 0xFF00) >> 8);
-	hk_buf[5] = (hk_adc3_results[1] & 0xFF);
-	hk_buf[6] = ((hk_adc3_results[0] & 0xFF00) >> 8);
-	hk_buf[7] = (hk_adc3_results[0] & 0xFF);
-	hk_buf[8] = ((i2c_values[0] & 0xFF00) >> 8);
-	hk_buf[9] = (i2c_values[0] & 0xFF);
-	hk_buf[10] = ((i2c_values[1] & 0xFF00) >> 8);
-	hk_buf[11] = (i2c_values[1] & 0xFF);
-	hk_buf[12] = ((i2c_values[2] & 0xFF00) >> 8);
-	hk_buf[13] = (i2c_values[2] & 0xFF);
-	hk_buf[14] = ((i2c_values[3] & 0xFF00) >> 8);
-	hk_buf[15] = (i2c_values[3] & 0xFF);
-	hk_buf[16] = ((hk_adc1_results[0] & 0xFF00) >> 8);
-	hk_buf[17] = (hk_adc1_results[0] & 0xFF);
-	hk_buf[18] = ((hk_adc1_results[1] & 0xFF00) >> 8);
-	hk_buf[19] = (hk_adc1_results[1] & 0xFF);
-	hk_buf[20] = ((hk_adc1_results[2] & 0xFF00) >> 8);
-	hk_buf[21] = (hk_adc1_results[2] & 0xFF);
-	hk_buf[22] = ((hk_adc1_results[3] & 0xFF00) >> 8);
-	hk_buf[23] = (hk_adc1_results[3] & 0xFF);
-	hk_buf[24] = ((hk_adc3_results[2] & 0xFF00) >> 8);
-	hk_buf[25] = (hk_adc3_results[2] & 0xFF);
-	hk_buf[26] = ((hk_adc3_results[3] & 0xFF00) >> 8);
-	hk_buf[27] = (hk_adc3_results[3] & 0xFF);
-	hk_buf[28] = ((hk_adc1_results[6] & 0xFF00) >> 8);
-	hk_buf[29] = (hk_adc1_results[6] & 0xFF);
-	hk_buf[30] = ((hk_adc1_results[7] & 0xFF00) >> 8);
-	hk_buf[31] = (hk_adc1_results[7] & 0xFF);
-	hk_buf[32] = ((hk_adc1_results[8] & 0xFF00) >> 8);
-	hk_buf[33] = (hk_adc1_results[8] & 0xFF);
-	hk_buf[34] = ((hk_adc1_results[4] & 0xFF00) >> 8);
-	hk_buf[35] = (hk_adc1_results[4] & 0xFF);
-	hk_buf[36] = ((hk_adc1_results[5] & 0xFF00) >> 8);
-	hk_buf[37] = (hk_adc1_results[5] & 0xFF);
+	hk_buf[0] = hk_sync;                     			// HK SYNC 0xCC MSB
+	hk_buf[1] = hk_sync;                     			// HK SYNC 0xCC LSB
+	hk_buf[2] = ((hk_seq & 0xFF00) >> 8);    			// HK SEQ # MSB
+	hk_buf[3] = (hk_seq & 0xFF);             			// HK SEQ # LSB
+	hk_buf[4] = ((hk_adc3_results[1] & 0xFF00) >> 8);	// HK vsense MSB
+	hk_buf[5] = (hk_adc3_results[1] & 0xFF);			// HK vsense LSB
+	hk_buf[6] = ((hk_adc3_results[0] & 0xFF00) >> 8);	// HK vrefint MSB
+	hk_buf[7] = (hk_adc3_results[0] & 0xFF);			// HK vrefint LSB
+	hk_buf[8] = ((i2c_values[0] & 0xFF00) >> 8);		// HK TEMP1 MSB
+	hk_buf[9] = (i2c_values[0] & 0xFF);					// HK TEMP1 LSB
+	hk_buf[10] = ((i2c_values[1] & 0xFF00) >> 8);		// HK TEMP2 MSB
+	hk_buf[11] = (i2c_values[1] & 0xFF);				// HK TEMP2 LSB
+	hk_buf[12] = ((i2c_values[2] & 0xFF00) >> 8);		// HK TEMP3 MSB
+	hk_buf[13] = (i2c_values[2] & 0xFF);				// HK TEMP3 LSB
+	hk_buf[14] = ((i2c_values[3] & 0xFF00) >> 8);		// HK TEMP4 MSB
+	hk_buf[15] = (i2c_values[3] & 0xFF);				// HK TEMP4 LSB
+	hk_buf[16] = ((hk_adc1_results[0] & 0xFF00) >> 8);	// HK BUSvmon MSB
+	hk_buf[17] = (hk_adc1_results[0] & 0xFF);			// HK BUSvmon LSB
+	hk_buf[18] = ((hk_adc1_results[1] & 0xFF00) >> 8);	// HK BUSimon MSB
+	hk_buf[19] = (hk_adc1_results[1] & 0xFF);			// HK BUSimon LSB
+	hk_buf[20] = ((hk_adc1_results[2] & 0xFF00) >> 8);	// HK 2v5mon MSB
+	hk_buf[21] = (hk_adc1_results[2] & 0xFF);			// HK 2v5mon LSB
+	hk_buf[22] = ((hk_adc3_results[3] & 0xFF00) >> 8);	// HK 3v3mon MSB
+	hk_buf[23] = (hk_adc3_results[3] & 0xFF);			// HK 3v3mon LSB
+	hk_buf[24] = ((hk_adc1_results[6] & 0xFF00) >> 8);	// HK 5vmon MSB
+	hk_buf[25] = (hk_adc1_results[6] & 0xFF);			// HK 5vmon LSB
+	hk_buf[26] = ((hk_adc1_results[3] & 0xFF00) >> 8);	// HK n3v3mon MSB
+	hk_buf[27] = (hk_adc1_results[3] & 0xFF);			// HK n3v3mon LSB
+	hk_buf[28] = ((hk_adc3_results[2] & 0xFF00) >> 8);	// HK n5vmon MSB
+	hk_buf[29] = (hk_adc3_results[2] & 0xFF);			// HK n5vmon LSB
+	hk_buf[30] = ((hk_adc1_results[7] & 0xFF00) >> 8);	// HK 15vmon MSB
+	hk_buf[31] = (hk_adc1_results[7] & 0xFF);			// HK 15vmon LSB
+	hk_buf[32] = ((hk_adc1_results[8] & 0xFF00) >> 8);	// HK 5vrefmon MSB
+	hk_buf[33] = (hk_adc1_results[8] & 0xFF);			// HK 5vrefmon LSB
+	hk_buf[34] = ((hk_adc1_results[4] & 0xFF00) >> 8);	// HK n150vmon MSB
+	hk_buf[35] = (hk_adc1_results[4] & 0xFF);			// HK n150vmon LSB
+	hk_buf[36] = ((hk_adc1_results[5] & 0xFF00) >> 8);	// HK n800vmon MSB
+	hk_buf[37] = (hk_adc1_results[5] & 0xFF);			// HK n800vmon LSB
 
 	HAL_UART_Transmit(&huart1, hk_buf, sizeof(hk_buf), 100);
 	hk_seq++;
@@ -413,12 +411,12 @@ void send_pmt_packet(uint8_t* pmt_spi)
 
 	uint8_t pmt_buf[6];
 
-	pmt_buf[0] = pmt_sync;
-	pmt_buf[1] = pmt_sync;
-	pmt_buf[2] = ((pmt_seq & 0xFF00) >> 8);
-	pmt_buf[3] = (pmt_seq & 0xFF);
-	pmt_buf[4] = pmt_spi[0];
-	pmt_buf[5] = pmt_spi[1];
+	pmt_buf[0] = pmt_sync;						// PMT SYNC MSB 0xBB
+	pmt_buf[1] = pmt_sync;						// PMT SYNC LSB 0xBB
+	pmt_buf[2] = ((pmt_seq & 0xFF00) >> 8);		// PMT SEQ # MSB
+	pmt_buf[3] = (pmt_seq & 0xFF);				// PMT SEQ # LSB
+	pmt_buf[4] = pmt_spi[0];					// PMT eADC MSB
+	pmt_buf[5] = pmt_spi[1];					// PMT eADC LSB
 
 	HAL_UART_Transmit(&huart1, pmt_buf, sizeof(pmt_buf), 100);
 	pmt_seq++;
@@ -451,6 +449,7 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 		free(spi2_results);
 		free(erpa_adc_results);
       }
+      int hk_check = HK_ON;
       if (HK_ON)
       {
     	  int16_t *i2c_values = i2c();
@@ -486,7 +485,6 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-
   HAL_UART_Receive_IT(&huart1, rx_buf, 1);
   unsigned char key = rx_buf[0];
 
@@ -500,17 +498,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
   case 0x0A:
   {
     HAL_GPIO_WritePin(gpios[8].gpio, gpios[8].pin, GPIO_PIN_RESET);
-    break;
-  }
-
-  case 0x08:
-  {
-    HAL_GPIO_WritePin(gpios[9].gpio, gpios[9].pin, GPIO_PIN_SET);
-    break;
-  }
-  case 0x09:
-  {
-    HAL_GPIO_WritePin(gpios[9].gpio, gpios[9].pin, GPIO_PIN_RESET);
     break;
   }
   case 0x1B:
@@ -541,6 +528,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
    }
   case 0x00:
   {
+
     HAL_GPIO_WritePin(gpios[0].gpio, gpios[0].pin, GPIO_PIN_SET);
     break;
   }
@@ -551,6 +539,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
   }
   case 0x01:
   {
+
     HAL_GPIO_WritePin(gpios[1].gpio, gpios[1].pin, GPIO_PIN_SET);
     break;
   }
@@ -699,16 +688,16 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_USART1_UART_Init();
+  MX_ADC1_Init();
+  MX_ADC3_Init();
   MX_DAC1_Init();
-  MX_TIM1_Init();
-  MX_TIM2_Init();
   MX_I2C1_Init();
   MX_SPI1_Init();
-  MX_DMA_Init();
-  MX_ADC1_Init();
-  MX_USART1_UART_Init();
-  MX_ADC3_Init();
   MX_SPI2_Init();
+  MX_TIM1_Init();
+  MX_DMA_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
 
 //  SYSCFG->PMCR &= ~(1 << 27);
@@ -792,13 +781,13 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
   RCC_OscInitStruct.PLL.PLLM = 4;
-  RCC_OscInitStruct.PLL.PLLN = 12;
+  RCC_OscInitStruct.PLL.PLLN = 9;
   RCC_OscInitStruct.PLL.PLLP = 2;
   RCC_OscInitStruct.PLL.PLLQ = 2;
   RCC_OscInitStruct.PLL.PLLR = 2;
   RCC_OscInitStruct.PLL.PLLRGE = RCC_PLL1VCIRANGE_3;
-  RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1VCOWIDE;
-  RCC_OscInitStruct.PLL.PLLFRACN = 0;
+  RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1VCOMEDIUM;
+  RCC_OscInitStruct.PLL.PLLFRACN = 3072;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -809,12 +798,12 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2
                               |RCC_CLOCKTYPE_D3PCLK1|RCC_CLOCKTYPE_D1PCLK1;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-  RCC_ClkInitStruct.SYSCLKDivider = RCC_SYSCLK_DIV2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
+  RCC_ClkInitStruct.SYSCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_HCLK_DIV1;
   RCC_ClkInitStruct.APB3CLKDivider = RCC_APB3_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_APB1_DIV1;
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_APB2_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_APB1_DIV2;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_APB2_DIV2;
   RCC_ClkInitStruct.APB4CLKDivider = RCC_APB4_DIV1;
 
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK)
@@ -877,7 +866,7 @@ static void MX_ADC1_Init(void)
   hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
   hadc1.Init.LowPowerAutoWait = DISABLE;
   hadc1.Init.ContinuousConvMode = ENABLE;
-  hadc1.Init.NbrOfConversion = 12;
+  hadc1.Init.NbrOfConversion = 11;
   hadc1.Init.DiscontinuousConvMode = DISABLE;
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
@@ -995,17 +984,8 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_16;
-  sConfig.Rank = ADC_REGULAR_RANK_11;
-  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  /** Configure Regular Channel
-  */
   sConfig.Channel = ADC_CHANNEL_17;
-  sConfig.Rank = ADC_REGULAR_RANK_12;
+  sConfig.Rank = ADC_REGULAR_RANK_11;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -1037,6 +1017,7 @@ static void MX_ADC3_Init(void)
   /** Common config
   */
   hadc3.Instance = ADC3;
+  hadc3.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV2;
   hadc3.Init.Resolution = ADC_RESOLUTION_12B;
   hadc3.Init.ScanConvMode = ADC_SCAN_ENABLE;
   hadc3.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
@@ -1057,7 +1038,7 @@ static void MX_ADC3_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_VREFINT;
+  sConfig.Channel = ADC_CHANNEL_TEMPSENSOR;
   sConfig.Rank = ADC_REGULAR_RANK_1;
   sConfig.SamplingTime = ADC_SAMPLETIME_810CYCLES_5;
   sConfig.SingleDiff = ADC_SINGLE_ENDED;
@@ -1071,7 +1052,7 @@ static void MX_ADC3_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_TEMPSENSOR;
+  sConfig.Channel = ADC_CHANNEL_VREFINT;
   sConfig.Rank = ADC_REGULAR_RANK_2;
   if (HAL_ADC_ConfigChannel(&hadc3, &sConfig) != HAL_OK)
   {
@@ -1130,7 +1111,7 @@ static void MX_DAC1_Init(void)
   /** DAC channel OUT1 config
   */
   sConfig.DAC_SampleAndHold = DAC_SAMPLEANDHOLD_DISABLE;
-  sConfig.DAC_Trigger = DAC_TRIGGER_SOFTWARE;
+  sConfig.DAC_Trigger = DAC_TRIGGER_NONE;
   sConfig.DAC_OutputBuffer = DAC_OUTPUTBUFFER_ENABLE;
   sConfig.DAC_ConnectOnChipPeripheral = DAC_CHIPCONNECT_DISABLE;
   sConfig.DAC_UserTrimming = DAC_TRIMMING_FACTORY;
@@ -1160,7 +1141,7 @@ static void MX_I2C1_Init(void)
 
   /* USER CODE END I2C1_Init 1 */
   hi2c1.Instance = I2C1;
-  hi2c1.Init.Timing = 0x20303E5D;
+  hi2c1.Init.Timing = 0x00707CBB;
   hi2c1.Init.OwnAddress1 = 0;
   hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
   hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
@@ -1310,7 +1291,7 @@ static void MX_TIM1_Init(void)
   htim1.Instance = TIM1;
   htim1.Init.Prescaler = 100 - 1;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 60000 - 1;
+  htim1.Init.Period = 48000 - 1;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -1326,7 +1307,7 @@ static void MX_TIM1_Init(void)
     Error_Handler();
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 480 -1;
+  sConfigOC.Pulse = 480 - 1;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
@@ -1377,9 +1358,9 @@ static void MX_TIM2_Init(void)
 
   /* USER CODE END TIM2_Init 1 */
   htim2.Instance = TIM2;
-  htim2.Init.Prescaler = 100 -1;
+  htim2.Init.Prescaler = 1000 - 1;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 48000 - 1;
+  htim2.Init.Period = 150 - 1;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_PWM_Init(&htim2) != HAL_OK)
@@ -1393,7 +1374,7 @@ static void MX_TIM2_Init(void)
     Error_Handler();
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 480 - 1;
+  sConfigOC.Pulse = 30 - 1;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_4) != HAL_OK)
@@ -1490,33 +1471,23 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_9
-                          |GPIO_PIN_10, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13|GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_8
+                          |GPIO_PIN_9|GPIO_PIN_10, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2|GPIO_PIN_5|GPIO_PIN_6, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5|GPIO_PIN_6, GPIO_PIN_RESET);
-
-  /*Configure GPIO pins : PC6 PC7 PC8 PC9
-                           PC10 */
-  GPIO_InitStruct.Pin = GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_9
-                          |GPIO_PIN_10;
+  /*Configure GPIO pins : PC13 PC6 PC7 PC8
+                           PC9 PC10 */
+  GPIO_InitStruct.Pin = GPIO_PIN_13|GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_8
+                          |GPIO_PIN_9|GPIO_PIN_10;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : PA12 */
-  GPIO_InitStruct.Pin = GPIO_PIN_12;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : PB5 PB6 */
-  GPIO_InitStruct.Pin = GPIO_PIN_5|GPIO_PIN_6;
+  /*Configure GPIO pins : PB2 PB5 PB6 */
+  GPIO_InitStruct.Pin = GPIO_PIN_2|GPIO_PIN_5|GPIO_PIN_6;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
