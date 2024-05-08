@@ -94,6 +94,11 @@ uint8_t step = 0;
 int is_increasing = 1;
 int auto_sweep = 0;
 
+/* ERPA PACKET FACRTORING */
+int SAMPLING_FACTOR = 1;
+int FACTOR_COUNTER = 0;
+int SWP_FACTOR_COUNTER = 0;
+
 /* UART Variables */
 const uint8_t erpa_sync = 0xAA; // SYNC byte to let packet interpreter / OBC know which packet is which
 uint16_t erpa_seq = 0; // SEQ byte which keeps track of what # ERPA packet is being sent (0-65535)
@@ -427,44 +432,51 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 {
   if (htim == &htim2)
   {
-      if (ERPA_ON)
-      {
+	  FACTOR_COUNTER++;
+	  SWP_FACTOR_COUNTER++;
+
+	  if (FACTOR_COUNTER == SAMPLING_FACTOR) {
+		  FACTOR_COUNTER = 0;
+		  if (ERPA_ON)
+		  {
+
+			while(HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_11)) {}
+
+			uint8_t* spi2_results = spi(hspi2);
+			uint16_t *erpa_adc_results = erpa_adc();
+
+			if (SWP_FACTOR_COUNTER == (SAMPLING_FACTOR * 2)) {
+				if (auto_sweep)
+				{
+					do_auto_sweep();
+				} else {
+					set_erpa_sweep();
+				}
+				SWP_FACTOR_COUNTER = 0;
+			}
 
 
-		while(HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_11)) {}
+			send_erpa_packet(spi2_results, erpa_adc_results);
 
-		uint8_t* spi2_results = spi(hspi2);
-        uint16_t *erpa_adc_results = erpa_adc();
-
-        if (auto_sweep)
-		{
-		  do_auto_sweep();
-		} else {
-		  set_erpa_sweep();
-		}
-
-
-		send_erpa_packet(spi2_results, erpa_adc_results);
-
-		free(spi2_results);
-		free(erpa_adc_results);
-      }
-      int hk_check = HK_ON;
-      if (HK_ON)
-      {
-    	  int16_t *i2c_values = i2c();
-    	  uint16_t* hk_adc1_results = hk_adc1();
-    	  uint16_t* hk_adc3_results = hk_adc3();
+			free(spi2_results);
+			free(erpa_adc_results);
+		  }
+		  if (HK_ON)
+		  {
+			  int16_t *i2c_values = i2c();
+			  uint16_t* hk_adc1_results = hk_adc1();
+			  uint16_t* hk_adc3_results = hk_adc3();
 
 
-    	  send_hk_packet(i2c_values, hk_adc1_results, hk_adc3_results);
+			  send_hk_packet(i2c_values, hk_adc1_results, hk_adc3_results);
 
 
-          free(i2c_values);
-          free(hk_adc1_results);
-          free(hk_adc3_results);
+			  free(i2c_values);
+			  free(hk_adc1_results);
+			  free(hk_adc3_results);
 
-      }
+		  }
+	  }
   }
   else if (htim == &htim1)
   {
@@ -526,6 +538,26 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	}
   	break;
    }
+  case 0x24:
+  {
+	  if (SAMPLING_FACTOR < 32)
+	  {
+		  SAMPLING_FACTOR *= 2;
+		  FACTOR_COUNTER = 0;
+		  SWP_FACTOR_COUNTER = 0;
+	  }
+	  break;
+  }
+  case 0x25:
+  {
+	  if (SAMPLING_FACTOR > 1)
+	  {
+		  SAMPLING_FACTOR /= 2;
+		  FACTOR_COUNTER = 0;
+		  SWP_FACTOR_COUNTER = 0;
+	  }
+	  break;
+  }
   case 0x00:
   {
 
@@ -683,10 +715,6 @@ int main(void)
   PeriphCommonClock_Config();
 
   /* USER CODE BEGIN SysInit */
-
-  /* USER CODE END SysInit */
-
-  /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_DAC1_Init();
   MX_TIM1_Init();
@@ -698,6 +726,10 @@ int main(void)
   MX_USART1_UART_Init();
   MX_ADC3_Init();
   MX_SPI2_Init();
+
+  /* USER CODE END SysInit */
+
+  /* Initialize all configured peripherals */
   /* USER CODE BEGIN 2 */
 
 //  SYSCFG->PMCR &= ~(1 << 27);
@@ -781,13 +813,13 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
   RCC_OscInitStruct.PLL.PLLM = 4;
-  RCC_OscInitStruct.PLL.PLLN = 9;
+  RCC_OscInitStruct.PLL.PLLN = 12;
   RCC_OscInitStruct.PLL.PLLP = 2;
   RCC_OscInitStruct.PLL.PLLQ = 2;
   RCC_OscInitStruct.PLL.PLLR = 2;
   RCC_OscInitStruct.PLL.PLLRGE = RCC_PLL1VCIRANGE_3;
-  RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1VCOMEDIUM;
-  RCC_OscInitStruct.PLL.PLLFRACN = 3072;
+  RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1VCOWIDE;
+  RCC_OscInitStruct.PLL.PLLFRACN = 0;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -798,8 +830,8 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2
                               |RCC_CLOCKTYPE_D3PCLK1|RCC_CLOCKTYPE_D1PCLK1;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
-  RCC_ClkInitStruct.SYSCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.SYSCLKDivider = RCC_SYSCLK_DIV2;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_HCLK_DIV1;
   RCC_ClkInitStruct.APB3CLKDivider = RCC_APB3_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_APB1_DIV2;
@@ -1141,7 +1173,7 @@ static void MX_I2C1_Init(void)
 
   /* USER CODE END I2C1_Init 1 */
   hi2c1.Instance = I2C1;
-  hi2c1.Init.Timing = 0x00707CBB;
+  hi2c1.Init.Timing = 0x00506682;
   hi2c1.Init.OwnAddress1 = 0;
   hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
   hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
@@ -1358,9 +1390,9 @@ static void MX_TIM2_Init(void)
 
   /* USER CODE END TIM2_Init 1 */
   htim2.Instance = TIM2;
-  htim2.Init.Prescaler = 100 - 1;
+  htim2.Init.Prescaler = 1000 - 1;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 48000 - 1;
+  htim2.Init.Period = 150 - 1;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_PWM_Init(&htim2) != HAL_OK)
@@ -1374,7 +1406,7 @@ static void MX_TIM2_Init(void)
     Error_Handler();
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 480 - 1;
+  sConfigOC.Pulse = 30 - 1;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_4) != HAL_OK)
