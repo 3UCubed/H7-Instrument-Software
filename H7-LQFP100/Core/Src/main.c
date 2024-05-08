@@ -434,8 +434,9 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
   {
 	  FACTOR_COUNTER++;
 	  SWP_FACTOR_COUNTER++;
-
-	  if (FACTOR_COUNTER == SAMPLING_FACTOR) {
+	  int samp_check = SAMPLING_FACTOR;
+	  int fact_check = FACTOR_COUNTER;
+	  if (FACTOR_COUNTER >= SAMPLING_FACTOR) {
 		  FACTOR_COUNTER = 0;
 		  if (ERPA_ON)
 		  {
@@ -716,20 +717,20 @@ int main(void)
 
   /* USER CODE BEGIN SysInit */
   MX_GPIO_Init();
-  MX_DAC1_Init();
-  MX_TIM1_Init();
-  MX_TIM2_Init();
-  MX_I2C1_Init();
-  MX_SPI1_Init();
-  MX_DMA_Init();
-  MX_ADC1_Init();
-  MX_USART1_UART_Init();
-  MX_ADC3_Init();
-  MX_SPI2_Init();
+   MX_DAC1_Init();
+   MX_TIM1_Init();
+   MX_TIM2_Init();
+   MX_I2C1_Init();
+   MX_SPI1_Init();
+   MX_DMA_Init();
+   MX_ADC1_Init();
+   MX_USART1_UART_Init();
+   MX_ADC3_Init();
+   MX_SPI2_Init();
 
   /* USER CODE END SysInit */
 
-  /* Initialize all configured peripherals */
+
   /* USER CODE BEGIN 2 */
 
 //  SYSCFG->PMCR &= ~(1 << 27);
