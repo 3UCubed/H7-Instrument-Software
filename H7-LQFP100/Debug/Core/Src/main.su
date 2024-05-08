@@ -27,4 +27,4 @@
 ../Core/Src/main.c:1442:13:MX_DMA_Init	16	static
 ../Core/Src/main.c:1463:13:MX_GPIO_Init	48	static
 ../Core/Src/main.c:1505:6:HAL_ADC_ConvCpltCallback	48	static,ignoring_inline_asm
-../Core/Src/main.c:1522:6:Error_Handler	4	static,ignoring_inline_asm
+../Core/Src/main.c:1523:6:Error_Handler	4	static,ignoring_inline_asm
