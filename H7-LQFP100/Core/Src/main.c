@@ -223,7 +223,6 @@ void do_auto_sweep()
 	  }
 
 	HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, DAC_OUT[step]);
-	HAL_DAC_Start(&hdac1, DAC_CHANNEL_1);
 
 }
 
@@ -746,6 +745,13 @@ int main(void)
 
   TIM2->CCR4 = 312;
   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_4);
+
+  // Moved from the do_auto_sweep function, it should only need to be started once.
+	if(HAL_DAC_Start(&hdac1, DAC_CHANNEL_1) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
 
 //  SYSCFG->PMCR &= ~(1 << 27);
 //  SYSCFG->PMCR &= ~(1 << 26);
