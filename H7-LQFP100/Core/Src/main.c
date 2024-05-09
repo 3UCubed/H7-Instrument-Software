@@ -744,7 +744,7 @@ int main(void)
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
 
-  TIM2->CCR4 = 100;
+  TIM2->CCR4 = 312;
   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_4);
 
 //  SYSCFG->PMCR &= ~(1 << 27);
