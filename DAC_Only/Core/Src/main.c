@@ -26,7 +26,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+#define SIZE 16
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -64,7 +64,7 @@ static void MX_TIM2_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-uint32_t DAC_OUT[10] = { 0, 0, 620, 1241, 1861, 2482, 3103, 3723, 4095, 4095 }; // For 3.3 volts
+uint32_t DAC_OUT[SIZE] = { 0, 0, 620, 1241, 1861, 2482, 3103, 3723, 4095, 4095, 3723, 3103, 2482, 1861, 1241, 620 }; // For 3.3 volts
 
 
 /* USER CODE END 0 */
@@ -106,8 +106,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   HAL_TIM_Base_Start(&htim2);
 
-  HAL_DAC_Start_DMA(&hdac1, DAC1_CHANNEL_1, DAC_OUT, 10, DAC_ALIGN_12B_R);
-
+  HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, DAC_OUT, SIZE, DAC_ALIGN_12B_R);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -235,7 +234,7 @@ static void MX_TIM2_Init(void)
   htim2.Instance = TIM2;
   htim2.Init.Prescaler = 64-1;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 100-1;
+  htim2.Init.Period = 3125-1;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim2) != HAL_OK)

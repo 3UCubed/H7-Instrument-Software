@@ -66,6 +66,7 @@ SPI_HandleTypeDef hspi2;
 
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
+TIM_HandleTypeDef htim6;
 
 UART_HandleTypeDef huart1;
 
@@ -90,7 +91,7 @@ ALIGN_32BYTES(static uint16_t ADC1Data[ADC1NumChannels]);
 ALIGN_32BYTES(static uint16_t ADC3Data[ADC3NumChannels]);
 
 /* DAC Variables for SWP */
-uint32_t DAC_OUT[10] = { 0, 0, 620, 1241, 1861, 2482, 3103, 3723, 4095, 4095 }; // For 3.3 volts
+uint32_t DAC_OUT[16] = { 0, 0, 620, 1241, 1861, 2482, 3103, 3723, 4095, 4095, 3723, 3103, 2482, 1861, 1241, 620 }; // For 3.3 volts
 uint8_t step = 0;
 int is_increasing = 1;
 int auto_sweep = 0;
@@ -133,6 +134,7 @@ static void MX_SPI2_Init(void);
 static void MX_TIM1_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_TIM2_Init(void);
+static void MX_TIM6_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -413,14 +415,14 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim) {
 			uint8_t *spi2_results = spi(hspi2);
 			uint16_t *erpa_adc_results = erpa_adc();
 
-			if (SWP_FACTOR_COUNTER == (SAMPLING_FACTOR * 2)) {
-				if (auto_sweep) {
-					do_auto_sweep();
-				} else {
-					set_erpa_sweep();
-				}
-				SWP_FACTOR_COUNTER = 0;
-			}
+//			if (SWP_FACTOR_COUNTER == (SAMPLING_FACTOR * 2)) {
+//				if (auto_sweep) {
+//					do_auto_sweep();
+//				} else {
+//					set_erpa_sweep();
+//				}
+//				SWP_FACTOR_COUNTER = 0;
+//			}
 
 			send_erpa_packet(spi2_results, erpa_adc_results);
 
@@ -665,15 +667,19 @@ int main(void)
   MX_TIM1_Init();
   MX_USART1_UART_Init();
   MX_TIM2_Init();
+  MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
+  HAL_TIM_Base_Start(&htim6);
+
+  HAL_DAC_Start_DMA(&hdac1, DAC1_CHANNEL_1, DAC_OUT, 16, DAC_ALIGN_12B_R);
 
 	TIM2->CCR4 = 312;
-	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_4);
-
-	// Moved from the do_auto_sweep function, it should only need to be started once.
-	if (HAL_DAC_Start(&hdac1, DAC_CHANNEL_1) != HAL_OK) {
-		Error_Handler();
-	}
+//	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_4);
+//
+//	// Moved from the do_auto_sweep function, it should only need to be started once.
+//	if (HAL_DAC_Start(&hdac1, DAC_CHANNEL_1) != HAL_OK) {
+//		Error_Handler();
+//	}
 
 //  SYSCFG->PMCR &= ~(1 << 27);
 //  SYSCFG->PMCR &= ~(1 << 26);
@@ -1081,7 +1087,7 @@ static void MX_DAC1_Init(void)
   /** DAC channel OUT1 config
   */
   sConfig.DAC_SampleAndHold = DAC_SAMPLEANDHOLD_DISABLE;
-  sConfig.DAC_Trigger = DAC_TRIGGER_T2_TRGO;
+  sConfig.DAC_Trigger = DAC_TRIGGER_T6_TRGO;
   sConfig.DAC_OutputBuffer = DAC_OUTPUTBUFFER_ENABLE;
   sConfig.DAC_ConnectOnChipPeripheral = DAC_CHIPCONNECT_DISABLE;
   sConfig.DAC_UserTrimming = DAC_TRIMMING_FACTORY;
@@ -1369,6 +1375,44 @@ static void MX_TIM2_Init(void)
 }
 
 /**
+  * @brief TIM6 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM6_Init(void)
+{
+
+  /* USER CODE BEGIN TIM6_Init 0 */
+
+  /* USER CODE END TIM6_Init 0 */
+
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM6_Init 1 */
+
+  /* USER CODE END TIM6_Init 1 */
+  htim6.Instance = TIM6;
+  htim6.Init.Prescaler = 48-1;
+  htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim6.Init.Period = 3125;
+  htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_ENABLE;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim6, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM6_Init 2 */
+
+  /* USER CODE END TIM6_Init 2 */
+
+}
+
+/**
   * @brief USART1 Initialization Function
   * @param None
   * @retval None
@@ -1432,9 +1476,9 @@ static void MX_DMA_Init(void)
   /* DMA1_Stream1_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA1_Stream1_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA1_Stream1_IRQn);
-  /* DMA1_Stream2_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Stream2_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Stream2_IRQn);
+  /* DMA1_Stream5_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream5_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream5_IRQn);
 
 }
 
