@@ -44,7 +44,7 @@
 DAC_HandleTypeDef hdac1;
 DMA_HandleTypeDef hdma_dac1_ch1;
 
-TIM_HandleTypeDef htim6;
+TIM_HandleTypeDef htim2;
 
 /* USER CODE BEGIN PV */
 
@@ -55,7 +55,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_DAC1_Init(void);
-static void MX_TIM6_Init(void);
+static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -97,9 +97,9 @@ int main(void)
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_DAC1_Init();
-  MX_TIM6_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
-  HAL_TIM_Base_Start(&htim6);
+  HAL_TIM_Base_Start(&htim2);
 
   HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, DAC_OUT, SIZE, DAC_ALIGN_12B_R);
   /* USER CODE END 2 */
@@ -203,7 +203,7 @@ static void MX_DAC1_Init(void)
   /** DAC channel OUT1 config
   */
   sConfig.DAC_SampleAndHold = DAC_SAMPLEANDHOLD_DISABLE;
-  sConfig.DAC_Trigger = DAC_TRIGGER_T6_TRGO;
+  sConfig.DAC_Trigger = DAC_TRIGGER_T2_TRGO;
   sConfig.DAC_OutputBuffer = DAC_OUTPUTBUFFER_ENABLE;
   sConfig.DAC_ConnectOnChipPeripheral = DAC_CHIPCONNECT_DISABLE;
   sConfig.DAC_UserTrimming = DAC_TRIMMING_FACTORY;
@@ -218,40 +218,47 @@ static void MX_DAC1_Init(void)
 }
 
 /**
-  * @brief TIM6 Initialization Function
+  * @brief TIM2 Initialization Function
   * @param None
   * @retval None
   */
-static void MX_TIM6_Init(void)
+static void MX_TIM2_Init(void)
 {
 
-  /* USER CODE BEGIN TIM6_Init 0 */
+  /* USER CODE BEGIN TIM2_Init 0 */
 
-  /* USER CODE END TIM6_Init 0 */
+  /* USER CODE END TIM2_Init 0 */
 
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
   TIM_MasterConfigTypeDef sMasterConfig = {0};
 
-  /* USER CODE BEGIN TIM6_Init 1 */
+  /* USER CODE BEGIN TIM2_Init 1 */
 
-  /* USER CODE END TIM6_Init 1 */
-  htim6.Instance = TIM6;
-  htim6.Init.Prescaler = 48-1;
-  htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim6.Init.Period = 3125;
-  htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
+  /* USER CODE END TIM2_Init 1 */
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 48-1;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 3125;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
   {
     Error_Handler();
   }
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_ENABLE;
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_UPDATE;
   sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim6, &sMasterConfig) != HAL_OK)
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
   {
     Error_Handler();
   }
-  /* USER CODE BEGIN TIM6_Init 2 */
+  /* USER CODE BEGIN TIM2_Init 2 */
 
-  /* USER CODE END TIM6_Init 2 */
+  /* USER CODE END TIM2_Init 2 */
 
 }
 
