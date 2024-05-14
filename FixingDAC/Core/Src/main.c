@@ -481,10 +481,15 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	case 0x1D: {
 		if (!auto_sweep) {
 			auto_sweep = 1;
-			step = 0;
+			HAL_TIM_Base_Start(&htim2);
+
+			HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, DAC_OUT, SIZE, DAC_ALIGN_12B_R);
+
 		} else {
 			auto_sweep = 0;
-			step = 0;
+			HAL_TIM_Base_Stop(&htim2);
+
+			HAL_DAC_Stop_DMA(&hdac1, DAC_CHANNEL_1);
 		}
 		break;
 	}
@@ -658,9 +663,7 @@ int main(void)
   TIM2->CCR4 = 312;
   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_4);
 
-  HAL_TIM_Base_Start(&htim2);
 
-  HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, DAC_OUT, SIZE, DAC_ALIGN_12B_R);
 
 
   if (HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_OFFSET_LINEARITY,
