@@ -495,8 +495,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		break;
 	}
 	case 0x24: {
-		cadence *= 2;
-		TIM2->ARR = cadence;
+		if (cadence <= 50000){
+			cadence *= 2;
+			TIM2->ARR = cadence;
+		}
 		break;
 	}
 	case 0x25: {
