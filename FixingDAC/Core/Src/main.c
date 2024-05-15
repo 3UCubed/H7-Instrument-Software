@@ -92,7 +92,7 @@ ALIGN_32BYTES(static uint16_t ADC3Data[ADC3NumChannels]);
 /* DAC Variables for SWP */
 uint32_t DAC_OUT[SIZE] = { 0, 0, 0, 0, 620, 620, 1241, 1241, 1861, 1861, 2482, 2482, 3103, 3103, 3723, 3723, 4095, 4095, 4095, 4095, 3723, 3723, 3103, 3103, 2482, 2482, 1861, 1861, 1241, 1241, 620, 620 }; // For 3.3 volts
 volatile uint32_t cadence = 3125;
-uint8_t step = 0;
+uint8_t step = 3;
 int is_increasing = 1;
 int auto_sweep = 0;
 
@@ -404,7 +404,6 @@ void send_pmt_packet(uint8_t *pmt_spi) {
 void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim) {
 	if (htim == &htim2) {
 		if (ERPA_ON) {
-			SWP_FACTOR_COUNTER++;
 
 			while (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_11)) {
 			}
@@ -412,14 +411,9 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim) {
 			uint8_t *spi2_results = spi(hspi2);
 			uint16_t *erpa_adc_results = erpa_adc();
 
-//			if (SWP_FACTOR_COUNTER == (SAMPLING_FACTOR * 2)) {
-//				if (auto_sweep) {
-//					do_auto_sweep();
-//				} else {
-//					set_erpa_sweep();
-//				}
-//				SWP_FACTOR_COUNTER = 0;
-//			}
+			if (!auto_sweep){
+				set_erpa_sweep();
+			}
 
 			send_erpa_packet(spi2_results, erpa_adc_results);
 
@@ -468,14 +462,14 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		break;
 	}
 	case 0x1B: {
-		if (step < 9) {
-			step++;
+		if (step < 17) {
+			step+=2;
 		}
 		break;
 	}
 	case 0x1C: {
-		if (step > 0) {
-			step--;
+		if (step > 3) {
+			step-=2;
 		}
 		break;
 	}
