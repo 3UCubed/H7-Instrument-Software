@@ -343,40 +343,44 @@ void send_hk_packet(int16_t *i2c_values, uint16_t *hk_adc1_results,
 	hk_buf[1] = hk_sync;                     			// HK SYNC 0xCC LSB
 	hk_buf[2] = ((hk_seq & 0xFF00) >> 8);    			// HK SEQ # MSB
 	hk_buf[3] = (hk_seq & 0xFF);             			// HK SEQ # LSB
-	hk_buf[4] = ((hk_adc3_results[1] & 0xFF00) >> 8);	// HK vsense MSB
-	hk_buf[5] = (hk_adc3_results[1] & 0xFF);			// HK vsense LSB
-	hk_buf[6] = ((hk_adc3_results[0] & 0xFF00) >> 8);	// HK vrefint MSB
-	hk_buf[7] = (hk_adc3_results[0] & 0xFF);			// HK vrefint LSB
-	hk_buf[8] = ((i2c_values[0] & 0xFF00) >> 8);		// HK TEMP1 MSB
-	hk_buf[9] = (i2c_values[0] & 0xFF);					// HK TEMP1 LSB
-	hk_buf[10] = ((i2c_values[1] & 0xFF00) >> 8);		// HK TEMP2 MSB
-	hk_buf[11] = (i2c_values[1] & 0xFF);				// HK TEMP2 LSB
-	hk_buf[12] = ((i2c_values[2] & 0xFF00) >> 8);		// HK TEMP3 MSB
-	hk_buf[13] = (i2c_values[2] & 0xFF);				// HK TEMP3 LSB
-	hk_buf[14] = ((i2c_values[3] & 0xFF00) >> 8);		// HK TEMP4 MSB
-	hk_buf[15] = (i2c_values[3] & 0xFF);				// HK TEMP4 LSB
-	hk_buf[16] = ((hk_adc1_results[0] & 0xFF00) >> 8);	// HK BUSvmon MSB
-	hk_buf[17] = (hk_adc1_results[0] & 0xFF);			// HK BUSvmon LSB
-	hk_buf[18] = ((hk_adc1_results[1] & 0xFF00) >> 8);	// HK BUSimon MSB
-	hk_buf[19] = (hk_adc1_results[1] & 0xFF);			// HK BUSimon LSB
-	hk_buf[20] = ((hk_adc1_results[2] & 0xFF00) >> 8);	// HK 2v5mon MSB
-	hk_buf[21] = (hk_adc1_results[2] & 0xFF);			// HK 2v5mon LSB
-	hk_buf[22] = ((hk_adc3_results[3] & 0xFF00) >> 8);	// HK 3v3mon MSB
-	hk_buf[23] = (hk_adc3_results[3] & 0xFF);			// HK 3v3mon LSB
-	hk_buf[24] = ((hk_adc1_results[6] & 0xFF00) >> 8);	// HK 5vmon MSB
-	hk_buf[25] = (hk_adc1_results[6] & 0xFF);			// HK 5vmon LSB
-	hk_buf[26] = ((hk_adc1_results[3] & 0xFF00) >> 8);	// HK n3v3mon MSB
-	hk_buf[27] = (hk_adc1_results[3] & 0xFF);			// HK n3v3mon LSB
-	hk_buf[28] = ((hk_adc3_results[2] & 0xFF00) >> 8);	// HK n5vmon MSB
-	hk_buf[29] = (hk_adc3_results[2] & 0xFF);			// HK n5vmon LSB
-	hk_buf[30] = ((hk_adc1_results[7] & 0xFF00) >> 8);	// HK 15vmon MSB
-	hk_buf[31] = (hk_adc1_results[7] & 0xFF);			// HK 15vmon LSB
-	hk_buf[32] = ((hk_adc1_results[8] & 0xFF00) >> 8);	// HK 5vrefmon MSB
-	hk_buf[33] = (hk_adc1_results[8] & 0xFF);			// HK 5vrefmon LSB
-	hk_buf[34] = ((hk_adc1_results[4] & 0xFF00) >> 8);	// HK n150vmon MSB
-	hk_buf[35] = (hk_adc1_results[4] & 0xFF);			// HK n150vmon LSB
-	hk_buf[36] = ((hk_adc1_results[5] & 0xFF00) >> 8);	// HK n800vmon MSB
-	hk_buf[37] = (hk_adc1_results[5] & 0xFF);			// HK n800vmon LSB
+//	hk_buf[4] = ((hk_adc3_results[1] & 0xFF00) >> 8);	// HK vsense MSB
+//	hk_buf[5] = (hk_adc3_results[1] & 0xFF);			// HK vsense LSB
+//	hk_buf[6] = ((hk_adc3_results[0] & 0xFF00) >> 8);	// HK vrefint MSB
+//	hk_buf[7] = (hk_adc3_results[0] & 0xFF);			// HK vrefint LSB
+//	hk_buf[8] = ((i2c_values[0] & 0xFF00) >> 8);		// HK TEMP1 MSB
+//	hk_buf[9] = (i2c_values[0] & 0xFF);					// HK TEMP1 LSB
+//	hk_buf[10] = ((i2c_values[1] & 0xFF00) >> 8);		// HK TEMP2 MSB
+//	hk_buf[11] = (i2c_values[1] & 0xFF);				// HK TEMP2 LSB
+//	hk_buf[12] = ((i2c_values[2] & 0xFF00) >> 8);		// HK TEMP3 MSB
+//	hk_buf[13] = (i2c_values[2] & 0xFF);				// HK TEMP3 LSB
+//	hk_buf[14] = ((i2c_values[3] & 0xFF00) >> 8);		// HK TEMP4 MSB
+//	hk_buf[15] = (i2c_values[3] & 0xFF);				// HK TEMP4 LSB
+//	hk_buf[16] = ((hk_adc1_results[0] & 0xFF00) >> 8);	// HK BUSvmon MSB
+//	hk_buf[17] = (hk_adc1_results[0] & 0xFF);			// HK BUSvmon LSB
+//	hk_buf[18] = ((hk_adc1_results[1] & 0xFF00) >> 8);	// HK BUSimon MSB
+//	hk_buf[19] = (hk_adc1_results[1] & 0xFF);			// HK BUSimon LSB
+//	hk_buf[20] = ((hk_adc1_results[2] & 0xFF00) >> 8);	// HK 2v5mon MSB
+//	hk_buf[21] = (hk_adc1_results[2] & 0xFF);			// HK 2v5mon LSB
+//	hk_buf[22] = ((hk_adc3_results[3] & 0xFF00) >> 8);	// HK 3v3mon MSB
+//	hk_buf[23] = (hk_adc3_results[3] & 0xFF);			// HK 3v3mon LSB
+//	hk_buf[24] = ((hk_adc1_results[6] & 0xFF00) >> 8);	// HK 5vmon MSB
+//	hk_buf[25] = (hk_adc1_results[6] & 0xFF);			// HK 5vmon LSB
+//	hk_buf[26] = ((hk_adc1_results[3] & 0xFF00) >> 8);	// HK n3v3mon MSB
+//	hk_buf[27] = (hk_adc1_results[3] & 0xFF);			// HK n3v3mon LSB
+//	hk_buf[28] = ((hk_adc3_results[2] & 0xFF00) >> 8);	// HK n5vmon MSB
+//	hk_buf[29] = (hk_adc3_results[2] & 0xFF);			// HK n5vmon LSB
+//	hk_buf[30] = ((hk_adc1_results[7] & 0xFF00) >> 8);	// HK 15vmon MSB
+//	hk_buf[31] = (hk_adc1_results[7] & 0xFF);			// HK 15vmon LSB
+//	hk_buf[32] = ((hk_adc1_results[8] & 0xFF00) >> 8);	// HK 5vrefmon MSB
+//	hk_buf[33] = (hk_adc1_results[8] & 0xFF);			// HK 5vrefmon LSB
+//	hk_buf[34] = ((hk_adc1_results[4] & 0xFF00) >> 8);	// HK n150vmon MSB
+//	hk_buf[35] = (hk_adc1_results[4] & 0xFF);			// HK n150vmon LSB
+//	hk_buf[36] = ((hk_adc1_results[5] & 0xFF00) >> 8);	// HK n800vmon MSB
+//	hk_buf[37] = (hk_adc1_results[5] & 0xFF);			// HK n800vmon LSB
+
+	for (int i = 4; i < 38; i++){
+		hk_buf[i] = (SysTick->VAL)&(0xff);
+	}
 
 	HAL_UART_Transmit(&huart1, hk_buf, sizeof(hk_buf), 100);
 	hk_seq++;
@@ -438,15 +442,15 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim) {
 
 	} else if (htim == &htim4) {
 		if (HK_ON) {
-			int16_t *i2c_values = i2c();
-			uint16_t *hk_adc1_results = hk_adc1();
-			uint16_t *hk_adc3_results = hk_adc3();
+//			int16_t *i2c_values = i2c();
+//			uint16_t *hk_adc1_results = hk_adc1();
+//			uint16_t *hk_adc3_results = hk_adc3();
 
-			send_hk_packet(i2c_values, hk_adc1_results, hk_adc3_results);
+			send_hk_packet(NULL, NULL, NULL);
 
-			free(i2c_values);
-			free(hk_adc1_results);
-			free(hk_adc3_results);
+//			free(i2c_values);
+//			free(hk_adc1_results);
+//			free(hk_adc3_results);
 
 		}
 	}
@@ -1419,7 +1423,7 @@ static void MX_USART1_UART_Init(void)
 
   /* USER CODE END USART1_Init 1 */
   huart1.Instance = USART1;
-  huart1.Init.BaudRate = 230400;
+  huart1.Init.BaudRate = 460800;
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
   huart1.Init.StopBits = UART_STOPBITS_1;
   huart1.Init.Parity = UART_PARITY_NONE;
