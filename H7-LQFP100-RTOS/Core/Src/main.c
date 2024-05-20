@@ -44,32 +44,47 @@
 /* Private variables ---------------------------------------------------------*/
 
 TIM_HandleTypeDef htim1;
+TIM_HandleTypeDef htim2;
+TIM_HandleTypeDef htim3;
 
-/* Definitions for Task1 */
-osThreadId_t Task1Handle;
-const osThreadAttr_t Task1_attributes = {
-  .name = "Task1",
+/* Definitions for PMT_task */
+osThreadId_t PMT_taskHandle;
+const osThreadAttr_t PMT_task_attributes = {
+  .name = "PMT_task",
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
-/* Definitions for Task2 */
-osThreadId_t Task2Handle;
-const osThreadAttr_t Task2_attributes = {
-  .name = "Task2",
+/* Definitions for ERPA_task */
+osThreadId_t ERPA_taskHandle;
+const osThreadAttr_t ERPA_task_attributes = {
+  .name = "ERPA_task",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for HK_task */
+osThreadId_t HK_taskHandle;
+const osThreadAttr_t HK_task_attributes = {
+  .name = "HK_task",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* USER CODE BEGIN PV */
 uint8_t pmt_seq = 0;
-osEventFlagsId_t evt_id;
+uint8_t erpa_seq = 0;
+uint8_t hk_seq = 0;
+osEventFlagsId_t event_flags;
+
 
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_TIM1_Init(void);
-void StartTask1(void *argument);
-void StartTask2(void *argument);
+static void MX_TIM2_Init(void);
+static void MX_TIM3_Init(void);
+void PMT_init(void *argument);
+void ERPA_init(void *argument);
+void HK_init(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -82,8 +97,22 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
   if (htim == &htim1)
   {
 	  printf("Sample PMT\n");
-	  osEventFlagsSet(evt_id, 0x0001); // Set the event flag for Task1
+	  osEventFlagsSet(event_flags, 0x0001); // Set the event flag for Task1
 
+  }
+  else if (htim == &htim2)
+  {
+	  printf("Sample ERPA\n");
+	  osEventFlagsSet(event_flags, 0x0002);
+  }
+  else if (htim == &htim3)
+  {
+	  printf("Sample HK\n");
+	  osEventFlagsSet(event_flags, 0x0004);
+  }
+  else
+  {
+	  printf("Unknown Timer Interrupt\n");
   }
 }
 /* USER CODE END 0 */
@@ -116,8 +145,12 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_TIM1_Init();
+  MX_TIM2_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_1);
+  HAL_TIM_OC_Start_IT(&htim2, TIM_CHANNEL_1);
+  HAL_TIM_OC_Start_IT(&htim3, TIM_CHANNEL_1);
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -140,11 +173,14 @@ int main(void)
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* creation of Task1 */
-  Task1Handle = osThreadNew(StartTask1, NULL, &Task1_attributes);
+  /* creation of PMT_task */
+  PMT_taskHandle = osThreadNew(PMT_init, NULL, &PMT_task_attributes);
 
-  /* creation of Task2 */
-  Task2Handle = osThreadNew(StartTask2, NULL, &Task2_attributes);
+  /* creation of ERPA_task */
+  ERPA_taskHandle = osThreadNew(ERPA_init, NULL, &ERPA_task_attributes);
+
+  /* creation of HK_task */
+  HK_taskHandle = osThreadNew(HK_init, NULL, &HK_task_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
 	/* add threads, ... */
@@ -152,7 +188,7 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_EVENTS */
 	/* add events, ... */
-  evt_id = osEventFlagsNew(NULL); // Create an event flags group
+  event_flags = osEventFlagsNew(NULL); // Create an event flags group
 
   /* USER CODE END RTOS_EVENTS */
 
@@ -266,45 +302,156 @@ static void MX_TIM1_Init(void)
 
 }
 
+/**
+  * @brief TIM2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM2_Init(void)
+{
+
+  /* USER CODE BEGIN TIM2_Init 0 */
+
+  /* USER CODE END TIM2_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM2_Init 1 */
+
+  /* USER CODE END TIM2_Init 1 */
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 64-1;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 3125-1;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM2_Init 2 */
+
+  /* USER CODE END TIM2_Init 2 */
+
+}
+
+/**
+  * @brief TIM3 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM3_Init(void)
+{
+
+  /* USER CODE BEGIN TIM3_Init 0 */
+
+  /* USER CODE END TIM3_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM3_Init 1 */
+
+  /* USER CODE END TIM3_Init 1 */
+  htim3.Instance = TIM3;
+  htim3.Init.Prescaler = 64-1;
+  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim3.Init.Period = 1000-1;
+  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM3_Init 2 */
+
+  /* USER CODE END TIM3_Init 2 */
+
+}
+
 /* USER CODE BEGIN 4 */
 
 /* USER CODE END 4 */
 
-/* USER CODE BEGIN Header_StartTask1 */
+/* USER CODE BEGIN Header_PMT_init */
 /**
- * @brief  Function implementing the Task1 thread.
- * @param  argument: Not used
- * @retval None
- */
-/* USER CODE END Header_StartTask1 */
-void StartTask1(void *argument)
+  * @brief  Function implementing the PMT_task thread.
+  * @param  argument: Not used
+  * @retval None
+  */
+/* USER CODE END Header_PMT_init */
+void PMT_init(void *argument)
 {
   /* USER CODE BEGIN 5 */
 	/* Infinite loop */
 	for (;;) {
-	    osEventFlagsWait(evt_id, 0x0001, osFlagsWaitAny, osWaitForever);
+	    osEventFlagsWait(event_flags, 0x0001, osFlagsWaitAny, osWaitForever);
 		pmt_seq++;
 		printf("PMT: %d\n", pmt_seq);
 	}
   /* USER CODE END 5 */
 }
 
-/* USER CODE BEGIN Header_StartTask2 */
+/* USER CODE BEGIN Header_ERPA_init */
 /**
- * @brief Function implementing the Task2 thread.
- * @param argument: Not used
- * @retval None
- */
-/* USER CODE END Header_StartTask2 */
-void StartTask2(void *argument)
+* @brief Function implementing the ERPA_task thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_ERPA_init */
+void ERPA_init(void *argument)
 {
-  /* USER CODE BEGIN StartTask2 */
-	/* Infinite loop */
-	for (;;) {
-		printf("Task-2\n");
-		osDelay(1000);
-	}
-  /* USER CODE END StartTask2 */
+  /* USER CODE BEGIN ERPA_init */
+  /* Infinite loop */
+  for(;;)
+  {
+	    osEventFlagsWait(event_flags, 0x0002, osFlagsWaitAny, osWaitForever);
+		erpa_seq++;
+		printf("ERPA: %d\n", erpa_seq);  }
+  /* USER CODE END ERPA_init */
+}
+
+/* USER CODE BEGIN Header_HK_init */
+/**
+* @brief Function implementing the HK_task thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_HK_init */
+void HK_init(void *argument)
+{
+  /* USER CODE BEGIN HK_init */
+  /* Infinite loop */
+  for(;;)
+  {
+	    osEventFlagsWait(event_flags, 0x0004, osFlagsWaitAny, osWaitForever);
+		hk_seq++;
+		printf("HK: %d\n", hk_seq);
+  }
+  /* USER CODE END HK_init */
 }
 
 /**
