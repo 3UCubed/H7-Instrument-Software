@@ -415,7 +415,7 @@ int main(void)
   /* USER CODE BEGIN RTOS_EVENTS */
 	/* add events, ... */
   event_flags = osEventFlagsNew(NULL); // Create an event flags group
-
+  printf("Starting kernal...\n");
   /* USER CODE END RTOS_EVENTS */
 
   /* Start scheduler */
@@ -754,6 +754,7 @@ void ERPA_init(void *argument)
   {
 	    osEventFlagsWait(event_flags, ERPA_FLAG_ID, osFlagsWaitAny, osWaitForever);
 		erpa_seq++;
+  }
   /* USER CODE END ERPA_init */
 }
 
