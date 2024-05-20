@@ -33,7 +33,9 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define PMT_FLAG_ID 0x0001
+#define ERPA_FLAG_ID 0x0002
+#define HK_FLAG_ID 0x0004
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -97,18 +99,18 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
   if (htim == &htim1)
   {
 	  printf("Sample PMT\n");
-	  osEventFlagsSet(event_flags, 0x0001); // Set the event flag for Task1
+	  osEventFlagsSet(event_flags, PMT_FLAG_ID); // Set the event flag for Task1
 
   }
   else if (htim == &htim2)
   {
 	  printf("Sample ERPA\n");
-	  osEventFlagsSet(event_flags, 0x0002);
+	  osEventFlagsSet(event_flags, ERPA_FLAG_ID);
   }
   else if (htim == &htim3)
   {
 	  printf("Sample HK\n");
-	  osEventFlagsSet(event_flags, 0x0004);
+	  osEventFlagsSet(event_flags, HK_FLAG_ID);
   }
   else
   {
@@ -408,7 +410,7 @@ void PMT_init(void *argument)
   /* USER CODE BEGIN 5 */
 	/* Infinite loop */
 	for (;;) {
-	    osEventFlagsWait(event_flags, 0x0001, osFlagsWaitAny, osWaitForever);
+	    osEventFlagsWait(event_flags, PMT_FLAG_ID, osFlagsWaitAny, osWaitForever);
 		pmt_seq++;
 		printf("PMT: %d\n", pmt_seq);
 	}
@@ -428,7 +430,7 @@ void ERPA_init(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	    osEventFlagsWait(event_flags, 0x0002, osFlagsWaitAny, osWaitForever);
+	    osEventFlagsWait(event_flags, ERPA_FLAG_ID, osFlagsWaitAny, osWaitForever);
 		erpa_seq++;
 		printf("ERPA: %d\n", erpa_seq);  }
   /* USER CODE END ERPA_init */
@@ -447,7 +449,7 @@ void HK_init(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	    osEventFlagsWait(event_flags, 0x0004, osFlagsWaitAny, osWaitForever);
+	    osEventFlagsWait(event_flags, HK_FLAG_ID, osFlagsWaitAny, osWaitForever);
 		hk_seq++;
 		printf("HK: %d\n", hk_seq);
   }

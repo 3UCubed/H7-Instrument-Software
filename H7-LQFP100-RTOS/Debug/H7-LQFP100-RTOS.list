@@ -29,15 +29,15 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  12 .debug_ranges 000013d0  00000000  00000000  0003da00  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 13 .debug_macro  000049e5  00000000  00000000  0003edd0  2**0
+ 13 .debug_macro  000049f7  00000000  00000000  0003edd0  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_line   0001667d  00000000  00000000  000437b5  2**0
+ 14 .debug_line   0001667d  00000000  00000000  000437c7  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_str    00169160  00000000  00000000  00059e32  2**0
+ 15 .debug_str    00169199  00000000  00000000  00059e44  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .comment      00000050  00000000  00000000  001c2f92  2**0
+ 16 .comment      00000050  00000000  00000000  001c2fdd  2**0
                   CONTENTS, READONLY
- 17 .debug_frame  00006070  00000000  00000000  001c2fe4  2**2
+ 17 .debug_frame  00006070  00000000  00000000  001c3030  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -150,7 +150,7 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 	  printf("Sample PMT\n");
  8000390:	4817      	ldr	r0, [pc, #92]	; (80003f0 <HAL_TIM_OC_DelayElapsedCallback+0x70>)
  8000392:	f005 fef1 	bl	8006178 <puts>
-	  osEventFlagsSet(event_flags, 0x0001); // Set the event flag for Task1
+	  osEventFlagsSet(event_flags, PMT_FLAG_ID); // Set the event flag for Task1
  8000396:	4b17      	ldr	r3, [pc, #92]	; (80003f4 <HAL_TIM_OC_DelayElapsedCallback+0x74>)
  8000398:	681b      	ldr	r3, [r3, #0]
  800039a:	2101      	movs	r1, #1
@@ -171,7 +171,7 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 	  printf("Sample ERPA\n");
  80003ac:	4813      	ldr	r0, [pc, #76]	; (80003fc <HAL_TIM_OC_DelayElapsedCallback+0x7c>)
  80003ae:	f005 fee3 	bl	8006178 <puts>
-	  osEventFlagsSet(event_flags, 0x0002);
+	  osEventFlagsSet(event_flags, ERPA_FLAG_ID);
  80003b2:	4b10      	ldr	r3, [pc, #64]	; (80003f4 <HAL_TIM_OC_DelayElapsedCallback+0x74>)
  80003b4:	681b      	ldr	r3, [r3, #0]
  80003b6:	2102      	movs	r1, #2
@@ -187,7 +187,7 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 	  printf("Sample HK\n");
  80003c8:	480e      	ldr	r0, [pc, #56]	; (8000404 <HAL_TIM_OC_DelayElapsedCallback+0x84>)
  80003ca:	f005 fed5 	bl	8006178 <puts>
-	  osEventFlagsSet(event_flags, 0x0004);
+	  osEventFlagsSet(event_flags, HK_FLAG_ID);
  80003ce:	4b09      	ldr	r3, [pc, #36]	; (80003f4 <HAL_TIM_OC_DelayElapsedCallback+0x74>)
  80003d0:	681b      	ldr	r3, [r3, #0]
  80003d2:	2104      	movs	r1, #4
@@ -829,7 +829,7 @@ void PMT_init(void *argument)
   /* USER CODE BEGIN 5 */
 	/* Infinite loop */
 	for (;;) {
-	    osEventFlagsWait(event_flags, 0x0001, osFlagsWaitAny, osWaitForever);
+	    osEventFlagsWait(event_flags, PMT_FLAG_ID, osFlagsWaitAny, osWaitForever);
  8000774:	4b0a      	ldr	r3, [pc, #40]	; (80007a0 <PMT_init+0x34>)
  8000776:	6818      	ldr	r0, [r3, #0]
  8000778:	f04f 33ff 	mov.w	r3, #4294967295	; 0xffffffff
@@ -849,7 +849,7 @@ void PMT_init(void *argument)
  8000794:	4619      	mov	r1, r3
  8000796:	4804      	ldr	r0, [pc, #16]	; (80007a8 <PMT_init+0x3c>)
  8000798:	f005 fc68 	bl	800606c <iprintf>
-	    osEventFlagsWait(event_flags, 0x0001, osFlagsWaitAny, osWaitForever);
+	    osEventFlagsWait(event_flags, PMT_FLAG_ID, osFlagsWaitAny, osWaitForever);
  800079c:	e7ea      	b.n	8000774 <PMT_init+0x8>
  800079e:	bf00      	nop
  80007a0:	24000188 	.word	0x24000188
@@ -871,7 +871,7 @@ void ERPA_init(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	    osEventFlagsWait(event_flags, 0x0002, osFlagsWaitAny, osWaitForever);
+	    osEventFlagsWait(event_flags, ERPA_FLAG_ID, osFlagsWaitAny, osWaitForever);
  80007b4:	4b0a      	ldr	r3, [pc, #40]	; (80007e0 <ERPA_init+0x34>)
  80007b6:	6818      	ldr	r0, [r3, #0]
  80007b8:	f04f 33ff 	mov.w	r3, #4294967295	; 0xffffffff
@@ -891,7 +891,7 @@ void ERPA_init(void *argument)
  80007d4:	4619      	mov	r1, r3
  80007d6:	4804      	ldr	r0, [pc, #16]	; (80007e8 <ERPA_init+0x3c>)
  80007d8:	f005 fc48 	bl	800606c <iprintf>
-	    osEventFlagsWait(event_flags, 0x0002, osFlagsWaitAny, osWaitForever);
+	    osEventFlagsWait(event_flags, ERPA_FLAG_ID, osFlagsWaitAny, osWaitForever);
  80007dc:	e7ea      	b.n	80007b4 <ERPA_init+0x8>
  80007de:	bf00      	nop
  80007e0:	24000188 	.word	0x24000188
@@ -913,7 +913,7 @@ void HK_init(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	    osEventFlagsWait(event_flags, 0x0004, osFlagsWaitAny, osWaitForever);
+	    osEventFlagsWait(event_flags, HK_FLAG_ID, osFlagsWaitAny, osWaitForever);
  80007f4:	4b0a      	ldr	r3, [pc, #40]	; (8000820 <HK_init+0x34>)
  80007f6:	6818      	ldr	r0, [r3, #0]
  80007f8:	f04f 33ff 	mov.w	r3, #4294967295	; 0xffffffff
@@ -933,7 +933,7 @@ void HK_init(void *argument)
  8000814:	4619      	mov	r1, r3
  8000816:	4804      	ldr	r0, [pc, #16]	; (8000828 <HK_init+0x3c>)
  8000818:	f005 fc28 	bl	800606c <iprintf>
-	    osEventFlagsWait(event_flags, 0x0004, osFlagsWaitAny, osWaitForever);
+	    osEventFlagsWait(event_flags, HK_FLAG_ID, osFlagsWaitAny, osWaitForever);
  800081c:	e7ea      	b.n	80007f4 <HK_init+0x8>
  800081e:	bf00      	nop
  8000820:	24000188 	.word	0x24000188
