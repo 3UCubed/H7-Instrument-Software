@@ -36,6 +36,12 @@
 #define PMT_FLAG_ID 0x0001
 #define ERPA_FLAG_ID 0x0002
 #define HK_FLAG_ID 0x0004
+
+#define PMT_DATA_SIZE 6
+#define SPI_RESULT_SIZE 2
+#define UART_RX_BUFFER_SIZE 100
+
+#define PMT_SYNC 0xBB
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -48,6 +54,8 @@
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
+
+UART_HandleTypeDef huart1;
 
 /* Definitions for PMT_task */
 osThreadId_t PMT_taskHandle;
@@ -70,23 +78,37 @@ const osThreadAttr_t HK_task_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
+/* Definitions for UART_RX_task */
+osThreadId_t UART_RX_taskHandle;
+const osThreadAttr_t UART_RX_task_attributes = {
+  .name = "UART_RX_task",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+
+
+
 /* USER CODE BEGIN PV */
 uint8_t pmt_seq = 0;
 uint8_t erpa_seq = 0;
 uint8_t hk_seq = 0;
+
 osEventFlagsId_t event_flags;
 
-
+unsigned char UART_RX_BUFFER[UART_RX_BUFFER_SIZE];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+static void MX_GPIO_Init(void);
 static void MX_TIM1_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_TIM3_Init(void);
+static void MX_USART1_UART_Init(void);
 void PMT_init(void *argument);
 void ERPA_init(void *argument);
 void HK_init(void *argument);
+void UART_RX_init(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -94,22 +116,29 @@ void HK_init(void *argument);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+/**
+ * @brief Handles the callback for timer delay elapsed events.
+ *
+ * This function is called when a timer's delay has elapsed and performs
+ * specific actions based on the timer instance.
+ *
+ * @param htim Pointer to the timer handle structure.
+ *             Supported timer instances are htim1, htim2, and htim3.
+ */
 void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 {
   if (htim == &htim1)
   {
-	  printf("Sample PMT\n");
 	  osEventFlagsSet(event_flags, PMT_FLAG_ID); // Set the event flag for Task1
 
   }
   else if (htim == &htim2)
   {
-	  printf("Sample ERPA\n");
 	  osEventFlagsSet(event_flags, ERPA_FLAG_ID);
   }
   else if (htim == &htim3)
   {
-	  printf("Sample HK\n");
 	  osEventFlagsSet(event_flags, HK_FLAG_ID);
   }
   else
@@ -117,6 +146,196 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 	  printf("Unknown Timer Interrupt\n");
   }
 }
+
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+	HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
+	unsigned char key = UART_RX_BUFFER[0];
+
+	switch (key) {
+	case 0x0B: {
+		printf("SDN1 ON\n");
+//		HAL_GPIO_WritePin(gpios[8].gpio, gpios[8].pin, GPIO_PIN_SET);
+		break;
+	}
+	case 0x0A: {
+		printf("SDN1 OFF\n");
+//		HAL_GPIO_WritePin(gpios[8].gpio, gpios[8].pin, GPIO_PIN_RESET);
+		break;
+	}
+	case 0x1B: {
+		printf("Step Up\n");
+//		if (step < 17) {
+//			step+=2;
+//		}
+		break;
+	}
+	case 0x1C: {
+		printf("Step Down\n");
+//		if (step > 3) {
+//			step-=2;
+//		}
+		break;
+	}
+	case 0x1D: {
+		printf("Toggle AutoSweep\n");
+//		if (!auto_sweep) {
+//			auto_sweep = 1;
+//			HAL_TIM_Base_Start(&htim2);
+//
+//			HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, DAC_OUT, SIZE, DAC_ALIGN_12B_R);
+//
+//		} else {
+//			auto_sweep = 0;
+//			HAL_TIM_Base_Stop(&htim2);
+//
+//			HAL_DAC_Stop_DMA(&hdac1, DAC_CHANNEL_1);
+//		}
+		break;
+	}
+	case 0x24: {
+		printf("Factor Up\n");
+//		if (cadence <= 50000){
+//			cadence *= 2;
+//			TIM2->ARR = cadence;
+//		}
+		break;
+	}
+	case 0x25: {
+		printf("Factor Down\n");
+//		if (cadence >= 6250){
+//			cadence /= 2;
+//			TIM2->ARR = cadence;
+//		}
+		break;
+	}
+	case 0x00: {
+		printf("SYS ON PB5\n");
+//		HAL_GPIO_WritePin(gpios[0].gpio, gpios[0].pin, GPIO_PIN_SET);
+		break;
+	}
+	case 0x13: {
+		printf("SYS OFF PB5\n");
+//		HAL_GPIO_WritePin(gpios[0].gpio, gpios[0].pin, GPIO_PIN_RESET);
+		break;
+	}
+	case 0x01: {
+
+		printf("800v ON PB6\n");
+//		HAL_GPIO_WritePin(gpios[1].gpio, gpios[1].pin, GPIO_PIN_SET);
+		break;
+	}
+	case 0x14: {
+		printf("800v OFF PB6\n");
+//		HAL_GPIO_WritePin(gpios[1].gpio, gpios[1].pin, GPIO_PIN_RESET);
+		break;
+	}
+	case 0x02: {
+		printf("5v ON PC2\n");
+//		HAL_GPIO_WritePin(gpios[2].gpio, gpios[2].pin, GPIO_PIN_SET);
+		break;
+	}
+	case 0x15: {
+		printf("5v OFF PC2\n");
+//		HAL_GPIO_WritePin(gpios[2].gpio, gpios[2].pin, GPIO_PIN_RESET);
+		break;
+	}
+	case 0x03: {
+		printf("n200v ON PC13\n");
+//		HAL_GPIO_WritePin(gpios[3].gpio, gpios[3].pin, GPIO_PIN_SET);
+		break;
+	}
+	case 0x16: {
+		printf("n200v OFF PC13\n");
+//		HAL_GPIO_WritePin(gpios[3].gpio, gpios[3].pin, GPIO_PIN_RESET);
+		break;
+	}
+	case 0x04: {
+		printf("3v3 ON PC7\n");
+//		HAL_GPIO_WritePin(gpios[4].gpio, gpios[4].pin, GPIO_PIN_SET);
+		break;
+	}
+	case 0x17: {
+		printf("3v3 OFF PC7\n");
+//		HAL_GPIO_WritePin(gpios[4].gpio, gpios[4].pin, GPIO_PIN_RESET);
+		break;
+	}
+	case 0x05: {
+		printf("n5v ON PC8\n");
+//		HAL_GPIO_WritePin(gpios[5].gpio, gpios[5].pin, GPIO_PIN_SET);
+		break;
+	}
+	case 0x18: {
+		printf("n5v OFF PC8\n");
+//		HAL_GPIO_WritePin(gpios[5].gpio, gpios[5].pin, GPIO_PIN_RESET);
+		break;
+	}
+	case 0x06: {
+		printf("15v ON PC9\n");
+//		HAL_GPIO_WritePin(gpios[6].gpio, gpios[6].pin, GPIO_PIN_SET);
+		break;
+	}
+	case 0x19: {
+		printf("15v OFF PC9\n");
+//		HAL_GPIO_WritePin(gpios[6].gpio, gpios[6].pin, GPIO_PIN_RESET);
+		break;
+	}
+	case 0x07: {
+		printf("n3v3 ON PC6\n");
+//		HAL_GPIO_WritePin(gpios[7].gpio, gpios[7].pin, GPIO_PIN_SET);
+		break;
+	}
+	case 0x1A: {
+		printf("n3v3 OFF PC6\n");
+//		HAL_GPIO_WritePin(gpios[7].gpio, gpios[7].pin, GPIO_PIN_RESET);
+		break;
+	}
+	case 0x0C: {
+		printf("Enter STOP mode\n");
+//		HAL_SuspendTick();
+//		HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
+//		NVIC_SystemReset();
+		break;
+	}
+	case 0x0D: {
+		printf("PMT ON\n");
+//		PMT_ON = 1;
+//		HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_1);
+		break;
+	}
+	case 0x10: {
+		printf("PMT OFF\n");
+//		PMT_ON = 0;
+//		HAL_TIM_OC_Stop_IT(&htim1, TIM_CHANNEL_1);
+		break;
+	}
+	case 0x0E: {
+		printf("ERPA ON\n");
+		//ERPA_ON = 1;
+		//HAL_TIM_OC_Start_IT(&htim2, TIM_CHANNEL_4);
+		break;
+	}
+	case 0x11: {
+		printf("ERPA OFF\n");
+		//ERPA_ON = 0;
+		//HAL_TIM_OC_Stop_IT(&htim2, TIM_CHANNEL_4);
+		break;
+	}
+	case 0x0F: {
+		printf("HK ON \n");
+		//HK_ON = 1;
+		//HAL_TIM_OC_Start_IT(&htim4, TIM_CHANNEL_1);
+		break;
+	}
+	case 0x12: {
+		printf("HK OFF\n");
+		//HK_ON = 0;
+		//HAL_TIM_OC_Start_IT(&htim4, TIM_CHANNEL_1);
+		break;
+	}
+	}
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -146,9 +365,11 @@ int main(void)
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
+  MX_GPIO_Init();
   MX_TIM1_Init();
   MX_TIM2_Init();
   MX_TIM3_Init();
+  MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_1);
   HAL_TIM_OC_Start_IT(&htim2, TIM_CHANNEL_1);
@@ -183,6 +404,9 @@ int main(void)
 
   /* creation of HK_task */
   HK_taskHandle = osThreadNew(HK_init, NULL, &HK_task_attributes);
+
+  /* creation of UART_RX_task */
+  UART_RX_taskHandle = osThreadNew(UART_RX_init, NULL, &UART_RX_task_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
 	/* add threads, ... */
@@ -394,8 +618,105 @@ static void MX_TIM3_Init(void)
 
 }
 
+/**
+  * @brief USART1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART1_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART1_Init 0 */
+
+  /* USER CODE END USART1_Init 0 */
+
+  /* USER CODE BEGIN USART1_Init 1 */
+
+  /* USER CODE END USART1_Init 1 */
+  huart1.Instance = USART1;
+  huart1.Init.BaudRate = 460800;
+  huart1.Init.WordLength = UART_WORDLENGTH_8B;
+  huart1.Init.StopBits = UART_STOPBITS_1;
+  huart1.Init.Parity = UART_PARITY_NONE;
+  huart1.Init.Mode = UART_MODE_TX_RX;
+  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
+  huart1.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+  huart1.Init.ClockPrescaler = UART_PRESCALER_DIV1;
+  huart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+  if (HAL_UART_Init(&huart1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_UARTEx_SetTxFifoThreshold(&huart1, UART_TXFIFO_THRESHOLD_1_8) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_UARTEx_SetRxFifoThreshold(&huart1, UART_RXFIFO_THRESHOLD_1_8) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_UARTEx_DisableFifoMode(&huart1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART1_Init 2 */
+
+  /* USER CODE END USART1_Init 2 */
+
+}
+
+/**
+  * @brief GPIO Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_GPIO_Init(void)
+{
+/* USER CODE BEGIN MX_GPIO_Init_1 */
+/* USER CODE END MX_GPIO_Init_1 */
+
+  /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+
+/* USER CODE BEGIN MX_GPIO_Init_2 */
+/* USER CODE END MX_GPIO_Init_2 */
+}
+
 /* USER CODE BEGIN 4 */
 
+//void receive_spi(SPI_HandleTypeDef spi_handle, uint8_t *buffer)
+//{
+//	uint8_t spi_raw_data[SPI_RESULT_SIZE];
+//	uint8_t spi_MSB;
+//	uint8_t spi_LSB;
+//
+//	HAL_SPI_Receive(&spi_handle, (uint8_t*) spi_data, 1, 1);
+//
+//	spi_LSB = ((spi_raw_data[0] & 0xFF00) >> 8);
+//	spi_MSB = (spi_raw_data[1] & 0xFF);
+//
+//	spi_handle.Instance->CR1 |= 1 << 10;
+//
+//	buffer[0] = spi_MSB;
+//	buffer[1] = spi_LSB;
+//}
+//
+//
+//void sample_pmt(uint8_t *buffer)
+//{
+//	uint8_t pmt_spi[SPI_RESULT_SIZE];
+//
+//	receive_spi(hspi1, pmt_spi);
+//
+//	buffer[0] = PMT_SYNC;
+//	buffer[1] = PMT_SYNC;
+//	buffer[2] = ((pmt_seq & 0xFF00) >> 8);
+//	buffer[3] = (pmt_seq & 0xFF);
+//	buffer[4] = pmt_spi[0];
+//	buffer[5] = pmt_spi[1];
+//
+//}
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_PMT_init */
@@ -408,11 +729,12 @@ static void MX_TIM3_Init(void)
 void PMT_init(void *argument)
 {
   /* USER CODE BEGIN 5 */
+	uint8_t pmt_data[PMT_DATA_SIZE];
 	/* Infinite loop */
 	for (;;) {
 	    osEventFlagsWait(event_flags, PMT_FLAG_ID, osFlagsWaitAny, osWaitForever);
+	    //sample_pmt(pmt_data);
 		pmt_seq++;
-		printf("PMT: %d\n", pmt_seq);
 	}
   /* USER CODE END 5 */
 }
@@ -432,7 +754,6 @@ void ERPA_init(void *argument)
   {
 	    osEventFlagsWait(event_flags, ERPA_FLAG_ID, osFlagsWaitAny, osWaitForever);
 		erpa_seq++;
-		printf("ERPA: %d\n", erpa_seq);  }
   /* USER CODE END ERPA_init */
 }
 
@@ -451,9 +772,26 @@ void HK_init(void *argument)
   {
 	    osEventFlagsWait(event_flags, HK_FLAG_ID, osFlagsWaitAny, osWaitForever);
 		hk_seq++;
-		printf("HK: %d\n", hk_seq);
   }
   /* USER CODE END HK_init */
+}
+
+/* USER CODE BEGIN Header_UART_RX_init */
+/**
+* @brief Function implementing the UART_RX_task thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_UART_RX_init */
+void UART_RX_init(void *argument)
+{
+  /* USER CODE BEGIN UART_RX_init */
+  /* Infinite loop */
+  for(;;)
+  {
+		HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
+  }
+  /* USER CODE END UART_RX_init */
 }
 
 /**
