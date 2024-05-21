@@ -33,15 +33,29 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define SIMULATE
+
 #define PMT_FLAG_ID 0x0001
 #define ERPA_FLAG_ID 0x0002
 #define HK_FLAG_ID 0x0004
 
 #define PMT_DATA_SIZE 6
-#define SPI_RESULT_SIZE 2
+#define ERPA_DATA_SIZE 14
+#define HK_DATA_SIZE 38
 #define UART_RX_BUFFER_SIZE 100
 
+#define ADC1_NUM_CHANNELS 11
+#define ADC3_NUM_CHANNELS 4
+
 #define PMT_SYNC 0xBB
+#define ERPA_SYNC 0xAA
+#define HK_SYNC 0xCC
+
+static const uint8_t REG_TEMP = 0x00;
+static const uint8_t ADT7410_1 = 0x48 << 1;
+static const uint8_t ADT7410_2 = 0x4A << 1;
+static const uint8_t ADT7410_3 = 0x49 << 1;
+static const uint8_t ADT7410_4 = 0x4B << 1;
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -104,6 +118,10 @@ uint8_t hk_seq = 0;
 osEventFlagsId_t event_flags;
 
 unsigned char UART_RX_BUFFER[UART_RX_BUFFER_SIZE];
+
+ALIGN_32BYTES(static uint16_t ADC1_raw_data[ADC1_NUM_CHANNELS]);
+ALIGN_32BYTES(static uint16_t ADC3_raw_data[ADC3_NUM_CHANNELS]);
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -126,7 +144,7 @@ void HK_init(void *argument);
 void UART_RX_init(void *argument);
 
 /* USER CODE BEGIN PFP */
-
+void system_setup();
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -439,6 +457,7 @@ int main(void)
   /* USER CODE BEGIN RTOS_EVENTS */
 	/* add events, ... */
   event_flags = osEventFlagsNew(NULL); // Create an event flags group
+  system_setup();
   printf("Starting kernal...\n");
   /* USER CODE END RTOS_EVENTS */
 
@@ -1222,39 +1241,260 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+void system_setup()
+{
+	  TIM2->CCR4 = 312;
+	  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_4);
 
-//void receive_spi(SPI_HandleTypeDef spi_handle, uint8_t *buffer)
-//{
-//	uint8_t spi_raw_data[SPI_RESULT_SIZE];
-//	uint8_t spi_MSB;
-//	uint8_t spi_LSB;
-//
-//	HAL_SPI_Receive(&spi_handle, (uint8_t*) spi_data, 1, 1);
-//
-//	spi_LSB = ((spi_raw_data[0] & 0xFF00) >> 8);
-//	spi_MSB = (spi_raw_data[1] & 0xFF);
-//
-//	spi_handle.Instance->CR1 |= 1 << 10;
-//
-//	buffer[0] = spi_MSB;
-//	buffer[1] = spi_LSB;
-//}
-//
-//
-//void sample_pmt(uint8_t *buffer)
-//{
-//	uint8_t pmt_spi[SPI_RESULT_SIZE];
-//
-//	receive_spi(hspi1, pmt_spi);
-//
-//	buffer[0] = PMT_SYNC;
-//	buffer[1] = PMT_SYNC;
-//	buffer[2] = ((pmt_seq & 0xFF00) >> 8);
-//	buffer[3] = (pmt_seq & 0xFF);
-//	buffer[4] = pmt_spi[0];
-//	buffer[5] = pmt_spi[1];
-//
-//}
+
+
+
+	  if (HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_OFFSET_LINEARITY,
+	  			ADC_SINGLE_ENDED) != HAL_OK) {
+	  		/* Calibration Error */
+	  		Error_Handler();
+	  	}
+
+	  	if (HAL_ADC_Start_DMA(&hadc1, (uint32_t*) ADC1_raw_data,
+	  	ADC1_NUM_CHANNELS) != HAL_OK) {
+	  		Error_Handler();
+	  	}
+
+	  	if (HAL_ADCEx_Calibration_Start(&hadc3, ADC_CALIB_OFFSET_LINEARITY,
+	  			ADC_SINGLE_ENDED) != HAL_OK) {
+	  		/* Calibration Error */
+	  		Error_Handler();
+	  	}
+
+	  	if (HAL_ADC_Start_DMA(&hadc3, (uint32_t*) ADC3_raw_data,
+	  	ADC3_NUM_CHANNELS) != HAL_OK) {
+	  		Error_Handler();
+	  	}
+}
+
+int16_t poll_i2c_sensor(const uint8_t TEMP_ADDR) {
+	int16_t output;
+	uint8_t buf[2];
+	HAL_StatusTypeDef ret;
+	buf[0] = REG_TEMP;
+	ret = HAL_I2C_Master_Transmit(&hi2c1, TEMP_ADDR, buf, 1, 1000);
+	if (ret != HAL_OK) {
+		printf("I2C TX Error\n");
+	} else {
+		/* Read 2 bytes from the temperature register */
+		ret = HAL_I2C_Master_Receive(&hi2c1, TEMP_ADDR, buf, 2, 1000);
+		if (ret != HAL_OK) {
+			printf("I2C RX Error\n");
+		} else {
+			output = (int16_t) (buf[0] << 8);
+			output = (output | buf[1]) >> 3;
+		}
+	}
+	return output;
+}
+
+void receive_spi(SPI_HandleTypeDef spi_handle, uint8_t *buffer)
+{
+	uint8_t spi_raw_data[2];
+	uint8_t spi_MSB;
+	uint8_t spi_LSB;
+
+	HAL_SPI_Receive(&spi_handle, (uint8_t*) spi_raw_data, 1, 1);
+
+	spi_LSB = ((spi_raw_data[0] & 0xFF00) >> 8);
+	spi_MSB = (spi_raw_data[1] & 0xFF);
+
+	spi_handle.Instance->CR1 |= 1 << 10;
+
+	buffer[0] = spi_MSB;
+	buffer[1] = spi_LSB;
+}
+
+void receive_erpa_adc(uint16_t *buffer)
+{
+	uint16_t PC4 = ADC1_raw_data[1]; 			// SWPmon --
+	uint16_t PB0 = ADC1_raw_data[5]; 	// TEMP1 -- verified doesn't need to change
+
+	buffer[0] = PC4;
+	buffer[1] = PB0;
+}
+
+void receive_hk_i2c(int16_t *buffer)
+{
+	int16_t output1 = poll_i2c_sensor(ADT7410_1);
+	int16_t output2 = poll_i2c_sensor(ADT7410_2);
+	int16_t output3 = poll_i2c_sensor(ADT7410_3);
+	int16_t output4 = poll_i2c_sensor(ADT7410_4);
+
+	buffer[0] = output1;
+	buffer[1] = output2;
+	buffer[2] = output3;
+	buffer[3] = output4;
+}
+
+void receive_hk_adc1(uint16_t *buffer)
+{
+	uint16_t PA1 = ADC1_raw_data[10];// BUSVmon -- verified doesn't need to change
+	uint16_t PA2 = ADC1_raw_data[8];	// BUSImon -- verified doesn't need to change
+	uint16_t PC0 = ADC1_raw_data[6];		// 2v5mon -- verified doesn't need to change
+	uint16_t PA3 = ADC1_raw_data[9];				// n3v3mon --
+	uint16_t PB1 = ADC1_raw_data[2];		// n200v -- verified doesn't need to change
+	uint16_t PA7 = ADC1_raw_data[3];				// n800v --
+	uint16_t PC1 = ADC1_raw_data[7];				// 5vmon --
+	uint16_t PC5 = ADC1_raw_data[4];		// 15vmon -- verified doesn't need to change
+	uint16_t PA6 = ADC1_raw_data[0];				// 5vrefmon --
+
+	buffer[0] = PA1;
+	buffer[1] = PA2;
+	buffer[2] = PC0;
+	buffer[3] = PA3;
+	buffer[4] = PB1;
+	buffer[5] = PA7;
+	buffer[6] = PC1;
+	buffer[7] = PC5;
+	buffer[8] = PA6;
+}
+
+void receive_hk_adc3(uint16_t *buffer)
+{
+	uint16_t vrefint = ADC3_raw_data[0];
+	uint16_t vsense = ADC3_raw_data[1];
+	uint16_t PC2 = ADC3_raw_data[2]; 		// n5vmon --
+	uint16_t PC3 = ADC3_raw_data[3];			// 3v3mon --
+
+	buffer[0] = vrefint;
+	buffer[1] = vsense;
+	buffer[2] = PC2;
+	buffer[3] = PC3;
+}
+
+void sample_pmt(uint8_t *buffer)
+{
+	uint8_t pmt_spi[2];
+
+
+#ifdef SIMULATE
+	pmt_spi[0] = 0xE;
+	pmt_spi[1] = 0xD;
+#else
+	receive_spi(hspi1, pmt_spi);
+#endif
+
+	buffer[0] = PMT_SYNC;
+	buffer[1] = PMT_SYNC;
+	buffer[2] = ((pmt_seq & 0xFF00) >> 8);
+	buffer[3] = (pmt_seq & 0xFF);
+	buffer[4] = pmt_spi[0];
+	buffer[5] = pmt_spi[1];
+
+}
+
+
+void sample_erpa(uint8_t *buffer)
+{
+	uint8_t erpa_spi[2];
+	uint16_t erpa_adc[2];
+
+#ifdef SIMULATE
+	erpa_spi[0] = 0xE;
+	erpa_spi[1] = 0xD;
+
+	erpa_adc[0] = 0xEE;
+	erpa_adc[1] = 0xDD;
+#else
+	receive_spi(hspi2);
+	reveice_erpa_adc(erpa_adc);
+#endif
+
+	buffer[0] = ERPA_SYNC;
+	buffer[1] = ERPA_SYNC;
+	buffer[2] = ((erpa_seq & 0xFF00) >> 8);
+	buffer[3] = (erpa_seq & 0xFF);
+	buffer[4] = ((0 & 0xFF00) >> 8); 	  						// ENDmon MSB
+	buffer[5] = (0 & 0xFF);               					// ENDmon LSB
+	buffer[6] = ((erpa_adc[0] & 0xFF00) >> 8);    // SWP Monitored MSB
+	buffer[7] = (erpa_adc[0] & 0xFF);             // SWP Monitored LSB
+	buffer[8] = ((erpa_adc[1] & 0xFF00) >> 8);    // TEMPURATURE 1 MSB
+	buffer[9] = (erpa_adc[1] & 0xFF);             // TEMPURATURE 1 LSB
+	buffer[10] = ((0 & 0xFF00) >> 8);     				// TEMPURATURE 2 MSB
+	buffer[11] = (0 & 0xFF);                    			// TEMPURATURE 2 LSB
+	buffer[12] = erpa_spi[0];									// ERPA eADC MSB
+	buffer[13] = erpa_spi[1];									// ERPA eADC LSB
+}
+
+
+void sample_hk(uint8_t *buffer)
+{
+	int16_t hk_i2c[4];
+	uint16_t hk_adc1[9];
+	uint16_t hk_adc3[4];
+
+#ifdef SIMULATE
+	hk_i2c[0] = 0x11;
+	hk_i2c[1] = 0x12;
+	hk_i2c[2] = 0x13;
+	hk_i2c[3] = 0x14;
+
+	hk_adc1[0] = 0xA0;
+	hk_adc1[1] = 0xA1;
+	hk_adc1[2] = 0xA2;
+	hk_adc1[3] = 0xA3;
+	hk_adc1[4] = 0xA4;
+	hk_adc1[5] = 0xA5;
+	hk_adc1[6] = 0xA6;
+	hk_adc1[7] = 0xA7;
+	hk_adc1[8] = 0xA8;
+
+	hk_adc3[0] = 0xB0;
+	hk_adc3[1] = 0xB1;
+	hk_adc3[2] = 0xB2;
+	hk_adc3[3] = 0xB3;
+#else
+	receive_hk_i2c(hk_i2c);
+	receive_hk_adc1(hk_adc1);
+	receive_hk_adc3(hk_adc3);
+#endif
+
+	buffer[0] = HK_SYNC;                     			// HK SYNC 0xCC MSB
+	buffer[1] = HK_SYNC;                     			// HK SYNC 0xCC LSB
+	buffer[2] = ((hk_seq & 0xFF00) >> 8);    			// HK SEQ # MSB
+	buffer[3] = (hk_seq & 0xFF);             			// HK SEQ # LSB
+	buffer[4] = ((hk_adc3[1] & 0xFF00) >> 8);	// HK vsense MSB
+	buffer[5] = (hk_adc3[1] & 0xFF);			// HK vsense LSB
+	buffer[6] = ((hk_adc3[0] & 0xFF00) >> 8);	// HK vrefint MSB
+	buffer[7] = (hk_adc3[0] & 0xFF);			// HK vrefint LSB
+	buffer[8] = ((hk_i2c[0] & 0xFF00) >> 8);		// HK TEMP1 MSB
+	buffer[9] = (hk_i2c[0] & 0xFF);					// HK TEMP1 LSB
+	buffer[10] = ((hk_i2c[1] & 0xFF00) >> 8);		// HK TEMP2 MSB
+	buffer[11] = (hk_i2c[1] & 0xFF);				// HK TEMP2 LSB
+	buffer[12] = ((hk_i2c[2] & 0xFF00) >> 8);		// HK TEMP3 MSB
+	buffer[13] = (hk_i2c[2] & 0xFF);				// HK TEMP3 LSB
+	buffer[14] = ((hk_i2c[3] & 0xFF00) >> 8);		// HK TEMP4 MSB
+	buffer[15] = (hk_i2c[3] & 0xFF);				// HK TEMP4 LSB
+	buffer[16] = ((hk_adc1[0] & 0xFF00) >> 8);	// HK BUSvmon MSB
+	buffer[17] = (hk_adc1[0] & 0xFF);			// HK BUSvmon LSB
+	buffer[18] = ((hk_adc1[1] & 0xFF00) >> 8);	// HK BUSimon MSB
+	buffer[19] = (hk_adc1[1] & 0xFF);			// HK BUSimon LSB
+	buffer[20] = ((hk_adc1[2] & 0xFF00) >> 8);	// HK 2v5mon MSB
+	buffer[21] = (hk_adc1[2] & 0xFF);			// HK 2v5mon LSB
+	buffer[22] = ((hk_adc1[3] & 0xFF00) >> 8);	// HK 3v3mon MSB
+	buffer[23] = (hk_adc1[3] & 0xFF);			// HK 3v3mon LSB
+	buffer[24] = ((hk_adc1[6] & 0xFF00) >> 8);	// HK 5vmon MSB
+	buffer[25] = (hk_adc1[6] & 0xFF);			// HK 5vmon LSB
+	buffer[26] = ((hk_adc1[3] & 0xFF00) >> 8);	// HK n3v3mon MSB
+	buffer[27] = (hk_adc1[3] & 0xFF);			// HK n3v3mon LSB
+	buffer[28] = ((hk_adc1[2] & 0xFF00) >> 8);	// HK n5vmon MSB
+	buffer[29] = (hk_adc1[2] & 0xFF);			// HK n5vmon LSB
+	buffer[30] = ((hk_adc1[7] & 0xFF00) >> 8);	// HK 15vmon MSB
+	buffer[31] = (hk_adc1[7] & 0xFF);			// HK 15vmon LSB
+	buffer[32] = ((hk_adc1[8] & 0xFF00) >> 8);	// HK 5vrefmon MSB
+	buffer[33] = (hk_adc1[8] & 0xFF);			// HK 5vrefmon LSB
+	buffer[34] = ((hk_adc1[4] & 0xFF00) >> 8);	// HK n150vmon MSB
+	buffer[35] = (hk_adc1[4] & 0xFF);			// HK n150vmon LSB
+	buffer[36] = ((hk_adc1[5] & 0xFF00) >> 8);	// HK n800vmon MSB
+	buffer[37] = (hk_adc1[5] & 0xFF);			// HK n800vmon LSB
+
+}
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_PMT_init */
@@ -1271,7 +1511,7 @@ void PMT_init(void *argument)
 	/* Infinite loop */
 	for (;;) {
 	    osEventFlagsWait(event_flags, PMT_FLAG_ID, osFlagsWaitAny, osWaitForever);
-	    //sample_pmt(pmt_data);
+	    sample_pmt(pmt_data);
 		pmt_seq++;
 	}
   /* USER CODE END 5 */
@@ -1287,10 +1527,12 @@ void PMT_init(void *argument)
 void ERPA_init(void *argument)
 {
   /* USER CODE BEGIN ERPA_init */
+	uint8_t erpa_data[ERPA_DATA_SIZE];
   /* Infinite loop */
   for(;;)
   {
 	    osEventFlagsWait(event_flags, ERPA_FLAG_ID, osFlagsWaitAny, osWaitForever);
+	    sample_erpa(erpa_data);
 		erpa_seq++;
   }
   /* USER CODE END ERPA_init */
@@ -1306,10 +1548,12 @@ void ERPA_init(void *argument)
 void HK_init(void *argument)
 {
   /* USER CODE BEGIN HK_init */
+	uint8_t hk_data[HK_DATA_SIZE];
   /* Infinite loop */
   for(;;)
   {
 	    osEventFlagsWait(event_flags, HK_FLAG_ID, osFlagsWaitAny, osWaitForever);
+	    sample_hk(hk_data);
 		hk_seq++;
   }
   /* USER CODE END HK_init */
