@@ -363,7 +363,7 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
  80005f0:	4293      	cmp	r3, r2
  80005f2:	d106      	bne.n	8000602 <HAL_TIM_OC_DelayElapsedCallback+0x1e>
   {
-	  osEventFlagsSet(event_flags, PMT_FLAG_ID); // Set the event flag for Task1
+	  osEventFlagsSet(event_flags, PMT_FLAG_ID);
  80005f4:	4b12      	ldr	r3, [pc, #72]	; (8000640 <HAL_TIM_OC_DelayElapsedCallback+0x5c>)
  80005f6:	681b      	ldr	r3, [r3, #0]
  80005f8:	2101      	movs	r1, #1
@@ -417,8 +417,11 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
  800064c:	080130f0 	.word	0x080130f0
 
 08000650 <HAL_UART_RxCpltCallback>:
-
-
+ * toggling GPIO pins, starting or stopping timers, and other operations.
+ *
+ * @param huart Pointer to a UART_HandleTypeDef structure that contains
+ *              the configuration information for the specified UART module.
+ */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
  8000650:	b580      	push	{r7, lr}
  8000652:	b084      	sub	sp, #16
@@ -901,7 +904,7 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_EVENTS */
 	/* add events, ... */
-  event_flags = osEventFlagsNew(NULL); // Create an event flags group
+  event_flags = osEventFlagsNew(NULL);
  8000920:	2000      	movs	r0, #0
  8000922:	f00e fe80 	bl	800f626 <osEventFlagsNew>
  8000926:	4603      	mov	r3, r0
@@ -2880,8 +2883,10 @@ static void MX_GPIO_Init(void)
  800148c:	58020400 	.word	0x58020400
 
 08001490 <system_setup>:
-
-/* USER CODE BEGIN 4 */
+ * This function initializes various system components including timers, ADC calibration, and DMA for ADC data acquisition.
+ * It starts PWM for TIM2, performs ADC calibration for ADC1 and ADC3, and starts DMA for ADC data acquisition.
+ * Any errors encountered during these initialization steps are handled by the Error_Handler function.
+ */
 void system_setup()
 {
  8001490:	b580      	push	{r7, lr}
@@ -2894,9 +2899,6 @@ void system_setup()
  800149e:	210c      	movs	r1, #12
  80014a0:	4818      	ldr	r0, [pc, #96]	; (8001504 <system_setup+0x74>)
  80014a2:	f00a fa3b 	bl	800b91c <HAL_TIM_PWM_Start>
-
-
-
 
 	  if (HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_OFFSET_LINEARITY,
  80014a6:	f240 72ff 	movw	r2, #2047	; 0x7ff
@@ -2962,10 +2964,10 @@ void system_setup()
  8001514:	240005e0 	.word	0x240005e0
 
 08001518 <sample_pmt>:
-	buffer[2] = PC2;
-	buffer[3] = PC3;
-}
-
+ * The sampled data is stored in the provided buffer.
+ *
+ * @param buffer Pointer to the buffer where sampled data will be stored.
+ */
 void sample_pmt(uint8_t *buffer)
 {
  8001518:	b480      	push	{r7}
@@ -3026,8 +3028,10 @@ void sample_pmt(uint8_t *buffer)
  8001564:	24000544 	.word	0x24000544
 
 08001568 <sample_erpa>:
-
-
+ * The sampled data is stored in the provided buffer.
+ *
+ * @param buffer Pointer to the buffer where sampled data will be stored.
+ */
 void sample_erpa(uint8_t *buffer)
 {
  8001568:	b480      	push	{r7}
@@ -3076,17 +3080,17 @@ void sample_erpa(uint8_t *buffer)
  800159a:	4a1c      	ldr	r2, [pc, #112]	; (800160c <sample_erpa+0xa4>)
  800159c:	7812      	ldrb	r2, [r2, #0]
  800159e:	701a      	strb	r2, [r3, #0]
-	buffer[4] = ((0 & 0xFF00) >> 8); 	  						// ENDmon MSB
+	buffer[4] = ((0 & 0xFF00) >> 8); 	  		// ENDmon MSB
  80015a0:	687b      	ldr	r3, [r7, #4]
  80015a2:	3304      	adds	r3, #4
  80015a4:	2200      	movs	r2, #0
  80015a6:	701a      	strb	r2, [r3, #0]
-	buffer[5] = (0 & 0xFF);               					// ENDmon LSB
+	buffer[5] = (0 & 0xFF);               		// ENDmon LSB
  80015a8:	687b      	ldr	r3, [r7, #4]
  80015aa:	3305      	adds	r3, #5
  80015ac:	2200      	movs	r2, #0
  80015ae:	701a      	strb	r2, [r3, #0]
-	buffer[6] = ((erpa_adc[0] & 0xFF00) >> 8);    // SWP Monitored MSB
+	buffer[6] = ((erpa_adc[0] & 0xFF00) >> 8);	// SWP Monitored MSB
  80015b0:	893b      	ldrh	r3, [r7, #8]
  80015b2:	0a1b      	lsrs	r3, r3, #8
  80015b4:	b29a      	uxth	r2, r3
@@ -3094,13 +3098,13 @@ void sample_erpa(uint8_t *buffer)
  80015b8:	3306      	adds	r3, #6
  80015ba:	b2d2      	uxtb	r2, r2
  80015bc:	701a      	strb	r2, [r3, #0]
-	buffer[7] = (erpa_adc[0] & 0xFF);             // SWP Monitored LSB
+	buffer[7] = (erpa_adc[0] & 0xFF);           // SWP Monitored LSB
  80015be:	893a      	ldrh	r2, [r7, #8]
  80015c0:	687b      	ldr	r3, [r7, #4]
  80015c2:	3307      	adds	r3, #7
  80015c4:	b2d2      	uxtb	r2, r2
  80015c6:	701a      	strb	r2, [r3, #0]
-	buffer[8] = ((erpa_adc[1] & 0xFF00) >> 8);    // TEMPURATURE 1 MSB
+	buffer[8] = ((erpa_adc[1] & 0xFF00) >> 8);  // TEMPURATURE 1 MSB
  80015c8:	897b      	ldrh	r3, [r7, #10]
  80015ca:	0a1b      	lsrs	r3, r3, #8
  80015cc:	b29a      	uxth	r2, r3
@@ -3108,28 +3112,28 @@ void sample_erpa(uint8_t *buffer)
  80015d0:	3308      	adds	r3, #8
  80015d2:	b2d2      	uxtb	r2, r2
  80015d4:	701a      	strb	r2, [r3, #0]
-	buffer[9] = (erpa_adc[1] & 0xFF);             // TEMPURATURE 1 LSB
+	buffer[9] = (erpa_adc[1] & 0xFF);           // TEMPURATURE 1 LSB
  80015d6:	897a      	ldrh	r2, [r7, #10]
  80015d8:	687b      	ldr	r3, [r7, #4]
  80015da:	3309      	adds	r3, #9
  80015dc:	b2d2      	uxtb	r2, r2
  80015de:	701a      	strb	r2, [r3, #0]
-	buffer[10] = ((0 & 0xFF00) >> 8);     				// TEMPURATURE 2 MSB
+	buffer[10] = ((0 & 0xFF00) >> 8);     		// TEMPURATURE 2 MSB
  80015e0:	687b      	ldr	r3, [r7, #4]
  80015e2:	330a      	adds	r3, #10
  80015e4:	2200      	movs	r2, #0
  80015e6:	701a      	strb	r2, [r3, #0]
-	buffer[11] = (0 & 0xFF);                    			// TEMPURATURE 2 LSB
+	buffer[11] = (0 & 0xFF);                    // TEMPURATURE 2 LSB
  80015e8:	687b      	ldr	r3, [r7, #4]
  80015ea:	330b      	adds	r3, #11
  80015ec:	2200      	movs	r2, #0
  80015ee:	701a      	strb	r2, [r3, #0]
-	buffer[12] = erpa_spi[0];									// ERPA eADC MSB
+	buffer[12] = erpa_spi[0];					// ERPA eADC MSB
  80015f0:	687b      	ldr	r3, [r7, #4]
  80015f2:	330c      	adds	r3, #12
  80015f4:	7b3a      	ldrb	r2, [r7, #12]
  80015f6:	701a      	strb	r2, [r3, #0]
-	buffer[13] = erpa_spi[1];									// ERPA eADC LSB
+	buffer[13] = erpa_spi[1];					// ERPA eADC LSB
  80015f8:	687b      	ldr	r3, [r7, #4]
  80015fa:	330d      	adds	r3, #13
  80015fc:	7b7a      	ldrb	r2, [r7, #13]
@@ -3143,8 +3147,10 @@ void sample_erpa(uint8_t *buffer)
  800160c:	24000545 	.word	0x24000545
 
 08001610 <sample_hk>:
-
-
+ * The sampled data is stored in the provided buffer.
+ *
+ * @param buffer Pointer to the buffer where sampled data will be stored.
+ */
 void sample_hk(uint8_t *buffer)
 {
  8001610:	b480      	push	{r7}
@@ -3214,21 +3220,21 @@ void sample_hk(uint8_t *buffer)
 	receive_hk_adc3(hk_adc3);
 #endif
 
-	buffer[0] = HK_SYNC;                     			// HK SYNC 0xCC MSB
+	buffer[0] = HK_SYNC;                     	// HK SYNC 0xCC MSB
  800165c:	687b      	ldr	r3, [r7, #4]
  800165e:	22cc      	movs	r2, #204	; 0xcc
  8001660:	701a      	strb	r2, [r3, #0]
-	buffer[1] = HK_SYNC;                     			// HK SYNC 0xCC LSB
+	buffer[1] = HK_SYNC;                     	// HK SYNC 0xCC LSB
  8001662:	687b      	ldr	r3, [r7, #4]
  8001664:	3301      	adds	r3, #1
  8001666:	22cc      	movs	r2, #204	; 0xcc
  8001668:	701a      	strb	r2, [r3, #0]
-	buffer[2] = ((hk_seq & 0xFF00) >> 8);    			// HK SEQ # MSB
+	buffer[2] = ((hk_seq & 0xFF00) >> 8);    	// HK SEQ # MSB
  800166a:	687b      	ldr	r3, [r7, #4]
  800166c:	3302      	adds	r3, #2
  800166e:	2200      	movs	r2, #0
  8001670:	701a      	strb	r2, [r3, #0]
-	buffer[3] = (hk_seq & 0xFF);             			// HK SEQ # LSB
+	buffer[3] = (hk_seq & 0xFF);             	// HK SEQ # LSB
  8001672:	687b      	ldr	r3, [r7, #4]
  8001674:	3303      	adds	r3, #3
  8001676:	4a6c      	ldr	r2, [pc, #432]	; (8001828 <sample_hk+0x218>)
@@ -3262,53 +3268,53 @@ void sample_hk(uint8_t *buffer)
  80016a6:	3307      	adds	r3, #7
  80016a8:	b2d2      	uxtb	r2, r2
  80016aa:	701a      	strb	r2, [r3, #0]
-	buffer[8] = ((hk_i2c[0] & 0xFF00) >> 8);		// HK TEMP1 MSB
+	buffer[8] = ((hk_i2c[0] & 0xFF00) >> 8);	// HK TEMP1 MSB
  80016ac:	f9b7 3028 	ldrsh.w	r3, [r7, #40]	; 0x28
  80016b0:	121a      	asrs	r2, r3, #8
  80016b2:	687b      	ldr	r3, [r7, #4]
  80016b4:	3308      	adds	r3, #8
  80016b6:	b2d2      	uxtb	r2, r2
  80016b8:	701a      	strb	r2, [r3, #0]
-	buffer[9] = (hk_i2c[0] & 0xFF);					// HK TEMP1 LSB
+	buffer[9] = (hk_i2c[0] & 0xFF);				// HK TEMP1 LSB
  80016ba:	f9b7 2028 	ldrsh.w	r2, [r7, #40]	; 0x28
  80016be:	687b      	ldr	r3, [r7, #4]
  80016c0:	3309      	adds	r3, #9
  80016c2:	b2d2      	uxtb	r2, r2
  80016c4:	701a      	strb	r2, [r3, #0]
-	buffer[10] = ((hk_i2c[1] & 0xFF00) >> 8);		// HK TEMP2 MSB
+	buffer[10] = ((hk_i2c[1] & 0xFF00) >> 8);	// HK TEMP2 MSB
  80016c6:	f9b7 302a 	ldrsh.w	r3, [r7, #42]	; 0x2a
  80016ca:	121a      	asrs	r2, r3, #8
  80016cc:	687b      	ldr	r3, [r7, #4]
  80016ce:	330a      	adds	r3, #10
  80016d0:	b2d2      	uxtb	r2, r2
  80016d2:	701a      	strb	r2, [r3, #0]
-	buffer[11] = (hk_i2c[1] & 0xFF);				// HK TEMP2 LSB
+	buffer[11] = (hk_i2c[1] & 0xFF);			// HK TEMP2 LSB
  80016d4:	f9b7 202a 	ldrsh.w	r2, [r7, #42]	; 0x2a
  80016d8:	687b      	ldr	r3, [r7, #4]
  80016da:	330b      	adds	r3, #11
  80016dc:	b2d2      	uxtb	r2, r2
  80016de:	701a      	strb	r2, [r3, #0]
-	buffer[12] = ((hk_i2c[2] & 0xFF00) >> 8);		// HK TEMP3 MSB
+	buffer[12] = ((hk_i2c[2] & 0xFF00) >> 8);	// HK TEMP3 MSB
  80016e0:	f9b7 302c 	ldrsh.w	r3, [r7, #44]	; 0x2c
  80016e4:	121a      	asrs	r2, r3, #8
  80016e6:	687b      	ldr	r3, [r7, #4]
  80016e8:	330c      	adds	r3, #12
  80016ea:	b2d2      	uxtb	r2, r2
  80016ec:	701a      	strb	r2, [r3, #0]
-	buffer[13] = (hk_i2c[2] & 0xFF);				// HK TEMP3 LSB
+	buffer[13] = (hk_i2c[2] & 0xFF);			// HK TEMP3 LSB
  80016ee:	f9b7 202c 	ldrsh.w	r2, [r7, #44]	; 0x2c
  80016f2:	687b      	ldr	r3, [r7, #4]
  80016f4:	330d      	adds	r3, #13
  80016f6:	b2d2      	uxtb	r2, r2
  80016f8:	701a      	strb	r2, [r3, #0]
-	buffer[14] = ((hk_i2c[3] & 0xFF00) >> 8);		// HK TEMP4 MSB
+	buffer[14] = ((hk_i2c[3] & 0xFF00) >> 8);	// HK TEMP4 MSB
  80016fa:	f9b7 302e 	ldrsh.w	r3, [r7, #46]	; 0x2e
  80016fe:	121a      	asrs	r2, r3, #8
  8001700:	687b      	ldr	r3, [r7, #4]
  8001702:	330e      	adds	r3, #14
  8001704:	b2d2      	uxtb	r2, r2
  8001706:	701a      	strb	r2, [r3, #0]
-	buffer[15] = (hk_i2c[3] & 0xFF);				// HK TEMP4 LSB
+	buffer[15] = (hk_i2c[3] & 0xFF);			// HK TEMP4 LSB
  8001708:	f9b7 202e 	ldrsh.w	r2, [r7, #46]	; 0x2e
  800170c:	687b      	ldr	r3, [r7, #4]
  800170e:	330f      	adds	r3, #15

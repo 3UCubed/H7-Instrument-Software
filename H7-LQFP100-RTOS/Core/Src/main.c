@@ -33,6 +33,9 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+// *********************************************************************************************************** DEFINES
+
+// VVVVV REMOVE THIS LINE IF TESTING ON REAL INSTRUMENT VVVVV //
 #define SIMULATE
 
 #define PMT_FLAG_ID 0x0001
@@ -51,11 +54,7 @@
 #define ERPA_SYNC 0xAA
 #define HK_SYNC 0xCC
 
-static const uint8_t REG_TEMP = 0x00;
-static const uint8_t ADT7410_1 = 0x48 << 1;
-static const uint8_t ADT7410_2 = 0x4A << 1;
-static const uint8_t ADT7410_3 = 0x49 << 1;
-static const uint8_t ADT7410_4 = 0x4B << 1;
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -111,6 +110,8 @@ const osThreadAttr_t UART_RX_task_attributes = {
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* USER CODE BEGIN PV */
+// *********************************************************************************************************** GLOBAL VARIABLES
+
 uint8_t pmt_seq = 0;
 uint8_t erpa_seq = 0;
 uint8_t hk_seq = 0;
@@ -121,6 +122,12 @@ unsigned char UART_RX_BUFFER[UART_RX_BUFFER_SIZE];
 
 ALIGN_32BYTES(static uint16_t ADC1_raw_data[ADC1_NUM_CHANNELS]);
 ALIGN_32BYTES(static uint16_t ADC3_raw_data[ADC3_NUM_CHANNELS]);
+
+static const uint8_t REG_TEMP = 0x00;
+static const uint8_t ADT7410_1 = 0x48 << 1;
+static const uint8_t ADT7410_2 = 0x4A << 1;
+static const uint8_t ADT7410_3 = 0x49 << 1;
+static const uint8_t ADT7410_4 = 0x4B << 1;
 
 /* USER CODE END PV */
 
@@ -144,11 +151,15 @@ void HK_init(void *argument);
 void UART_RX_init(void *argument);
 
 /* USER CODE BEGIN PFP */
+// *********************************************************************************************************** FUNCTION PROTOYPES
+
 void system_setup();
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+// *********************************************************************************************************** CALLBACKS
+
 
 /**
  * @brief Handles the callback for timer delay elapsed events.
@@ -163,7 +174,7 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 {
   if (htim == &htim1)
   {
-	  osEventFlagsSet(event_flags, PMT_FLAG_ID); // Set the event flag for Task1
+	  osEventFlagsSet(event_flags, PMT_FLAG_ID);
 
   }
   else if (htim == &htim2)
@@ -181,6 +192,16 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 }
 
 
+/**
+ * @brief UART receive complete callback.
+ *
+ * This function is called when a UART receive operation is complete. It handles
+ * various commands received via UART and performs corresponding actions, such as
+ * toggling GPIO pins, starting or stopping timers, and other operations.
+ *
+ * @param huart Pointer to a UART_HandleTypeDef structure that contains
+ *              the configuration information for the specified UART module.
+ */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
 	unsigned char key = UART_RX_BUFFER[0];
@@ -368,8 +389,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	}
 	}
 }
-
 /* USER CODE END 0 */
+
 
 /**
   * @brief  The application entry point.
@@ -456,7 +477,7 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_EVENTS */
 	/* add events, ... */
-  event_flags = osEventFlagsNew(NULL); // Create an event flags group
+  event_flags = osEventFlagsNew(NULL);
   system_setup();
   printf("Starting kernal...\n");
   /* USER CODE END RTOS_EVENTS */
@@ -1241,13 +1262,171 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+// *********************************************************************************************************** RAW DATA RETRIEVAL FUNCTIONS
+
+
+/**
+ * @brief Polls an I2C temperature sensor.
+ *
+ * This function transmits a read request to the specified I2C temperature sensor
+ * and reads the temperature value.
+ *
+ * @param TEMP_ADDR The I2C address of the temperature sensor.
+ * @return The temperature reading from the sensor, or an error code.
+ */
+int16_t poll_i2c_sensor(const uint8_t TEMP_ADDR) {
+	int16_t output;
+	uint8_t buf[2];
+	HAL_StatusTypeDef ret;
+	buf[0] = REG_TEMP;
+	ret = HAL_I2C_Master_Transmit(&hi2c1, TEMP_ADDR, buf, 1, 1000);
+	if (ret != HAL_OK) {
+		printf("I2C TX Error\n");
+	} else {
+		/* Read 2 bytes from the temperature register */
+		ret = HAL_I2C_Master_Receive(&hi2c1, TEMP_ADDR, buf, 2, 1000);
+		if (ret != HAL_OK) {
+			printf("I2C RX Error\n");
+		} else {
+			output = (int16_t) (buf[0] << 8);
+			output = (output | buf[1]) >> 3;
+		}
+	}
+	return output;
+}
+
+
+/**
+ * @brief Receives data from an SPI device.
+ *
+ * This function receives data from the specified SPI device and stores the result
+ * in the provided buffer.
+ *
+ * @param spi_handle The handle to the SPI device.
+ * @param buffer The buffer to store the received data.
+ */
+void receive_spi(SPI_HandleTypeDef spi_handle, uint8_t *buffer)
+{
+	uint8_t spi_raw_data[2];
+	uint8_t spi_MSB;
+	uint8_t spi_LSB;
+
+	HAL_SPI_Receive(&spi_handle, (uint8_t*) spi_raw_data, 1, 1);
+
+	spi_LSB = ((spi_raw_data[0] & 0xFF00) >> 8);
+	spi_MSB = (spi_raw_data[1] & 0xFF);
+
+	spi_handle.Instance->CR1 |= 1 << 10;
+
+	buffer[0] = spi_MSB;
+	buffer[1] = spi_LSB;
+}
+
+
+/**
+ * @brief Receives ADC data for ERPA.
+ *
+ * This function retrieves data from specific ADC channels and stores the values
+ * in the provided buffer.
+ *
+ * @param buffer The buffer to store the received ADC data.
+ */
+void receive_erpa_adc(uint16_t *buffer)
+{
+	uint16_t PC4 = ADC1_raw_data[1];	// SWPmon --
+	uint16_t PB0 = ADC1_raw_data[5]; 	// TEMP1 -- verified doesn't need to change
+
+	buffer[0] = PC4;
+	buffer[1] = PB0;
+}
+
+
+/**
+ * @brief Receives housekeeping I2C sensor data.
+ *
+ * This function polls multiple I2C sensors and stores the results in the provided buffer.
+ *
+ * @param buffer The buffer to store the received I2C sensor data.
+ */
+void receive_hk_i2c(int16_t *buffer)
+{
+	int16_t output1 = poll_i2c_sensor(ADT7410_1);
+	int16_t output2 = poll_i2c_sensor(ADT7410_2);
+	int16_t output3 = poll_i2c_sensor(ADT7410_3);
+	int16_t output4 = poll_i2c_sensor(ADT7410_4);
+
+	buffer[0] = output1;
+	buffer[1] = output2;
+	buffer[2] = output3;
+	buffer[3] = output4;
+}
+
+
+/**
+ * @brief Receives housekeeping ADC1 sensor data.
+ *
+ * This function retrieves multiple ADC1 sensor data and stores the results in the provided buffer.
+ *
+ * @param buffer The buffer to store the received ADC1 sensor data.
+ */
+void receive_hk_adc1(uint16_t *buffer)
+{
+	uint16_t PA1 = ADC1_raw_data[10];	// BUSVmon -- verified doesn't need to change
+	uint16_t PA2 = ADC1_raw_data[8];	// BUSImon -- verified doesn't need to change
+	uint16_t PC0 = ADC1_raw_data[6];	// 2v5mon -- verified doesn't need to change
+	uint16_t PA3 = ADC1_raw_data[9];	// n3v3mon --
+	uint16_t PB1 = ADC1_raw_data[2];	// n200v -- verified doesn't need to change
+	uint16_t PA7 = ADC1_raw_data[3];	// n800v --
+	uint16_t PC1 = ADC1_raw_data[7];	// 5vmon --
+	uint16_t PC5 = ADC1_raw_data[4];	// 15vmon -- verified doesn't need to change
+	uint16_t PA6 = ADC1_raw_data[0];	// 5vrefmon --
+
+	buffer[0] = PA1;
+	buffer[1] = PA2;
+	buffer[2] = PC0;
+	buffer[3] = PA3;
+	buffer[4] = PB1;
+	buffer[5] = PA7;
+	buffer[6] = PC1;
+	buffer[7] = PC5;
+	buffer[8] = PA6;
+}
+
+
+/**
+ * @brief Receives housekeeping ADC3 sensor data.
+ *
+ * This function retrieves specific ADC3 sensor data and stores the results in the provided buffer.
+ *
+ * @param buffer The buffer to store the received ADC3 sensor data.
+ */
+void receive_hk_adc3(uint16_t *buffer)
+{
+	uint16_t vrefint = ADC3_raw_data[0];
+	uint16_t vsense = ADC3_raw_data[1];
+	uint16_t PC2 = ADC3_raw_data[2]; 		// n5vmon --
+	uint16_t PC3 = ADC3_raw_data[3];		// 3v3mon --
+
+	buffer[0] = vrefint;
+	buffer[1] = vsense;
+	buffer[2] = PC2;
+	buffer[3] = PC3;
+}
+
+// *********************************************************************************************************** HELPER FUNCTIONS
+
+
+/**
+ * @brief Performs system setup tasks.
+ *
+ * This function initializes various system components including timers, ADC calibration, and DMA for ADC data acquisition.
+ * It starts PWM for TIM2, performs ADC calibration for ADC1 and ADC3, and starts DMA for ADC data acquisition.
+ * Any errors encountered during these initialization steps are handled by the Error_Handler function.
+ */
 void system_setup()
 {
 	  TIM2->CCR4 = 312;
 	  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_4);
-
-
-
 
 	  if (HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_OFFSET_LINEARITY,
 	  			ADC_SINGLE_ENDED) != HAL_OK) {
@@ -1272,102 +1451,16 @@ void system_setup()
 	  	}
 }
 
-int16_t poll_i2c_sensor(const uint8_t TEMP_ADDR) {
-	int16_t output;
-	uint8_t buf[2];
-	HAL_StatusTypeDef ret;
-	buf[0] = REG_TEMP;
-	ret = HAL_I2C_Master_Transmit(&hi2c1, TEMP_ADDR, buf, 1, 1000);
-	if (ret != HAL_OK) {
-		printf("I2C TX Error\n");
-	} else {
-		/* Read 2 bytes from the temperature register */
-		ret = HAL_I2C_Master_Receive(&hi2c1, TEMP_ADDR, buf, 2, 1000);
-		if (ret != HAL_OK) {
-			printf("I2C RX Error\n");
-		} else {
-			output = (int16_t) (buf[0] << 8);
-			output = (output | buf[1]) >> 3;
-		}
-	}
-	return output;
-}
 
-void receive_spi(SPI_HandleTypeDef spi_handle, uint8_t *buffer)
-{
-	uint8_t spi_raw_data[2];
-	uint8_t spi_MSB;
-	uint8_t spi_LSB;
-
-	HAL_SPI_Receive(&spi_handle, (uint8_t*) spi_raw_data, 1, 1);
-
-	spi_LSB = ((spi_raw_data[0] & 0xFF00) >> 8);
-	spi_MSB = (spi_raw_data[1] & 0xFF);
-
-	spi_handle.Instance->CR1 |= 1 << 10;
-
-	buffer[0] = spi_MSB;
-	buffer[1] = spi_LSB;
-}
-
-void receive_erpa_adc(uint16_t *buffer)
-{
-	uint16_t PC4 = ADC1_raw_data[1]; 			// SWPmon --
-	uint16_t PB0 = ADC1_raw_data[5]; 	// TEMP1 -- verified doesn't need to change
-
-	buffer[0] = PC4;
-	buffer[1] = PB0;
-}
-
-void receive_hk_i2c(int16_t *buffer)
-{
-	int16_t output1 = poll_i2c_sensor(ADT7410_1);
-	int16_t output2 = poll_i2c_sensor(ADT7410_2);
-	int16_t output3 = poll_i2c_sensor(ADT7410_3);
-	int16_t output4 = poll_i2c_sensor(ADT7410_4);
-
-	buffer[0] = output1;
-	buffer[1] = output2;
-	buffer[2] = output3;
-	buffer[3] = output4;
-}
-
-void receive_hk_adc1(uint16_t *buffer)
-{
-	uint16_t PA1 = ADC1_raw_data[10];// BUSVmon -- verified doesn't need to change
-	uint16_t PA2 = ADC1_raw_data[8];	// BUSImon -- verified doesn't need to change
-	uint16_t PC0 = ADC1_raw_data[6];		// 2v5mon -- verified doesn't need to change
-	uint16_t PA3 = ADC1_raw_data[9];				// n3v3mon --
-	uint16_t PB1 = ADC1_raw_data[2];		// n200v -- verified doesn't need to change
-	uint16_t PA7 = ADC1_raw_data[3];				// n800v --
-	uint16_t PC1 = ADC1_raw_data[7];				// 5vmon --
-	uint16_t PC5 = ADC1_raw_data[4];		// 15vmon -- verified doesn't need to change
-	uint16_t PA6 = ADC1_raw_data[0];				// 5vrefmon --
-
-	buffer[0] = PA1;
-	buffer[1] = PA2;
-	buffer[2] = PC0;
-	buffer[3] = PA3;
-	buffer[4] = PB1;
-	buffer[5] = PA7;
-	buffer[6] = PC1;
-	buffer[7] = PC5;
-	buffer[8] = PA6;
-}
-
-void receive_hk_adc3(uint16_t *buffer)
-{
-	uint16_t vrefint = ADC3_raw_data[0];
-	uint16_t vsense = ADC3_raw_data[1];
-	uint16_t PC2 = ADC3_raw_data[2]; 		// n5vmon --
-	uint16_t PC3 = ADC3_raw_data[3];			// 3v3mon --
-
-	buffer[0] = vrefint;
-	buffer[1] = vsense;
-	buffer[2] = PC2;
-	buffer[3] = PC3;
-}
-
+/**
+ * @brief Samples data from the PMT.
+ *
+ * This function samples data from the PMT. If the SIMULATE precompiler directive is set,
+ * simulated data is used. Otherwise, SPI communication is used to receive actual data.
+ * The sampled data is stored in the provided buffer.
+ *
+ * @param buffer Pointer to the buffer where sampled data will be stored.
+ */
 void sample_pmt(uint8_t *buffer)
 {
 	uint8_t pmt_spi[2];
@@ -1390,6 +1483,15 @@ void sample_pmt(uint8_t *buffer)
 }
 
 
+/**
+ * @brief Samples data from the ERPA.
+ *
+ * This function samples data from the ERPA. If the SIMULATE precompiler directive is set,
+ * simulated data is used. Otherwise, SPI communication and ADC readings are used to obtain actual data.
+ * The sampled data is stored in the provided buffer.
+ *
+ * @param buffer Pointer to the buffer where sampled data will be stored.
+ */
 void sample_erpa(uint8_t *buffer)
 {
 	uint8_t erpa_spi[2];
@@ -1410,19 +1512,28 @@ void sample_erpa(uint8_t *buffer)
 	buffer[1] = ERPA_SYNC;
 	buffer[2] = ((erpa_seq & 0xFF00) >> 8);
 	buffer[3] = (erpa_seq & 0xFF);
-	buffer[4] = ((0 & 0xFF00) >> 8); 	  						// ENDmon MSB
-	buffer[5] = (0 & 0xFF);               					// ENDmon LSB
-	buffer[6] = ((erpa_adc[0] & 0xFF00) >> 8);    // SWP Monitored MSB
-	buffer[7] = (erpa_adc[0] & 0xFF);             // SWP Monitored LSB
-	buffer[8] = ((erpa_adc[1] & 0xFF00) >> 8);    // TEMPURATURE 1 MSB
-	buffer[9] = (erpa_adc[1] & 0xFF);             // TEMPURATURE 1 LSB
-	buffer[10] = ((0 & 0xFF00) >> 8);     				// TEMPURATURE 2 MSB
-	buffer[11] = (0 & 0xFF);                    			// TEMPURATURE 2 LSB
-	buffer[12] = erpa_spi[0];									// ERPA eADC MSB
-	buffer[13] = erpa_spi[1];									// ERPA eADC LSB
+	buffer[4] = ((0 & 0xFF00) >> 8); 	  		// ENDmon MSB
+	buffer[5] = (0 & 0xFF);               		// ENDmon LSB
+	buffer[6] = ((erpa_adc[0] & 0xFF00) >> 8);	// SWP Monitored MSB
+	buffer[7] = (erpa_adc[0] & 0xFF);           // SWP Monitored LSB
+	buffer[8] = ((erpa_adc[1] & 0xFF00) >> 8);  // TEMPURATURE 1 MSB
+	buffer[9] = (erpa_adc[1] & 0xFF);           // TEMPURATURE 1 LSB
+	buffer[10] = ((0 & 0xFF00) >> 8);     		// TEMPURATURE 2 MSB
+	buffer[11] = (0 & 0xFF);                    // TEMPURATURE 2 LSB
+	buffer[12] = erpa_spi[0];					// ERPA eADC MSB
+	buffer[13] = erpa_spi[1];					// ERPA eADC LSB
 }
 
 
+/**
+ * @brief Samples data from the HK system.
+ *
+ * This function samples data from the HK system. If the SIMULATE precompiler directive is set,
+ * simulated data is used. Otherwise, actual data is obtained through I2C communication and ADC readings.
+ * The sampled data is stored in the provided buffer.
+ *
+ * @param buffer Pointer to the buffer where sampled data will be stored.
+ */
 void sample_hk(uint8_t *buffer)
 {
 	int16_t hk_i2c[4];
@@ -1455,22 +1566,22 @@ void sample_hk(uint8_t *buffer)
 	receive_hk_adc3(hk_adc3);
 #endif
 
-	buffer[0] = HK_SYNC;                     			// HK SYNC 0xCC MSB
-	buffer[1] = HK_SYNC;                     			// HK SYNC 0xCC LSB
-	buffer[2] = ((hk_seq & 0xFF00) >> 8);    			// HK SEQ # MSB
-	buffer[3] = (hk_seq & 0xFF);             			// HK SEQ # LSB
+	buffer[0] = HK_SYNC;                     	// HK SYNC 0xCC MSB
+	buffer[1] = HK_SYNC;                     	// HK SYNC 0xCC LSB
+	buffer[2] = ((hk_seq & 0xFF00) >> 8);    	// HK SEQ # MSB
+	buffer[3] = (hk_seq & 0xFF);             	// HK SEQ # LSB
 	buffer[4] = ((hk_adc3[1] & 0xFF00) >> 8);	// HK vsense MSB
 	buffer[5] = (hk_adc3[1] & 0xFF);			// HK vsense LSB
 	buffer[6] = ((hk_adc3[0] & 0xFF00) >> 8);	// HK vrefint MSB
 	buffer[7] = (hk_adc3[0] & 0xFF);			// HK vrefint LSB
-	buffer[8] = ((hk_i2c[0] & 0xFF00) >> 8);		// HK TEMP1 MSB
-	buffer[9] = (hk_i2c[0] & 0xFF);					// HK TEMP1 LSB
-	buffer[10] = ((hk_i2c[1] & 0xFF00) >> 8);		// HK TEMP2 MSB
-	buffer[11] = (hk_i2c[1] & 0xFF);				// HK TEMP2 LSB
-	buffer[12] = ((hk_i2c[2] & 0xFF00) >> 8);		// HK TEMP3 MSB
-	buffer[13] = (hk_i2c[2] & 0xFF);				// HK TEMP3 LSB
-	buffer[14] = ((hk_i2c[3] & 0xFF00) >> 8);		// HK TEMP4 MSB
-	buffer[15] = (hk_i2c[3] & 0xFF);				// HK TEMP4 LSB
+	buffer[8] = ((hk_i2c[0] & 0xFF00) >> 8);	// HK TEMP1 MSB
+	buffer[9] = (hk_i2c[0] & 0xFF);				// HK TEMP1 LSB
+	buffer[10] = ((hk_i2c[1] & 0xFF00) >> 8);	// HK TEMP2 MSB
+	buffer[11] = (hk_i2c[1] & 0xFF);			// HK TEMP2 LSB
+	buffer[12] = ((hk_i2c[2] & 0xFF00) >> 8);	// HK TEMP3 MSB
+	buffer[13] = (hk_i2c[2] & 0xFF);			// HK TEMP3 LSB
+	buffer[14] = ((hk_i2c[3] & 0xFF00) >> 8);	// HK TEMP4 MSB
+	buffer[15] = (hk_i2c[3] & 0xFF);			// HK TEMP4 LSB
 	buffer[16] = ((hk_adc1[0] & 0xFF00) >> 8);	// HK BUSvmon MSB
 	buffer[17] = (hk_adc1[0] & 0xFF);			// HK BUSvmon LSB
 	buffer[18] = ((hk_adc1[1] & 0xFF00) >> 8);	// HK BUSimon MSB
@@ -1498,6 +1609,8 @@ void sample_hk(uint8_t *buffer)
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_PMT_init */
+// *********************************************************************************************************** RTOS TASK FUNCTIONS
+
 /**
   * @brief  Function implementing the PMT_task thread.
   * @param  argument: Not used
