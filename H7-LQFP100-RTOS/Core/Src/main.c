@@ -949,6 +949,7 @@ void UART_RX_init(void *argument)
   for(;;)
   {
 		HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
+		osDelay(1);
   }
   /* USER CODE END UART_RX_init */
 }
