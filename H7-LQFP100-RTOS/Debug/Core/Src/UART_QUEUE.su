@@ -1,0 +1,6 @@
+../Core/Src/UART_QUEUE.c:13:6:queue_init	16	static
+../Core/Src/UART_QUEUE.c:22:6:queue_free	16	static
+../Core/Src/UART_QUEUE.c:27:6:queue_enqueue	16	static
+../Core/Src/UART_QUEUE.c:39:6:queue_dequeue	16	static
+../Core/Src/UART_QUEUE.c:53:6:queue_is_empty	16	static
+../Core/Src/UART_QUEUE.c:58:6:queue_is_full	16	static

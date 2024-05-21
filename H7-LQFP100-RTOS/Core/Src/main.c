@@ -23,7 +23,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
-
+#include <UART_QUEUE.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -46,6 +46,7 @@
 #define ERPA_DATA_SIZE 14
 #define HK_DATA_SIZE 38
 #define UART_RX_BUFFER_SIZE 100
+#define RTS_QUEUE_MAX_SIZE 100
 
 #define ADC1_NUM_CHANNELS 11
 #define ADC3_NUM_CHANNELS 4
@@ -109,6 +110,13 @@ const osThreadAttr_t UART_RX_task_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
+/* Definitions for UART_TX_task */
+osThreadId_t UART_TX_taskHandle;
+const osThreadAttr_t UART_TX_task_attributes = {
+  .name = "UART_TX_task",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
 /* USER CODE BEGIN PV */
 // *********************************************************************************************************** GLOBAL VARIABLES
 
@@ -117,6 +125,8 @@ uint8_t erpa_seq = 0;
 uint8_t hk_seq = 0;
 
 osEventFlagsId_t event_flags;
+
+uart_queue_t RTS_queue;
 
 unsigned char UART_RX_BUFFER[UART_RX_BUFFER_SIZE];
 
@@ -149,6 +159,7 @@ void PMT_init(void *argument);
 void ERPA_init(void *argument);
 void HK_init(void *argument);
 void UART_RX_init(void *argument);
+void UART_TX_init(void *argument);
 
 /* USER CODE BEGIN PFP */
 // *********************************************************************************************************** FUNCTION PROTOYPES
@@ -391,7 +402,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 }
 /* USER CODE END 0 */
 
-
 /**
   * @brief  The application entry point.
   * @retval int
@@ -470,6 +480,9 @@ int main(void)
 
   /* creation of UART_RX_task */
   UART_RX_taskHandle = osThreadNew(UART_RX_init, NULL, &UART_RX_task_attributes);
+
+  /* creation of UART_TX_task */
+  UART_TX_taskHandle = osThreadNew(UART_TX_init, NULL, &UART_TX_task_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
 	/* add threads, ... */
@@ -1213,7 +1226,7 @@ static void MX_DMA_Init(void)
   HAL_NVIC_SetPriority(DMA1_Stream1_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(DMA1_Stream1_IRQn);
   /* DMA1_Stream5_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Stream5_IRQn, 0, 0);
+  HAL_NVIC_SetPriority(DMA1_Stream5_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(DMA1_Stream5_IRQn);
 
 }
@@ -1425,6 +1438,8 @@ void receive_hk_adc3(uint16_t *buffer)
  */
 void system_setup()
 {
+	  queue_init(&RTS_queue, RTS_QUEUE_MAX_SIZE);
+
 	  TIM2->CCR4 = 312;
 	  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_4);
 
@@ -1452,6 +1467,20 @@ void system_setup()
 }
 
 
+packet_t create_packet(const uint8_t* data, uint16_t size) {
+    packet_t packet;
+    packet.array = (uint8_t*)malloc(size * sizeof(uint8_t)); // Allocate memory
+    if (packet.array == NULL) {
+        // Memory allocation failed
+        // Handle the error accordingly (e.g., return an error code or terminate the program)
+    }
+    memcpy(packet.array, data, size); // Copy the data into the packet array
+    packet.size = size;
+    return packet;
+}
+
+
+
 /**
  * @brief Samples data from the PMT.
  *
@@ -1461,10 +1490,11 @@ void system_setup()
  *
  * @param buffer Pointer to the buffer where sampled data will be stored.
  */
-void sample_pmt(uint8_t *buffer)
+void sample_pmt()
 {
-	uint8_t pmt_spi[2];
+    uint8_t* buffer = (uint8_t*)malloc(PMT_DATA_SIZE * sizeof(uint8_t)); // Allocate memory for the buffer
 
+	uint8_t pmt_spi[2];
 
 #ifdef SIMULATE
 	pmt_spi[0] = 0xE;
@@ -1480,6 +1510,9 @@ void sample_pmt(uint8_t *buffer)
 	buffer[4] = pmt_spi[0];
 	buffer[5] = pmt_spi[1];
 
+	packet_t pmt_packet = create_packet(buffer, PMT_DATA_SIZE);
+	queue_enqueue(&RTS_queue, &pmt_packet);
+	free(buffer);
 }
 
 
@@ -1492,8 +1525,10 @@ void sample_pmt(uint8_t *buffer)
  *
  * @param buffer Pointer to the buffer where sampled data will be stored.
  */
-void sample_erpa(uint8_t *buffer)
+void sample_erpa()
 {
+    uint8_t* buffer = (uint8_t*)malloc(ERPA_DATA_SIZE * sizeof(uint8_t)); // Allocate memory for the buffer
+
 	uint8_t erpa_spi[2];
 	uint16_t erpa_adc[2];
 
@@ -1522,6 +1557,10 @@ void sample_erpa(uint8_t *buffer)
 	buffer[11] = (0 & 0xFF);                    // TEMPURATURE 2 LSB
 	buffer[12] = erpa_spi[0];					// ERPA eADC MSB
 	buffer[13] = erpa_spi[1];					// ERPA eADC LSB
+
+	packet_t erpa_packet = create_packet(buffer, ERPA_DATA_SIZE);
+	queue_enqueue(&RTS_queue, &erpa_packet);
+	free(buffer);
 }
 
 
@@ -1534,8 +1573,10 @@ void sample_erpa(uint8_t *buffer)
  *
  * @param buffer Pointer to the buffer where sampled data will be stored.
  */
-void sample_hk(uint8_t *buffer)
+void sample_hk()
 {
+    uint8_t* buffer = (uint8_t*)malloc(HK_DATA_SIZE * sizeof(uint8_t)); // Allocate memory for the buffer
+
 	int16_t hk_i2c[4];
 	uint16_t hk_adc1[9];
 	uint16_t hk_adc3[4];
@@ -1605,6 +1646,9 @@ void sample_hk(uint8_t *buffer)
 	buffer[36] = ((hk_adc1[5] & 0xFF00) >> 8);	// HK n800vmon MSB
 	buffer[37] = (hk_adc1[5] & 0xFF);			// HK n800vmon LSB
 
+	packet_t hk_packet = create_packet(buffer, HK_DATA_SIZE);
+	queue_enqueue(&RTS_queue, &hk_packet);
+	free(buffer);
 }
 /* USER CODE END 4 */
 
@@ -1620,11 +1664,10 @@ void sample_hk(uint8_t *buffer)
 void PMT_init(void *argument)
 {
   /* USER CODE BEGIN 5 */
-	uint8_t pmt_data[PMT_DATA_SIZE];
 	/* Infinite loop */
 	for (;;) {
 	    osEventFlagsWait(event_flags, PMT_FLAG_ID, osFlagsWaitAny, osWaitForever);
-	    sample_pmt(pmt_data);
+	    //sample_pmt();
 		pmt_seq++;
 	}
   /* USER CODE END 5 */
@@ -1640,12 +1683,11 @@ void PMT_init(void *argument)
 void ERPA_init(void *argument)
 {
   /* USER CODE BEGIN ERPA_init */
-	uint8_t erpa_data[ERPA_DATA_SIZE];
   /* Infinite loop */
   for(;;)
   {
 	    osEventFlagsWait(event_flags, ERPA_FLAG_ID, osFlagsWaitAny, osWaitForever);
-	    sample_erpa(erpa_data);
+	    //sample_erpa();
 		erpa_seq++;
   }
   /* USER CODE END ERPA_init */
@@ -1661,12 +1703,11 @@ void ERPA_init(void *argument)
 void HK_init(void *argument)
 {
   /* USER CODE BEGIN HK_init */
-	uint8_t hk_data[HK_DATA_SIZE];
   /* Infinite loop */
   for(;;)
   {
 	    osEventFlagsWait(event_flags, HK_FLAG_ID, osFlagsWaitAny, osWaitForever);
-	    sample_hk(hk_data);
+	    sample_hk();
 		hk_seq++;
   }
   /* USER CODE END HK_init */
@@ -1689,6 +1730,35 @@ void UART_RX_init(void *argument)
 		osDelay(1);
   }
   /* USER CODE END UART_RX_init */
+}
+
+/* USER CODE BEGIN Header_UART_TX_init */
+/**
+* @brief Function implementing the UART_TX_task thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_UART_TX_init */
+void UART_TX_init(void *argument)
+{
+  /* USER CODE BEGIN UART_TX_init */
+  /* Infinite loop */
+  for(;;)
+  {
+	    if (!queue_is_empty(&RTS_queue))
+	    {
+			packet_t dequeued_packet;
+	    	queue_dequeue(&RTS_queue, &dequeued_packet);
+	        printf("Dequeued packet: ");
+	        for (uint16_t i = 0; i < dequeued_packet.size; i++) {
+	            printf("%d ", dequeued_packet.array[i]);
+	        }
+	        printf("\n");
+	    	HAL_UART_Transmit(&huart1, dequeued_packet.array, sizeof(dequeued_packet.array), 100);
+	    }
+	    osDelay(1);
+  }
+  /* USER CODE END UART_TX_init */
 }
 
 /**
