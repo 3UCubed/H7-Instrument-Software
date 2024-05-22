@@ -33,20 +33,12 @@ typedef struct {
     uint16_t size;   // Size of the array
 } packet_t;
 
-typedef struct {                                // object data type
-  uint8_t Buf[32];
-  uint8_t Idx;
-} MSGQUEUE_OBJ_t;
-
 typedef struct {
 	GPIO_TypeDef *gpio;
 	uint16_t pin;
 } gpio_pins;
 
-const gpio_pins gpios[] = { { GPIOB, GPIO_PIN_5 }, { GPIOB, GPIO_PIN_6 }, {
-		GPIOC, GPIO_PIN_10 }, { GPIOC, GPIO_PIN_13 }, { GPIOC, GPIO_PIN_7 }, {
-		GPIOC, GPIO_PIN_8 }, { GPIOC, GPIO_PIN_9 }, { GPIOC, GPIO_PIN_6 }, {
-		GPIOB, GPIO_PIN_2 } };
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -147,6 +139,12 @@ uint8_t PMT_ON = 0;
 uint8_t ERPA_ON = 0;
 uint8_t HK_ON = 0;
 
+int auto_sweep = 0;
+
+volatile uint32_t cadence = 3125;
+uint8_t step = 3;
+
+
 osEventFlagsId_t event_flags;
 
 unsigned char UART_RX_BUFFER[UART_RX_BUFFER_SIZE];
@@ -160,6 +158,12 @@ static const uint8_t ADT7410_2 = 0x4A << 1;
 static const uint8_t ADT7410_3 = 0x49 << 1;
 static const uint8_t ADT7410_4 = 0x4B << 1;
 
+uint32_t DAC_OUT[32] = { 0, 0, 0, 0, 620, 620, 1241, 1241, 1861, 1861, 2482, 2482, 3103, 3103, 3723, 3723, 4095, 4095, 4095, 4095, 3723, 3723, 3103, 3103, 2482, 2482, 1861, 1861, 1241, 1241, 620, 620 }; // For 3.3 volts
+
+const gpio_pins gpios[] = { { GPIOB, GPIO_PIN_5 }, { GPIOB, GPIO_PIN_6 }, {
+		GPIOC, GPIO_PIN_10 }, { GPIOC, GPIO_PIN_13 }, { GPIOC, GPIO_PIN_7 }, {
+		GPIOC, GPIO_PIN_8 }, { GPIOC, GPIO_PIN_9 }, { GPIOC, GPIO_PIN_6 }, {
+		GPIOB, GPIO_PIN_2 } };
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -251,48 +255,54 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	}
 	case 0x1B: {
 		printf("Step Up\n");
-//		if (step < 17) {
-//			step+=2;
-//		}
+		if (step < 17) {
+			step+=2;
+			HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, DAC_OUT[step]);
+			HAL_DAC_Start(&hdac1, DAC_CHANNEL_1);
+
+		}
 		break;
 	}
 	case 0x1C: {
 		printf("Step Down\n");
-//		if (step > 3) {
-//			step-=2;
-//		}
+		if (step > 3) {
+			step-=2;
+			HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, DAC_OUT[step]);
+			HAL_DAC_Start(&hdac1, DAC_CHANNEL_1);
+
+		}
 		break;
 	}
 	case 0x1D: {
 		printf("Toggle AutoSweep\n");
-//		if (!auto_sweep) {
-//			auto_sweep = 1;
-//			HAL_TIM_Base_Start(&htim2);
-//
-//			HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, DAC_OUT, SIZE, DAC_ALIGN_12B_R);
-//
-//		} else {
-//			auto_sweep = 0;
-//			HAL_TIM_Base_Stop(&htim2);
-//
-//			HAL_DAC_Stop_DMA(&hdac1, DAC_CHANNEL_1);
-//		}
+		if (!auto_sweep) {
+			auto_sweep = 1;
+			HAL_TIM_Base_Start(&htim2);
+
+			HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, DAC_OUT, 32, DAC_ALIGN_12B_R);
+
+		} else {
+			auto_sweep = 0;
+			HAL_TIM_Base_Stop(&htim2);
+
+			HAL_DAC_Stop_DMA(&hdac1, DAC_CHANNEL_1);
+		}
 		break;
 	}
 	case 0x24: {
 		printf("Factor Up\n");
-//		if (cadence <= 50000){
-//			cadence *= 2;
-//			TIM2->ARR = cadence;
-//		}
+		if (cadence <= 50000){
+			cadence *= 2;
+			TIM2->ARR = cadence;
+		}
 		break;
 	}
 	case 0x25: {
 		printf("Factor Down\n");
-//		if (cadence >= 6250){
-//			cadence /= 2;
-//			TIM2->ARR = cadence;
-//		}
+		if (cadence >= 6250){
+			cadence /= 2;
+			TIM2->ARR = cadence;
+		}
 		break;
 	}
 	case 0x00: {
