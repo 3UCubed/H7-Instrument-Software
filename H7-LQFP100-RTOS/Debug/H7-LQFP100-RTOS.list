@@ -35,9 +35,9 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  15 .debug_line   0002f389  00000000  00000000  000735d4  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_str    0018d605  00000000  00000000  000a295d  2**0
+ 16 .debug_str    0018d604  00000000  00000000  000a295d  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .comment      00000050  00000000  00000000  0022ff62  2**0
+ 17 .comment      00000050  00000000  00000000  0022ff61  2**0
                   CONTENTS, READONLY
  18 .debug_frame  0000aac8  00000000  00000000  0022ffb4  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
@@ -3157,75 +3157,76 @@ void system_setup()
  8001678:	b580      	push	{r7, lr}
  800167a:	af00      	add	r7, sp, #0
 	  queue_init(&RTS_queue, RTS_QUEUE_MAX_SIZE);
- 800167c:	f44f 717a 	mov.w	r1, #1000	; 0x3e8
- 8001680:	481c      	ldr	r0, [pc, #112]	; (80016f4 <system_setup+0x7c>)
- 8001682:	f7fe ffff 	bl	8000684 <queue_init>
+ 800167c:	2164      	movs	r1, #100	; 0x64
+ 800167e:	481d      	ldr	r0, [pc, #116]	; (80016f4 <system_setup+0x7c>)
+ 8001680:	f7ff f800 	bl	8000684 <queue_init>
 
 	  TIM2->CCR4 = 312;
- 8001686:	f04f 4380 	mov.w	r3, #1073741824	; 0x40000000
- 800168a:	f44f 729c 	mov.w	r2, #312	; 0x138
- 800168e:	641a      	str	r2, [r3, #64]	; 0x40
+ 8001684:	f04f 4380 	mov.w	r3, #1073741824	; 0x40000000
+ 8001688:	f44f 729c 	mov.w	r2, #312	; 0x138
+ 800168c:	641a      	str	r2, [r3, #64]	; 0x40
 	  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_4);
- 8001690:	210c      	movs	r1, #12
- 8001692:	4819      	ldr	r0, [pc, #100]	; (80016f8 <system_setup+0x80>)
- 8001694:	f00a fa28 	bl	800bae8 <HAL_TIM_PWM_Start>
+ 800168e:	210c      	movs	r1, #12
+ 8001690:	4819      	ldr	r0, [pc, #100]	; (80016f8 <system_setup+0x80>)
+ 8001692:	f00a fa29 	bl	800bae8 <HAL_TIM_PWM_Start>
 
 	  if (HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_OFFSET_LINEARITY,
- 8001698:	f240 72ff 	movw	r2, #2047	; 0x7ff
- 800169c:	f04f 1101 	mov.w	r1, #65537	; 0x10001
- 80016a0:	4816      	ldr	r0, [pc, #88]	; (80016fc <system_setup+0x84>)
- 80016a2:	f002 fbcd 	bl	8003e40 <HAL_ADCEx_Calibration_Start>
- 80016a6:	4603      	mov	r3, r0
- 80016a8:	2b00      	cmp	r3, #0
- 80016aa:	d001      	beq.n	80016b0 <system_setup+0x38>
+ 8001696:	f240 72ff 	movw	r2, #2047	; 0x7ff
+ 800169a:	f04f 1101 	mov.w	r1, #65537	; 0x10001
+ 800169e:	4817      	ldr	r0, [pc, #92]	; (80016fc <system_setup+0x84>)
+ 80016a0:	f002 fbce 	bl	8003e40 <HAL_ADCEx_Calibration_Start>
+ 80016a4:	4603      	mov	r3, r0
+ 80016a6:	2b00      	cmp	r3, #0
+ 80016a8:	d001      	beq.n	80016ae <system_setup+0x36>
 	  			ADC_SINGLE_ENDED) != HAL_OK) {
 	  		/* Calibration Error */
 	  		Error_Handler();
- 80016ac:	f000 fa1c 	bl	8001ae8 <Error_Handler>
+ 80016aa:	f000 fa1d 	bl	8001ae8 <Error_Handler>
 	  	}
 
 	  	if (HAL_ADC_Start_DMA(&hadc1, (uint32_t*) ADC1_raw_data,
- 80016b0:	220b      	movs	r2, #11
- 80016b2:	4913      	ldr	r1, [pc, #76]	; (8001700 <system_setup+0x88>)
- 80016b4:	4811      	ldr	r0, [pc, #68]	; (80016fc <system_setup+0x84>)
- 80016b6:	f001 fca1 	bl	8002ffc <HAL_ADC_Start_DMA>
- 80016ba:	4603      	mov	r3, r0
- 80016bc:	2b00      	cmp	r3, #0
- 80016be:	d001      	beq.n	80016c4 <system_setup+0x4c>
+ 80016ae:	220b      	movs	r2, #11
+ 80016b0:	4913      	ldr	r1, [pc, #76]	; (8001700 <system_setup+0x88>)
+ 80016b2:	4812      	ldr	r0, [pc, #72]	; (80016fc <system_setup+0x84>)
+ 80016b4:	f001 fca2 	bl	8002ffc <HAL_ADC_Start_DMA>
+ 80016b8:	4603      	mov	r3, r0
+ 80016ba:	2b00      	cmp	r3, #0
+ 80016bc:	d001      	beq.n	80016c2 <system_setup+0x4a>
 	  	ADC1_NUM_CHANNELS) != HAL_OK) {
 	  		Error_Handler();
- 80016c0:	f000 fa12 	bl	8001ae8 <Error_Handler>
+ 80016be:	f000 fa13 	bl	8001ae8 <Error_Handler>
 	  	}
 
 	  	if (HAL_ADCEx_Calibration_Start(&hadc3, ADC_CALIB_OFFSET_LINEARITY,
- 80016c4:	f240 72ff 	movw	r2, #2047	; 0x7ff
- 80016c8:	f04f 1101 	mov.w	r1, #65537	; 0x10001
- 80016cc:	480d      	ldr	r0, [pc, #52]	; (8001704 <system_setup+0x8c>)
- 80016ce:	f002 fbb7 	bl	8003e40 <HAL_ADCEx_Calibration_Start>
- 80016d2:	4603      	mov	r3, r0
- 80016d4:	2b00      	cmp	r3, #0
- 80016d6:	d001      	beq.n	80016dc <system_setup+0x64>
+ 80016c2:	f240 72ff 	movw	r2, #2047	; 0x7ff
+ 80016c6:	f04f 1101 	mov.w	r1, #65537	; 0x10001
+ 80016ca:	480e      	ldr	r0, [pc, #56]	; (8001704 <system_setup+0x8c>)
+ 80016cc:	f002 fbb8 	bl	8003e40 <HAL_ADCEx_Calibration_Start>
+ 80016d0:	4603      	mov	r3, r0
+ 80016d2:	2b00      	cmp	r3, #0
+ 80016d4:	d001      	beq.n	80016da <system_setup+0x62>
 	  			ADC_SINGLE_ENDED) != HAL_OK) {
 	  		/* Calibration Error */
 	  		Error_Handler();
- 80016d8:	f000 fa06 	bl	8001ae8 <Error_Handler>
+ 80016d6:	f000 fa07 	bl	8001ae8 <Error_Handler>
 	  	}
 
 	  	if (HAL_ADC_Start_DMA(&hadc3, (uint32_t*) ADC3_raw_data,
- 80016dc:	2204      	movs	r2, #4
- 80016de:	490a      	ldr	r1, [pc, #40]	; (8001708 <system_setup+0x90>)
- 80016e0:	4808      	ldr	r0, [pc, #32]	; (8001704 <system_setup+0x8c>)
- 80016e2:	f001 fc8b 	bl	8002ffc <HAL_ADC_Start_DMA>
- 80016e6:	4603      	mov	r3, r0
- 80016e8:	2b00      	cmp	r3, #0
- 80016ea:	d001      	beq.n	80016f0 <system_setup+0x78>
+ 80016da:	2204      	movs	r2, #4
+ 80016dc:	490a      	ldr	r1, [pc, #40]	; (8001708 <system_setup+0x90>)
+ 80016de:	4809      	ldr	r0, [pc, #36]	; (8001704 <system_setup+0x8c>)
+ 80016e0:	f001 fc8c 	bl	8002ffc <HAL_ADC_Start_DMA>
+ 80016e4:	4603      	mov	r3, r0
+ 80016e6:	2b00      	cmp	r3, #0
+ 80016e8:	d001      	beq.n	80016ee <system_setup+0x76>
 	  	ADC3_NUM_CHANNELS) != HAL_OK) {
 	  		Error_Handler();
- 80016ec:	f000 f9fc 	bl	8001ae8 <Error_Handler>
+ 80016ea:	f000 f9fd 	bl	8001ae8 <Error_Handler>
 	  	}
 }
- 80016f0:	bf00      	nop
- 80016f2:	bd80      	pop	{r7, pc}
+ 80016ee:	bf00      	nop
+ 80016f0:	bd80      	pop	{r7, pc}
+ 80016f2:	bf00      	nop
  80016f4:	24000550 	.word	0x24000550
  80016f8:	24000408 	.word	0x24000408
  80016fc:	2400009c 	.word	0x2400009c

@@ -23,12 +23,15 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
-#include <UART_QUEUE.h>
+#include <stdlib.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+typedef struct {
+    uint8_t* array;  // Pointer to the array data
+    uint16_t size;   // Size of the array
+} packet_t;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -46,7 +49,6 @@
 #define ERPA_DATA_SIZE 14
 #define HK_DATA_SIZE 38
 #define UART_RX_BUFFER_SIZE 100
-#define RTS_QUEUE_MAX_SIZE 100
 
 #define ADC1_NUM_CHANNELS 11
 #define ADC3_NUM_CHANNELS 4
@@ -125,8 +127,6 @@ uint8_t erpa_seq = 0;
 uint8_t hk_seq = 0;
 
 osEventFlagsId_t event_flags;
-
-uart_queue_t RTS_queue;
 
 unsigned char UART_RX_BUFFER[UART_RX_BUFFER_SIZE];
 
@@ -1438,7 +1438,6 @@ void receive_hk_adc3(uint16_t *buffer)
  */
 void system_setup()
 {
-	  queue_init(&RTS_queue, RTS_QUEUE_MAX_SIZE);
 
 	  TIM2->CCR4 = 312;
 	  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_4);
@@ -1511,7 +1510,6 @@ void sample_pmt()
 	buffer[5] = pmt_spi[1];
 
 	packet_t pmt_packet = create_packet(buffer, PMT_DATA_SIZE);
-	queue_enqueue(&RTS_queue, &pmt_packet);
 	free(buffer);
 }
 
@@ -1559,7 +1557,6 @@ void sample_erpa()
 	buffer[13] = erpa_spi[1];					// ERPA eADC LSB
 
 	packet_t erpa_packet = create_packet(buffer, ERPA_DATA_SIZE);
-	queue_enqueue(&RTS_queue, &erpa_packet);
 	free(buffer);
 }
 
@@ -1647,7 +1644,6 @@ void sample_hk()
 	buffer[37] = (hk_adc1[5] & 0xFF);			// HK n800vmon LSB
 
 	packet_t hk_packet = create_packet(buffer, HK_DATA_SIZE);
-	queue_enqueue(&RTS_queue, &hk_packet);
 	free(buffer);
 }
 /* USER CODE END 4 */
@@ -1745,17 +1741,6 @@ void UART_TX_init(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	    if (!queue_is_empty(&RTS_queue))
-	    {
-			packet_t dequeued_packet;
-	    	queue_dequeue(&RTS_queue, &dequeued_packet);
-	        printf("Dequeued packet: ");
-	        for (uint16_t i = 0; i < dequeued_packet.size; i++) {
-	            printf("%d ", dequeued_packet.array[i]);
-	        }
-	        printf("\n");
-	    	HAL_UART_Transmit(&huart1, dequeued_packet.array, sizeof(dequeued_packet.array), 100);
-	    }
 	    osDelay(1);
   }
   /* USER CODE END UART_TX_init */
