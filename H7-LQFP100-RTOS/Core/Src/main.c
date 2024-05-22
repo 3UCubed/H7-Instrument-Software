@@ -32,6 +32,11 @@ typedef struct {
     uint8_t* array;  // Pointer to the array data
     uint16_t size;   // Size of the array
 } packet_t;
+
+typedef struct {                                // object data type
+  uint8_t Buf[32];
+  uint8_t Idx;
+} MSGQUEUE_OBJ_t;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -49,6 +54,7 @@ typedef struct {
 #define ERPA_DATA_SIZE 14
 #define HK_DATA_SIZE 38
 #define UART_RX_BUFFER_SIZE 100
+#define MSGQUEUE_OBJECTS 16                     // number of Message Queue Objects
 
 #define ADC1_NUM_CHANNELS 11
 #define ADC3_NUM_CHANNELS 4
@@ -121,6 +127,7 @@ const osThreadAttr_t UART_TX_task_attributes = {
 };
 /* USER CODE BEGIN PV */
 // *********************************************************************************************************** GLOBAL VARIABLES
+osMessageQueueId_t mid_MsgQueue;                // message queue id
 
 uint8_t pmt_seq = 0;
 uint8_t erpa_seq = 0;
@@ -466,6 +473,10 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_QUEUES */
 	/* add queues, ... */
+  mid_MsgQueue = osMessageQueueNew(MSGQUEUE_OBJECTS, sizeof(packet_t), NULL);
+  if (mid_MsgQueue == NULL) {
+    ; // Message Queue object not created, handle failure
+  }
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
@@ -1492,8 +1503,7 @@ packet_t create_packet(const uint8_t* data, uint16_t size) {
 void sample_pmt()
 {
     uint8_t* buffer = (uint8_t*)malloc(PMT_DATA_SIZE * sizeof(uint8_t)); // Allocate memory for the buffer
-
-	uint8_t pmt_spi[2];
+	uint8_t* pmt_spi = (uint8_t*)malloc(2 * sizeof(uint8_t));
 
 #ifdef SIMULATE
 	pmt_spi[0] = 0xE;
@@ -1510,7 +1520,9 @@ void sample_pmt()
 	buffer[5] = pmt_spi[1];
 
 	packet_t pmt_packet = create_packet(buffer, PMT_DATA_SIZE);
+    osMessageQueuePut(mid_MsgQueue, &pmt_packet, 0U, 0U);
 	free(buffer);
+	free(pmt_spi);
 }
 
 
@@ -1527,8 +1539,8 @@ void sample_erpa()
 {
     uint8_t* buffer = (uint8_t*)malloc(ERPA_DATA_SIZE * sizeof(uint8_t)); // Allocate memory for the buffer
 
-	uint8_t erpa_spi[2];
-	uint16_t erpa_adc[2];
+	uint8_t* erpa_spi = (uint8_t*)malloc(2 * sizeof(uint8_t));
+	uint16_t* erpa_adc = (uint16_t*)malloc(2 * sizeof(uint16_t));
 
 #ifdef SIMULATE
 	erpa_spi[0] = 0xE;
@@ -1557,7 +1569,10 @@ void sample_erpa()
 	buffer[13] = erpa_spi[1];					// ERPA eADC LSB
 
 	packet_t erpa_packet = create_packet(buffer, ERPA_DATA_SIZE);
+    osMessageQueuePut(mid_MsgQueue, &erpa_packet, 0U, 0U);
 	free(buffer);
+	free(erpa_spi);
+	free(erpa_adc);
 }
 
 
@@ -1574,9 +1589,9 @@ void sample_hk()
 {
     uint8_t* buffer = (uint8_t*)malloc(HK_DATA_SIZE * sizeof(uint8_t)); // Allocate memory for the buffer
 
-	int16_t hk_i2c[4];
-	uint16_t hk_adc1[9];
-	uint16_t hk_adc3[4];
+	int16_t* hk_i2c = (uint16_t*)malloc(4 * sizeof(uint16_t));
+	uint16_t* hk_adc1 = (uint16_t*)malloc(9 * sizeof(uint16_t));
+	uint16_t* hk_adc3 = (uint16_t*)malloc(4 * sizeof(uint16_t));
 
 #ifdef SIMULATE
 	hk_i2c[0] = 0x11;
@@ -1644,7 +1659,11 @@ void sample_hk()
 	buffer[37] = (hk_adc1[5] & 0xFF);			// HK n800vmon LSB
 
 	packet_t hk_packet = create_packet(buffer, HK_DATA_SIZE);
+    osMessageQueuePut(mid_MsgQueue, &hk_packet, 0U, 0U);
 	free(buffer);
+	free(hk_i2c);
+	free(hk_adc1);
+	free(hk_adc3);
 }
 /* USER CODE END 4 */
 
@@ -1660,11 +1679,13 @@ void sample_hk()
 void PMT_init(void *argument)
 {
   /* USER CODE BEGIN 5 */
+
 	/* Infinite loop */
 	for (;;) {
 	    osEventFlagsWait(event_flags, PMT_FLAG_ID, osFlagsWaitAny, osWaitForever);
-	    //sample_pmt();
+	    sample_pmt();
 		pmt_seq++;
+		osThreadYield();
 	}
   /* USER CODE END 5 */
 }
@@ -1683,8 +1704,9 @@ void ERPA_init(void *argument)
   for(;;)
   {
 	    osEventFlagsWait(event_flags, ERPA_FLAG_ID, osFlagsWaitAny, osWaitForever);
-	    //sample_erpa();
+	    sample_erpa();
 		erpa_seq++;
+		osThreadYield();
   }
   /* USER CODE END ERPA_init */
 }
@@ -1705,6 +1727,7 @@ void HK_init(void *argument)
 	    osEventFlagsWait(event_flags, HK_FLAG_ID, osFlagsWaitAny, osWaitForever);
 	    sample_hk();
 		hk_seq++;
+		osThreadYield();
   }
   /* USER CODE END HK_init */
 }
@@ -1739,10 +1762,24 @@ void UART_TX_init(void *argument)
 {
   /* USER CODE BEGIN UART_TX_init */
   /* Infinite loop */
-  for(;;)
-  {
-	    osDelay(1);
-  }
+	packet_t msg;
+	osStatus_t status;
+
+	while (1) {
+	   ; // Insert thread code here...
+
+	   status = osMessageQueueGet(mid_MsgQueue, &msg, NULL, osWaitForever); // wait for message
+
+	   if (status == osOK) {
+	       printf("Dequeued packet: ");
+
+	       for (uint16_t i = 0; i < msg.size; i++) {
+	           printf("%d ", msg.array[i]);
+	       }
+	       printf("\n");
+	       HAL_UART_Transmit(&huart1, msg.array, msg.size, 100);
+	   }
+	}
   /* USER CODE END UART_TX_init */
 }
 
