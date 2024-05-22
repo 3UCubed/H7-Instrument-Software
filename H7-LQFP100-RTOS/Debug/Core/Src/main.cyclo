@@ -29,6 +29,6 @@ main.c:1679:6:PMT_init	1
 main.c:1700:6:ERPA_init	1
 main.c:1721:6:HK_init	1
 main.c:1742:6:UART_RX_init	1
-main.c:1761:6:UART_TX_init	3
-main.c:1794:6:HAL_TIM_PeriodElapsedCallback	2
-main.c:1811:6:Error_Handler	1
+main.c:1761:6:UART_TX_init	2
+main.c:1790:6:HAL_TIM_PeriodElapsedCallback	2
+main.c:1807:6:Error_Handler	1

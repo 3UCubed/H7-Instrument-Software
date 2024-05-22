@@ -30,5 +30,5 @@
 ../Core/Src/main.c:1721:6:HK_init	16	static
 ../Core/Src/main.c:1742:6:UART_RX_init	16	static
 ../Core/Src/main.c:1761:6:UART_TX_init	32	static
-../Core/Src/main.c:1794:6:HAL_TIM_PeriodElapsedCallback	16	static
-../Core/Src/main.c:1811:6:Error_Handler	4	static,ignoring_inline_asm
+../Core/Src/main.c:1790:6:HAL_TIM_PeriodElapsedCallback	16	static
+../Core/Src/main.c:1807:6:Error_Handler	4	static,ignoring_inline_asm

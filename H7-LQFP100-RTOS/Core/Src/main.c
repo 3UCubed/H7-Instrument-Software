@@ -1771,13 +1771,9 @@ void UART_TX_init(void *argument)
 	   status = osMessageQueueGet(mid_MsgQueue, &msg, NULL, osWaitForever); // wait for message
 
 	   if (status == osOK) {
-	       printf("Dequeued packet: ");
-
-	       for (uint16_t i = 0; i < msg.size; i++) {
-	           printf("%d ", msg.array[i]);
-	       }
-	       printf("\n");
+	       printf("RTS queue size: %ld\n", osMessageQueueGetCount(mid_MsgQueue));
 	       HAL_UART_Transmit(&huart1, msg.array, msg.size, 100);
+	       free(msg.array);
 	   }
 	}
   /* USER CODE END UART_TX_init */
