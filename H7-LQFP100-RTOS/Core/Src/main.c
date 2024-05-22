@@ -37,6 +37,16 @@ typedef struct {                                // object data type
   uint8_t Buf[32];
   uint8_t Idx;
 } MSGQUEUE_OBJ_t;
+
+typedef struct {
+	GPIO_TypeDef *gpio;
+	uint16_t pin;
+} gpio_pins;
+
+const gpio_pins gpios[] = { { GPIOB, GPIO_PIN_5 }, { GPIOB, GPIO_PIN_6 }, {
+		GPIOC, GPIO_PIN_10 }, { GPIOC, GPIO_PIN_13 }, { GPIOC, GPIO_PIN_7 }, {
+		GPIOC, GPIO_PIN_8 }, { GPIOC, GPIO_PIN_9 }, { GPIOC, GPIO_PIN_6 }, {
+		GPIOB, GPIO_PIN_2 } };
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -231,12 +241,12 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	switch (key) {
 	case 0x0B: {
 		printf("SDN1 ON\n");
-//		HAL_GPIO_WritePin(gpios[8].gpio, gpios[8].pin, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(gpios[8].gpio, gpios[8].pin, GPIO_PIN_SET);
 		break;
 	}
 	case 0x0A: {
 		printf("SDN1 OFF\n");
-//		HAL_GPIO_WritePin(gpios[8].gpio, gpios[8].pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(gpios[8].gpio, gpios[8].pin, GPIO_PIN_RESET);
 		break;
 	}
 	case 0x1B: {
@@ -287,83 +297,83 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	}
 	case 0x00: {
 		printf("SYS ON PB5\n");
-//		HAL_GPIO_WritePin(gpios[0].gpio, gpios[0].pin, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(gpios[0].gpio, gpios[0].pin, GPIO_PIN_SET);
 		break;
 	}
 	case 0x13: {
 		printf("SYS OFF PB5\n");
-//		HAL_GPIO_WritePin(gpios[0].gpio, gpios[0].pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(gpios[0].gpio, gpios[0].pin, GPIO_PIN_RESET);
 		break;
 	}
 	case 0x01: {
 
 		printf("800v ON PB6\n");
-//		HAL_GPIO_WritePin(gpios[1].gpio, gpios[1].pin, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(gpios[1].gpio, gpios[1].pin, GPIO_PIN_SET);
 		break;
 	}
 	case 0x14: {
 		printf("800v OFF PB6\n");
-//		HAL_GPIO_WritePin(gpios[1].gpio, gpios[1].pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(gpios[1].gpio, gpios[1].pin, GPIO_PIN_RESET);
 		break;
 	}
 	case 0x02: {
 		printf("5v ON PC2\n");
-//		HAL_GPIO_WritePin(gpios[2].gpio, gpios[2].pin, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(gpios[2].gpio, gpios[2].pin, GPIO_PIN_SET);
 		break;
 	}
 	case 0x15: {
 		printf("5v OFF PC2\n");
-//		HAL_GPIO_WritePin(gpios[2].gpio, gpios[2].pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(gpios[2].gpio, gpios[2].pin, GPIO_PIN_RESET);
 		break;
 	}
 	case 0x03: {
 		printf("n200v ON PC13\n");
-//		HAL_GPIO_WritePin(gpios[3].gpio, gpios[3].pin, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(gpios[3].gpio, gpios[3].pin, GPIO_PIN_SET);
 		break;
 	}
 	case 0x16: {
 		printf("n200v OFF PC13\n");
-//		HAL_GPIO_WritePin(gpios[3].gpio, gpios[3].pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(gpios[3].gpio, gpios[3].pin, GPIO_PIN_RESET);
 		break;
 	}
 	case 0x04: {
 		printf("3v3 ON PC7\n");
-//		HAL_GPIO_WritePin(gpios[4].gpio, gpios[4].pin, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(gpios[4].gpio, gpios[4].pin, GPIO_PIN_SET);
 		break;
 	}
 	case 0x17: {
 		printf("3v3 OFF PC7\n");
-//		HAL_GPIO_WritePin(gpios[4].gpio, gpios[4].pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(gpios[4].gpio, gpios[4].pin, GPIO_PIN_RESET);
 		break;
 	}
 	case 0x05: {
 		printf("n5v ON PC8\n");
-//		HAL_GPIO_WritePin(gpios[5].gpio, gpios[5].pin, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(gpios[5].gpio, gpios[5].pin, GPIO_PIN_SET);
 		break;
 	}
 	case 0x18: {
 		printf("n5v OFF PC8\n");
-//		HAL_GPIO_WritePin(gpios[5].gpio, gpios[5].pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(gpios[5].gpio, gpios[5].pin, GPIO_PIN_RESET);
 		break;
 	}
 	case 0x06: {
 		printf("15v ON PC9\n");
-//		HAL_GPIO_WritePin(gpios[6].gpio, gpios[6].pin, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(gpios[6].gpio, gpios[6].pin, GPIO_PIN_SET);
 		break;
 	}
 	case 0x19: {
 		printf("15v OFF PC9\n");
-//		HAL_GPIO_WritePin(gpios[6].gpio, gpios[6].pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(gpios[6].gpio, gpios[6].pin, GPIO_PIN_RESET);
 		break;
 	}
 	case 0x07: {
 		printf("n3v3 ON PC6\n");
-//		HAL_GPIO_WritePin(gpios[7].gpio, gpios[7].pin, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(gpios[7].gpio, gpios[7].pin, GPIO_PIN_SET);
 		break;
 	}
 	case 0x1A: {
 		printf("n3v3 OFF PC6\n");
-//		HAL_GPIO_WritePin(gpios[7].gpio, gpios[7].pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(gpios[7].gpio, gpios[7].pin, GPIO_PIN_RESET);
 		break;
 	}
 	case 0x0C: {
