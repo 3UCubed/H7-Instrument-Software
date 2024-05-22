@@ -133,6 +133,10 @@ uint8_t pmt_seq = 0;
 uint8_t erpa_seq = 0;
 uint8_t hk_seq = 0;
 
+uint8_t PMT_ON = 0;
+uint8_t ERPA_ON = 0;
+uint8_t HK_ON = 0;
+
 osEventFlagsId_t event_flags;
 
 unsigned char UART_RX_BUFFER[UART_RX_BUFFER_SIZE];
@@ -371,38 +375,32 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	}
 	case 0x0D: {
 		printf("PMT ON\n");
-//		PMT_ON = 1;
-//		HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_1);
+		PMT_ON = 1;
 		break;
 	}
 	case 0x10: {
 		printf("PMT OFF\n");
-//		PMT_ON = 0;
-//		HAL_TIM_OC_Stop_IT(&htim1, TIM_CHANNEL_1);
+		PMT_ON = 0;
 		break;
 	}
 	case 0x0E: {
 		printf("ERPA ON\n");
-		//ERPA_ON = 1;
-		//HAL_TIM_OC_Start_IT(&htim2, TIM_CHANNEL_4);
+		ERPA_ON = 1;
 		break;
 	}
 	case 0x11: {
 		printf("ERPA OFF\n");
-		//ERPA_ON = 0;
-		//HAL_TIM_OC_Stop_IT(&htim2, TIM_CHANNEL_4);
+		ERPA_ON = 0;
 		break;
 	}
 	case 0x0F: {
 		printf("HK ON \n");
-		//HK_ON = 1;
-		//HAL_TIM_OC_Start_IT(&htim4, TIM_CHANNEL_1);
+		HK_ON = 1;
 		break;
 	}
 	case 0x12: {
 		printf("HK OFF\n");
-		//HK_ON = 0;
-		//HAL_TIM_OC_Start_IT(&htim4, TIM_CHANNEL_1);
+		HK_ON = 0;
 		break;
 	}
 	}
@@ -1679,12 +1677,15 @@ void sample_hk()
 void PMT_init(void *argument)
 {
   /* USER CODE BEGIN 5 */
-
 	/* Infinite loop */
 	for (;;) {
+
 	    osEventFlagsWait(event_flags, PMT_FLAG_ID, osFlagsWaitAny, osWaitForever);
+		if(PMT_ON){
 	    sample_pmt();
 		pmt_seq++;
+
+		}
 		osThreadYield();
 	}
   /* USER CODE END 5 */
@@ -1700,12 +1701,17 @@ void PMT_init(void *argument)
 void ERPA_init(void *argument)
 {
   /* USER CODE BEGIN ERPA_init */
+
   /* Infinite loop */
   for(;;)
   {
 	    osEventFlagsWait(event_flags, ERPA_FLAG_ID, osFlagsWaitAny, osWaitForever);
+	  if (ERPA_ON)
+	  {
 	    sample_erpa();
 		erpa_seq++;
+
+	  }
 		osThreadYield();
   }
   /* USER CODE END ERPA_init */
@@ -1721,12 +1727,17 @@ void ERPA_init(void *argument)
 void HK_init(void *argument)
 {
   /* USER CODE BEGIN HK_init */
+
   /* Infinite loop */
   for(;;)
   {
 	    osEventFlagsWait(event_flags, HK_FLAG_ID, osFlagsWaitAny, osWaitForever);
+	  if(HK_ON)
+	  {
 	    sample_hk();
 		hk_seq++;
+
+	  }
 		osThreadYield();
   }
   /* USER CODE END HK_init */
@@ -1746,7 +1757,7 @@ void UART_RX_init(void *argument)
   for(;;)
   {
 		HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
-		osDelay(1);
+		osDelay(5);
   }
   /* USER CODE END UART_RX_init */
 }
@@ -1775,6 +1786,7 @@ void UART_TX_init(void *argument)
 	       HAL_UART_Transmit(&huart1, msg.array, msg.size, 100);
 	       free(msg.array);
 	   }
+	   osThreadYield();
 	}
   /* USER CODE END UART_TX_init */
 }
