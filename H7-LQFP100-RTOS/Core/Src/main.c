@@ -132,9 +132,9 @@ const osThreadAttr_t UART_TX_task_attributes = {
 // *********************************************************************************************************** GLOBAL VARIABLES
 osMessageQueueId_t mid_MsgQueue;                // message queue id
 
-uint8_t pmt_seq = 0;
-uint8_t erpa_seq = 0;
-uint8_t hk_seq = 0;
+uint16_t pmt_seq = 0;
+uint16_t erpa_seq = 0;
+uint16_t hk_seq = 0;
 
 uint8_t PMT_ON = 0;
 uint8_t ERPA_ON = 0;
