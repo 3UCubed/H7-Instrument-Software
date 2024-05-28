@@ -24,6 +24,7 @@
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -1397,24 +1398,49 @@ int16_t poll_i2c_sensor(const uint8_t TEMP_ADDR) {
  * @param spi_handle The handle to the SPI device.
  * @param buffer The buffer to store the received data.
  */
-void receive_spi(SPI_HandleTypeDef spi_handle, uint8_t *buffer)
+void receive_pmt_spi(uint8_t *buffer)
 {
 	uint8_t spi_raw_data[2];
 	uint8_t spi_MSB;
 	uint8_t spi_LSB;
 
-	HAL_SPI_Receive(&spi_handle, (uint8_t*) spi_raw_data, 1, 1);
+	HAL_SPI_Receive(&hspi1, (uint8_t*) spi_raw_data, 1, 1);
 
 	spi_LSB = ((spi_raw_data[0] & 0xFF00) >> 8);
 	spi_MSB = (spi_raw_data[1] & 0xFF);
 
-	spi_handle.Instance->CR1 |= 1 << 10;
+	hspi1.Instance->CR1 |= 1 << 10;
 
 	buffer[0] = spi_MSB;
 	buffer[1] = spi_LSB;
 }
 
 
+/**
+ * @brief Receives data from an SPI device.
+ *
+ * This function receives data from the specified SPI device and stores the result
+ * in the provided buffer.
+ *
+ * @param spi_handle The handle to the SPI device.
+ * @param buffer The buffer to store the received data.
+ */
+void receive_erpa_spi(uint8_t *buffer)
+{
+	uint8_t spi_raw_data[2];
+	uint8_t spi_MSB;
+	uint8_t spi_LSB;
+
+	HAL_SPI_Receive(&hspi2, (uint8_t*) spi_raw_data, 1, 1);
+
+	spi_LSB = ((spi_raw_data[0] & 0xFF00) >> 8);
+	spi_MSB = (spi_raw_data[1] & 0xFF);
+
+	hspi2.Instance->CR1 |= 1 << 10;
+
+	buffer[0] = spi_MSB;
+	buffer[1] = spi_LSB;
+}
 /**
  * @brief Receives ADC data for ERPA.
  *
@@ -1577,7 +1603,7 @@ void sample_pmt()
 	pmt_spi[0] = 0xE;
 	pmt_spi[1] = 0xD;
 #else
-	receive_spi(hspi1, pmt_spi);
+	receive_pmt_spi(pmt_spi);
 #endif
 
 	buffer[0] = PMT_SYNC;
@@ -1617,7 +1643,7 @@ void sample_erpa()
 	erpa_adc[0] = 0xEE;
 	erpa_adc[1] = 0xDD;
 #else
-	receive_spi(hspi2, erpa_spi);
+	receive_erpa_spi(erpa_spi);
 	receive_erpa_adc(erpa_adc);
 #endif
 
@@ -1657,7 +1683,7 @@ void sample_hk()
 {
     uint8_t* buffer = (uint8_t*)malloc(HK_DATA_SIZE * sizeof(uint8_t)); // Allocate memory for the buffer
 
-	int16_t* hk_i2c = (uint16_t*)malloc(4 * sizeof(uint16_t));
+	int16_t* hk_i2c = (int16_t*)malloc(4 * sizeof(int16_t));
 	uint16_t* hk_adc1 = (uint16_t*)malloc(9 * sizeof(uint16_t));
 	uint16_t* hk_adc3 = (uint16_t*)malloc(4 * sizeof(uint16_t));
 
