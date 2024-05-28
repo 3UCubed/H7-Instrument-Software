@@ -1572,6 +1572,8 @@ void system_setup()
 }
 
 
+
+
 packet_t create_packet(const uint8_t* data, uint16_t size) {
     packet_t packet;
     packet.array = (uint8_t*)malloc(size * sizeof(uint8_t)); // Allocate memory
@@ -1597,6 +1599,8 @@ packet_t create_packet(const uint8_t* data, uint16_t size) {
  */
 void sample_pmt()
 {
+	while (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_8)) {
+	}
     uint8_t* buffer = (uint8_t*)malloc(PMT_DATA_SIZE * sizeof(uint8_t)); // Allocate memory for the buffer
 	uint8_t* pmt_spi = (uint8_t*)malloc(2 * sizeof(uint8_t));
 
