@@ -1432,7 +1432,7 @@ void receive_erpa_spi(uint8_t *buffer)
 	uint8_t spi_MSB;
 	uint8_t spi_LSB;
 
-	HAL_SPI_Receive(&hspi2, (uint8_t*) spi_raw_data, 1, 1);
+	HAL_SPI_Receive(&hspi2, (uint8_t*) spi_raw_data, 1, 100);
 
 	spi_LSB = ((spi_raw_data[0] & 0xFF00) >> 8);
 	spi_MSB = (spi_raw_data[1] & 0xFF);
@@ -1632,6 +1632,9 @@ void sample_pmt()
  */
 void sample_erpa()
 {
+	while (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_11)) {
+	}
+
     uint8_t* buffer = (uint8_t*)malloc(ERPA_DATA_SIZE * sizeof(uint8_t)); // Allocate memory for the buffer
 
 	uint8_t* erpa_spi = (uint8_t*)malloc(2 * sizeof(uint8_t));
