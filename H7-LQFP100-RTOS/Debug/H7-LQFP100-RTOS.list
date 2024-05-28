@@ -23,23 +23,23 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
   9 .ARM.attributes 0000002e  00000000  00000000  00030100  2**0
                   CONTENTS, READONLY
- 10 .debug_info   00030c37  00000000  00000000  0003012e  2**0
+ 10 .debug_info   00030c3b  00000000  00000000  0003012e  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 11 .debug_abbrev 00005267  00000000  00000000  00060d65  2**0
+ 11 .debug_abbrev 00005283  00000000  00000000  00060d69  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 12 .debug_aranges 00002540  00000000  00000000  00065fd0  2**3
+ 12 .debug_aranges 00002540  00000000  00000000  00065ff0  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 13 .debug_ranges 00002358  00000000  00000000  00068510  2**3
+ 13 .debug_ranges 00002358  00000000  00000000  00068530  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_macro  000074bb  00000000  00000000  0006a868  2**0
+ 14 .debug_macro  000074bb  00000000  00000000  0006a888  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_line   0002ef26  00000000  00000000  00071d23  2**0
+ 15 .debug_line   0002ef2c  00000000  00000000  00071d43  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_str    0018d56b  00000000  00000000  000a0c49  2**0
+ 16 .debug_str    0018d573  00000000  00000000  000a0c6f  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .comment      00000050  00000000  00000000  0022e1b4  2**0
+ 17 .comment      00000050  00000000  00000000  0022e1e2  2**0
                   CONTENTS, READONLY
- 18 .debug_frame  0000a980  00000000  00000000  0022e204  2**2
+ 18 .debug_frame  0000a980  00000000  00000000  0022e234  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -3570,39 +3570,40 @@ void sample_erpa()
  80019b0:	4603      	mov	r3, r0
  80019b2:	617b      	str	r3, [r7, #20]
 
-	uint8_t* erpa_spi = (uint8_t*)malloc(2 * sizeof(uint8_t));
- 80019b4:	2002      	movs	r0, #2
+	uint16_t* erpa_adc = (uint16_t*)malloc(2 * sizeof(uint16_t));
+ 80019b4:	2004      	movs	r0, #4
  80019b6:	f011 ff93 	bl	80138e0 <malloc>
  80019ba:	4603      	mov	r3, r0
  80019bc:	613b      	str	r3, [r7, #16]
-	uint16_t* erpa_adc = (uint16_t*)malloc(2 * sizeof(uint16_t));
- 80019be:	2004      	movs	r0, #4
+
+#ifdef SIMULATE
+	uint8_t* erpa_spi = (uint8_t*)malloc(2 * sizeof(uint8_t));
+ 80019be:	2002      	movs	r0, #2
  80019c0:	f011 ff8e 	bl	80138e0 <malloc>
  80019c4:	4603      	mov	r3, r0
  80019c6:	60fb      	str	r3, [r7, #12]
 
-#ifdef SIMULATE
 	erpa_spi[0] = 0xE;
- 80019c8:	693b      	ldr	r3, [r7, #16]
+ 80019c8:	68fb      	ldr	r3, [r7, #12]
  80019ca:	220e      	movs	r2, #14
  80019cc:	701a      	strb	r2, [r3, #0]
 	erpa_spi[1] = 0xD;
- 80019ce:	693b      	ldr	r3, [r7, #16]
+ 80019ce:	68fb      	ldr	r3, [r7, #12]
  80019d0:	3301      	adds	r3, #1
  80019d2:	220d      	movs	r2, #13
  80019d4:	701a      	strb	r2, [r3, #0]
 
 	erpa_adc[0] = 0xEE;
- 80019d6:	68fb      	ldr	r3, [r7, #12]
+ 80019d6:	693b      	ldr	r3, [r7, #16]
  80019d8:	22ee      	movs	r2, #238	; 0xee
  80019da:	801a      	strh	r2, [r3, #0]
 	erpa_adc[1] = 0xDD;
- 80019dc:	68fb      	ldr	r3, [r7, #12]
+ 80019dc:	693b      	ldr	r3, [r7, #16]
  80019de:	3302      	adds	r3, #2
  80019e0:	22dd      	movs	r2, #221	; 0xdd
  80019e2:	801a      	strh	r2, [r3, #0]
 #else
-	receive_erpa_spi(erpa_spi);
+	uint8_t* erpa_spi = receive_erpa_spi();
 	receive_erpa_adc(erpa_adc);
 #endif
 
@@ -3637,7 +3638,7 @@ void sample_erpa()
  8001a10:	2200      	movs	r2, #0
  8001a12:	701a      	strb	r2, [r3, #0]
 	buffer[6] = ((erpa_adc[0] & 0xFF00) >> 8);	// SWP Monitored MSB
- 8001a14:	68fb      	ldr	r3, [r7, #12]
+ 8001a14:	693b      	ldr	r3, [r7, #16]
  8001a16:	881b      	ldrh	r3, [r3, #0]
  8001a18:	0a1b      	lsrs	r3, r3, #8
  8001a1a:	b29a      	uxth	r2, r3
@@ -3646,14 +3647,14 @@ void sample_erpa()
  8001a20:	b2d2      	uxtb	r2, r2
  8001a22:	701a      	strb	r2, [r3, #0]
 	buffer[7] = (erpa_adc[0] & 0xFF);           // SWP Monitored LSB
- 8001a24:	68fb      	ldr	r3, [r7, #12]
+ 8001a24:	693b      	ldr	r3, [r7, #16]
  8001a26:	881a      	ldrh	r2, [r3, #0]
  8001a28:	697b      	ldr	r3, [r7, #20]
  8001a2a:	3307      	adds	r3, #7
  8001a2c:	b2d2      	uxtb	r2, r2
  8001a2e:	701a      	strb	r2, [r3, #0]
 	buffer[8] = ((erpa_adc[1] & 0xFF00) >> 8);  // TEMPURATURE 1 MSB
- 8001a30:	68fb      	ldr	r3, [r7, #12]
+ 8001a30:	693b      	ldr	r3, [r7, #16]
  8001a32:	3302      	adds	r3, #2
  8001a34:	881b      	ldrh	r3, [r3, #0]
  8001a36:	0a1b      	lsrs	r3, r3, #8
@@ -3663,7 +3664,7 @@ void sample_erpa()
  8001a3e:	b2d2      	uxtb	r2, r2
  8001a40:	701a      	strb	r2, [r3, #0]
 	buffer[9] = (erpa_adc[1] & 0xFF);           // TEMPURATURE 1 LSB
- 8001a42:	68fb      	ldr	r3, [r7, #12]
+ 8001a42:	693b      	ldr	r3, [r7, #16]
  8001a44:	3302      	adds	r3, #2
  8001a46:	881a      	ldrh	r2, [r3, #0]
  8001a48:	697b      	ldr	r3, [r7, #20]
@@ -3683,13 +3684,13 @@ void sample_erpa()
 	buffer[12] = erpa_spi[0];					// ERPA eADC MSB
  8001a60:	697b      	ldr	r3, [r7, #20]
  8001a62:	330c      	adds	r3, #12
- 8001a64:	693a      	ldr	r2, [r7, #16]
+ 8001a64:	68fa      	ldr	r2, [r7, #12]
  8001a66:	7812      	ldrb	r2, [r2, #0]
  8001a68:	701a      	strb	r2, [r3, #0]
 	buffer[13] = erpa_spi[1];					// ERPA eADC LSB
  8001a6a:	697b      	ldr	r3, [r7, #20]
  8001a6c:	330d      	adds	r3, #13
- 8001a6e:	693a      	ldr	r2, [r7, #16]
+ 8001a6e:	68fa      	ldr	r2, [r7, #12]
  8001a70:	7852      	ldrb	r2, [r2, #1]
  8001a72:	701a      	strb	r2, [r3, #0]
 
@@ -3710,10 +3711,10 @@ void sample_erpa()
  8001a8e:	6978      	ldr	r0, [r7, #20]
  8001a90:	f011 ff2e 	bl	80138f0 <free>
 	free(erpa_spi);
- 8001a94:	6938      	ldr	r0, [r7, #16]
+ 8001a94:	68f8      	ldr	r0, [r7, #12]
  8001a96:	f011 ff2b 	bl	80138f0 <free>
 	free(erpa_adc);
- 8001a9a:	68f8      	ldr	r0, [r7, #12]
+ 8001a9a:	6938      	ldr	r0, [r7, #16]
  8001a9c:	f011 ff28 	bl	80138f0 <free>
 }
  8001aa0:	bf00      	nop

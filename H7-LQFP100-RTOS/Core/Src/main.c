@@ -1425,7 +1425,7 @@ void receive_pmt_spi(uint8_t *buffer)
  * @param spi_handle The handle to the SPI device.
  * @param buffer The buffer to store the received data.
  */
-void receive_erpa_spi(uint8_t *buffer)
+uint8_t* receive_erpa_spi()
 {
 	uint8_t spi_raw_data[2];
 	uint8_t spi_MSB;
@@ -1438,8 +1438,10 @@ void receive_erpa_spi(uint8_t *buffer)
 
 	hspi2.Instance->CR1 |= 1 << 10;
 
-	buffer[0] = spi_MSB;
-	buffer[1] = spi_LSB;
+	uint8_t *results = malloc(2 * sizeof(uint8_t));
+	results[0] = spi_MSB;
+	results[1] = spi_LSB;
+	return results;
 }
 /**
  * @brief Receives ADC data for ERPA.
@@ -1633,17 +1635,18 @@ void sample_erpa()
 {
     uint8_t* buffer = (uint8_t*)malloc(ERPA_DATA_SIZE * sizeof(uint8_t)); // Allocate memory for the buffer
 
-	uint8_t* erpa_spi = (uint8_t*)malloc(2 * sizeof(uint8_t));
 	uint16_t* erpa_adc = (uint16_t*)malloc(2 * sizeof(uint16_t));
 
 #ifdef SIMULATE
+	uint8_t* erpa_spi = (uint8_t*)malloc(2 * sizeof(uint8_t));
+
 	erpa_spi[0] = 0xE;
 	erpa_spi[1] = 0xD;
 
 	erpa_adc[0] = 0xEE;
 	erpa_adc[1] = 0xDD;
 #else
-	receive_erpa_spi(erpa_spi);
+	uint8_t* erpa_spi = receive_erpa_spi();
 	receive_erpa_adc(erpa_adc);
 #endif
 
