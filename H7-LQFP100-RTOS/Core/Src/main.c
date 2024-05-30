@@ -25,6 +25,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -52,8 +54,8 @@ typedef struct {
 #define ERPA_FLAG_ID 0x0002
 #define HK_FLAG_ID 0x0004
 
-#define PMT_DATA_SIZE 6
-#define ERPA_DATA_SIZE 14
+#define PMT_DATA_SIZE 14
+#define ERPA_DATA_SIZE 10
 #define HK_DATA_SIZE 38
 #define UART_RX_BUFFER_SIZE 100
 #define MSGQUEUE_OBJECTS 16                     // number of Message Queue Objects
@@ -83,6 +85,8 @@ DAC_HandleTypeDef hdac1;
 DMA_HandleTypeDef hdma_dac1_ch1;
 
 I2C_HandleTypeDef hi2c1;
+
+RTC_HandleTypeDef hrtc;
 
 SPI_HandleTypeDef hspi1;
 SPI_HandleTypeDef hspi2;
@@ -182,6 +186,7 @@ static void MX_ADC3_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_DAC1_Init(void);
 static void MX_SPI1_Init(void);
+static void MX_RTC_Init(void);
 void PMT_init(void *argument);
 void ERPA_init(void *argument);
 void HK_init(void *argument);
@@ -471,10 +476,12 @@ int main(void)
   MX_ADC1_Init();
   MX_DAC1_Init();
   MX_SPI1_Init();
+  MX_RTC_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_1);
   HAL_TIM_OC_Start_IT(&htim2, TIM_CHANNEL_1);
   HAL_TIM_OC_Start_IT(&htim3, TIM_CHANNEL_1);
+
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -525,6 +532,7 @@ int main(void)
   event_flags = osEventFlagsNew(NULL);
   system_setup();
   printf("Starting kernal...\n");
+
   /* USER CODE END RTOS_EVENTS */
 
   /* Start scheduler */
@@ -562,9 +570,10 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_LSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_DIV1;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
   RCC_OscInitStruct.PLL.PLLM = 4;
@@ -958,6 +967,70 @@ static void MX_I2C1_Init(void)
   /* USER CODE BEGIN I2C1_Init 2 */
 
   /* USER CODE END I2C1_Init 2 */
+
+}
+
+/**
+  * @brief RTC Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_RTC_Init(void)
+{
+
+  /* USER CODE BEGIN RTC_Init 0 */
+
+  /* USER CODE END RTC_Init 0 */
+
+  RTC_TimeTypeDef sTime = {0};
+  RTC_DateTypeDef sDate = {0};
+
+  /* USER CODE BEGIN RTC_Init 1 */
+
+  /* USER CODE END RTC_Init 1 */
+
+  /** Initialize RTC Only
+  */
+  hrtc.Instance = RTC;
+  hrtc.Init.HourFormat = RTC_HOURFORMAT_24;
+  hrtc.Init.AsynchPrediv = 127;
+  hrtc.Init.SynchPrediv = 255;
+  hrtc.Init.OutPut = RTC_OUTPUT_DISABLE;
+  hrtc.Init.OutPutPolarity = RTC_OUTPUT_POLARITY_HIGH;
+  hrtc.Init.OutPutType = RTC_OUTPUT_TYPE_OPENDRAIN;
+  hrtc.Init.OutPutRemap = RTC_OUTPUT_REMAP_NONE;
+  if (HAL_RTC_Init(&hrtc) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /* USER CODE BEGIN Check_RTC_BKUP */
+
+  /* USER CODE END Check_RTC_BKUP */
+
+  /** Initialize RTC and set the Time and Date
+  */
+  sTime.Hours = 0x0;
+  sTime.Minutes = 0x0;
+  sTime.Seconds = 0x0;
+  sTime.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
+  sTime.StoreOperation = RTC_STOREOPERATION_RESET;
+  if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BCD) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sDate.WeekDay = RTC_WEEKDAY_MONDAY;
+  sDate.Month = RTC_MONTH_JANUARY;
+  sDate.Date = 0x1;
+  sDate.Year = 0x0;
+
+  if (HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BCD) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN RTC_Init 2 */
+
+  /* USER CODE END RTC_Init 2 */
 
 }
 
@@ -1572,7 +1645,22 @@ void system_setup()
 }
 
 
+void getTimestamp(uint8_t *buffer)
+{
+	RTC_TimeTypeDef currentTime;
+	RTC_DateTypeDef currentDate;
 
+	HAL_RTC_GetTime(&hrtc, &currentTime, RTC_FORMAT_BIN);
+	HAL_RTC_GetDate(&hrtc, &currentDate, RTC_FORMAT_BIN);
+    uint32_t milliseconds = (1000 - (currentTime.SubSeconds * 1000) / hrtc.Init.SynchPrediv);
+
+	buffer[0] = currentTime.Hours;
+	buffer[1] = currentTime.Minutes;
+	buffer[2] = currentTime.Seconds;
+    buffer[3] = (milliseconds >> 8) & 0xFF;  // High byte of milliseconds
+    buffer[4] = milliseconds & 0xFF;
+
+}
 
 packet_t create_packet(const uint8_t* data, uint16_t size) {
     packet_t packet;
@@ -1603,6 +1691,9 @@ void sample_pmt()
 	}
     uint8_t* buffer = (uint8_t*)malloc(PMT_DATA_SIZE * sizeof(uint8_t)); // Allocate memory for the buffer
 	uint8_t* pmt_spi = (uint8_t*)malloc(2 * sizeof(uint8_t));
+	uint8_t* timestamp = (uint8_t*)malloc(5 * sizeof(uint8_t));
+
+    getTimestamp(timestamp);
 
 #ifdef SIMULATE
 	pmt_spi[0] = 0xE;
@@ -1617,11 +1708,20 @@ void sample_pmt()
 	buffer[3] = (pmt_seq & 0xFF);
 	buffer[4] = pmt_spi[0];
 	buffer[5] = pmt_spi[1];
+	buffer[6] = 0x00;
+	buffer[7] = timestamp[0];
+	buffer[8] = 0x00;
+	buffer[9] = timestamp[1];
+	buffer[10] = 0x00;
+	buffer[11] = timestamp[2];
+	buffer[12] = timestamp[3];
+	buffer[13] = timestamp[4];
 
 	packet_t pmt_packet = create_packet(buffer, PMT_DATA_SIZE);
     osMessageQueuePut(mid_MsgQueue, &pmt_packet, 0U, 0U);
 	free(buffer);
 	free(pmt_spi);
+	free(timestamp);
 }
 
 
@@ -1659,16 +1759,13 @@ void sample_erpa()
 	buffer[1] = ERPA_SYNC;
 	buffer[2] = ((erpa_seq & 0xFF00) >> 8);
 	buffer[3] = (erpa_seq & 0xFF);
-	buffer[4] = ((0 & 0xFF00) >> 8); 	  		// ENDmon MSB
-	buffer[5] = (0 & 0xFF);               		// ENDmon LSB
-	buffer[6] = ((erpa_adc[0] & 0xFF00) >> 8);	// SWP Monitored MSB
-	buffer[7] = (erpa_adc[0] & 0xFF);           // SWP Monitored LSB
-	buffer[8] = ((erpa_adc[1] & 0xFF00) >> 8);  // TEMPURATURE 1 MSB
-	buffer[9] = (erpa_adc[1] & 0xFF);           // TEMPURATURE 1 LSB
-	buffer[10] = ((0 & 0xFF00) >> 8);     		// TEMPURATURE 2 MSB
-	buffer[11] = (0 & 0xFF);                    // TEMPURATURE 2 LSB
-	buffer[12] = erpa_spi[0];					// ERPA eADC MSB
-	buffer[13] = erpa_spi[1];					// ERPA eADC LSB
+	buffer[4] = ((erpa_adc[0] & 0xFF00) >> 8);	// SWP Monitored MSB
+	buffer[5] = (erpa_adc[0] & 0xFF);           // SWP Monitored LSB
+	buffer[6] = ((erpa_adc[1] & 0xFF00) >> 8);  // TEMPURATURE 1 MSB
+	buffer[7] = (erpa_adc[1] & 0xFF);           // TEMPURATURE 1 LSB
+	buffer[8] = erpa_spi[0];					// ERPA eADC MSB
+	buffer[9] = erpa_spi[1];					// ERPA eADC LSB
+
 
 	packet_t erpa_packet = create_packet(buffer, ERPA_DATA_SIZE);
     osMessageQueuePut(mid_MsgQueue, &erpa_packet, 0U, 0U);
@@ -1767,6 +1864,9 @@ void sample_hk()
 	free(hk_adc1);
 	free(hk_adc3);
 }
+
+
+
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_PMT_init */
