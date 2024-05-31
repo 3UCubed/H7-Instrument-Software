@@ -55,8 +55,8 @@ typedef struct {
 #define HK_FLAG_ID 0x0004
 
 #define PMT_DATA_SIZE 14
-#define ERPA_DATA_SIZE 10
-#define HK_DATA_SIZE 38
+#define ERPA_DATA_SIZE 18
+#define HK_DATA_SIZE 46
 #define UART_RX_BUFFER_SIZE 100
 #define MSGQUEUE_OBJECTS 16                     // number of Message Queue Objects
 
@@ -1019,10 +1019,10 @@ static void MX_RTC_Init(void)
   {
     Error_Handler();
   }
-  sDate.WeekDay = RTC_WEEKDAY_MONDAY;
-  sDate.Month = RTC_MONTH_JANUARY;
-  sDate.Date = 0x1;
-  sDate.Year = 0x0;
+  sDate.WeekDay = RTC_WEEKDAY_FRIDAY;
+  sDate.Month = RTC_MONTH_MAY;
+  sDate.Date = 0x31;
+  sDate.Year = 0x24;
 
   if (HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BCD) != HAL_OK)
   {
@@ -1654,11 +1654,16 @@ void getTimestamp(uint8_t *buffer)
 	HAL_RTC_GetDate(&hrtc, &currentDate, RTC_FORMAT_BIN);
     uint32_t milliseconds = (1000 - (currentTime.SubSeconds * 1000) / hrtc.Init.SynchPrediv);
 
-	buffer[0] = currentTime.Hours;
-	buffer[1] = currentTime.Minutes;
-	buffer[2] = currentTime.Seconds;
-    buffer[3] = (milliseconds >> 8) & 0xFF;  // High byte of milliseconds
-    buffer[4] = milliseconds & 0xFF;
+
+
+    buffer[0] = currentDate.Year;		// 0-99
+    buffer[1] = currentDate.Month;		// 1-12
+    buffer[2] = currentDate.Date;		// 1-31
+	buffer[3] = currentTime.Hours;		// 0-23
+	buffer[4] = currentTime.Minutes;	// 0-59
+	buffer[5] = currentTime.Seconds;	// 0-59
+    buffer[6] = (milliseconds >> 8) & 0xFF;  // High byte of milliseconds
+    buffer[7] = milliseconds & 0xFF;
 
 }
 
@@ -1691,8 +1696,7 @@ void sample_pmt()
 	}
     uint8_t* buffer = (uint8_t*)malloc(PMT_DATA_SIZE * sizeof(uint8_t)); // Allocate memory for the buffer
 	uint8_t* pmt_spi = (uint8_t*)malloc(2 * sizeof(uint8_t));
-	uint8_t* timestamp = (uint8_t*)malloc(5 * sizeof(uint8_t));
-
+	uint8_t* timestamp = (uint8_t*)malloc(8 * sizeof(uint8_t));
     getTimestamp(timestamp);
 
 #ifdef SIMULATE
@@ -1708,14 +1712,14 @@ void sample_pmt()
 	buffer[3] = (pmt_seq & 0xFF);
 	buffer[4] = pmt_spi[0];
 	buffer[5] = pmt_spi[1];
-	buffer[6] = 0x00;
-	buffer[7] = timestamp[0];
-	buffer[8] = 0x00;
-	buffer[9] = timestamp[1];
-	buffer[10] = 0x00;
-	buffer[11] = timestamp[2];
-	buffer[12] = timestamp[3];
-	buffer[13] = timestamp[4];
+	buffer[6] = timestamp[0];
+	buffer[7] = timestamp[1];
+	buffer[8] = timestamp[2];
+	buffer[9] = timestamp[3];
+	buffer[10] = timestamp[4];
+	buffer[11] = timestamp[5];
+	buffer[12] = timestamp[6];
+	buffer[13] = timestamp[7];
 
 	packet_t pmt_packet = create_packet(buffer, PMT_DATA_SIZE);
     osMessageQueuePut(mid_MsgQueue, &pmt_packet, 0U, 0U);
@@ -1743,6 +1747,8 @@ void sample_erpa()
 
 	uint8_t* erpa_spi = (uint8_t*)malloc(2 * sizeof(uint8_t));
 	uint16_t* erpa_adc = (uint16_t*)malloc(2 * sizeof(uint16_t));
+	uint8_t* timestamp = (uint8_t*)malloc(8 * sizeof(uint8_t));
+    getTimestamp(timestamp);
 
 #ifdef SIMULATE
 	erpa_spi[0] = 0xE;
@@ -1765,6 +1771,15 @@ void sample_erpa()
 	buffer[7] = (erpa_adc[1] & 0xFF);           // TEMPURATURE 1 LSB
 	buffer[8] = erpa_spi[0];					// ERPA eADC MSB
 	buffer[9] = erpa_spi[1];					// ERPA eADC LSB
+	buffer[10] = timestamp[0];
+	buffer[11] = timestamp[1];
+	buffer[12] = timestamp[2];
+	buffer[13] = timestamp[3];
+	buffer[14] = timestamp[4];
+	buffer[15] = timestamp[5];
+	buffer[16] = timestamp[6];
+	buffer[17] = timestamp[7];
+
 
 
 	packet_t erpa_packet = create_packet(buffer, ERPA_DATA_SIZE);
@@ -1772,6 +1787,7 @@ void sample_erpa()
 	free(buffer);
 	free(erpa_spi);
 	free(erpa_adc);
+	free(timestamp);
 }
 
 
@@ -1791,6 +1807,8 @@ void sample_hk()
 	int16_t* hk_i2c = (int16_t*)malloc(4 * sizeof(int16_t));
 	uint16_t* hk_adc1 = (uint16_t*)malloc(9 * sizeof(uint16_t));
 	uint16_t* hk_adc3 = (uint16_t*)malloc(4 * sizeof(uint16_t));
+	uint8_t* timestamp = (uint8_t*)malloc(8 * sizeof(uint8_t));
+    getTimestamp(timestamp);
 
 #ifdef SIMULATE
 	hk_i2c[0] = 0x11;
@@ -1856,6 +1874,14 @@ void sample_hk()
 	buffer[35] = (hk_adc1[4] & 0xFF);			// HK n150vmon LSB
 	buffer[36] = ((hk_adc1[5] & 0xFF00) >> 8);	// HK n800vmon MSB
 	buffer[37] = (hk_adc1[5] & 0xFF);			// HK n800vmon LSB
+	buffer[38] = timestamp[0];
+	buffer[39] = timestamp[1];
+	buffer[40] = timestamp[2];
+	buffer[41] = timestamp[3];
+	buffer[42] = timestamp[4];
+	buffer[43] = timestamp[5];
+	buffer[44] = timestamp[6];
+	buffer[45] = timestamp[7];
 
 	packet_t hk_packet = create_packet(buffer, HK_DATA_SIZE);
     osMessageQueuePut(mid_MsgQueue, &hk_packet, 0U, 0U);
@@ -1863,6 +1889,7 @@ void sample_hk()
 	free(hk_i2c);
 	free(hk_adc1);
 	free(hk_adc3);
+	free(timestamp);
 }
 
 
