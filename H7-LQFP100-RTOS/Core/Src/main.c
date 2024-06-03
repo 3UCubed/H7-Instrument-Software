@@ -1626,7 +1626,12 @@ int handshake()
 		if(key == 0xFF)
 		{
 			buffer[0] = 0xFA;
-			HAL_UART_Transmit(&huart1, buffer, 1, 100);
+			for(int i = 0; i < 10; i++)
+			{
+				HAL_UART_Transmit(&huart1, buffer, 1, 100);
+				HAL_Delay(100);
+			}
+
 			return 1;
 		}
 	}
