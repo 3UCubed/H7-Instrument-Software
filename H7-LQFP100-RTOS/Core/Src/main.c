@@ -1616,26 +1616,28 @@ void receive_hk_adc3(uint16_t *buffer)
 
 int handshake()
 {
-	uint8_t buffer[1];
+	uint8_t tx_buffer[9];
+	uint8_t rx_buffer[9];
 	uint8_t key;
+	int allowed_tries = 10;
 
-	while(1)
+	// Wait for 0xFF to be received
+	do
 	{
-		HAL_UART_Receive_IT(&huart1, buffer, 1);
-		key = buffer[0];
-		if(key == 0xFF)
-		{
-			buffer[0] = 0xFA;
-			for(int i = 0; i < 10; i++)
-			{
-				HAL_UART_Transmit(&huart1, buffer, 1, 100);
-				HAL_Delay(100);
-			}
+		HAL_UART_Receive_IT(&huart1, rx_buffer, 9);
+		key = rx_buffer[0];
+	}while(key != 0xFF);
 
-			return 1;
-		}
+	// TODO: Set RTC based on received time stamp in rx_buffer and send timestamp of when RTC actually starts
+
+	// TEMPORARY: Send back received time stamp, will be changed once above todo is completed
+	rx_buffer[0] = 0xFA;
+	for(int i = 0; i < allowed_tries; i++)
+	{
+		HAL_UART_Transmit(&huart1, rx_buffer, 9 * sizeof(uint8_t), 100);
 	}
-	return 0;
+
+	return 1;
 }
 
 
