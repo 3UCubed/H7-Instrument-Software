@@ -195,7 +195,7 @@ void UART_TX_init(void *argument);
 
 /* USER CODE BEGIN PFP */
 // *********************************************************************************************************** FUNCTION PROTOYPES
-
+int handshake();
 void system_setup();
 /* USER CODE END PFP */
 
@@ -478,6 +478,12 @@ int main(void)
   MX_SPI1_Init();
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
+  if (!handshake())
+  {
+	  Error_Handler();
+  }
+
+
   HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_1);
   HAL_TIM_OC_Start_IT(&htim2, TIM_CHANNEL_1);
   HAL_TIM_OC_Start_IT(&htim3, TIM_CHANNEL_1);
@@ -1606,6 +1612,26 @@ void receive_hk_adc3(uint16_t *buffer)
 }
 
 // *********************************************************************************************************** HELPER FUNCTIONS
+
+
+int handshake()
+{
+	uint8_t buffer[1];
+	uint8_t key;
+
+	while(1)
+	{
+		HAL_UART_Receive_IT(&huart1, buffer, 1);
+		key = buffer[0];
+		if(key == 0xFF)
+		{
+			buffer[0] = 0xFA;
+			HAL_UART_Transmit(&huart1, buffer, 1, 100);
+			return 1;
+		}
+	}
+	return 0;
+}
 
 
 /**
