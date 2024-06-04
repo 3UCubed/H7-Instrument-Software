@@ -1624,13 +1624,47 @@ int handshake()
 	// Wait for 0xFF to be received
 	do
 	{
-		HAL_UART_Receive_IT(&huart1, rx_buffer, 9);
+		HAL_UART_Receive(&huart1, rx_buffer, 9, 100);
 		key = rx_buffer[0];
 	}while(key != 0xFF);
 
-	// TODO: Set RTC based on received time stamp in rx_buffer and send timestamp of when RTC actually starts
 
-	// TEMPORARY: Send back received time stamp, will be changed once above todo is completed
+	//    [0]     [1]     [2]     [3]     [4]     [5]     [6]     [7]     [8]
+	//    0xFF    Year   Month    Day     Hour   Minute  Second  ms MSB  ms LSB
+
+	RTC_DateTypeDef dateStruct;
+	RTC_TimeTypeDef timeStruct;
+	uint8_t year = rx_buffer[1];
+	uint8_t month = rx_buffer[2];
+	uint8_t day = rx_buffer[3];
+	uint8_t hour = rx_buffer[4];
+	uint8_t minute = rx_buffer[5];
+	uint8_t second = rx_buffer[6];
+	uint16_t milliseconds = (rx_buffer[7] << 8) | rx_buffer[8]; // Combine MSB and LSB for milliseconds
+
+	dateStruct.Year = year;
+	dateStruct.Month = month;
+	dateStruct.Date = day;
+
+	timeStruct.Hours = hour;
+	timeStruct.Minutes = minute;
+	timeStruct.Seconds = second;
+	timeStruct.SubSeconds = milliseconds; // Set the milliseconds (if supported by your RTC)
+
+	HAL_StatusTypeDef status;
+
+	status = HAL_RTC_SetDate(&hrtc, &dateStruct, RTC_FORMAT_BIN);
+	if (status != HAL_OK)
+	{
+	    Error_Handler();
+	}
+
+	status = HAL_RTC_SetTime(&hrtc, &timeStruct, RTC_FORMAT_BIN);
+	if (status != HAL_OK)
+	{
+	    Error_Handler();
+	}
+
 	tx_buffer[0] = 0xFA;
 	tx_buffer[1] = 1;
 	tx_buffer[2] = 0;
