@@ -1616,7 +1616,7 @@ void receive_hk_adc3(uint16_t *buffer)
 
 int handshake()
 {
-	uint8_t tx_buffer[9];
+	uint8_t tx_buffer[5];
 	uint8_t rx_buffer[9];
 	uint8_t key;
 	int allowed_tries = 10;
@@ -1631,10 +1631,15 @@ int handshake()
 	// TODO: Set RTC based on received time stamp in rx_buffer and send timestamp of when RTC actually starts
 
 	// TEMPORARY: Send back received time stamp, will be changed once above todo is completed
-	rx_buffer[0] = 0xFA;
+	tx_buffer[0] = 0xFA;
+	tx_buffer[1] = 1;
+	tx_buffer[2] = 0;
+	tx_buffer[3] = 0;
+	tx_buffer[4] = 2;
+
 	for(int i = 0; i < allowed_tries; i++)
 	{
-		HAL_UART_Transmit(&huart1, rx_buffer, 9 * sizeof(uint8_t), 100);
+		HAL_UART_Transmit(&huart1, tx_buffer, 5 * sizeof(uint8_t), 100);
 	}
 
 	return 1;
