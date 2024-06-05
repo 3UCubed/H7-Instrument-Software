@@ -166,7 +166,7 @@ static const uint8_t ADT7410_4 = 0x4B << 1;
 uint32_t DAC_OUT[32] = { 0, 0, 0, 0, 620, 620, 1241, 1241, 1861, 1861, 2482, 2482, 3103, 3103, 3723, 3723, 4095, 4095, 4095, 4095, 3723, 3723, 3103, 3103, 2482, 2482, 1861, 1861, 1241, 1241, 620, 620 }; // For 3.3 volts
 
 const gpio_pins gpios[] = { { GPIOB, GPIO_PIN_5 }, { GPIOB, GPIO_PIN_6 }, {
-		GPIOC, GPIO_PIN_10 }, { GPIOC, GPIO_PIN_13 }, { GPIOC, GPIO_PIN_7 }, {
+		GPIOC, GPIO_PIN_7 }, { GPIOC, GPIO_PIN_13 }, { GPIOC, GPIO_PIN_10 }, {
 		GPIOC, GPIO_PIN_8 }, { GPIOC, GPIO_PIN_9 }, { GPIOC, GPIO_PIN_6 }, {
 		GPIOB, GPIO_PIN_2 } };
 /* USER CODE END PV */
@@ -334,12 +334,12 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		break;
 	}
 	case 0x02: {
-		printf("5v ON PC2\n");
+		printf("5v ON PC7\n");
 		HAL_GPIO_WritePin(gpios[2].gpio, gpios[2].pin, GPIO_PIN_SET);
 		break;
 	}
 	case 0x15: {
-		printf("5v OFF PC2\n");
+		printf("5v OFF PC7\n");
 		HAL_GPIO_WritePin(gpios[2].gpio, gpios[2].pin, GPIO_PIN_RESET);
 		break;
 	}
@@ -354,12 +354,12 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		break;
 	}
 	case 0x04: {
-		printf("3v3 ON PC7\n");
+		printf("3v3 ON PC10\n");
 		HAL_GPIO_WritePin(gpios[4].gpio, gpios[4].pin, GPIO_PIN_SET);
 		break;
 	}
 	case 0x17: {
-		printf("3v3 OFF PC7\n");
+		printf("3v3 OFF PC10\n");
 		HAL_GPIO_WritePin(gpios[4].gpio, gpios[4].pin, GPIO_PIN_RESET);
 		break;
 	}
