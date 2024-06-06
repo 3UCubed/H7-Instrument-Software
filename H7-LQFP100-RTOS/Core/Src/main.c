@@ -144,8 +144,6 @@ uint8_t PMT_ON = 0;
 uint8_t ERPA_ON = 0;
 uint8_t HK_ON = 0;
 
-int auto_sweep = 0;
-
 volatile uint32_t cadence = 3125;
 uint8_t step = 3;
 
@@ -250,53 +248,166 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	unsigned char key = UART_RX_BUFFER[0];
 
 	switch (key) {
-	case 0x0B: {
+	case 0x10: {
 		printf("SDN1 ON\n");
 		HAL_GPIO_WritePin(gpios[8].gpio, gpios[8].pin, GPIO_PIN_SET);
 		break;
 	}
-	case 0x0A: {
+	case 0x00: {
 		printf("SDN1 OFF\n");
 		HAL_GPIO_WritePin(gpios[8].gpio, gpios[8].pin, GPIO_PIN_RESET);
 		break;
 	}
+	case 0x11: {
+		printf("SYS ON PB5\n");
+		HAL_GPIO_WritePin(gpios[0].gpio, gpios[0].pin, GPIO_PIN_SET);
+
+		break;
+	}
+	case 0x01: {
+		printf("SYS OFF PB5\n");
+		HAL_GPIO_WritePin(gpios[0].gpio, gpios[0].pin, GPIO_PIN_RESET); // turning off PB5 & ensuring all other enables are off
+
+		HAL_GPIO_WritePin(gpios[1].gpio, gpios[1].pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(gpios[3].gpio, gpios[3].pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(gpios[6].gpio, gpios[6].pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(gpios[5].gpio, gpios[5].pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(gpios[7].gpio, gpios[7].pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(gpios[2].gpio, gpios[2].pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(gpios[4].gpio, gpios[4].pin, GPIO_PIN_RESET);
+
+		break;
+	}
+	case 0x12: {
+		printf("3v3 ON PC10\n");
+		HAL_GPIO_WritePin(gpios[4].gpio, gpios[4].pin, GPIO_PIN_SET);
+		break;
+	}
+	case 0x02: {
+		printf("3v3 OFF PC10\n");
+		HAL_GPIO_WritePin(gpios[4].gpio, gpios[4].pin, GPIO_PIN_RESET);
+		break;
+	}
+	case 0x13: {
+		printf("5v ON PC7\n");
+		HAL_GPIO_WritePin(gpios[2].gpio, gpios[2].pin, GPIO_PIN_SET);
+		break;
+	}
+	case 0x03: {
+		printf("5v OFF PC7\n");
+		HAL_GPIO_WritePin(gpios[2].gpio, gpios[2].pin, GPIO_PIN_RESET);
+		break;
+	}
+	case 0x14: {
+		printf("n3v3 ON PC6\n");
+		HAL_GPIO_WritePin(gpios[7].gpio, gpios[7].pin, GPIO_PIN_SET);
+		break;
+	}
+	case 0x04: {
+		printf("n3v3 OFF PC6\n");
+		HAL_GPIO_WritePin(gpios[7].gpio, gpios[7].pin, GPIO_PIN_RESET);
+		break;
+	}
+	case 0x15: {
+		printf("n5v ON PC8\n");
+		HAL_GPIO_WritePin(gpios[5].gpio, gpios[5].pin, GPIO_PIN_SET);
+		break;
+	}
+	case 0x05: {
+		printf("n5v OFF PC8\n");
+		HAL_GPIO_WritePin(gpios[5].gpio, gpios[5].pin, GPIO_PIN_RESET);
+		break;
+	}
+	case 0x16: {
+		printf("15v ON PC9\n");
+		HAL_GPIO_WritePin(gpios[6].gpio, gpios[6].pin, GPIO_PIN_SET);
+		break;
+	}
+	case 0x06: {
+		printf("15v OFF PC9\n");
+		HAL_GPIO_WritePin(gpios[6].gpio, gpios[6].pin, GPIO_PIN_RESET);
+		break;
+	}
+	case 0x17: {
+		printf("n200v ON PC13\n");
+		HAL_GPIO_WritePin(gpios[3].gpio, gpios[3].pin, GPIO_PIN_SET);
+		break;
+	}
+	case 0x07: {
+		printf("n200v OFF PC13\n");
+		HAL_GPIO_WritePin(gpios[3].gpio, gpios[3].pin, GPIO_PIN_RESET);
+		break;
+	}
+	case 0x18: {
+		printf("800v ON PB6\n");
+		HAL_GPIO_WritePin(gpios[1].gpio, gpios[1].pin, GPIO_PIN_SET);
+		break;
+	}
+	case 0x08: {
+		printf("800v OFF PB6\n");
+		HAL_GPIO_WritePin(gpios[1].gpio, gpios[1].pin, GPIO_PIN_RESET);
+		break;
+	}
+	case 0x19: {
+		printf("AUTOSWEEP ON\n");
+		HAL_TIM_Base_Start(&htim2);
+		HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, DAC_OUT, 32, DAC_ALIGN_12B_R);
+		break;
+	}
+	case 0x09: {
+		printf("AUTOSWEEP OFF\n");
+		HAL_TIM_Base_Stop(&htim2);
+		HAL_DAC_Stop_DMA(&hdac1, DAC_CHANNEL_1);
+	}
+	case 0x1A: {
+		printf("ERPA ON\n");
+		ERPA_ON = 1;
+		break;
+	}
+	case 0x0A: {
+		printf("ERPA OFF\n");
+		ERPA_ON = 0;
+		break;
+	}
 	case 0x1B: {
+		printf("PMT ON\n");
+		PMT_ON = 1;
+		break;
+	}
+	case 0x0B: {
+		printf("PMT OFF\n");
+		PMT_ON = 0;
+		break;
+	}
+	case 0x1C: {
+		printf("HK ON \n");
+		HK_ON = 1;
+		break;
+	}
+	case 0x0C: {
+		printf("HK OFF\n");
+		HK_ON = 0;
+		break;
+	}
+	case 0x1D: {
 		printf("Step Up\n");
 		if (step < 17) {
 			step+=2;
 			HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, DAC_OUT[step]);
 			HAL_DAC_Start(&hdac1, DAC_CHANNEL_1);
-
 		}
 		break;
 	}
-	case 0x1C: {
+	case 0x0D: {
 		printf("Step Down\n");
 		if (step > 3) {
 			step-=2;
 			HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, DAC_OUT[step]);
 			HAL_DAC_Start(&hdac1, DAC_CHANNEL_1);
-
 		}
 		break;
 	}
-	case 0x1D: {
-		printf("Toggle AutoSweep\n");
-		if (!auto_sweep) {
-			auto_sweep = 1;
-			HAL_TIM_Base_Start(&htim2);
-
-			HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, DAC_OUT, 32, DAC_ALIGN_12B_R);
-
-		} else {
-			auto_sweep = 0;
-			HAL_TIM_Base_Stop(&htim2);
-
-			HAL_DAC_Stop_DMA(&hdac1, DAC_CHANNEL_1);
-		}
-		break;
-	}
-	case 0x24: {
+	case 0x1E: {
 		printf("Factor Up\n");
 		if (cadence <= 50000){
 			cadence *= 2;
@@ -304,7 +415,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		}
 		break;
 	}
-	case 0x25: {
+	case 0x0E: {
 		printf("Factor Down\n");
 		if (cadence >= 6250){
 			cadence /= 2;
@@ -312,122 +423,40 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		}
 		break;
 	}
-	case 0x00: {
-		printf("SYS ON PB5\n");
-		HAL_GPIO_WritePin(gpios[0].gpio, gpios[0].pin, GPIO_PIN_SET);
-		break;
-	}
-	case 0x13: {
-		printf("SYS OFF PB5\n");
-		HAL_GPIO_WritePin(gpios[0].gpio, gpios[0].pin, GPIO_PIN_RESET);
-		break;
-	}
-	case 0x01: {
-
-		printf("800v ON PB6\n");
-		HAL_GPIO_WritePin(gpios[1].gpio, gpios[1].pin, GPIO_PIN_SET);
-		break;
-	}
-	case 0x14: {
-		printf("800v OFF PB6\n");
-		HAL_GPIO_WritePin(gpios[1].gpio, gpios[1].pin, GPIO_PIN_RESET);
-		break;
-	}
-	case 0x02: {
-		printf("5v ON PC7\n");
-		HAL_GPIO_WritePin(gpios[2].gpio, gpios[2].pin, GPIO_PIN_SET);
-		break;
-	}
-	case 0x15: {
-		printf("5v OFF PC7\n");
-		HAL_GPIO_WritePin(gpios[2].gpio, gpios[2].pin, GPIO_PIN_RESET);
-		break;
-	}
-	case 0x03: {
-		printf("n200v ON PC13\n");
-		HAL_GPIO_WritePin(gpios[3].gpio, gpios[3].pin, GPIO_PIN_SET);
-		break;
-	}
-	case 0x16: {
-		printf("n200v OFF PC13\n");
-		HAL_GPIO_WritePin(gpios[3].gpio, gpios[3].pin, GPIO_PIN_RESET);
-		break;
-	}
-	case 0x04: {
-		printf("3v3 ON PC10\n");
-		HAL_GPIO_WritePin(gpios[4].gpio, gpios[4].pin, GPIO_PIN_SET);
-		break;
-	}
-	case 0x17: {
-		printf("3v3 OFF PC10\n");
-		HAL_GPIO_WritePin(gpios[4].gpio, gpios[4].pin, GPIO_PIN_RESET);
-		break;
-	}
-	case 0x05: {
-		printf("n5v ON PC8\n");
-		HAL_GPIO_WritePin(gpios[5].gpio, gpios[5].pin, GPIO_PIN_SET);
-		break;
-	}
-	case 0x18: {
-		printf("n5v OFF PC8\n");
-		HAL_GPIO_WritePin(gpios[5].gpio, gpios[5].pin, GPIO_PIN_RESET);
-		break;
-	}
-	case 0x06: {
-		printf("15v ON PC9\n");
-		HAL_GPIO_WritePin(gpios[6].gpio, gpios[6].pin, GPIO_PIN_SET);
-		break;
-	}
-	case 0x19: {
-		printf("15v OFF PC9\n");
-		HAL_GPIO_WritePin(gpios[6].gpio, gpios[6].pin, GPIO_PIN_RESET);
-		break;
-	}
-	case 0x07: {
-		printf("n3v3 ON PC6\n");
-		HAL_GPIO_WritePin(gpios[7].gpio, gpios[7].pin, GPIO_PIN_SET);
-		break;
-	}
-	case 0x1A: {
-		printf("n3v3 OFF PC6\n");
-		HAL_GPIO_WritePin(gpios[7].gpio, gpios[7].pin, GPIO_PIN_RESET);
-		break;
-	}
-	case 0x0C: {
-		printf("Enter STOP mode\n");
-//		HAL_SuspendTick();
-//		HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
-//		NVIC_SystemReset();
-		break;
-	}
-	case 0x0D: {
-		printf("PMT ON\n");
-		PMT_ON = 1;
-		break;
-	}
-	case 0x10: {
-		printf("PMT OFF\n");
-		PMT_ON = 0;
-		break;
-	}
-	case 0x0E: {
-		printf("ERPA ON\n");
-		ERPA_ON = 1;
-		break;
-	}
-	case 0x11: {
-		printf("ERPA OFF\n");
-		ERPA_ON = 0;
+	case 0x1F: {
+		printf("Exit STOP mode\n");
+		// TODO: Exit stop mode
 		break;
 	}
 	case 0x0F: {
-		printf("HK ON \n");
-		HK_ON = 1;
+		printf("Enter STOP mode\n");
+		// TODO: Enter stop mode
 		break;
 	}
-	case 0x12: {
-		printf("HK OFF\n");
-		HK_ON = 0;
+	case 0xE0: {
+		printf("Auto Init\n");
+		HAL_GPIO_WritePin(gpios[8].gpio, gpios[8].pin, GPIO_PIN_SET); // sdn1
+		HAL_GPIO_WritePin(gpios[0].gpio, gpios[0].pin, GPIO_PIN_SET); // sys on pb5
+		HAL_GPIO_WritePin(gpios[4].gpio, gpios[4].pin, GPIO_PIN_SET); // 3v3 on pc10
+		HAL_GPIO_WritePin(gpios[2].gpio, gpios[2].pin, GPIO_PIN_SET); // 5v on pc7
+		HAL_GPIO_WritePin(gpios[7].gpio, gpios[7].pin, GPIO_PIN_SET); // n3v3 on pc6
+		HAL_GPIO_WritePin(gpios[5].gpio, gpios[5].pin, GPIO_PIN_SET); // n5v on pc8
+		HAL_GPIO_WritePin(gpios[6].gpio, gpios[6].pin, GPIO_PIN_SET); // 15v on pc9
+		break;
+	}
+	case 0xD0: {
+		printf("Auto Deinit\n");
+		HAL_GPIO_WritePin(gpios[6].gpio, gpios[6].pin, GPIO_PIN_SET); // 15v on pc9
+		HAL_GPIO_WritePin(gpios[5].gpio, gpios[5].pin, GPIO_PIN_SET); // n5v on pc8
+		HAL_GPIO_WritePin(gpios[7].gpio, gpios[7].pin, GPIO_PIN_SET); // n3v3 on pc6
+		HAL_GPIO_WritePin(gpios[2].gpio, gpios[2].pin, GPIO_PIN_SET); // 5v on pc7
+		HAL_GPIO_WritePin(gpios[4].gpio, gpios[4].pin, GPIO_PIN_SET); // 3v3 on pc10
+		HAL_GPIO_WritePin(gpios[0].gpio, gpios[0].pin, GPIO_PIN_SET); // sys on pb5
+		HAL_GPIO_WritePin(gpios[8].gpio, gpios[8].pin, GPIO_PIN_SET); // sdn1
+		break;
+	}
+	default:{
+		printf("Unknown Command\n");
 		break;
 	}
 	}
