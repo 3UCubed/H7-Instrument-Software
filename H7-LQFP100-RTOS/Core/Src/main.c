@@ -48,8 +48,6 @@ typedef struct {
 /* USER CODE BEGIN PD */
 // *********************************************************************************************************** DEFINES
 
-#define SIMULATE
-
 #define PMT_FLAG_ID 0x0001
 #define ERPA_FLAG_ID 0x0002
 #define HK_FLAG_ID 0x0004
@@ -437,7 +435,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		printf("Auto Init\n");
 		HAL_GPIO_WritePin(gpios[8].gpio, gpios[8].pin, GPIO_PIN_SET); // sdn1
 		HAL_GPIO_WritePin(gpios[0].gpio, gpios[0].pin, GPIO_PIN_SET); // sys on pb5
-		HAL_GPIO_WritePin(gpios[4].gpio, gpios[4].pin, GPIO_PIN_SET); // 3v3 on pc10
+		HAL_GPIO_WritePin(gpios[4].gpio, gpios[4].pin, GPIO_PIN_SET); // 3v3 on pc1
 		HAL_GPIO_WritePin(gpios[2].gpio, gpios[2].pin, GPIO_PIN_SET); // 5v on pc7
 		HAL_GPIO_WritePin(gpios[7].gpio, gpios[7].pin, GPIO_PIN_SET); // n3v3 on pc6
 		HAL_GPIO_WritePin(gpios[5].gpio, gpios[5].pin, GPIO_PIN_SET); // n5v on pc8
@@ -446,13 +444,13 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	}
 	case 0xD0: {
 		printf("Auto Deinit\n");
-		HAL_GPIO_WritePin(gpios[6].gpio, gpios[6].pin, GPIO_PIN_SET); // 15v on pc9
-		HAL_GPIO_WritePin(gpios[5].gpio, gpios[5].pin, GPIO_PIN_SET); // n5v on pc8
-		HAL_GPIO_WritePin(gpios[7].gpio, gpios[7].pin, GPIO_PIN_SET); // n3v3 on pc6
-		HAL_GPIO_WritePin(gpios[2].gpio, gpios[2].pin, GPIO_PIN_SET); // 5v on pc7
-		HAL_GPIO_WritePin(gpios[4].gpio, gpios[4].pin, GPIO_PIN_SET); // 3v3 on pc10
-		HAL_GPIO_WritePin(gpios[0].gpio, gpios[0].pin, GPIO_PIN_SET); // sys on pb5
-		HAL_GPIO_WritePin(gpios[8].gpio, gpios[8].pin, GPIO_PIN_SET); // sdn1
+		HAL_GPIO_WritePin(gpios[6].gpio, gpios[6].pin, GPIO_PIN_RESET); // 15v on pc9
+		HAL_GPIO_WritePin(gpios[5].gpio, gpios[5].pin, GPIO_PIN_RESET); // n5v on pc8
+		HAL_GPIO_WritePin(gpios[7].gpio, gpios[7].pin, GPIO_PIN_RESET); // n3v3 on pc6
+		HAL_GPIO_WritePin(gpios[2].gpio, gpios[2].pin, GPIO_PIN_RESET); // 5v on pc7
+		HAL_GPIO_WritePin(gpios[4].gpio, gpios[4].pin, GPIO_PIN_RESET); // 3v3 on pc1
+		HAL_GPIO_WritePin(gpios[0].gpio, gpios[0].pin, GPIO_PIN_RESET); // sys on pb5
+		HAL_GPIO_WritePin(gpios[8].gpio, gpios[8].pin, GPIO_PIN_RESET); // sdn1
 		break;
 	}
 	default:{
