@@ -30,10 +30,11 @@
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
+typedef StaticTask_t osStaticThreadDef_t;
 /* USER CODE BEGIN PTD */
 typedef struct {
-    uint8_t* array;  // Pointer to the array data
-    uint16_t size;   // Size of the array
+	uint8_t* array;  // Pointer to the array data
+	uint16_t size;   // Size of the array
 } packet_t;
 
 typedef struct {
@@ -130,6 +131,30 @@ const osThreadAttr_t UART_TX_task_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
+/* Definitions for GPIO_on_task */
+osThreadId_t GPIO_on_taskHandle;
+uint32_t GPIO_on_taskBuffer[ 128 ];
+osStaticThreadDef_t GPIO_on_taskControlBlock;
+const osThreadAttr_t GPIO_on_task_attributes = {
+  .name = "GPIO_on_task",
+  .cb_mem = &GPIO_on_taskControlBlock,
+  .cb_size = sizeof(GPIO_on_taskControlBlock),
+  .stack_mem = &GPIO_on_taskBuffer[0],
+  .stack_size = sizeof(GPIO_on_taskBuffer),
+  .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for GPIO_off_task */
+osThreadId_t GPIO_off_taskHandle;
+uint32_t GPIO_off_taskBuffer[ 128 ];
+osStaticThreadDef_t GPIO_off_taskControlBlock;
+const osThreadAttr_t GPIO_off_task_attributes = {
+  .name = "GPIO_off_task",
+  .cb_mem = &GPIO_off_taskControlBlock,
+  .cb_size = sizeof(GPIO_off_taskControlBlock),
+  .stack_mem = &GPIO_off_taskBuffer[0],
+  .stack_size = sizeof(GPIO_off_taskBuffer),
+  .priority = (osPriority_t) osPriorityLow,
+};
 /* USER CODE BEGIN PV */
 // *********************************************************************************************************** GLOBAL VARIABLES
 osMessageQueueId_t mid_MsgQueue;                // message queue id
@@ -163,8 +188,8 @@ uint32_t DAC_OUT[32] = { 0, 0, 0, 0, 620, 620, 1241, 1241, 1861, 1861, 2482, 248
 
 const gpio_pins gpios[] = { { GPIOB, GPIO_PIN_5 }, { GPIOB, GPIO_PIN_6 }, {
 		GPIOC, GPIO_PIN_7 }, { GPIOC, GPIO_PIN_13 }, { GPIOC, GPIO_PIN_10 }, {
-		GPIOC, GPIO_PIN_8 }, { GPIOC, GPIO_PIN_9 }, { GPIOC, GPIO_PIN_6 }, {
-		GPIOB, GPIO_PIN_2 } };
+				GPIOC, GPIO_PIN_8 }, { GPIOC, GPIO_PIN_9 }, { GPIOC, GPIO_PIN_6 }, {
+						GPIOB, GPIO_PIN_2 } };
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -188,6 +213,8 @@ void ERPA_init(void *argument);
 void HK_init(void *argument);
 void UART_RX_init(void *argument);
 void UART_TX_init(void *argument);
+void GPIO_on_init(void *argument);
+void GPIO_off_init(void *argument);
 
 /* USER CODE BEGIN PFP */
 // *********************************************************************************************************** FUNCTION PROTOYPES
@@ -211,23 +238,23 @@ void system_setup();
  */
 void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 {
-  if (htim == &htim1)
-  {
-	  osEventFlagsSet(event_flags, PMT_FLAG_ID);
+	if (htim == &htim1)
+	{
+		osEventFlagsSet(event_flags, PMT_FLAG_ID);
 
-  }
-  else if (htim == &htim2)
-  {
-	  osEventFlagsSet(event_flags, ERPA_FLAG_ID);
-  }
-  else if (htim == &htim3)
-  {
-	  osEventFlagsSet(event_flags, HK_FLAG_ID);
-  }
-  else
-  {
-	  printf("Unknown Timer Interrupt\n");
-  }
+	}
+	else if (htim == &htim2)
+	{
+		osEventFlagsSet(event_flags, ERPA_FLAG_ID);
+	}
+	else if (htim == &htim3)
+	{
+		osEventFlagsSet(event_flags, HK_FLAG_ID);
+	}
+	else
+	{
+		printf("Unknown Timer Interrupt\n");
+	}
 }
 
 
@@ -433,24 +460,12 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	}
 	case 0xE0: {
 		printf("Auto Init\n");
-		HAL_GPIO_WritePin(gpios[8].gpio, gpios[8].pin, GPIO_PIN_SET); // sdn1
-		HAL_GPIO_WritePin(gpios[0].gpio, gpios[0].pin, GPIO_PIN_SET); // sys on pb5
-		HAL_GPIO_WritePin(gpios[4].gpio, gpios[4].pin, GPIO_PIN_SET); // 3v3 on pc1
-		HAL_GPIO_WritePin(gpios[2].gpio, gpios[2].pin, GPIO_PIN_SET); // 5v on pc7
-		HAL_GPIO_WritePin(gpios[7].gpio, gpios[7].pin, GPIO_PIN_SET); // n3v3 on pc6
-		HAL_GPIO_WritePin(gpios[5].gpio, gpios[5].pin, GPIO_PIN_SET); // n5v on pc8
-		HAL_GPIO_WritePin(gpios[6].gpio, gpios[6].pin, GPIO_PIN_SET); // 15v on pc9
+		xTaskResumeFromISR(GPIO_on_taskHandle);
 		break;
 	}
 	case 0xD0: {
 		printf("Auto Deinit\n");
-		HAL_GPIO_WritePin(gpios[6].gpio, gpios[6].pin, GPIO_PIN_RESET); // 15v on pc9
-		HAL_GPIO_WritePin(gpios[5].gpio, gpios[5].pin, GPIO_PIN_RESET); // n5v on pc8
-		HAL_GPIO_WritePin(gpios[7].gpio, gpios[7].pin, GPIO_PIN_RESET); // n3v3 on pc6
-		HAL_GPIO_WritePin(gpios[2].gpio, gpios[2].pin, GPIO_PIN_RESET); // 5v on pc7
-		HAL_GPIO_WritePin(gpios[4].gpio, gpios[4].pin, GPIO_PIN_RESET); // 3v3 on pc1
-		HAL_GPIO_WritePin(gpios[0].gpio, gpios[0].pin, GPIO_PIN_RESET); // sys on pb5
-		HAL_GPIO_WritePin(gpios[8].gpio, gpios[8].pin, GPIO_PIN_RESET); // sdn1
+		xTaskResumeFromISR(GPIO_off_taskHandle);
 		break;
 	}
 	default:{
@@ -505,15 +520,15 @@ int main(void)
   MX_SPI1_Init();
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
-  if (!handshake())
-  {
-	  Error_Handler();
-  }
+	if (!handshake())
+	{
+		Error_Handler();
+	}
 
 
-  HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_1);
-  HAL_TIM_OC_Start_IT(&htim2, TIM_CHANNEL_1);
-  HAL_TIM_OC_Start_IT(&htim3, TIM_CHANNEL_1);
+	HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_1);
+	HAL_TIM_OC_Start_IT(&htim2, TIM_CHANNEL_1);
+	HAL_TIM_OC_Start_IT(&htim3, TIM_CHANNEL_1);
 
   /* USER CODE END 2 */
 
@@ -534,10 +549,10 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_QUEUES */
 	/* add queues, ... */
-  mid_MsgQueue = osMessageQueueNew(MSGQUEUE_OBJECTS, sizeof(packet_t), NULL);
-  if (mid_MsgQueue == NULL) {
-    ; // Message Queue object not created, handle failure
-  }
+	mid_MsgQueue = osMessageQueueNew(MSGQUEUE_OBJECTS, sizeof(packet_t), NULL);
+	if (mid_MsgQueue == NULL) {
+		; // Message Queue object not created, handle failure
+	}
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
@@ -556,15 +571,21 @@ int main(void)
   /* creation of UART_TX_task */
   UART_TX_taskHandle = osThreadNew(UART_TX_init, NULL, &UART_TX_task_attributes);
 
+  /* creation of GPIO_on_task */
+  GPIO_on_taskHandle = osThreadNew(GPIO_on_init, NULL, &GPIO_on_task_attributes);
+
+  /* creation of GPIO_off_task */
+  GPIO_off_taskHandle = osThreadNew(GPIO_off_init, NULL, &GPIO_off_task_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
 	/* add threads, ... */
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
 	/* add events, ... */
-  event_flags = osEventFlagsNew(NULL);
-  system_setup();
-  printf("Starting kernal...\n");
+	event_flags = osEventFlagsNew(NULL);
+	system_setup();
+	printf("Starting kernal...\n");
 
   /* USER CODE END RTOS_EVENTS */
 
@@ -806,7 +827,6 @@ static void MX_ADC1_Init(void)
   */
   sConfig.Channel = ADC_CHANNEL_15;
   sConfig.Rank = ADC_REGULAR_RANK_10;
-  sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -816,7 +836,6 @@ static void MX_ADC1_Init(void)
   */
   sConfig.Channel = ADC_CHANNEL_17;
   sConfig.Rank = ADC_REGULAR_RANK_11;
-  sConfig.SamplingTime = ADC_SAMPLETIME_810CYCLES_5;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -1683,13 +1702,13 @@ int handshake()
 	status = HAL_RTC_SetDate(&hrtc, &dateStruct, RTC_FORMAT_BIN);
 	if (status != HAL_OK)
 	{
-	    Error_Handler();
+		Error_Handler();
 	}
 
 	status = HAL_RTC_SetTime(&hrtc, &timeStruct, RTC_FORMAT_BIN);
 	if (status != HAL_OK)
 	{
-	    Error_Handler();
+		Error_Handler();
 	}
 
 	tx_buffer[0] = 0xFA;
@@ -1717,30 +1736,30 @@ int handshake()
 void system_setup()
 {
 
-	  TIM2->CCR4 = 312;
-	  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_4);
+	TIM2->CCR4 = 312;
+	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_4);
 
-	  if (HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_OFFSET_LINEARITY,
-	  			ADC_SINGLE_ENDED) != HAL_OK) {
-	  		/* Calibration Error */
-	  		Error_Handler();
-	  	}
+	if (HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_OFFSET_LINEARITY,
+			ADC_SINGLE_ENDED) != HAL_OK) {
+		/* Calibration Error */
+		Error_Handler();
+	}
 
-	  	if (HAL_ADC_Start_DMA(&hadc1, (uint32_t*) ADC1_raw_data,
-	  	ADC1_NUM_CHANNELS) != HAL_OK) {
-	  		Error_Handler();
-	  	}
+	if (HAL_ADC_Start_DMA(&hadc1, (uint32_t*) ADC1_raw_data,
+			ADC1_NUM_CHANNELS) != HAL_OK) {
+		Error_Handler();
+	}
 
-	  	if (HAL_ADCEx_Calibration_Start(&hadc3, ADC_CALIB_OFFSET_LINEARITY,
-	  			ADC_SINGLE_ENDED) != HAL_OK) {
-	  		/* Calibration Error */
-	  		Error_Handler();
-	  	}
+	if (HAL_ADCEx_Calibration_Start(&hadc3, ADC_CALIB_OFFSET_LINEARITY,
+			ADC_SINGLE_ENDED) != HAL_OK) {
+		/* Calibration Error */
+		Error_Handler();
+	}
 
-	  	if (HAL_ADC_Start_DMA(&hadc3, (uint32_t*) ADC3_raw_data,
-	  	ADC3_NUM_CHANNELS) != HAL_OK) {
-	  		Error_Handler();
-	  	}
+	if (HAL_ADC_Start_DMA(&hadc3, (uint32_t*) ADC3_raw_data,
+			ADC3_NUM_CHANNELS) != HAL_OK) {
+		Error_Handler();
+	}
 }
 
 
@@ -1751,31 +1770,31 @@ void getTimestamp(uint8_t *buffer)
 
 	HAL_RTC_GetTime(&hrtc, &currentTime, RTC_FORMAT_BIN);
 	HAL_RTC_GetDate(&hrtc, &currentDate, RTC_FORMAT_BIN);
-    uint32_t milliseconds = (1000 - (currentTime.SubSeconds * 1000) / hrtc.Init.SynchPrediv);
+	uint32_t milliseconds = (1000 - (currentTime.SubSeconds * 1000) / hrtc.Init.SynchPrediv);
 
 
 
-    buffer[0] = currentDate.Year;		// 0-99
-    buffer[1] = currentDate.Month;		// 1-12
-    buffer[2] = currentDate.Date;		// 1-31
+	buffer[0] = currentDate.Year;		// 0-99
+	buffer[1] = currentDate.Month;		// 1-12
+	buffer[2] = currentDate.Date;		// 1-31
 	buffer[3] = currentTime.Hours;		// 0-23
 	buffer[4] = currentTime.Minutes;	// 0-59
 	buffer[5] = currentTime.Seconds;	// 0-59
-    buffer[6] = (milliseconds >> 8) & 0xFF;  // High byte of milliseconds
-    buffer[7] = milliseconds & 0xFF;
+	buffer[6] = (milliseconds >> 8) & 0xFF;  // High byte of milliseconds
+	buffer[7] = milliseconds & 0xFF;
 
 }
 
 packet_t create_packet(const uint8_t* data, uint16_t size) {
-    packet_t packet;
-    packet.array = (uint8_t*)malloc(size * sizeof(uint8_t)); // Allocate memory
-    if (packet.array == NULL) {
-        // Memory allocation failed
-        // Handle the error accordingly (e.g., return an error code or terminate the program)
-    }
-    memcpy(packet.array, data, size); // Copy the data into the packet array
-    packet.size = size;
-    return packet;
+	packet_t packet;
+	packet.array = (uint8_t*)malloc(size * sizeof(uint8_t)); // Allocate memory
+	if (packet.array == NULL) {
+		// Memory allocation failed
+		// Handle the error accordingly (e.g., return an error code or terminate the program)
+	}
+	memcpy(packet.array, data, size); // Copy the data into the packet array
+	packet.size = size;
+	return packet;
 }
 
 
@@ -1793,10 +1812,10 @@ void sample_pmt()
 {
 	while (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_8)) {
 	}
-    uint8_t* buffer = (uint8_t*)malloc(PMT_DATA_SIZE * sizeof(uint8_t)); // Allocate memory for the buffer
+	uint8_t* buffer = (uint8_t*)malloc(PMT_DATA_SIZE * sizeof(uint8_t)); // Allocate memory for the buffer
 	uint8_t* pmt_spi = (uint8_t*)malloc(2 * sizeof(uint8_t));
 	uint8_t* timestamp = (uint8_t*)malloc(8 * sizeof(uint8_t));
-    getTimestamp(timestamp);
+	getTimestamp(timestamp);
 
 #ifdef SIMULATE
 	pmt_spi[0] = 0xE;
@@ -1821,7 +1840,7 @@ void sample_pmt()
 	buffer[13] = timestamp[7];
 
 	packet_t pmt_packet = create_packet(buffer, PMT_DATA_SIZE);
-    osMessageQueuePut(mid_MsgQueue, &pmt_packet, 0U, 0U);
+	osMessageQueuePut(mid_MsgQueue, &pmt_packet, 0U, 0U);
 	free(buffer);
 	free(pmt_spi);
 	free(timestamp);
@@ -1842,12 +1861,12 @@ void sample_erpa()
 	while (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_11)) {
 	}
 
-    uint8_t* buffer = (uint8_t*)malloc(ERPA_DATA_SIZE * sizeof(uint8_t)); // Allocate memory for the buffer
+	uint8_t* buffer = (uint8_t*)malloc(ERPA_DATA_SIZE * sizeof(uint8_t)); // Allocate memory for the buffer
 
 	uint8_t* erpa_spi = (uint8_t*)malloc(2 * sizeof(uint8_t));
 	uint16_t* erpa_adc = (uint16_t*)malloc(2 * sizeof(uint16_t));
 	uint8_t* timestamp = (uint8_t*)malloc(8 * sizeof(uint8_t));
-    getTimestamp(timestamp);
+	getTimestamp(timestamp);
 
 #ifdef SIMULATE
 	erpa_spi[0] = 0xE;
@@ -1882,7 +1901,7 @@ void sample_erpa()
 
 
 	packet_t erpa_packet = create_packet(buffer, ERPA_DATA_SIZE);
-    osMessageQueuePut(mid_MsgQueue, &erpa_packet, 0U, 0U);
+	osMessageQueuePut(mid_MsgQueue, &erpa_packet, 0U, 0U);
 	free(buffer);
 	free(erpa_spi);
 	free(erpa_adc);
@@ -1901,13 +1920,13 @@ void sample_erpa()
  */
 void sample_hk()
 {
-    uint8_t* buffer = (uint8_t*)malloc(HK_DATA_SIZE * sizeof(uint8_t)); // Allocate memory for the buffer
+	uint8_t* buffer = (uint8_t*)malloc(HK_DATA_SIZE * sizeof(uint8_t)); // Allocate memory for the buffer
 
 	int16_t* hk_i2c = (int16_t*)malloc(4 * sizeof(int16_t));
 	uint16_t* hk_adc1 = (uint16_t*)malloc(9 * sizeof(uint16_t));
 	uint16_t* hk_adc3 = (uint16_t*)malloc(4 * sizeof(uint16_t));
 	uint8_t* timestamp = (uint8_t*)malloc(8 * sizeof(uint8_t));
-    getTimestamp(timestamp);
+	getTimestamp(timestamp);
 
 #ifdef SIMULATE
 	hk_i2c[0] = 0x11;
@@ -1957,14 +1976,14 @@ void sample_hk()
 	buffer[19] = (hk_adc1[1] & 0xFF);			// HK BUSimon LSB
 	buffer[20] = ((hk_adc1[2] & 0xFF00) >> 8);	// HK 2v5mon MSB
 	buffer[21] = (hk_adc1[2] & 0xFF);			// HK 2v5mon LSB
-	buffer[22] = ((hk_adc1[3] & 0xFF00) >> 8);	// HK 3v3mon MSB
-	buffer[23] = (hk_adc1[3] & 0xFF);			// HK 3v3mon LSB
+	buffer[22] = ((hk_adc3[3] & 0xFF00) >> 8);	// HK 3v3mon MSB
+	buffer[23] = (hk_adc3[3] & 0xFF);			// HK 3v3mon LSB
 	buffer[24] = ((hk_adc1[6] & 0xFF00) >> 8);	// HK 5vmon MSB
 	buffer[25] = (hk_adc1[6] & 0xFF);			// HK 5vmon LSB
 	buffer[26] = ((hk_adc1[3] & 0xFF00) >> 8);	// HK n3v3mon MSB
 	buffer[27] = (hk_adc1[3] & 0xFF);			// HK n3v3mon LSB
-	buffer[28] = ((hk_adc1[2] & 0xFF00) >> 8);	// HK n5vmon MSB
-	buffer[29] = (hk_adc1[2] & 0xFF);			// HK n5vmon LSB
+	buffer[28] = ((hk_adc3[2] & 0xFF00) >> 8);	// HK n5vmon MSB
+	buffer[29] = (hk_adc3[2] & 0xFF);			// HK n5vmon LSB
 	buffer[30] = ((hk_adc1[7] & 0xFF00) >> 8);	// HK 15vmon MSB
 	buffer[31] = (hk_adc1[7] & 0xFF);			// HK 15vmon LSB
 	buffer[32] = ((hk_adc1[8] & 0xFF00) >> 8);	// HK 5vrefmon MSB
@@ -1983,7 +2002,7 @@ void sample_hk()
 	buffer[45] = timestamp[7];
 
 	packet_t hk_packet = create_packet(buffer, HK_DATA_SIZE);
-    osMessageQueuePut(mid_MsgQueue, &hk_packet, 0U, 0U);
+	osMessageQueuePut(mid_MsgQueue, &hk_packet, 0U, 0U);
 	free(buffer);
 	free(hk_i2c);
 	free(hk_adc1);
@@ -1999,10 +2018,10 @@ void sample_hk()
 // *********************************************************************************************************** RTOS TASK FUNCTIONS
 
 /**
-  * @brief  Function implementing the PMT_task thread.
-  * @param  argument: Not used
-  * @retval None
-  */
+ * @brief  Function implementing the PMT_task thread.
+ * @param  argument: Not used
+ * @retval None
+ */
 /* USER CODE END Header_PMT_init */
 void PMT_init(void *argument)
 {
@@ -2010,10 +2029,10 @@ void PMT_init(void *argument)
 	/* Infinite loop */
 	for (;;) {
 
-	    osEventFlagsWait(event_flags, PMT_FLAG_ID, osFlagsWaitAny, osWaitForever);
+		osEventFlagsWait(event_flags, PMT_FLAG_ID, osFlagsWaitAny, osWaitForever);
 		if(PMT_ON){
-	    sample_pmt();
-		pmt_seq++;
+			sample_pmt();
+			pmt_seq++;
 
 		}
 		osThreadYield();
@@ -2023,102 +2042,166 @@ void PMT_init(void *argument)
 
 /* USER CODE BEGIN Header_ERPA_init */
 /**
-* @brief Function implementing the ERPA_task thread.
-* @param argument: Not used
-* @retval None
-*/
+ * @brief Function implementing the ERPA_task thread.
+ * @param argument: Not used
+ * @retval None
+ */
 /* USER CODE END Header_ERPA_init */
 void ERPA_init(void *argument)
 {
   /* USER CODE BEGIN ERPA_init */
 
-  /* Infinite loop */
-  for(;;)
-  {
-	    osEventFlagsWait(event_flags, ERPA_FLAG_ID, osFlagsWaitAny, osWaitForever);
-	  if (ERPA_ON)
-	  {
-	    sample_erpa();
-		erpa_seq++;
+	/* Infinite loop */
+	for(;;)
+	{
+		osEventFlagsWait(event_flags, ERPA_FLAG_ID, osFlagsWaitAny, osWaitForever);
+		if (ERPA_ON)
+		{
+			sample_erpa();
+			erpa_seq++;
 
-	  }
+		}
 		osThreadYield();
-  }
+	}
   /* USER CODE END ERPA_init */
 }
 
 /* USER CODE BEGIN Header_HK_init */
 /**
-* @brief Function implementing the HK_task thread.
-* @param argument: Not used
-* @retval None
-*/
+ * @brief Function implementing the HK_task thread.
+ * @param argument: Not used
+ * @retval None
+ */
 /* USER CODE END Header_HK_init */
 void HK_init(void *argument)
 {
   /* USER CODE BEGIN HK_init */
 
-  /* Infinite loop */
-  for(;;)
-  {
-	    osEventFlagsWait(event_flags, HK_FLAG_ID, osFlagsWaitAny, osWaitForever);
-	  if(HK_ON)
-	  {
-	    sample_hk();
-		hk_seq++;
+	/* Infinite loop */
+	for(;;)
+	{
+		osEventFlagsWait(event_flags, HK_FLAG_ID, osFlagsWaitAny, osWaitForever);
+		if(HK_ON)
+		{
+			sample_hk();
+			hk_seq++;
 
-	  }
+		}
 		osThreadYield();
-  }
+	}
   /* USER CODE END HK_init */
 }
 
 /* USER CODE BEGIN Header_UART_RX_init */
 /**
-* @brief Function implementing the UART_RX_task thread.
-* @param argument: Not used
-* @retval None
-*/
+ * @brief Function implementing the UART_RX_task thread.
+ * @param argument: Not used
+ * @retval None
+ */
 /* USER CODE END Header_UART_RX_init */
 void UART_RX_init(void *argument)
 {
   /* USER CODE BEGIN UART_RX_init */
-  /* Infinite loop */
-  for(;;)
-  {
+	/* Infinite loop */
+	for(;;)
+	{
 		HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
 		osDelay(5);
-  }
+	}
   /* USER CODE END UART_RX_init */
 }
 
 /* USER CODE BEGIN Header_UART_TX_init */
 /**
-* @brief Function implementing the UART_TX_task thread.
-* @param argument: Not used
-* @retval None
-*/
+ * @brief Function implementing the UART_TX_task thread.
+ * @param argument: Not used
+ * @retval None
+ */
 /* USER CODE END Header_UART_TX_init */
 void UART_TX_init(void *argument)
 {
   /* USER CODE BEGIN UART_TX_init */
-  /* Infinite loop */
+	/* Infinite loop */
 	packet_t msg;
 	osStatus_t status;
 
 	while (1) {
-	   ; // Insert thread code here...
+		; // Insert thread code here...
 
-	   status = osMessageQueueGet(mid_MsgQueue, &msg, NULL, osWaitForever); // wait for message
+		status = osMessageQueueGet(mid_MsgQueue, &msg, NULL, osWaitForever); // wait for message
 
-	   if (status == osOK) {
-	       printf("RTS queue size: %ld\n", osMessageQueueGetCount(mid_MsgQueue));
-	       HAL_UART_Transmit(&huart1, msg.array, msg.size, 100);
-	       free(msg.array);
-	   }
-	   osThreadYield();
+		if (status == osOK) {
+			printf("RTS queue size: %ld\n", osMessageQueueGetCount(mid_MsgQueue));
+			HAL_UART_Transmit(&huart1, msg.array, msg.size, 100);
+			free(msg.array);
+		}
+		osThreadYield();
 	}
   /* USER CODE END UART_TX_init */
+}
+
+/* USER CODE BEGIN Header_GPIO_on_init */
+/**
+ * @brief Function implementing the GPIO_on_task thread.
+ * @param argument: Not used
+ * @retval None
+ */
+/* USER CODE END Header_GPIO_on_init */
+void GPIO_on_init(void *argument)
+{
+  /* USER CODE BEGIN GPIO_on_init */
+	osThreadSuspend(GPIO_on_taskHandle);
+	/* Infinite loop */
+	for(;;)
+	{
+		HAL_GPIO_WritePin(gpios[8].gpio, gpios[8].pin, GPIO_PIN_SET); // sdn1
+		osDelay(100);
+		HAL_GPIO_WritePin(gpios[0].gpio, gpios[0].pin, GPIO_PIN_SET); // sys on pb5
+		osDelay(100);
+		HAL_GPIO_WritePin(gpios[4].gpio, gpios[4].pin, GPIO_PIN_SET); // 3v3 on pc1
+		osDelay(100);
+		HAL_GPIO_WritePin(gpios[2].gpio, gpios[2].pin, GPIO_PIN_SET); // 5v on pc7
+		osDelay(100);
+		HAL_GPIO_WritePin(gpios[7].gpio, gpios[7].pin, GPIO_PIN_SET); // n3v3 on pc6
+		osDelay(100);
+		HAL_GPIO_WritePin(gpios[5].gpio, gpios[5].pin, GPIO_PIN_SET); // n5v on pc8
+		osDelay(100);
+		HAL_GPIO_WritePin(gpios[6].gpio, gpios[6].pin, GPIO_PIN_SET); // 15v on pc9
+		osThreadSuspend(GPIO_on_taskHandle);
+	}
+  /* USER CODE END GPIO_on_init */
+}
+
+/* USER CODE BEGIN Header_GPIO_off_init */
+/**
+ * @brief Function implementing the GPIO_off_task thread.
+ * @param argument: Not used
+ * @retval None
+ */
+/* USER CODE END Header_GPIO_off_init */
+void GPIO_off_init(void *argument)
+{
+  /* USER CODE BEGIN GPIO_off_init */
+	osThreadSuspend(GPIO_off_taskHandle);
+	/* Infinite loop */
+	for(;;)
+	{
+		HAL_GPIO_WritePin(gpios[6].gpio, gpios[6].pin, GPIO_PIN_RESET); // 15v on pc9
+		osDelay(100);
+		HAL_GPIO_WritePin(gpios[5].gpio, gpios[5].pin, GPIO_PIN_RESET); // n5v on pc8
+		osDelay(100);
+		HAL_GPIO_WritePin(gpios[7].gpio, gpios[7].pin, GPIO_PIN_RESET); // n3v3 on pc6
+		osDelay(100);
+		HAL_GPIO_WritePin(gpios[2].gpio, gpios[2].pin, GPIO_PIN_RESET); // 5v on pc7
+		osDelay(100);
+		HAL_GPIO_WritePin(gpios[4].gpio, gpios[4].pin, GPIO_PIN_RESET); // 3v3 on pc1
+		osDelay(100);
+		HAL_GPIO_WritePin(gpios[0].gpio, gpios[0].pin, GPIO_PIN_RESET); // sys on pb5
+		osDelay(100);
+		HAL_GPIO_WritePin(gpios[8].gpio, gpios[8].pin, GPIO_PIN_RESET); // sdn1
+		osThreadSuspend(GPIO_off_taskHandle);
+	}
+  /* USER CODE END GPIO_off_init */
 }
 
 /**
@@ -2167,7 +2250,7 @@ void Error_Handler(void)
 void assert_failed(uint8_t *file, uint32_t line)
 {
   /* USER CODE BEGIN 6 */
-  /* User can add his own implementation to report the file name and line number,
+	/* User can add his own implementation to report the file name and line number,
      ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
   /* USER CODE END 6 */
 }
