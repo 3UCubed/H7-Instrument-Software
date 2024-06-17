@@ -33,11 +33,6 @@
 typedef StaticTask_t osStaticThreadDef_t;
 /* USER CODE BEGIN PTD */
 typedef struct {
-	uint8_t* array;  // Pointer to the array data
-	uint16_t size;   // Size of the array
-} packet_t;
-
-typedef struct {
 	GPIO_TypeDef *gpio;
 	uint16_t pin;
 } gpio_pins;
@@ -57,7 +52,6 @@ typedef struct {
 #define ERPA_DATA_SIZE 18
 #define HK_DATA_SIZE 46
 #define UART_RX_BUFFER_SIZE 100
-#define MSGQUEUE_OBJECTS 16                     // number of Message Queue Objects
 
 #define ADC1_NUM_CHANNELS 11
 #define ADC3_NUM_CHANNELS 4
@@ -124,13 +118,6 @@ const osThreadAttr_t UART_RX_task_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
-/* Definitions for UART_TX_task */
-osThreadId_t UART_TX_taskHandle;
-const osThreadAttr_t UART_TX_task_attributes = {
-  .name = "UART_TX_task",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
-};
 /* Definitions for GPIO_on_task */
 osThreadId_t GPIO_on_taskHandle;
 uint32_t GPIO_on_taskBuffer[ 128 ];
@@ -157,8 +144,6 @@ const osThreadAttr_t GPIO_off_task_attributes = {
 };
 /* USER CODE BEGIN PV */
 // *********************************************************************************************************** GLOBAL VARIABLES
-osMessageQueueId_t mid_MsgQueue;                // message queue id
-
 uint16_t pmt_seq = 0;
 uint16_t erpa_seq = 0;
 uint16_t hk_seq = 0;
@@ -212,7 +197,6 @@ void PMT_init(void *argument);
 void ERPA_init(void *argument);
 void HK_init(void *argument);
 void UART_RX_init(void *argument);
-void UART_TX_init(void *argument);
 void GPIO_on_init(void *argument);
 void GPIO_off_init(void *argument);
 
@@ -549,10 +533,7 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_QUEUES */
 	/* add queues, ... */
-	mid_MsgQueue = osMessageQueueNew(MSGQUEUE_OBJECTS, sizeof(packet_t), NULL);
-	if (mid_MsgQueue == NULL) {
-		; // Message Queue object not created, handle failure
-	}
+
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
@@ -567,9 +548,6 @@ int main(void)
 
   /* creation of UART_RX_task */
   UART_RX_taskHandle = osThreadNew(UART_RX_init, NULL, &UART_RX_task_attributes);
-
-  /* creation of UART_TX_task */
-  UART_TX_taskHandle = osThreadNew(UART_TX_init, NULL, &UART_TX_task_attributes);
 
   /* creation of GPIO_on_task */
   GPIO_on_taskHandle = osThreadNew(GPIO_on_init, NULL, &GPIO_on_task_attributes);
@@ -617,7 +595,12 @@ void SystemClock_Config(void)
 
   /** Configure the main internal regulator output voltage
   */
-  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE3);
+  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+
+  while(!__HAL_PWR_GET_FLAG(PWR_FLAG_VOSRDY)) {}
+
+  __HAL_RCC_SYSCFG_CLK_ENABLE();
+  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE0);
 
   while(!__HAL_PWR_GET_FLAG(PWR_FLAG_VOSRDY)) {}
 
@@ -631,9 +614,9 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
   RCC_OscInitStruct.PLL.PLLM = 4;
-  RCC_OscInitStruct.PLL.PLLN = 12;
-  RCC_OscInitStruct.PLL.PLLP = 4;
-  RCC_OscInitStruct.PLL.PLLQ = 2;
+  RCC_OscInitStruct.PLL.PLLN = 60;
+  RCC_OscInitStruct.PLL.PLLP = 2;
+  RCC_OscInitStruct.PLL.PLLQ = 20;
   RCC_OscInitStruct.PLL.PLLR = 2;
   RCC_OscInitStruct.PLL.PLLRGE = RCC_PLL1VCIRANGE_3;
   RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1VCOWIDE;
@@ -650,13 +633,13 @@ void SystemClock_Config(void)
                               |RCC_CLOCKTYPE_D3PCLK1|RCC_CLOCKTYPE_D1PCLK1;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.SYSCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_HCLK_DIV1;
-  RCC_ClkInitStruct.APB3CLKDivider = RCC_APB3_DIV1;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_HCLK_DIV2;
+  RCC_ClkInitStruct.APB3CLKDivider = RCC_APB3_DIV2;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_APB1_DIV2;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_APB2_DIV2;
-  RCC_ClkInitStruct.APB4CLKDivider = RCC_APB4_DIV1;
+  RCC_ClkInitStruct.APB4CLKDivider = RCC_APB4_DIV2;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) != HAL_OK)
   {
     Error_Handler();
   }
@@ -990,7 +973,7 @@ static void MX_I2C1_Init(void)
 
   /* USER CODE END I2C1_Init 1 */
   hi2c1.Instance = I2C1;
-  hi2c1.Init.Timing = 0x00506682;
+  hi2c1.Init.Timing = 0x307075B1;
   hi2c1.Init.OwnAddress1 = 0;
   hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
   hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
@@ -1203,7 +1186,7 @@ static void MX_TIM1_Init(void)
 
   /* USER CODE END TIM1_Init 1 */
   htim1.Instance = TIM1;
-  htim1.Init.Prescaler = 96-1;
+  htim1.Init.Prescaler = 480-1;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim1.Init.Period = 62500-1;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -1282,7 +1265,7 @@ static void MX_TIM2_Init(void)
 
   /* USER CODE END TIM2_Init 1 */
   htim2.Instance = TIM2;
-  htim2.Init.Prescaler = 48-1;
+  htim2.Init.Prescaler = 240-1;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim2.Init.Period = 3125-1;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -1340,7 +1323,7 @@ static void MX_TIM3_Init(void)
 
   /* USER CODE END TIM3_Init 1 */
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 48-1;
+  htim3.Init.Prescaler = 240-1;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim3.Init.Period = 1000-1;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -1786,20 +1769,6 @@ void getTimestamp(uint8_t *buffer)
 
 }
 
-packet_t create_packet(const uint8_t* data, uint16_t size) {
-	packet_t packet;
-	packet.array = (uint8_t*)malloc(size * sizeof(uint8_t)); // Allocate memory
-	if (packet.array == NULL) {
-		// Memory allocation failed
-		// Handle the error accordingly (e.g., return an error code or terminate the program)
-	}
-	memcpy(packet.array, data, size); // Copy the data into the packet array
-	packet.size = size;
-	return packet;
-}
-
-
-
 /**
  * @brief Samples data from the PMT.
  *
@@ -1840,8 +1809,7 @@ void sample_pmt()
 	buffer[12] = timestamp[6];
 	buffer[13] = timestamp[7];
 
-	packet_t pmt_packet = create_packet(buffer, PMT_DATA_SIZE);
-	osMessageQueuePut(mid_MsgQueue, &pmt_packet, 0U, 0U);
+	HAL_UART_Transmit(&huart1, buffer, PMT_DATA_SIZE, 1);
 	free(buffer);
 	free(pmt_spi);
 	free(timestamp);
@@ -1901,8 +1869,7 @@ void sample_erpa()
 
 
 
-	packet_t erpa_packet = create_packet(buffer, ERPA_DATA_SIZE);
-	osMessageQueuePut(mid_MsgQueue, &erpa_packet, 0U, 0U);
+	HAL_UART_Transmit(&huart1, buffer, ERPA_DATA_SIZE, 1);
 	free(buffer);
 	free(erpa_spi);
 	free(erpa_adc);
@@ -2002,8 +1969,7 @@ void sample_hk()
 	buffer[44] = timestamp[6];
 	buffer[45] = timestamp[7];
 
-	packet_t hk_packet = create_packet(buffer, HK_DATA_SIZE);
-	osMessageQueuePut(mid_MsgQueue, &hk_packet, 0U, 0U);
+	HAL_UART_Transmit(&huart1, buffer, HK_DATA_SIZE, 1);
 	free(buffer);
 	free(hk_i2c);
 	free(hk_adc1);
@@ -2110,35 +2076,6 @@ void UART_RX_init(void *argument)
 		osDelay(5);
 	}
   /* USER CODE END UART_RX_init */
-}
-
-/* USER CODE BEGIN Header_UART_TX_init */
-/**
- * @brief Function implementing the UART_TX_task thread.
- * @param argument: Not used
- * @retval None
- */
-/* USER CODE END Header_UART_TX_init */
-void UART_TX_init(void *argument)
-{
-  /* USER CODE BEGIN UART_TX_init */
-	/* Infinite loop */
-	packet_t msg;
-	osStatus_t status;
-
-	while (1) {
-		; // Insert thread code here...
-
-		status = osMessageQueueGet(mid_MsgQueue, &msg, NULL, osWaitForever); // wait for message
-
-		if (status == osOK) {
-			printf("RTS queue size: %ld\n", osMessageQueueGetCount(mid_MsgQueue));
-			HAL_UART_Transmit(&huart1, msg.array, msg.size, 100);
-			free(msg.array);
-		}
-		osThreadYield();
-	}
-  /* USER CODE END UART_TX_init */
 }
 
 /* USER CODE BEGIN Header_GPIO_on_init */
