@@ -43,7 +43,13 @@ typedef struct {
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 // *********************************************************************************************************** DEFINES
-//#define SIMULATE
+#define SIMULATE
+#define ERPA_CAP 3076
+#define PMT_CAP 80
+#define HK_CAP 10000
+
+
+
 #define PMT_FLAG_ID 0x0001
 #define ERPA_FLAG_ID 0x0002
 #define HK_FLAG_ID 0x0004
@@ -2005,6 +2011,11 @@ void PMT_init(void *argument)
 		if(PMT_ON){
 			sample_pmt();
 			pmt_seq++;
+#ifdef PMT_CAP
+	if (pmt_seq >= PMT_CAP){
+		osThreadSuspend(PMT_taskHandle);
+	}
+#endif
 
 		}
 		osThreadYield();
@@ -2031,6 +2042,11 @@ void ERPA_init(void *argument)
 		{
 			sample_erpa();
 			erpa_seq++;
+#ifdef ERPA_CAP
+	if (erpa_seq >= ERPA_CAP){
+		osThreadSuspend(ERPA_taskHandle);
+	}
+#endif
 
 		}
 		osThreadYield();
@@ -2057,7 +2073,11 @@ void HK_init(void *argument)
 		{
 			sample_hk();
 			hk_seq++;
-
+#ifdef HK_CAP
+	if (hk_seq >= HK_CAP){
+		osThreadSuspend(HK_taskHandle);
+	}
+#endif
 		}
 		osThreadYield();
 	}
