@@ -367,6 +367,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		printf("AUTOSWEEP OFF\n");
 		HAL_TIM_Base_Stop(&htim2);
 		HAL_DAC_Stop_DMA(&hdac1, DAC_CHANNEL_1);
+		break;
 	}
 	case 0x1A: {
 		printf("ERPA ON\n");
