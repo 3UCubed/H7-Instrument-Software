@@ -43,12 +43,10 @@ typedef struct {
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 // *********************************************************************************************************** DEFINES
-#define SIMULATE
-#define ERPA_CAP 3076
-#define PMT_CAP 80
-#define HK_CAP 10000
-
-
+//#define SIMULATE
+//#define ERPA_CAP 3076
+//#define PMT_CAP 80
+//#define HK_CAP 10000
 
 #define PMT_FLAG_ID 0x0001
 #define ERPA_FLAG_ID 0x0002
@@ -150,6 +148,8 @@ const osThreadAttr_t GPIO_off_task_attributes = {
 };
 /* USER CODE BEGIN PV */
 // *********************************************************************************************************** GLOBAL VARIABLES
+volatile int TEMPERATURE_COUNTER = 1000; // Starts at 1000 so that temperature sensors are sampled on first hk packet
+
 uint16_t pmt_seq = 0;
 uint16_t erpa_seq = 0;
 uint16_t hk_seq = 0;
@@ -602,12 +602,7 @@ void SystemClock_Config(void)
 
   /** Configure the main internal regulator output voltage
   */
-  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
-
-  while(!__HAL_PWR_GET_FLAG(PWR_FLAG_VOSRDY)) {}
-
-  __HAL_RCC_SYSCFG_CLK_ENABLE();
-  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE0);
+  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE3);
 
   while(!__HAL_PWR_GET_FLAG(PWR_FLAG_VOSRDY)) {}
 
@@ -621,9 +616,9 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
   RCC_OscInitStruct.PLL.PLLM = 4;
-  RCC_OscInitStruct.PLL.PLLN = 60;
-  RCC_OscInitStruct.PLL.PLLP = 2;
-  RCC_OscInitStruct.PLL.PLLQ = 20;
+  RCC_OscInitStruct.PLL.PLLN = 16;
+  RCC_OscInitStruct.PLL.PLLP = 4;
+  RCC_OscInitStruct.PLL.PLLQ = 4;
   RCC_OscInitStruct.PLL.PLLR = 2;
   RCC_OscInitStruct.PLL.PLLRGE = RCC_PLL1VCIRANGE_3;
   RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1VCOWIDE;
@@ -638,15 +633,15 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2
                               |RCC_CLOCKTYPE_D3PCLK1|RCC_CLOCKTYPE_D1PCLK1;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
   RCC_ClkInitStruct.SYSCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_HCLK_DIV2;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_HCLK_DIV1;
   RCC_ClkInitStruct.APB3CLKDivider = RCC_APB3_DIV2;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_APB1_DIV2;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_APB2_DIV2;
-  RCC_ClkInitStruct.APB4CLKDivider = RCC_APB4_DIV2;
+  RCC_ClkInitStruct.APB4CLKDivider = RCC_APB4_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK)
   {
     Error_Handler();
   }
@@ -664,13 +659,13 @@ void PeriphCommonClock_Config(void)
   */
   PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_ADC;
   PeriphClkInitStruct.PLL2.PLL2M = 4;
-  PeriphClkInitStruct.PLL2.PLL2N = 9;
-  PeriphClkInitStruct.PLL2.PLL2P = 4;
-  PeriphClkInitStruct.PLL2.PLL2Q = 2;
+  PeriphClkInitStruct.PLL2.PLL2N = 16;
+  PeriphClkInitStruct.PLL2.PLL2P = 8;
+  PeriphClkInitStruct.PLL2.PLL2Q = 4;
   PeriphClkInitStruct.PLL2.PLL2R = 2;
   PeriphClkInitStruct.PLL2.PLL2RGE = RCC_PLL2VCIRANGE_3;
-  PeriphClkInitStruct.PLL2.PLL2VCOSEL = RCC_PLL2VCOMEDIUM;
-  PeriphClkInitStruct.PLL2.PLL2FRACN = 3072;
+  PeriphClkInitStruct.PLL2.PLL2VCOSEL = RCC_PLL2VCOWIDE;
+  PeriphClkInitStruct.PLL2.PLL2FRACN = 0;
   PeriphClkInitStruct.AdcClockSelection = RCC_ADCCLKSOURCE_PLL2;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
   {
@@ -980,7 +975,7 @@ static void MX_I2C1_Init(void)
 
   /* USER CODE END I2C1_Init 1 */
   hi2c1.Instance = I2C1;
-  hi2c1.Init.Timing = 0x0050174F;
+  hi2c1.Init.Timing = 0x00100413;
   hi2c1.Init.OwnAddress1 = 0;
   hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
   hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
@@ -1197,7 +1192,7 @@ static void MX_TIM1_Init(void)
 
   /* USER CODE END TIM1_Init 1 */
   htim1.Instance = TIM1;
-  htim1.Init.Prescaler = 240-1;
+  htim1.Init.Prescaler = 32-1;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim1.Init.Period = 62500-1;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -1276,7 +1271,7 @@ static void MX_TIM2_Init(void)
 
   /* USER CODE END TIM2_Init 1 */
   htim2.Instance = TIM2;
-  htim2.Init.Prescaler = 240-1;
+  htim2.Init.Prescaler = 32-1;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim2.Init.Period = 3125-1;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -1334,7 +1329,7 @@ static void MX_TIM3_Init(void)
 
   /* USER CODE END TIM3_Init 1 */
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 240-1;
+  htim3.Init.Prescaler = 32-1;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim3.Init.Period = 1000-1;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -1901,6 +1896,7 @@ void sample_hk()
 {
 	uint8_t* buffer = (uint8_t*)malloc(HK_DATA_SIZE * sizeof(uint8_t)); // Allocate memory for the buffer
 
+	static uint16_t last_i2c_reading[4];
 	int16_t* hk_i2c = (int16_t*)malloc(4 * sizeof(int16_t));
 	uint16_t* hk_adc1 = (uint16_t*)malloc(9 * sizeof(uint16_t));
 	uint16_t* hk_adc3 = (uint16_t*)malloc(4 * sizeof(uint16_t));
@@ -1928,7 +1924,21 @@ void sample_hk()
 	hk_adc3[2] = 0xB2;
 	hk_adc3[3] = 0xB3;
 #else
-	receive_hk_i2c(hk_i2c);
+	if (TEMPERATURE_COUNTER > 999){
+		receive_hk_i2c(hk_i2c);
+		last_i2c_reading[0] = hk_i2c[0];
+		last_i2c_reading[1] = hk_i2c[1];
+		last_i2c_reading[2] = hk_i2c[2];
+		last_i2c_reading[3] = hk_i2c[3];
+		TEMPERATURE_COUNTER = 0;
+	}
+	else{
+		TEMPERATURE_COUNTER++;
+		hk_i2c[0] = last_i2c_reading[0];
+		hk_i2c[1] = last_i2c_reading[1];
+		hk_i2c[2] = last_i2c_reading[2];
+		hk_i2c[3] = last_i2c_reading[3];
+	}
 	receive_hk_adc1(hk_adc1);
 	receive_hk_adc3(hk_adc3);
 #endif
