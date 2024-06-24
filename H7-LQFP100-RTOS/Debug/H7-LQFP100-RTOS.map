@@ -8274,9 +8274,8 @@ LOAD /Applications/STM32CubeIDE.app/Contents/Eclipse/plugins/com.st.stm32cube.id
                 0x0000000008000f8c      0x100 ./Core/Src/main.o
                 0x0000000008000f8c                SystemClock_Config
  .text.PeriphCommonClock_Config
-                0x000000000800108c       0x5e ./Core/Src/main.o
+                0x000000000800108c       0x60 ./Core/Src/main.o
                 0x000000000800108c                PeriphCommonClock_Config
- *fill*         0x00000000080010ea        0x2 
  .text.MX_ADC1_Init
                 0x00000000080010ec      0x244 ./Core/Src/main.o
  .text.MX_ADC3_Init

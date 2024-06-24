@@ -1572,14 +1572,14 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLM = 4;
  8001010:	2304      	movs	r3, #4
  8001012:	653b      	str	r3, [r7, #80]	; 0x50
-  RCC_OscInitStruct.PLL.PLLN = 16;
- 8001014:	2310      	movs	r3, #16
+  RCC_OscInitStruct.PLL.PLLN = 12;
+ 8001014:	230c      	movs	r3, #12
  8001016:	657b      	str	r3, [r7, #84]	; 0x54
-  RCC_OscInitStruct.PLL.PLLP = 4;
- 8001018:	2304      	movs	r3, #4
+  RCC_OscInitStruct.PLL.PLLP = 2;
+ 8001018:	2302      	movs	r3, #2
  800101a:	65bb      	str	r3, [r7, #88]	; 0x58
-  RCC_OscInitStruct.PLL.PLLQ = 4;
- 800101c:	2304      	movs	r3, #4
+  RCC_OscInitStruct.PLL.PLLQ = 2;
+ 800101c:	2302      	movs	r3, #2
  800101e:	65fb      	str	r3, [r7, #92]	; 0x5c
   RCC_OscInitStruct.PLL.PLLR = 2;
  8001020:	2302      	movs	r3, #2
@@ -1590,68 +1590,67 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1VCOWIDE;
  8001028:	2300      	movs	r3, #0
  800102a:	66bb      	str	r3, [r7, #104]	; 0x68
-  RCC_OscInitStruct.PLL.PLLFRACN = 0;
- 800102c:	2300      	movs	r3, #0
- 800102e:	66fb      	str	r3, [r7, #108]	; 0x6c
+  RCC_OscInitStruct.PLL.PLLFRACN = 4096;
+ 800102c:	f44f 5380 	mov.w	r3, #4096	; 0x1000
+ 8001030:	66fb      	str	r3, [r7, #108]	; 0x6c
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
- 8001030:	f107 0324 	add.w	r3, r7, #36	; 0x24
- 8001034:	4618      	mov	r0, r3
- 8001036:	f008 fb47 	bl	80096c8 <HAL_RCC_OscConfig>
- 800103a:	4603      	mov	r3, r0
- 800103c:	2b00      	cmp	r3, #0
- 800103e:	d001      	beq.n	8001044 <SystemClock_Config+0xb8>
+ 8001032:	f107 0324 	add.w	r3, r7, #36	; 0x24
+ 8001036:	4618      	mov	r0, r3
+ 8001038:	f008 fb46 	bl	80096c8 <HAL_RCC_OscConfig>
+ 800103c:	4603      	mov	r3, r0
+ 800103e:	2b00      	cmp	r3, #0
+ 8001040:	d001      	beq.n	8001046 <SystemClock_Config+0xba>
   {
     Error_Handler();
- 8001040:	f001 fc8a 	bl	8002958 <Error_Handler>
+ 8001042:	f001 fc89 	bl	8002958 <Error_Handler>
   }
 
   /** Initializes the CPU, AHB and APB buses clocks
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
- 8001044:	233f      	movs	r3, #63	; 0x3f
- 8001046:	607b      	str	r3, [r7, #4]
+ 8001046:	233f      	movs	r3, #63	; 0x3f
+ 8001048:	607b      	str	r3, [r7, #4]
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2
                               |RCC_CLOCKTYPE_D3PCLK1|RCC_CLOCKTYPE_D1PCLK1;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
- 8001048:	2300      	movs	r3, #0
- 800104a:	60bb      	str	r3, [r7, #8]
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+ 800104a:	2303      	movs	r3, #3
+ 800104c:	60bb      	str	r3, [r7, #8]
   RCC_ClkInitStruct.SYSCLKDivider = RCC_SYSCLK_DIV1;
- 800104c:	2300      	movs	r3, #0
- 800104e:	60fb      	str	r3, [r7, #12]
+ 800104e:	2300      	movs	r3, #0
+ 8001050:	60fb      	str	r3, [r7, #12]
   RCC_ClkInitStruct.AHBCLKDivider = RCC_HCLK_DIV1;
- 8001050:	2300      	movs	r3, #0
- 8001052:	613b      	str	r3, [r7, #16]
-  RCC_ClkInitStruct.APB3CLKDivider = RCC_APB3_DIV2;
- 8001054:	2340      	movs	r3, #64	; 0x40
- 8001056:	617b      	str	r3, [r7, #20]
+ 8001052:	2300      	movs	r3, #0
+ 8001054:	613b      	str	r3, [r7, #16]
+  RCC_ClkInitStruct.APB3CLKDivider = RCC_APB3_DIV1;
+ 8001056:	2300      	movs	r3, #0
+ 8001058:	617b      	str	r3, [r7, #20]
   RCC_ClkInitStruct.APB1CLKDivider = RCC_APB1_DIV2;
- 8001058:	2340      	movs	r3, #64	; 0x40
- 800105a:	61bb      	str	r3, [r7, #24]
+ 800105a:	2340      	movs	r3, #64	; 0x40
+ 800105c:	61bb      	str	r3, [r7, #24]
   RCC_ClkInitStruct.APB2CLKDivider = RCC_APB2_DIV2;
- 800105c:	f44f 6380 	mov.w	r3, #1024	; 0x400
- 8001060:	61fb      	str	r3, [r7, #28]
+ 800105e:	f44f 6380 	mov.w	r3, #1024	; 0x400
+ 8001062:	61fb      	str	r3, [r7, #28]
   RCC_ClkInitStruct.APB4CLKDivider = RCC_APB4_DIV1;
- 8001062:	2300      	movs	r3, #0
- 8001064:	623b      	str	r3, [r7, #32]
+ 8001064:	2300      	movs	r3, #0
+ 8001066:	623b      	str	r3, [r7, #32]
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK)
- 8001066:	1d3b      	adds	r3, r7, #4
- 8001068:	2101      	movs	r1, #1
- 800106a:	4618      	mov	r0, r3
- 800106c:	f008 ff86 	bl	8009f7c <HAL_RCC_ClockConfig>
- 8001070:	4603      	mov	r3, r0
- 8001072:	2b00      	cmp	r3, #0
- 8001074:	d001      	beq.n	800107a <SystemClock_Config+0xee>
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+ 8001068:	1d3b      	adds	r3, r7, #4
+ 800106a:	2102      	movs	r1, #2
+ 800106c:	4618      	mov	r0, r3
+ 800106e:	f008 ff85 	bl	8009f7c <HAL_RCC_ClockConfig>
+ 8001072:	4603      	mov	r3, r0
+ 8001074:	2b00      	cmp	r3, #0
+ 8001076:	d001      	beq.n	800107c <SystemClock_Config+0xf0>
   {
     Error_Handler();
- 8001076:	f001 fc6f 	bl	8002958 <Error_Handler>
+ 8001078:	f001 fc6e 	bl	8002958 <Error_Handler>
   }
 }
- 800107a:	bf00      	nop
- 800107c:	3770      	adds	r7, #112	; 0x70
- 800107e:	46bd      	mov	sp, r7
- 8001080:	bd80      	pop	{r7, pc}
- 8001082:	bf00      	nop
+ 800107c:	bf00      	nop
+ 800107e:	3770      	adds	r7, #112	; 0x70
+ 8001080:	46bd      	mov	sp, r7
+ 8001082:	bd80      	pop	{r7, pc}
  8001084:	58000400 	.word	0x58000400
  8001088:	58024800 	.word	0x58024800
 
@@ -1681,14 +1680,14 @@ void PeriphCommonClock_Config(void)
   PeriphClkInitStruct.PLL2.PLL2M = 4;
  80010aa:	2304      	movs	r3, #4
  80010ac:	60bb      	str	r3, [r7, #8]
-  PeriphClkInitStruct.PLL2.PLL2N = 16;
- 80010ae:	2310      	movs	r3, #16
+  PeriphClkInitStruct.PLL2.PLL2N = 12;
+ 80010ae:	230c      	movs	r3, #12
  80010b0:	60fb      	str	r3, [r7, #12]
-  PeriphClkInitStruct.PLL2.PLL2P = 8;
- 80010b2:	2308      	movs	r3, #8
+  PeriphClkInitStruct.PLL2.PLL2P = 5;
+ 80010b2:	2305      	movs	r3, #5
  80010b4:	613b      	str	r3, [r7, #16]
-  PeriphClkInitStruct.PLL2.PLL2Q = 4;
- 80010b6:	2304      	movs	r3, #4
+  PeriphClkInitStruct.PLL2.PLL2Q = 2;
+ 80010b6:	2302      	movs	r3, #2
  80010b8:	617b      	str	r3, [r7, #20]
   PeriphClkInitStruct.PLL2.PLL2R = 2;
  80010ba:	2302      	movs	r3, #2
@@ -1699,29 +1698,28 @@ void PeriphCommonClock_Config(void)
   PeriphClkInitStruct.PLL2.PLL2VCOSEL = RCC_PLL2VCOWIDE;
  80010c2:	2300      	movs	r3, #0
  80010c4:	623b      	str	r3, [r7, #32]
-  PeriphClkInitStruct.PLL2.PLL2FRACN = 0;
- 80010c6:	2300      	movs	r3, #0
- 80010c8:	627b      	str	r3, [r7, #36]	; 0x24
+  PeriphClkInitStruct.PLL2.PLL2FRACN = 4096;
+ 80010c6:	f44f 5380 	mov.w	r3, #4096	; 0x1000
+ 80010ca:	627b      	str	r3, [r7, #36]	; 0x24
   PeriphClkInitStruct.AdcClockSelection = RCC_ADCCLKSOURCE_PLL2;
- 80010ca:	2300      	movs	r3, #0
- 80010cc:	f8c7 30a4 	str.w	r3, [r7, #164]	; 0xa4
+ 80010cc:	2300      	movs	r3, #0
+ 80010ce:	f8c7 30a4 	str.w	r3, [r7, #164]	; 0xa4
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
- 80010d0:	463b      	mov	r3, r7
- 80010d2:	4618      	mov	r0, r3
- 80010d4:	f009 fb20 	bl	800a718 <HAL_RCCEx_PeriphCLKConfig>
- 80010d8:	4603      	mov	r3, r0
- 80010da:	2b00      	cmp	r3, #0
- 80010dc:	d001      	beq.n	80010e2 <PeriphCommonClock_Config+0x56>
+ 80010d2:	463b      	mov	r3, r7
+ 80010d4:	4618      	mov	r0, r3
+ 80010d6:	f009 fb1f 	bl	800a718 <HAL_RCCEx_PeriphCLKConfig>
+ 80010da:	4603      	mov	r3, r0
+ 80010dc:	2b00      	cmp	r3, #0
+ 80010de:	d001      	beq.n	80010e4 <PeriphCommonClock_Config+0x58>
   {
     Error_Handler();
- 80010de:	f001 fc3b 	bl	8002958 <Error_Handler>
+ 80010e0:	f001 fc3a 	bl	8002958 <Error_Handler>
   }
 }
- 80010e2:	bf00      	nop
- 80010e4:	37c0      	adds	r7, #192	; 0xc0
- 80010e6:	46bd      	mov	sp, r7
- 80010e8:	bd80      	pop	{r7, pc}
-	...
+ 80010e4:	bf00      	nop
+ 80010e6:	37c0      	adds	r7, #192	; 0xc0
+ 80010e8:	46bd      	mov	sp, r7
+ 80010ea:	bd80      	pop	{r7, pc}
 
 080010ec <MX_ADC1_Init>:
   * @brief ADC1 Initialization Function
@@ -2430,7 +2428,7 @@ static void MX_I2C1_Init(void)
  80014bc:	4b1c      	ldr	r3, [pc, #112]	; (8001530 <MX_I2C1_Init+0x78>)
  80014be:	4a1d      	ldr	r2, [pc, #116]	; (8001534 <MX_I2C1_Init+0x7c>)
  80014c0:	601a      	str	r2, [r3, #0]
-  hi2c1.Init.Timing = 0x00100413;
+  hi2c1.Init.Timing = 0x0020081F;
  80014c2:	4b1b      	ldr	r3, [pc, #108]	; (8001530 <MX_I2C1_Init+0x78>)
  80014c4:	4a1c      	ldr	r2, [pc, #112]	; (8001538 <MX_I2C1_Init+0x80>)
  80014c6:	605a      	str	r2, [r3, #4]
@@ -2515,7 +2513,7 @@ static void MX_I2C1_Init(void)
  800152e:	bd80      	pop	{r7, pc}
  8001530:	24000380 	.word	0x24000380
  8001534:	40005400 	.word	0x40005400
- 8001538:	00100413 	.word	0x00100413
+ 8001538:	0020081f 	.word	0x0020081f
 
 0800153c <MX_RTC_Init>:
   * @brief RTC Initialization Function
@@ -2959,9 +2957,9 @@ static void MX_TIM1_Init(void)
  8001798:	4b44      	ldr	r3, [pc, #272]	; (80018ac <MX_TIM1_Init+0x154>)
  800179a:	4a45      	ldr	r2, [pc, #276]	; (80018b0 <MX_TIM1_Init+0x158>)
  800179c:	601a      	str	r2, [r3, #0]
-  htim1.Init.Prescaler = 32-1;
+  htim1.Init.Prescaler = 100-1;
  800179e:	4b43      	ldr	r3, [pc, #268]	; (80018ac <MX_TIM1_Init+0x154>)
- 80017a0:	221f      	movs	r2, #31
+ 80017a0:	2263      	movs	r2, #99	; 0x63
  80017a2:	605a      	str	r2, [r3, #4]
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
  80017a4:	4b41      	ldr	r3, [pc, #260]	; (80018ac <MX_TIM1_Init+0x154>)
@@ -3180,9 +3178,9 @@ static void MX_TIM2_Init(void)
  80018e6:	4b2d      	ldr	r3, [pc, #180]	; (800199c <MX_TIM2_Init+0xe8>)
  80018e8:	f04f 4280 	mov.w	r2, #1073741824	; 0x40000000
  80018ec:	601a      	str	r2, [r3, #0]
-  htim2.Init.Prescaler = 32-1;
+  htim2.Init.Prescaler = 100-1;
  80018ee:	4b2b      	ldr	r3, [pc, #172]	; (800199c <MX_TIM2_Init+0xe8>)
- 80018f0:	221f      	movs	r2, #31
+ 80018f0:	2263      	movs	r2, #99	; 0x63
  80018f2:	605a      	str	r2, [r3, #4]
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
  80018f4:	4b29      	ldr	r3, [pc, #164]	; (800199c <MX_TIM2_Init+0xe8>)
@@ -3328,9 +3326,9 @@ static void MX_TIM3_Init(void)
  80019be:	4b1d      	ldr	r3, [pc, #116]	; (8001a34 <MX_TIM3_Init+0x94>)
  80019c0:	4a1d      	ldr	r2, [pc, #116]	; (8001a38 <MX_TIM3_Init+0x98>)
  80019c2:	601a      	str	r2, [r3, #0]
-  htim3.Init.Prescaler = 32-1;
+  htim3.Init.Prescaler = 100-1;
  80019c4:	4b1b      	ldr	r3, [pc, #108]	; (8001a34 <MX_TIM3_Init+0x94>)
- 80019c6:	221f      	movs	r2, #31
+ 80019c6:	2263      	movs	r2, #99	; 0x63
  80019c8:	605a      	str	r2, [r3, #4]
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
  80019ca:	4b1a      	ldr	r3, [pc, #104]	; (8001a34 <MX_TIM3_Init+0x94>)
