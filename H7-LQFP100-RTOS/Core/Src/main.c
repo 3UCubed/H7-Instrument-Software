@@ -33,6 +33,11 @@
 typedef StaticTask_t osStaticThreadDef_t;
 /* USER CODE BEGIN PTD */
 typedef struct {
+    uint8_t* array;  // Pointer to the array data
+    uint16_t size;   // Size of the array
+} packet_t;
+
+typedef struct {
 	GPIO_TypeDef *gpio;
 	uint16_t pin;
 } gpio_pins;
@@ -56,6 +61,8 @@ typedef struct {
 #define ERPA_DATA_SIZE 18
 #define HK_DATA_SIZE 46
 #define UART_RX_BUFFER_SIZE 100
+#define MSGQUEUE_OBJECTS 16                     // number of Message Queue Objects
+
 
 #define ADC1_NUM_CHANNELS 11
 #define ADC3_NUM_CHANNELS 4
@@ -93,6 +100,7 @@ TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 
 UART_HandleTypeDef huart1;
+DMA_HandleTypeDef hdma_usart1_tx;
 
 /* Definitions for PMT_task */
 osThreadId_t PMT_taskHandle;
@@ -146,8 +154,21 @@ const osThreadAttr_t GPIO_off_task_attributes = {
   .stack_size = sizeof(GPIO_off_taskBuffer),
   .priority = (osPriority_t) osPriorityLow,
 };
+/* Definitions for UART_TX_task */
+osThreadId_t UART_TX_taskHandle;
+const osThreadAttr_t UART_TX_task_attributes = {
+  .name = "UART_TX_task",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
 /* USER CODE BEGIN PV */
 // *********************************************************************************************************** GLOBAL VARIABLES
+osMessageQueueId_t mid_MsgQueue;                // message queue id
+packet_t msg;
+
+osStatus_t status;
+volatile int tx_flag = 1;
+volatile int available_msgs = 0;
 volatile int TEMPERATURE_COUNTER = 1000; // Starts at 1000 so that temperature sensors are sampled on first hk packet
 
 uint16_t pmt_seq = 0;
@@ -205,6 +226,7 @@ void HK_init(void *argument);
 void UART_RX_init(void *argument);
 void GPIO_on_init(void *argument);
 void GPIO_off_init(void *argument);
+void UART_TX_init(void *argument);
 
 /* USER CODE BEGIN PFP */
 // *********************************************************************************************************** FUNCTION PROTOYPES
@@ -540,6 +562,10 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_QUEUES */
 	/* add queues, ... */
+  mid_MsgQueue = osMessageQueueNew(MSGQUEUE_OBJECTS, sizeof(packet_t), NULL);
+  if (mid_MsgQueue == NULL) {
+    ; // Message Queue object not created, handle failure
+  }
 
   /* USER CODE END RTOS_QUEUES */
 
@@ -561,6 +587,9 @@ int main(void)
 
   /* creation of GPIO_off_task */
   GPIO_off_taskHandle = osThreadNew(GPIO_off_init, NULL, &GPIO_off_task_attributes);
+
+  /* creation of UART_TX_task */
+  UART_TX_taskHandle = osThreadNew(UART_TX_init, NULL, &UART_TX_task_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
 	/* add threads, ... */
@@ -609,20 +638,19 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_LSI;
-  RCC_OscInitStruct.HSIState = RCC_HSI_DIV1;
-  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI|RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 4;
-  RCC_OscInitStruct.PLL.PLLN = 12;
-  RCC_OscInitStruct.PLL.PLLP = 2;
-  RCC_OscInitStruct.PLL.PLLQ = 2;
+  RCC_OscInitStruct.PLL.PLLN = 32;
+  RCC_OscInitStruct.PLL.PLLP = 4;
+  RCC_OscInitStruct.PLL.PLLQ = 4;
   RCC_OscInitStruct.PLL.PLLR = 2;
-  RCC_OscInitStruct.PLL.PLLRGE = RCC_PLL1VCIRANGE_3;
+  RCC_OscInitStruct.PLL.PLLRGE = RCC_PLL1VCIRANGE_2;
   RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1VCOWIDE;
-  RCC_OscInitStruct.PLL.PLLFRACN = 4096;
+  RCC_OscInitStruct.PLL.PLLFRACN = 0;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -641,7 +669,7 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB2CLKDivider = RCC_APB2_DIV2;
   RCC_ClkInitStruct.APB4CLKDivider = RCC_APB4_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK)
   {
     Error_Handler();
   }
@@ -659,13 +687,13 @@ void PeriphCommonClock_Config(void)
   */
   PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_ADC;
   PeriphClkInitStruct.PLL2.PLL2M = 4;
-  PeriphClkInitStruct.PLL2.PLL2N = 12;
-  PeriphClkInitStruct.PLL2.PLL2P = 5;
-  PeriphClkInitStruct.PLL2.PLL2Q = 2;
+  PeriphClkInitStruct.PLL2.PLL2N = 32;
+  PeriphClkInitStruct.PLL2.PLL2P = 8;
+  PeriphClkInitStruct.PLL2.PLL2Q = 4;
   PeriphClkInitStruct.PLL2.PLL2R = 2;
-  PeriphClkInitStruct.PLL2.PLL2RGE = RCC_PLL2VCIRANGE_3;
+  PeriphClkInitStruct.PLL2.PLL2RGE = RCC_PLL2VCIRANGE_2;
   PeriphClkInitStruct.PLL2.PLL2VCOSEL = RCC_PLL2VCOWIDE;
-  PeriphClkInitStruct.PLL2.PLL2FRACN = 4096;
+  PeriphClkInitStruct.PLL2.PLL2FRACN = 0;
   PeriphClkInitStruct.AdcClockSelection = RCC_ADCCLKSOURCE_PLL2;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
   {
@@ -975,7 +1003,7 @@ static void MX_I2C1_Init(void)
 
   /* USER CODE END I2C1_Init 1 */
   hi2c1.Instance = I2C1;
-  hi2c1.Init.Timing = 0x0020081F;
+  hi2c1.Init.Timing = 0x0010030E;
   hi2c1.Init.OwnAddress1 = 0;
   hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
   hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
@@ -1192,7 +1220,7 @@ static void MX_TIM1_Init(void)
 
   /* USER CODE END TIM1_Init 1 */
   htim1.Instance = TIM1;
-  htim1.Init.Prescaler = 100-1;
+  htim1.Init.Prescaler = 50-1;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim1.Init.Period = 62500-1;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -1271,7 +1299,7 @@ static void MX_TIM2_Init(void)
 
   /* USER CODE END TIM2_Init 1 */
   htim2.Instance = TIM2;
-  htim2.Init.Prescaler = 100-1;
+  htim2.Init.Prescaler = 50-1;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim2.Init.Period = 3125-1;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -1329,7 +1357,7 @@ static void MX_TIM3_Init(void)
 
   /* USER CODE END TIM3_Init 1 */
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 100-1;
+  htim3.Init.Prescaler = 50-1;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim3.Init.Period = 1000-1;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -1419,6 +1447,9 @@ static void MX_DMA_Init(void)
   /* DMA1_Stream1_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA1_Stream1_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(DMA1_Stream1_IRQn);
+  /* DMA1_Stream2_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream2_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream2_IRQn);
   /* DMA1_Stream5_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA1_Stream5_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(DMA1_Stream5_IRQn);
@@ -1647,7 +1678,22 @@ void receive_hk_adc3(uint16_t *buffer)
 }
 
 // *********************************************************************************************************** HELPER FUNCTIONS
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
+{
+	tx_flag = 1;
+}
 
+packet_t create_packet(const uint8_t* data, uint16_t size) {
+    packet_t packet;
+    packet.array = (uint8_t*)malloc(size * sizeof(uint8_t)); // Allocate memory
+    if (packet.array == NULL) {
+        // Memory allocation failed
+        // Handle the error accordingly (e.g., return an error code or terminate the program)
+    }
+    memcpy(packet.array, data, size); // Copy the data into the packet array
+    packet.size = size;
+    return packet;
+}
 
 int handshake()
 {
@@ -1815,7 +1861,9 @@ void sample_pmt()
 	buffer[12] = timestamp[6];
 	buffer[13] = timestamp[7];
 
-	HAL_UART_Transmit(&huart1, buffer, PMT_DATA_SIZE, 1);
+	packet_t pmt_packet = create_packet(buffer, PMT_DATA_SIZE);
+	osMessageQueuePut(mid_MsgQueue, &pmt_packet, 0U, 0U);
+	available_msgs++;
 	free(buffer);
 	free(pmt_spi);
 	free(timestamp);
@@ -1875,7 +1923,9 @@ void sample_erpa()
 
 
 
-	HAL_UART_Transmit(&huart1, buffer, ERPA_DATA_SIZE, 1);
+	packet_t erpa_packet = create_packet(buffer, ERPA_DATA_SIZE);
+	osMessageQueuePut(mid_MsgQueue, &erpa_packet, 0U, 0U);
+	available_msgs++;
 	free(buffer);
 	free(erpa_spi);
 	free(erpa_adc);
@@ -1990,7 +2040,10 @@ void sample_hk()
 	buffer[44] = timestamp[6];
 	buffer[45] = timestamp[7];
 
-	HAL_UART_Transmit(&huart1, buffer, HK_DATA_SIZE, 1);
+	packet_t hk_packet = create_packet(buffer, HK_DATA_SIZE);
+	osMessageQueuePut(mid_MsgQueue, &hk_packet, 0U, 0U);
+	available_msgs++;
+
 	free(buffer);
 	free(hk_i2c);
 	free(hk_adc1);
@@ -2175,6 +2228,56 @@ void GPIO_off_init(void *argument)
 		osThreadSuspend(GPIO_off_taskHandle);
 	}
   /* USER CODE END GPIO_off_init */
+}
+
+/* USER CODE BEGIN Header_UART_TX_init */
+/**
+* @brief Function implementing the UART_TX_task thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_UART_TX_init */
+void UART_TX_init(void *argument)
+{
+  /* USER CODE BEGIN UART_TX_init */
+  static uint8_t tx_buffer[1000];
+  uint32_t total_size = 0;
+  osStatus_t status;
+
+  while (1) {
+    total_size = 0;
+
+    // Retrieve all messages from the queue and store them in tx_buffer
+    do {
+      status = osMessageQueueGet(mid_MsgQueue, &msg, NULL, osWaitForever);
+      if (status == osOK) {
+        if (total_size + msg.size <= 1000) {
+          memcpy(&tx_buffer[total_size], msg.array, msg.size);
+          free(msg.array);
+          total_size += msg.size;
+        } else {
+
+          break;
+        }
+      }
+    } while (status == osOK);
+
+    if (total_size > 0) {
+      HAL_UART_Transmit_DMA(&huart1, tx_buffer, total_size);
+
+      // Wait for transmission to complete
+      while (tx_flag == 0) {
+        osThreadYield();
+      }
+
+      // Reset the flag
+      tx_flag = 0;
+    }
+
+    // Yield thread control
+    osThreadYield();
+  }
+  /* USER CODE END UART_TX_init */
 }
 
 /**
