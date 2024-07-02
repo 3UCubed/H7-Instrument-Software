@@ -1661,36 +1661,37 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.AHBCLKDivider = RCC_HCLK_DIV1;
  800109a:	2300      	movs	r3, #0
  800109c:	613b      	str	r3, [r7, #16]
-  RCC_ClkInitStruct.APB3CLKDivider = RCC_APB3_DIV2;
- 800109e:	2340      	movs	r3, #64	; 0x40
+  RCC_ClkInitStruct.APB3CLKDivider = RCC_APB3_DIV1;
+ 800109e:	2300      	movs	r3, #0
  80010a0:	617b      	str	r3, [r7, #20]
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_APB1_DIV2;
- 80010a2:	2340      	movs	r3, #64	; 0x40
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_APB1_DIV1;
+ 80010a2:	2300      	movs	r3, #0
  80010a4:	61bb      	str	r3, [r7, #24]
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_APB2_DIV2;
- 80010a6:	f44f 6380 	mov.w	r3, #1024	; 0x400
- 80010aa:	61fb      	str	r3, [r7, #28]
-  RCC_ClkInitStruct.APB4CLKDivider = RCC_APB4_DIV2;
- 80010ac:	2340      	movs	r3, #64	; 0x40
- 80010ae:	623b      	str	r3, [r7, #32]
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_APB2_DIV1;
+ 80010a6:	2300      	movs	r3, #0
+ 80010a8:	61fb      	str	r3, [r7, #28]
+  RCC_ClkInitStruct.APB4CLKDivider = RCC_APB4_DIV1;
+ 80010aa:	2300      	movs	r3, #0
+ 80010ac:	623b      	str	r3, [r7, #32]
 
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK)
- 80010b0:	1d3b      	adds	r3, r7, #4
- 80010b2:	2101      	movs	r1, #1
- 80010b4:	4618      	mov	r0, r3
- 80010b6:	f009 f87b 	bl	800a1b0 <HAL_RCC_ClockConfig>
- 80010ba:	4603      	mov	r3, r0
- 80010bc:	2b00      	cmp	r3, #0
- 80010be:	d001      	beq.n	80010c4 <SystemClock_Config+0xec>
+ 80010ae:	1d3b      	adds	r3, r7, #4
+ 80010b0:	2101      	movs	r1, #1
+ 80010b2:	4618      	mov	r0, r3
+ 80010b4:	f009 f87c 	bl	800a1b0 <HAL_RCC_ClockConfig>
+ 80010b8:	4603      	mov	r3, r0
+ 80010ba:	2b00      	cmp	r3, #0
+ 80010bc:	d001      	beq.n	80010c2 <SystemClock_Config+0xea>
   {
     Error_Handler();
- 80010c0:	f001 fd2a 	bl	8002b18 <Error_Handler>
+ 80010be:	f001 fd2b 	bl	8002b18 <Error_Handler>
   }
 }
- 80010c4:	bf00      	nop
- 80010c6:	3770      	adds	r7, #112	; 0x70
- 80010c8:	46bd      	mov	sp, r7
- 80010ca:	bd80      	pop	{r7, pc}
+ 80010c2:	bf00      	nop
+ 80010c4:	3770      	adds	r7, #112	; 0x70
+ 80010c6:	46bd      	mov	sp, r7
+ 80010c8:	bd80      	pop	{r7, pc}
+ 80010ca:	bf00      	nop
  80010cc:	58000400 	.word	0x58000400
  80010d0:	58024800 	.word	0x58024800
 
@@ -2469,7 +2470,7 @@ static void MX_I2C1_Init(void)
  8001504:	4b1c      	ldr	r3, [pc, #112]	; (8001578 <MX_I2C1_Init+0x78>)
  8001506:	4a1d      	ldr	r2, [pc, #116]	; (800157c <MX_I2C1_Init+0x7c>)
  8001508:	601a      	str	r2, [r3, #0]
-  hi2c1.Init.Timing = 0x0010030E;
+  hi2c1.Init.Timing = 0x0020081F;
  800150a:	4b1b      	ldr	r3, [pc, #108]	; (8001578 <MX_I2C1_Init+0x78>)
  800150c:	4a1c      	ldr	r2, [pc, #112]	; (8001580 <MX_I2C1_Init+0x80>)
  800150e:	605a      	str	r2, [r3, #4]
@@ -2554,7 +2555,7 @@ static void MX_I2C1_Init(void)
  8001576:	bd80      	pop	{r7, pc}
  8001578:	24000380 	.word	0x24000380
  800157c:	40005400 	.word	0x40005400
- 8001580:	0010030e 	.word	0x0010030e
+ 8001580:	0020081f 	.word	0x0020081f
 
 08001584 <MX_RTC_Init>:
   * @brief RTC Initialization Function
