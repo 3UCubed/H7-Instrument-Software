@@ -3368,17 +3368,17 @@ static void MX_TIM3_Init(void)
  8001a06:	4b1d      	ldr	r3, [pc, #116]	; (8001a7c <MX_TIM3_Init+0x94>)
  8001a08:	4a1d      	ldr	r2, [pc, #116]	; (8001a80 <MX_TIM3_Init+0x98>)
  8001a0a:	601a      	str	r2, [r3, #0]
-  htim3.Init.Prescaler = 50-1;
+  htim3.Init.Prescaler = 100-1;
  8001a0c:	4b1b      	ldr	r3, [pc, #108]	; (8001a7c <MX_TIM3_Init+0x94>)
- 8001a0e:	2231      	movs	r2, #49	; 0x31
+ 8001a0e:	2263      	movs	r2, #99	; 0x63
  8001a10:	605a      	str	r2, [r3, #4]
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
  8001a12:	4b1a      	ldr	r3, [pc, #104]	; (8001a7c <MX_TIM3_Init+0x94>)
  8001a14:	2200      	movs	r2, #0
  8001a16:	609a      	str	r2, [r3, #8]
-  htim3.Init.Period = 1000-1;
+  htim3.Init.Period = 50000-1;
  8001a18:	4b18      	ldr	r3, [pc, #96]	; (8001a7c <MX_TIM3_Init+0x94>)
- 8001a1a:	f240 32e7 	movw	r2, #999	; 0x3e7
+ 8001a1a:	f24c 324f 	movw	r2, #49999	; 0xc34f
  8001a1e:	60da      	str	r2, [r3, #12]
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
  8001a20:	4b16      	ldr	r3, [pc, #88]	; (8001a7c <MX_TIM3_Init+0x94>)
@@ -3713,8 +3713,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
  8001c36:	2301      	movs	r3, #1
  8001c38:	61bb      	str	r3, [r7, #24]
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
- 8001c3a:	2300      	movs	r3, #0
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+ 8001c3a:	2302      	movs	r3, #2
  8001c3c:	61fb      	str	r3, [r7, #28]
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
  8001c3e:	2300      	movs	r3, #0
@@ -3732,8 +3732,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
  8001c52:	2301      	movs	r3, #1
  8001c54:	61bb      	str	r3, [r7, #24]
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
- 8001c56:	2300      	movs	r3, #0
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+ 8001c56:	2302      	movs	r3, #2
  8001c58:	61fb      	str	r3, [r7, #28]
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
  8001c5a:	2300      	movs	r3, #0
