@@ -388,46 +388,50 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	}
 	case 0x19: {
 		printf("AUTOSWEEP ON\n");
-		HAL_TIM_Base_Start(&htim2);
 		HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, DAC_OUT, 32, DAC_ALIGN_12B_R);
 		break;
 	}
 	case 0x09: {
 		printf("AUTOSWEEP OFF\n");
-		HAL_TIM_Base_Stop(&htim2);
 		HAL_DAC_Stop_DMA(&hdac1, DAC_CHANNEL_1);
 		break;
 	}
 	case 0x1A: {
 		printf("ERPA ON\n");
+		HAL_TIM_OC_Start_IT(&htim2, TIM_CHANNEL_4);
 		ERPA_ON = 1;
 		erpa_seq = 0;
 		break;
 	}
 	case 0x0A: {
 		printf("ERPA OFF\n");
+		HAL_TIM_OC_Stop_IT(&htim2, TIM_CHANNEL_4);
 		ERPA_ON = 0;
 		break;
 	}
 	case 0x1B: {
 		printf("PMT ON\n");
+		HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_1);
 		PMT_ON = 1;
 		pmt_seq = 0;
 		break;
 	}
 	case 0x0B: {
 		printf("PMT OFF\n");
+		HAL_TIM_OC_Stop_IT(&htim1, TIM_CHANNEL_1);
 		PMT_ON = 0;
 		break;
 	}
 	case 0x1C: {
 		printf("HK ON \n");
+		HAL_TIM_OC_Start_IT(&htim3, TIM_CHANNEL_1);
 		HK_ON = 1;
 		hk_seq = 0;
 		break;
 	}
 	case 0x0C: {
 		printf("HK OFF\n");
+		HAL_TIM_OC_Stop_IT(&htim3, TIM_CHANNEL_1);
 		HK_ON = 0;
 		break;
 	}
@@ -541,12 +545,6 @@ int main(void)
 	{
 		Error_Handler();
 	}
-
-
-	HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_1);
-	HAL_TIM_OC_Start_IT(&htim2, TIM_CHANNEL_1);
-	HAL_TIM_OC_Start_IT(&htim3, TIM_CHANNEL_1);
-
 
   /* USER CODE END 2 */
 
@@ -1782,7 +1780,6 @@ void system_setup()
 {
 
 	TIM2->CCR4 = 312;
-	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_4);
 
 	if (HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_OFFSET_LINEARITY,
 			ADC_SINGLE_ENDED) != HAL_OK) {
