@@ -57,9 +57,9 @@ typedef struct {
 #define ERPA_FLAG_ID 0x0002
 #define HK_FLAG_ID 0x0004
 
-#define PMT_DATA_SIZE 14
-#define ERPA_DATA_SIZE 18
-#define HK_DATA_SIZE 46
+#define PMT_DATA_SIZE 16
+#define ERPA_DATA_SIZE 20
+#define HK_DATA_SIZE 48
 #define UART_RX_BUFFER_SIZE 100
 #define MSGQUEUE_OBJECTS 16                     // number of Message Queue Objects
 
@@ -163,6 +163,7 @@ const osThreadAttr_t UART_TX_task_attributes = {
 };
 /* USER CODE BEGIN PV */
 // *********************************************************************************************************** GLOBAL VARIABLES
+volatile uint32_t UptimeMillis = 0;
 osMessageQueueId_t mid_MsgQueue;                // message queue id
 packet_t msg;
 
@@ -237,6 +238,7 @@ void system_setup();
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 // *********************************************************************************************************** CALLBACKS
+
 
 
 /**
@@ -1778,9 +1780,8 @@ int handshake()
  */
 void system_setup()
 {
-
+	HAL_TIM_Base_Start(&htim2);
 	TIM2->CCR4 = 312;
-
 	if (HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_OFFSET_LINEARITY,
 			ADC_SINGLE_ENDED) != HAL_OK) {
 		/* Calibration Error */
@@ -1804,6 +1805,26 @@ void system_setup()
 	}
 }
 
+uint32_t getMicro()
+{
+
+    uint32_t ms = UptimeMillis;
+    uint32_t st = SysTick->VAL;
+
+    // Did UptimeMillis rollover while reading SysTick->VAL?
+    if (ms != UptimeMillis)
+    {
+        // Rollover occurred so read both again.
+        // Must read both because we don't know whether the
+        // rollover occurred before or after reading SysTick->VAL.
+        // No need to check for another rollover because there is
+        // no chance of another rollover occurring so quickly.
+        ms = UptimeMillis;
+        st = SysTick->VAL;
+    }
+
+    return ms * 1000 - st / ((SysTick->LOAD + 1) / 1000);
+}
 
 void getTimestamp(uint8_t *buffer)
 {
@@ -1812,8 +1833,7 @@ void getTimestamp(uint8_t *buffer)
 
 	HAL_RTC_GetTime(&hrtc, &currentTime, RTC_FORMAT_BIN);
 	HAL_RTC_GetDate(&hrtc, &currentDate, RTC_FORMAT_BIN);
-	uint32_t milliseconds = (1000 - (currentTime.SubSeconds * 1000) / hrtc.Init.SynchPrediv);
-
+	uint32_t micro = getMicro();
 	//uint32_t milliseconds = currentTime.SubSeconds;
 
 
@@ -1823,8 +1843,11 @@ void getTimestamp(uint8_t *buffer)
 	buffer[3] = currentTime.Hours;		// 0-23
 	buffer[4] = currentTime.Minutes;	// 0-59
 	buffer[5] = currentTime.Seconds;	// 0-59
-	buffer[6] = (milliseconds >> 8) & 0xFF;  // High byte of milliseconds
-	buffer[7] = milliseconds & 0xFF;
+	buffer[6] = ((micro >> 24) & 0xFF);  // High byte of milliseconds
+	buffer[7] = ((micro >> 16) & 0xFF);  // High byte of milliseconds
+	buffer[8] = ((micro >> 8) & 0xFF);  // High byte of milliseconds
+	buffer[9] = micro & 0xFF;
+
 
 }
 
@@ -1843,7 +1866,7 @@ void sample_pmt()
 	}
 	uint8_t* buffer = (uint8_t*)malloc(PMT_DATA_SIZE * sizeof(uint8_t)); // Allocate memory for the buffer
 	uint8_t* pmt_spi = (uint8_t*)malloc(2 * sizeof(uint8_t));
-	uint8_t* timestamp = (uint8_t*)malloc(8 * sizeof(uint8_t));
+	uint8_t* timestamp = (uint8_t*)malloc(10 * sizeof(uint8_t));
 	getTimestamp(timestamp);
 
 #ifdef SIMULATE
@@ -1867,6 +1890,9 @@ void sample_pmt()
 	buffer[11] = timestamp[5];
 	buffer[12] = timestamp[6];
 	buffer[13] = timestamp[7];
+	buffer[14] = timestamp[8];
+	buffer[15] = timestamp[9];
+
 
 	packet_t pmt_packet = create_packet(buffer, PMT_DATA_SIZE);
 	osMessageQueuePut(mid_MsgQueue, &pmt_packet, 0U, 0U);
@@ -1895,7 +1921,7 @@ void sample_erpa()
 
 	uint8_t* erpa_spi = (uint8_t*)malloc(2 * sizeof(uint8_t));
 	uint16_t* erpa_adc = (uint16_t*)malloc(2 * sizeof(uint16_t));
-	uint8_t* timestamp = (uint8_t*)malloc(8 * sizeof(uint8_t));
+	uint8_t* timestamp = (uint8_t*)malloc(10 * sizeof(uint8_t));
 	getTimestamp(timestamp);
 
 #ifdef SIMULATE
@@ -1927,6 +1953,9 @@ void sample_erpa()
 	buffer[15] = timestamp[5];
 	buffer[16] = timestamp[6];
 	buffer[17] = timestamp[7];
+	buffer[18] = timestamp[8];
+	buffer[19] = timestamp[9];
+
 
 
 
@@ -1957,7 +1986,7 @@ void sample_hk()
 	int16_t* hk_i2c = (int16_t*)malloc(4 * sizeof(int16_t));
 	uint16_t* hk_adc1 = (uint16_t*)malloc(9 * sizeof(uint16_t));
 	uint16_t* hk_adc3 = (uint16_t*)malloc(4 * sizeof(uint16_t));
-	uint8_t* timestamp = (uint8_t*)malloc(8 * sizeof(uint8_t));
+	uint8_t* timestamp = (uint8_t*)malloc(10 * sizeof(uint8_t));
 	getTimestamp(timestamp);
 
 #ifdef SIMULATE
@@ -2046,6 +2075,9 @@ void sample_hk()
 	buffer[43] = timestamp[5];
 	buffer[44] = timestamp[6];
 	buffer[45] = timestamp[7];
+	buffer[46] = timestamp[8];
+	buffer[47] = timestamp[9];
+
 
 	packet_t hk_packet = create_packet(buffer, HK_DATA_SIZE);
 	osMessageQueuePut(mid_MsgQueue, &hk_packet, 0U, 0U);
