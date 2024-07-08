@@ -98,6 +98,7 @@ SPI_HandleTypeDef hspi2;
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
+TIM_HandleTypeDef htim4;
 
 UART_HandleTypeDef huart1;
 DMA_HandleTypeDef hdma_usart1_tx;
@@ -221,6 +222,7 @@ static void MX_ADC1_Init(void);
 static void MX_DAC1_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_RTC_Init(void);
+static void MX_TIM4_Init(void);
 void PMT_init(void *argument);
 void ERPA_init(void *argument);
 void HK_init(void *argument);
@@ -238,8 +240,6 @@ void system_setup();
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 // *********************************************************************************************************** CALLBACKS
-
-
 
 /**
  * @brief Handles the callback for timer delay elapsed events.
@@ -542,6 +542,7 @@ int main(void)
   MX_DAC1_Init();
   MX_SPI1_Init();
   MX_RTC_Init();
+  MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
 	if (!handshake())
 	{
@@ -1394,6 +1395,51 @@ static void MX_TIM3_Init(void)
 }
 
 /**
+  * @brief TIM4 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM4_Init(void)
+{
+
+  /* USER CODE BEGIN TIM4_Init 0 */
+
+  /* USER CODE END TIM4_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM4_Init 1 */
+
+  /* USER CODE END TIM4_Init 1 */
+  htim4.Instance = TIM4;
+  htim4.Init.Prescaler = 50-1;
+  htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim4.Init.Period = 1000;
+  htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim4) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim4, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim4, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM4_Init 2 */
+
+  /* USER CODE END TIM4_Init 2 */
+
+}
+
+/**
   * @brief USART1 Initialization Function
   * @param None
   * @retval None
@@ -1740,7 +1786,8 @@ int handshake()
 	timeStruct.Hours = hour;
 	timeStruct.Minutes = minute;
 	timeStruct.Seconds = second;
-	timeStruct.SubSeconds = milliseconds; // Set the milliseconds (if supported by your RTC)
+	timeStruct.SubSeconds = 0;
+
 
 	HAL_StatusTypeDef status;
 
@@ -1755,6 +1802,8 @@ int handshake()
 	{
 		Error_Handler();
 	}
+
+	HAL_TIM_Base_Start(&htim4);
 
 	tx_buffer[0] = 0xFA;
 	tx_buffer[1] = 1;
@@ -1780,7 +1829,6 @@ int handshake()
  */
 void system_setup()
 {
-	HAL_TIM_Base_Start(&htim2);
 	TIM2->CCR4 = 312;
 	if (HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_OFFSET_LINEARITY,
 			ADC_SINGLE_ENDED) != HAL_OK) {
@@ -1804,6 +1852,7 @@ void system_setup()
 		Error_Handler();
 	}
 }
+
 
 uint32_t getMicro()
 {
@@ -1833,8 +1882,9 @@ void getTimestamp(uint8_t *buffer)
 
 	HAL_RTC_GetTime(&hrtc, &currentTime, RTC_FORMAT_BIN);
 	HAL_RTC_GetDate(&hrtc, &currentDate, RTC_FORMAT_BIN);
-	uint32_t micro = getMicro();
-	//uint32_t milliseconds = currentTime.SubSeconds;
+
+	uint32_t milliseconds = (1000 - (currentTime.SubSeconds * 1000) / hrtc.Init.SynchPrediv) * 1000;
+	uint32_t micro = milliseconds + TIM4->CNT;
 
 
 	buffer[0] = currentDate.Year;		// 0-99
@@ -1847,8 +1897,6 @@ void getTimestamp(uint8_t *buffer)
 	buffer[7] = ((micro >> 16) & 0xFF);  // High byte of milliseconds
 	buffer[8] = ((micro >> 8) & 0xFF);  // High byte of milliseconds
 	buffer[9] = micro & 0xFF;
-
-
 }
 
 /**
