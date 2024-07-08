@@ -98,7 +98,6 @@ SPI_HandleTypeDef hspi2;
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
-TIM_HandleTypeDef htim4;
 
 UART_HandleTypeDef huart1;
 DMA_HandleTypeDef hdma_usart1_tx;
@@ -222,7 +221,6 @@ static void MX_ADC1_Init(void);
 static void MX_DAC1_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_RTC_Init(void);
-static void MX_TIM4_Init(void);
 void PMT_init(void *argument);
 void ERPA_init(void *argument);
 void HK_init(void *argument);
@@ -542,7 +540,6 @@ int main(void)
   MX_DAC1_Init();
   MX_SPI1_Init();
   MX_RTC_Init();
-  MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
 	if (!handshake())
 	{
@@ -641,17 +638,11 @@ void SystemClock_Config(void)
 
   while(!__HAL_PWR_GET_FLAG(PWR_FLAG_VOSRDY)) {}
 
-  /** Configure LSE Drive Capability
-  */
-  HAL_PWR_EnableBkUpAccess();
-  __HAL_RCC_LSEDRIVE_CONFIG(RCC_LSEDRIVE_LOW);
-
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE|RCC_OSCILLATORTYPE_LSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-  RCC_OscInitStruct.LSEState = RCC_LSE_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 4;
@@ -1073,8 +1064,8 @@ static void MX_RTC_Init(void)
   */
   hrtc.Instance = RTC;
   hrtc.Init.HourFormat = RTC_HOURFORMAT_24;
-  hrtc.Init.AsynchPrediv = 32;
-  hrtc.Init.SynchPrediv = 1024;
+  hrtc.Init.AsynchPrediv = 100;
+  hrtc.Init.SynchPrediv = 10000;
   hrtc.Init.OutPut = RTC_OUTPUT_DISABLE;
   hrtc.Init.OutPutPolarity = RTC_OUTPUT_POLARITY_HIGH;
   hrtc.Init.OutPutType = RTC_OUTPUT_TYPE_OPENDRAIN;
@@ -1391,51 +1382,6 @@ static void MX_TIM3_Init(void)
   /* USER CODE BEGIN TIM3_Init 2 */
 
   /* USER CODE END TIM3_Init 2 */
-
-}
-
-/**
-  * @brief TIM4 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_TIM4_Init(void)
-{
-
-  /* USER CODE BEGIN TIM4_Init 0 */
-
-  /* USER CODE END TIM4_Init 0 */
-
-  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
-  TIM_MasterConfigTypeDef sMasterConfig = {0};
-
-  /* USER CODE BEGIN TIM4_Init 1 */
-
-  /* USER CODE END TIM4_Init 1 */
-  htim4.Instance = TIM4;
-  htim4.Init.Prescaler = 50-1;
-  htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim4.Init.Period = 1000;
-  htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_Base_Init(&htim4) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-  if (HAL_TIM_ConfigClockSource(&htim4, &sClockSourceConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim4, &sMasterConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN TIM4_Init 2 */
-
-  /* USER CODE END TIM4_Init 2 */
 
 }
 
@@ -1786,7 +1732,7 @@ int handshake()
 	timeStruct.Hours = hour;
 	timeStruct.Minutes = minute;
 	timeStruct.Seconds = second;
-	timeStruct.SubSeconds = 0;
+	timeStruct.SubSeconds = milliseconds;
 
 
 	HAL_StatusTypeDef status;
@@ -1802,8 +1748,6 @@ int handshake()
 	{
 		Error_Handler();
 	}
-
-	HAL_TIM_Base_Start(&htim4);
 
 	tx_buffer[0] = 0xFA;
 	tx_buffer[1] = 1;
@@ -1854,27 +1798,6 @@ void system_setup()
 }
 
 
-uint32_t getMicro()
-{
-
-    uint32_t ms = UptimeMillis;
-    uint32_t st = SysTick->VAL;
-
-    // Did UptimeMillis rollover while reading SysTick->VAL?
-    if (ms != UptimeMillis)
-    {
-        // Rollover occurred so read both again.
-        // Must read both because we don't know whether the
-        // rollover occurred before or after reading SysTick->VAL.
-        // No need to check for another rollover because there is
-        // no chance of another rollover occurring so quickly.
-        ms = UptimeMillis;
-        st = SysTick->VAL;
-    }
-
-    return ms * 1000 - st / ((SysTick->LOAD + 1) / 1000);
-}
-
 void getTimestamp(uint8_t *buffer)
 {
 	RTC_TimeTypeDef currentTime;
@@ -1883,8 +1806,7 @@ void getTimestamp(uint8_t *buffer)
 	HAL_RTC_GetTime(&hrtc, &currentTime, RTC_FORMAT_BIN);
 	HAL_RTC_GetDate(&hrtc, &currentDate, RTC_FORMAT_BIN);
 
-	uint32_t milliseconds = (1000 - (currentTime.SubSeconds * 1000) / hrtc.Init.SynchPrediv) * 1000;
-	uint32_t micro = milliseconds + TIM4->CNT;
+	uint32_t milliseconds = 1000000 - (currentTime.SubSeconds * 100);
 
 
 	buffer[0] = currentDate.Year;		// 0-99
@@ -1893,10 +1815,10 @@ void getTimestamp(uint8_t *buffer)
 	buffer[3] = currentTime.Hours;		// 0-23
 	buffer[4] = currentTime.Minutes;	// 0-59
 	buffer[5] = currentTime.Seconds;	// 0-59
-	buffer[6] = ((micro >> 24) & 0xFF);  // High byte of milliseconds
-	buffer[7] = ((micro >> 16) & 0xFF);  // High byte of milliseconds
-	buffer[8] = ((micro >> 8) & 0xFF);  // High byte of milliseconds
-	buffer[9] = micro & 0xFF;
+	buffer[6] = ((milliseconds >> 24) & 0xFF);  // High byte of milliseconds
+	buffer[7] = ((milliseconds >> 16) & 0xFF);  // High byte of milliseconds
+	buffer[8] = ((milliseconds >> 8) & 0xFF);  // High byte of milliseconds
+	buffer[9] = milliseconds & 0xFF;
 }
 
 /**
