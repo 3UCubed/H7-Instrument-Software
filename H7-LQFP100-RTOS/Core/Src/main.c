@@ -44,6 +44,20 @@ typedef struct {
 	uint16_t pin;
 } gpio_pins;
 
+typedef enum {
+	RAIL_BUSVMON,	// 0
+	RAIL_BUSIMON,	// 1
+	RAIL_2v5,		// 2
+	RAIL_3v3,		// 3
+	RAIL_5v,		// 4
+	RAIL_n3v3,		// 5
+	RAIL_n5v,		// 6
+	RAIL_15v,		// 7
+	RAIL_5vref,		// 8
+	RAIL_n200v,		// 9
+	RAIL_n800v,		// 10
+} ERROR_TAGS;
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -56,12 +70,14 @@ typedef struct {
 #define PMT_FLAG_ID 0x0001
 #define ERPA_FLAG_ID 0x0002
 #define HK_FLAG_ID 0x0004
+#define VOLTAGE_MONITOR_ID 0x0008
 
 #define PMT_DATA_SIZE 16
 #define ERPA_DATA_SIZE 20
 #define HK_DATA_SIZE 48
 #define UART_RX_BUFFER_SIZE 64
 #define MSGQUEUE_OBJECTS 128
+#define ERROR_PACKET_DATA_SIZE 3
 
 #define ADC1_NUM_CHANNELS 11
 #define ADC3_NUM_CHANNELS 4
@@ -69,6 +85,7 @@ typedef struct {
 #define PMT_SYNC 0xBB
 #define ERPA_SYNC 0xAA
 #define HK_SYNC 0xCC
+#define ERROR_SYNC 0xDD
 
 /* USER CODE END PD */
 
@@ -140,6 +157,10 @@ const osThreadAttr_t GPIO_off_task_attributes = { .name = "GPIO_off_task",
 osThreadId_t UART_TX_taskHandle;
 const osThreadAttr_t UART_TX_task_attributes = { .name = "UART_TX_task",
 		.stack_size = 128 * 4, .priority = (osPriority_t) osPriorityLow, };
+/* Definitions for Voltage_Monitor */
+osThreadId_t Voltage_MonitorHandle;
+const osThreadAttr_t Voltage_Monitor_attributes = { .name = "Voltage_Monitor",
+		.stack_size = 128 * 4, .priority = (osPriority_t) osPriorityHigh, };
 /* USER CODE BEGIN PV */
 // *********************************************************************************************************** GLOBAL VARIABLES
 volatile uint32_t UptimeMillis = 0;
@@ -208,11 +229,16 @@ void UART_RX_init(void *argument);
 void GPIO_on_init(void *argument);
 void GPIO_off_init(void *argument);
 void UART_TX_init(void *argument);
+void Voltage_Monitor_init(void *argument);
 
 /* USER CODE BEGIN PFP */
 // *********************************************************************************************************** FUNCTION PROTOYPES
 int handshake();
 void system_setup();
+int inRange(uint16_t raw, int min, int max);
+void error_protocol(ERROR_TAGS tag);
+packet_t create_packet(const uint8_t *data, uint16_t size);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -235,6 +261,8 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim) {
 		osEventFlagsSet(event_flags, ERPA_FLAG_ID);
 	} else if (htim == &htim3) {
 		osEventFlagsSet(event_flags, HK_FLAG_ID);
+		osEventFlagsSet(event_flags, VOLTAGE_MONITOR_ID);
+
 	} else {
 		printf("Unknown Timer Interrupt\n");
 	}
@@ -515,7 +543,6 @@ int main(void) {
 	if (!handshake()) {
 		Error_Handler();
 	}
-
 	/* USER CODE END 2 */
 
 	/* Init scheduler */
@@ -567,6 +594,10 @@ int main(void) {
 	/* creation of UART_TX_task */
 	UART_TX_taskHandle = osThreadNew(UART_TX_init, NULL,
 			&UART_TX_task_attributes);
+
+	/* creation of Voltage_Monitor */
+	Voltage_MonitorHandle = osThreadNew(Voltage_Monitor_init, NULL,
+			&Voltage_Monitor_attributes);
 
 	/* USER CODE BEGIN RTOS_THREADS */
 	/* add threads, ... */
@@ -1430,7 +1461,6 @@ static void MX_GPIO_Init(void) {
 
 /* USER CODE BEGIN 4 */
 // *********************************************************************************************************** RAW DATA RETRIEVAL FUNCTIONS
-
 /**
  * @brief Polls an I2C temperature sensor.
  *
@@ -1594,6 +1624,31 @@ void receive_hk_adc3(uint16_t *buffer) {
 }
 
 // *********************************************************************************************************** HELPER FUNCTIONS
+
+int inRange(uint16_t raw, int min, int max) {
+	if (raw <= max && raw >= min) {
+		return 1;
+	}
+	return 0;
+}
+
+void error_protocol(ERROR_TAGS tag) {
+
+	packet_t error_packet;
+	uint8_t *buffer = (uint8_t*) malloc(ERROR_PACKET_DATA_SIZE * sizeof(uint8_t));
+
+	buffer[0] = ERROR_SYNC;
+	buffer[1] = ERROR_SYNC;
+	buffer[2] = tag;
+
+	error_packet = create_packet(buffer, ERROR_PACKET_DATA_SIZE);
+	osMessageQueuePut(mid_MsgQueue, &error_packet, 0U, 0U);
+	available_msgs++;
+
+	free(buffer);
+	//TODO: Shutdown
+}
+
 /**
  * @brief UART transmit complete callback.
  * @param huart: UART handle.
@@ -1601,7 +1656,6 @@ void receive_hk_adc3(uint16_t *buffer) {
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
 	tx_flag = 1;
 }
-
 
 /**
  * @brief Creates a packet with given data and size.
@@ -1619,7 +1673,6 @@ packet_t create_packet(const uint8_t *data, uint16_t size) {
 	packet.size = size;
 	return packet;
 }
-
 
 /**
  * @brief Performs a handshake by receiving and sending data over UART.
@@ -1692,6 +1745,8 @@ int handshake() {
  * Any errors encountered during these initialization steps are handled by the Error_Handler function.
  */
 void system_setup() {
+	HAL_TIM_OC_Start_IT(&htim3, TIM_CHANNEL_1);	// Timer 3 is used for both HK and voltage monitor task. Must always be running in order for voltage monitor to work
+
 	TIM2->CCR4 = 312;
 	if (HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_OFFSET_LINEARITY,
 	ADC_SINGLE_ENDED) != HAL_OK) {
@@ -1713,7 +1768,6 @@ void system_setup() {
 		Error_Handler();
 	}
 }
-
 
 /**
  * @brief Gets the current timestamp and stores it in the provided buffer.
@@ -1984,7 +2038,7 @@ void PMT_init(void *argument) {
 	for (;;) {
 
 		osEventFlagsWait(event_flags, PMT_FLAG_ID, osFlagsWaitAny,
-				osWaitForever);
+		osWaitForever);
 		if (PMT_ON) {
 			sample_pmt();
 			pmt_seq++;
@@ -2013,7 +2067,7 @@ void ERPA_init(void *argument) {
 	/* Infinite loop */
 	for (;;) {
 		osEventFlagsWait(event_flags, ERPA_FLAG_ID, osFlagsWaitAny,
-				osWaitForever);
+		osWaitForever);
 		if (ERPA_ON) {
 			sample_erpa();
 			erpa_seq++;
@@ -2042,7 +2096,7 @@ void HK_init(void *argument) {
 	/* Infinite loop */
 	for (;;) {
 		osEventFlagsWait(event_flags, HK_FLAG_ID, osFlagsWaitAny,
-				osWaitForever);
+		osWaitForever);
 		if (HK_ON) {
 			sample_hk();
 			hk_seq++;
@@ -2181,6 +2235,95 @@ void UART_TX_init(void *argument) {
 		osThreadYield();
 	}
 	/* USER CODE END UART_TX_init */
+}
+
+/* USER CODE BEGIN Header_Voltage_Monitor_init */
+/**
+ * @brief Function implementing the Voltage_Monitor thread.
+ * @param argument: Not used
+ * @retval None
+ */
+/* USER CODE END Header_Voltage_Monitor_init */
+void Voltage_Monitor_init(void *argument) {
+	/* USER CODE BEGIN Voltage_Monitor_init */
+	/* Infinite loop */
+	for (;;) {
+		osEventFlagsWait(event_flags, VOLTAGE_MONITOR_ID, osFlagsWaitAny,
+				osWaitForever);
+
+		// Sample voltages
+
+		// Check voltages
+
+		// If out of range, de-init all voltages & send error
+		uint16_t *hk_adc1 = (uint16_t*) malloc(9 * sizeof(uint16_t));
+		uint16_t *hk_adc3 = (uint16_t*) malloc(4 * sizeof(uint16_t));
+
+		receive_hk_adc1(hk_adc1);
+		receive_hk_adc3(hk_adc3);
+
+		uint16_t _busvmon = hk_adc1[0];
+		uint16_t _busimon = hk_adc1[1];
+		uint16_t _2v5 = hk_adc1[2];
+		uint16_t _3v3 = hk_adc3[3];
+		uint16_t _5v = hk_adc1[6];
+		uint16_t _n3v3 = hk_adc1[3];
+		uint16_t _n5v = hk_adc3[2];
+		uint16_t _15v = hk_adc1[7];
+		uint16_t _5vref = hk_adc1[8];
+		uint16_t _n200v = hk_adc1[4];
+		uint16_t _n800v = hk_adc1[5];
+
+		if (!inRange(_busvmon, 1574, 1739)) {
+			error_protocol(RAIL_BUSVMON);
+		}
+
+		if (!inRange(_busimon, 35, 39)) {
+			error_protocol(RAIL_BUSIMON);
+		}
+
+		if (!inRange(_2v5, 2947, 3257)) {
+			error_protocol(RAIL_2v5);
+		}
+
+		if (!inRange(_3v3, 3537, 3909)) {
+			error_protocol(RAIL_3v3);
+		}
+
+		if (!inRange(_5v, 3537, 3909)) {
+			error_protocol(RAIL_5v);
+		}
+
+		if (!inRange(_n3v3, 3702, 4091)) {
+			error_protocol(RAIL_n3v3);
+		}
+
+		if (!inRange(_n5v, 3619, 4000)) {
+			error_protocol(RAIL_n5v);
+		}
+
+		if (!inRange(_15v, 3525, 3896)) {
+			error_protocol(RAIL_15v);
+		}
+
+		if (!inRange(_5vref, 3537, 3909)) {
+			error_protocol(RAIL_5vref);
+		}
+
+		if (!inRange(_n200v, 3796, 4196)) {
+			error_protocol(RAIL_n200v);
+		}
+
+		if (!inRange(_n800v, 3018, 3336)) {
+			error_protocol(RAIL_n800v);
+		}
+
+		free(hk_adc1);
+		free(hk_adc3);
+
+		osThreadYield();
+	}
+	/* USER CODE END Voltage_Monitor_init */
 }
 
 /**
