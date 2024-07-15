@@ -1,38 +1,38 @@
 /**
- ******************************************************************************
- * @file    stm32h7xx.h
- * @author  MCD Application Team
- * @brief   CMSIS STM32H7xx Device Peripheral Access Layer Header File.
- *
- *          The file is the unique include file that the application programmer
- *          is using in the C source code, usually in main.c. This file contains:
- *           - Configuration section that allows to select:
- *              - The STM32H7xx device used in the target application
- *              - To use or not the peripheral's drivers in application code(i.e.
- *                code will be based on direct access to peripheral's registers
- *                rather than drivers API), this option is controlled by
- *                "#define USE_HAL_DRIVER"
- *
- ******************************************************************************
- * @attention
- *
- * Copyright (c) 2017 STMicroelectronics.
- * All rights reserved.
- *
- * This software is licensed under terms that can be found in the LICENSE file
- * in the root directory of this software component.
- * If no LICENSE file comes with this software, it is provided AS-IS.
- *
- ******************************************************************************
- */
+  ******************************************************************************
+  * @file    stm32h7xx.h
+  * @author  MCD Application Team
+  * @brief   CMSIS STM32H7xx Device Peripheral Access Layer Header File.
+  *
+  *          The file is the unique include file that the application programmer
+  *          is using in the C source code, usually in main.c. This file contains:
+  *           - Configuration section that allows to select:
+  *              - The STM32H7xx device used in the target application
+  *              - To use or not the peripheral's drivers in application code(i.e.
+  *                code will be based on direct access to peripheral's registers
+  *                rather than drivers API), this option is controlled by
+  *                "#define USE_HAL_DRIVER"
+  *
+  ******************************************************************************
+  * @attention
+  *
+  * Copyright (c) 2017 STMicroelectronics.
+  * All rights reserved.
+  *
+  * This software is licensed under terms that can be found in the LICENSE file
+  * in the root directory of this software component.
+  * If no LICENSE file comes with this software, it is provided AS-IS.
+  *
+  ******************************************************************************
+  */
 
 /** @addtogroup CMSIS
- * @{
- */
+  * @{
+  */
 
 /** @addtogroup stm32h7xx
- * @{
- */
+  * @{
+  */
 
 #ifndef STM32H7xx_H
 #define STM32H7xx_H
@@ -42,19 +42,20 @@
 #endif /* __cplusplus */
 
 /** @addtogroup Library_configuration_section
- * @{
- */
+  * @{
+  */
 
 /**
- * @brief STM32 Family
- */
+  * @brief STM32 Family
+  */
 #if !defined  (STM32H7)
 #define STM32H7
 #endif /* STM32H7 */
 
+
 /* Uncomment the line below according to the target STM32H7 device used in your
- application
- */
+   application
+  */
 
 #if !defined (STM32H743xx) && !defined (STM32H753xx)  && !defined (STM32H750xx) && !defined (STM32H742xx) && \
     !defined (STM32H745xx) && !defined (STM32H745xG)  && !defined (STM32H755xx)  && !defined (STM32H747xx) && !defined (STM32H747xG)&& !defined (STM32H757xx) && \
@@ -84,8 +85,8 @@
 #endif
 
 /*  Tip: To avoid modifying this file each time you need to switch between these
- devices, you can define the device in your toolchain compiler preprocessor.
- */
+        devices, you can define the device in your toolchain compiler preprocessor.
+  */
 
 #if defined(DUAL_CORE) && !defined(CORE_CM4) && !defined(CORE_CM7)
  #error "Dual core device, please select CORE_CM4 or CORE_CM7"
@@ -101,8 +102,8 @@
 #endif /* USE_HAL_DRIVER */
 
 /**
- * @brief CMSIS Device version number V1.10.4
- */
+  * @brief CMSIS Device version number V1.10.4
+  */
 #define __STM32H7xx_CMSIS_DEVICE_VERSION_MAIN   (0x01) /*!< [31:24] main version */
 #define __STM32H7xx_CMSIS_DEVICE_VERSION_SUB1   (0x0A) /*!< [23:16] sub1 version */
 #define __STM32H7xx_CMSIS_DEVICE_VERSION_SUB2   (0x04) /*!< [15:8]  sub2 version */
@@ -113,17 +114,17 @@
                                       |(__STM32H7xx_CMSIS_DEVICE_VERSION_RC))
 
 /**
- * @}
- */
+  * @}
+  */
 
 /** @addtogroup Device_Included
- * @{
- */
+  * @{
+  */
 
 #if defined(STM32H743xx)
   #include "stm32h743xx.h"
 #elif defined(STM32H753xx)
-#include "stm32h753xx.h"
+  #include "stm32h753xx.h"
 #elif defined(STM32H750xx)
   #include "stm32h750xx.h"
 #elif defined(STM32H742xx)
@@ -169,32 +170,39 @@
 #endif
 
 /**
- * @}
- */
+  * @}
+  */
 
 /** @addtogroup Exported_types
- * @{
- */
-typedef enum {
-	RESET = 0, SET = !RESET
+  * @{
+  */
+typedef enum
+{
+  RESET = 0,
+  SET = !RESET
 } FlagStatus, ITStatus;
 
-typedef enum {
-	DISABLE = 0, ENABLE = !DISABLE
+typedef enum
+{
+  DISABLE = 0,
+  ENABLE = !DISABLE
 } FunctionalState;
 #define IS_FUNCTIONAL_STATE(STATE) (((STATE) == DISABLE) || ((STATE) == ENABLE))
 
-typedef enum {
-	SUCCESS = 0, ERROR = !SUCCESS
+typedef enum
+{
+  SUCCESS = 0,
+  ERROR = !SUCCESS
 } ErrorStatus;
 
 /**
- * @}
- */
+  * @}
+  */
+
 
 /** @addtogroup Exported_macros
- * @{
- */
+  * @{
+  */
 #define SET_BIT(REG, BIT)     ((REG) |= (BIT))
 
 #define CLEAR_BIT(REG, BIT)   ((REG) &= ~(BIT))
@@ -267,12 +275,13 @@ typedef enum {
   } while(0)
 
 /**
- * @}
- */
+  * @}
+  */
 
 #if defined (USE_HAL_DRIVER)
-#include "stm32h7xx_hal.h"
+ #include "stm32h7xx_hal.h"
 #endif /* USE_HAL_DRIVER */
+
 
 #ifdef __cplusplus
 }
@@ -280,10 +289,13 @@ typedef enum {
 
 #endif /* STM32H7xx_H */
 /**
- * @}
- */
+  * @}
+  */
 
 /**
- * @}
- */
+  * @}
+  */
+
+
+
 
