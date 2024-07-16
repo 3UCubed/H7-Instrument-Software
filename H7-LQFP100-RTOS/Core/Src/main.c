@@ -73,11 +73,13 @@ typedef enum {
 #define HK_FLAG_ID 0x0004
 #define VOLTAGE_MONITOR_FLAG_ID 0x0008
 
-#define PMT_DATA_SIZE 16
-#define ERPA_DATA_SIZE 20
+#define PMT_DATA_SIZE 10
+#define ERPA_DATA_SIZE 14
 #define HK_DATA_SIZE 48
 #define UART_RX_BUFFER_SIZE 64
 #define UART_TX_BUFFER_SIZE 1000
+#define UPTIME_SIZE 4
+#define TIMESTAMP_SIZE 10
 
 #define MSGQUEUE_OBJECTS 128
 #define ERROR_PACKET_DATA_SIZE 3
@@ -204,7 +206,6 @@ uint16_t _n200v;
 uint16_t _n800v;
 
 
-volatile uint32_t UptimeMicro = 0;
 volatile uint32_t UptimeMillis = 0;
 osMessageQueueId_t mid_MsgQueue;
 packet_t msg;
@@ -282,7 +283,7 @@ int inRange(uint16_t raw, int min, int max);
 void error_protocol(ERROR_TAGS tag);
 packet_t create_packet(const uint8_t *data, uint16_t size);
 void sample_hk();
-uint32_t getMicro();
+void getUptime(uint8_t *buffer);
 
 /* USER CODE END PFP */
 
@@ -1906,9 +1907,9 @@ void system_setup() {
 	}
 }
 
-uint32_t getMicro()
+void getUptime(uint8_t *buffer)
 {
-
+	uint32_t uptime = 0;
     uint32_t ms = UptimeMillis;
     uint32_t st = SysTick->VAL;
 
@@ -1923,7 +1924,12 @@ uint32_t getMicro()
         ms = UptimeMillis;
         st = SysTick->VAL;
     }
-    return ms * 1000 - st / ((SysTick->LOAD + 1) / 1000);
+    uptime = ms * 1000 - st / ((SysTick->LOAD + 1) / 1000);
+
+	buffer[0] = ((uptime >> 24) & 0xFF);
+	buffer[1] = ((uptime >> 16) & 0xFF);
+	buffer[2] = ((uptime >> 8) & 0xFF);
+	buffer[3] = uptime & 0xFF;
 }
 
 /**
@@ -1936,7 +1942,6 @@ void getTimestamp(uint8_t *buffer) {
 
 	HAL_RTC_GetTime(&hrtc, &currentTime, RTC_FORMAT_BIN);
 	HAL_RTC_GetDate(&hrtc, &currentDate, RTC_FORMAT_BIN);
-	uint32_t micro = getMicro();
 	uint32_t milliseconds = 1000000 - (currentTime.SubSeconds * 100);
 
 	buffer[0] = currentDate.Year;				// 0-99
@@ -1945,10 +1950,10 @@ void getTimestamp(uint8_t *buffer) {
 	buffer[3] = currentTime.Hours;				// 0-23
 	buffer[4] = currentTime.Minutes;			// 0-59
 	buffer[5] = currentTime.Seconds;			// 0-59
-	buffer[6] = ((micro >> 24) & 0xFF);
-	buffer[7] = ((micro >> 16) & 0xFF);
-	buffer[8] = ((micro >> 8) & 0xFF);
-	buffer[9] = micro & 0xFF;
+	buffer[6] = ((milliseconds >> 24) & 0xFF);
+	buffer[7] = ((milliseconds >> 16) & 0xFF);
+	buffer[8] = ((milliseconds >> 8) & 0xFF);
+	buffer[9] = milliseconds & 0xFF;
 }
 
 /**
@@ -1965,8 +1970,9 @@ void sample_pmt() {
 	}
 	uint8_t *buffer = (uint8_t*) malloc(PMT_DATA_SIZE * sizeof(uint8_t));
 	uint8_t *pmt_spi = (uint8_t*) malloc(2 * sizeof(uint8_t));
-	uint8_t *timestamp = (uint8_t*) malloc(10 * sizeof(uint8_t));
-	getTimestamp(timestamp);
+	uint8_t *uptime = (uint8_t*) malloc(UPTIME_SIZE * sizeof(uint8_t));
+
+	getUptime(uptime);
 
 #ifdef SIMULATE
 	pmt_spi[0] = 0xE;
@@ -1981,23 +1987,18 @@ void sample_pmt() {
 	buffer[3] = (pmt_seq & 0xFF);
 	buffer[4] = pmt_spi[0];
 	buffer[5] = pmt_spi[1];
-	buffer[6] = timestamp[0];
-	buffer[7] = timestamp[1];
-	buffer[8] = timestamp[2];
-	buffer[9] = timestamp[3];
-	buffer[10] = timestamp[4];
-	buffer[11] = timestamp[5];
-	buffer[12] = timestamp[6];
-	buffer[13] = timestamp[7];
-	buffer[14] = timestamp[8];
-	buffer[15] = timestamp[9];
+	buffer[6] = uptime[0];
+	buffer[7] = uptime[1];
+	buffer[8] = uptime[2];
+	buffer[9] = uptime[3];
+
 
 	packet_t pmt_packet = create_packet(buffer, PMT_DATA_SIZE);
 	osMessageQueuePut(mid_MsgQueue, &pmt_packet, 0U, 0U);
 	available_msgs++;
 	free(buffer);
 	free(pmt_spi);
-	free(timestamp);
+	free(uptime);
 }
 
 /**
@@ -2017,8 +2018,9 @@ void sample_erpa() {
 
 	uint8_t *erpa_spi = (uint8_t*) malloc(2 * sizeof(uint8_t));
 	uint16_t *erpa_adc = (uint16_t*) malloc(2 * sizeof(uint16_t));
-	uint8_t *timestamp = (uint8_t*) malloc(10 * sizeof(uint8_t));
-	getTimestamp(timestamp);
+	uint8_t *uptime = (uint8_t*) malloc(UPTIME_SIZE * sizeof(uint8_t));
+
+	getUptime(uptime);
 
 #ifdef SIMULATE
 	erpa_spi[0] = 0xE;
@@ -2041,16 +2043,11 @@ void sample_erpa() {
 	buffer[7] = (erpa_adc[1] & 0xFF);           // TEMPURATURE 1 LSB
 	buffer[8] = erpa_spi[0];					// ERPA eADC MSB
 	buffer[9] = erpa_spi[1];					// ERPA eADC LSB
-	buffer[10] = timestamp[0];
-	buffer[11] = timestamp[1];
-	buffer[12] = timestamp[2];
-	buffer[13] = timestamp[3];
-	buffer[14] = timestamp[4];
-	buffer[15] = timestamp[5];
-	buffer[16] = timestamp[6];
-	buffer[17] = timestamp[7];
-	buffer[18] = timestamp[8];
-	buffer[19] = timestamp[9];
+	buffer[10] = uptime[0];
+	buffer[11] = uptime[1];
+	buffer[12] = uptime[2];
+	buffer[13] = uptime[3];
+
 
 	packet_t erpa_packet = create_packet(buffer, ERPA_DATA_SIZE);
 	osMessageQueuePut(mid_MsgQueue, &erpa_packet, 0U, 0U);
@@ -2058,7 +2055,7 @@ void sample_erpa() {
 	free(buffer);
 	free(erpa_spi);
 	free(erpa_adc);
-	free(timestamp);
+	free(uptime);
 }
 
 /**
@@ -2075,7 +2072,8 @@ void sample_hk() {
 
 	static uint16_t last_i2c_reading[4];
 	int16_t *hk_i2c = (int16_t*) malloc(4 * sizeof(int16_t));
-	uint8_t *timestamp = (uint8_t*) malloc(10 * sizeof(uint8_t));
+	uint8_t *timestamp = (uint8_t*) malloc(TIMESTAMP_SIZE * sizeof(uint8_t));
+
 	getTimestamp(timestamp);
 
 #ifdef SIMULATE
@@ -2410,7 +2408,7 @@ void Voltage_Monitor_init(void *argument)
 #ifdef DAMY
 		osThreadExit();
 #endif
-	osThreadExit(); // REMOVE
+	//osThreadExit(); // REMOVE
 
 	for (;;) {
 		osEventFlagsWait(event_flags, VOLTAGE_MONITOR_FLAG_ID, osFlagsWaitAny,
@@ -2437,49 +2435,49 @@ void Voltage_Monitor_init(void *argument)
 		_n200v = hk_adc1[4];
 		_n800v = hk_adc1[5];
 
-		if (!inRange(_busvmon, 1574, 1739)) {
-			error_protocol(RAIL_BUSVMON);
-		}
-
-		if (!inRange(_busimon, 35, 39)) {
-			error_protocol(RAIL_BUSIMON);
-		}
-
-		if (!inRange(_2v5, 2947, 3257)) {
-			error_protocol(RAIL_2v5);
-		}
-
-		if (!inRange(_3v3, 3537, 3909)) {
-			error_protocol(RAIL_3v3);
-		}
-
-		if (!inRange(_5v, 3537, 3909)) {
-			error_protocol(RAIL_5v);
-		}
-
-		if (!inRange(_n3v3, 3702, 4091)) {
-			error_protocol(RAIL_n3v3);
-		}
-
-		if (!inRange(_n5v, 3619, 4000)) {
-			error_protocol(RAIL_n5v);
-		}
-
-		if (!inRange(_15v, 3525, 3896)) {
-			error_protocol(RAIL_15v);
-		}
-
-		if (!inRange(_5vref, 3537, 3909)) {
-			error_protocol(RAIL_5vref);
-		}
-
-		if (!inRange(_n200v, 3796, 4196)) {
-			error_protocol(RAIL_n200v);
-		}
-
-		if (!inRange(_n800v, 3018, 3336)) {
-			error_protocol(RAIL_n800v);
-		}
+//		if (!inRange(_busvmon, 1574, 1739)) {
+//			error_protocol(RAIL_BUSVMON);
+//		}
+//
+//		if (!inRange(_busimon, 35, 39)) {
+//			error_protocol(RAIL_BUSIMON);
+//		}
+//
+//		if (!inRange(_2v5, 2947, 3257)) {
+//			error_protocol(RAIL_2v5);
+//		}
+//
+//		if (!inRange(_3v3, 3537, 3909)) {
+//			error_protocol(RAIL_3v3);
+//		}
+//
+//		if (!inRange(_5v, 3537, 3909)) {
+//			error_protocol(RAIL_5v);
+//		}
+//
+//		if (!inRange(_n3v3, 3702, 4091)) {
+//			error_protocol(RAIL_n3v3);
+//		}
+//
+//		if (!inRange(_n5v, 3619, 4000)) {
+//			error_protocol(RAIL_n5v);
+//		}
+//
+//		if (!inRange(_15v, 3525, 3896)) {
+//			error_protocol(RAIL_15v);
+//		}
+//
+//		if (!inRange(_5vref, 3537, 3909)) {
+//			error_protocol(RAIL_5vref);
+//		}
+//
+//		if (!inRange(_n200v, 3796, 4196)) {
+//			error_protocol(RAIL_n200v);
+//		}
+//
+//		if (!inRange(_n800v, 3018, 3336)) {
+//			error_protocol(RAIL_n800v);
+//		}
 
 		free(hk_adc1);
 		free(hk_adc3);
