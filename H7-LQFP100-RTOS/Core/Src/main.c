@@ -204,7 +204,7 @@ uint16_t _n200v;
 uint16_t _n800v;
 
 
-
+volatile uint32_t UptimeMicro = 0;
 volatile uint32_t UptimeMillis = 0;
 osMessageQueueId_t mid_MsgQueue;
 packet_t msg;
@@ -282,6 +282,8 @@ int inRange(uint16_t raw, int min, int max);
 void error_protocol(ERROR_TAGS tag);
 packet_t create_packet(const uint8_t *data, uint16_t size);
 void sample_hk();
+uint32_t getMicro();
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -1780,6 +1782,7 @@ void error_protocol(ERROR_TAGS tag) {
 	available_msgs++;
 
 	free(buffer);
+
 	//TODO: Shutdown
 }
 
@@ -1903,6 +1906,26 @@ void system_setup() {
 	}
 }
 
+uint32_t getMicro()
+{
+
+    uint32_t ms = UptimeMillis;
+    uint32_t st = SysTick->VAL;
+
+    // Did UptimeMillis rollover while reading SysTick->VAL?
+    if (ms != UptimeMillis)
+    {
+        // Rollover occurred so read both again.
+        // Must read both because we don't know whether the
+        // rollover occurred before or after reading SysTick->VAL.
+        // No need to check for another rollover because there is
+        // no chance of another rollover occurring so quickly.
+        ms = UptimeMillis;
+        st = SysTick->VAL;
+    }
+    return ms * 1000 - st / ((SysTick->LOAD + 1) / 1000);
+}
+
 /**
  * @brief Gets the current timestamp and stores it in the provided buffer.
  * @param buffer: Pointer to the buffer where the timestamp will be stored.
@@ -1913,7 +1936,7 @@ void getTimestamp(uint8_t *buffer) {
 
 	HAL_RTC_GetTime(&hrtc, &currentTime, RTC_FORMAT_BIN);
 	HAL_RTC_GetDate(&hrtc, &currentDate, RTC_FORMAT_BIN);
-
+	uint32_t micro = getMicro();
 	uint32_t milliseconds = 1000000 - (currentTime.SubSeconds * 100);
 
 	buffer[0] = currentDate.Year;				// 0-99
@@ -1922,10 +1945,10 @@ void getTimestamp(uint8_t *buffer) {
 	buffer[3] = currentTime.Hours;				// 0-23
 	buffer[4] = currentTime.Minutes;			// 0-59
 	buffer[5] = currentTime.Seconds;			// 0-59
-	buffer[6] = ((milliseconds >> 24) & 0xFF);
-	buffer[7] = ((milliseconds >> 16) & 0xFF);
-	buffer[8] = ((milliseconds >> 8) & 0xFF);
-	buffer[9] = milliseconds & 0xFF;
+	buffer[6] = ((micro >> 24) & 0xFF);
+	buffer[7] = ((micro >> 16) & 0xFF);
+	buffer[8] = ((micro >> 8) & 0xFF);
+	buffer[9] = micro & 0xFF;
 }
 
 /**
@@ -2392,6 +2415,7 @@ void Voltage_Monitor_init(void *argument)
 	for (;;) {
 		osEventFlagsWait(event_flags, VOLTAGE_MONITOR_FLAG_ID, osFlagsWaitAny,
 				osWaitForever);
+
 
 		uint16_t *hk_adc1 = (uint16_t*) malloc(9 * sizeof(uint16_t));
 		uint16_t *hk_adc3 = (uint16_t*) malloc(4 * sizeof(uint16_t));
