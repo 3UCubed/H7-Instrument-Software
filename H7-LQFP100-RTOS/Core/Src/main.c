@@ -91,7 +91,6 @@ typedef enum {
 #define ERPA_SYNC 0xAA
 #define HK_SYNC 0xCC
 #define ERROR_SYNC 0xDD
-
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -205,6 +204,7 @@ uint16_t _5vref;
 uint16_t _n200v;
 uint16_t _n800v;
 
+volatile int STOP_TRIGGERED = 0;
 
 volatile uint32_t UptimeMillis = 0;
 osMessageQueueId_t mid_MsgQueue;
@@ -522,6 +522,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	case 0x0F: {
 		printf("Enter STOP mode\n");
 		// TODO: Enter stop mode
+		STOP_TRIGGERED = 1;
 		break;
 	}
 	case 0xE0: {
@@ -690,8 +691,10 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.HSIState = RCC_HSI_DIV2;
+  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 4;
@@ -1522,7 +1525,23 @@ static void MX_USART1_UART_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN USART1_Init 2 */
+	/* Set the RXFIFO threshold */
+	HAL_UARTEx_SetRxFifoThreshold(&huart1, UART_RXFIFO_THRESHOLD_1_4);
 
+	/* Enable the FIFO mode */
+	HAL_UARTEx_EnableFifoMode(&huart1);
+
+	/* Enable MCU wakeup by UART */
+	HAL_UARTEx_EnableStopMode(&huart1);
+
+	/* Enable the UART RX FIFO threshold interrupt */
+	__HAL_UART_ENABLE_IT(&huart1, UART_IT_RXFT);
+
+	/* Enable the UART wakeup from stop mode interrupt */
+	__HAL_UART_ENABLE_IT(&huart1, UART_IT_WUF);
+
+	/* Put UART peripheral in reception process */
+//	HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
   /* USER CODE END USART1_Init 2 */
 
 }
@@ -1772,7 +1791,8 @@ int inRange(uint16_t raw, int min, int max) {
 void error_protocol(ERROR_TAGS tag) {
 	sample_hk();
 	packet_t error_packet;
-	uint8_t *buffer = (uint8_t*) malloc(ERROR_PACKET_DATA_SIZE * sizeof(uint8_t));
+	uint8_t *buffer = (uint8_t*) malloc(
+			ERROR_PACKET_DATA_SIZE * sizeof(uint8_t));
 
 	buffer[0] = ERROR_SYNC;
 	buffer[1] = ERROR_SYNC;
@@ -1907,24 +1927,22 @@ void system_setup() {
 	}
 }
 
-void getUptime(uint8_t *buffer)
-{
+void getUptime(uint8_t *buffer) {
 	uint32_t uptime = 0;
-    uint32_t ms = UptimeMillis;
-    uint32_t st = SysTick->VAL;
+	uint32_t ms = UptimeMillis;
+	uint32_t st = SysTick->VAL;
 
-    // Did UptimeMillis rollover while reading SysTick->VAL?
-    if (ms != UptimeMillis)
-    {
-        // Rollover occurred so read both again.
-        // Must read both because we don't know whether the
-        // rollover occurred before or after reading SysTick->VAL.
-        // No need to check for another rollover because there is
-        // no chance of another rollover occurring so quickly.
-        ms = UptimeMillis;
-        st = SysTick->VAL;
-    }
-    uptime = ms * 1000 - st / ((SysTick->LOAD + 1) / 1000);
+	// Did UptimeMillis rollover while reading SysTick->VAL?
+	if (ms != UptimeMillis) {
+		// Rollover occurred so read both again.
+		// Must read both because we don't know whether the
+		// rollover occurred before or after reading SysTick->VAL.
+		// No need to check for another rollover because there is
+		// no chance of another rollover occurring so quickly.
+		ms = UptimeMillis;
+		st = SysTick->VAL;
+	}
+	uptime = ms * 1000 - st / ((SysTick->LOAD + 1) / 1000);
 
 	buffer[0] = ((uptime >> 24) & 0xFF);
 	buffer[1] = ((uptime >> 16) & 0xFF);
@@ -1992,7 +2010,6 @@ void sample_pmt() {
 	buffer[8] = uptime[2];
 	buffer[9] = uptime[3];
 
-
 	packet_t pmt_packet = create_packet(buffer, PMT_DATA_SIZE);
 	osMessageQueuePut(mid_MsgQueue, &pmt_packet, 0U, 0U);
 	available_msgs++;
@@ -2047,7 +2064,6 @@ void sample_erpa() {
 	buffer[11] = uptime[1];
 	buffer[12] = uptime[2];
 	buffer[13] = uptime[3];
-
 
 	packet_t erpa_packet = create_packet(buffer, ERPA_DATA_SIZE);
 	osMessageQueuePut(mid_MsgQueue, &erpa_packet, 0U, 0U);
@@ -2277,6 +2293,22 @@ void UART_RX_init(void *argument)
 	/* Infinite loop */
 	for (;;) {
 		HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
+		if (STOP_TRIGGERED) {
+			STOP_TRIGGERED = 0;
+			vTaskSuspendAll();
+			HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
+
+		    // Reinitialize system clock after wake-up
+		    SystemClock_Config();
+
+		    // Re-enable interrupts if necessary
+		    HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
+
+			xTaskResumeAll();
+		}
+		else{
+
+		}
 		osDelay(5);
 	}
   /* USER CODE END UART_RX_init */
@@ -2369,7 +2401,7 @@ void UART_TX_init(void *argument)
 					memcpy(&tx_buffer[total_size], msg.array, msg.size);
 					free(msg.array);
 					total_size += msg.size;
-					if(total_size >= (UART_TX_BUFFER_SIZE - HK_DATA_SIZE)){
+					if (total_size >= (UART_TX_BUFFER_SIZE - HK_DATA_SIZE)) {
 						break;
 					}
 				}
@@ -2412,8 +2444,7 @@ void Voltage_Monitor_init(void *argument)
 
 	for (;;) {
 		osEventFlagsWait(event_flags, VOLTAGE_MONITOR_FLAG_ID, osFlagsWaitAny,
-				osWaitForever);
-
+		osWaitForever);
 
 		uint16_t *hk_adc1 = (uint16_t*) malloc(9 * sizeof(uint16_t));
 		uint16_t *hk_adc3 = (uint16_t*) malloc(4 * sizeof(uint16_t));
