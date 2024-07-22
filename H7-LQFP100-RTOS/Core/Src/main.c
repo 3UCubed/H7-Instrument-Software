@@ -72,6 +72,7 @@ typedef enum {
 #define ERPA_FLAG_ID 0x0002
 #define HK_FLAG_ID 0x0004
 #define VOLTAGE_MONITOR_FLAG_ID 0x0008
+#define STOP_FLAG 0x0016
 
 #define PMT_DATA_SIZE 10
 #define ERPA_DATA_SIZE 14
@@ -203,8 +204,6 @@ uint16_t _15v;
 uint16_t _5vref;
 uint16_t _n200v;
 uint16_t _n800v;
-
-volatile int STOP_TRIGGERED = 0;
 
 volatile uint32_t UptimeMillis = 0;
 osMessageQueueId_t mid_MsgQueue;
@@ -521,8 +520,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	}
 	case 0x0F: {
 		printf("Enter STOP mode\n");
-		// TODO: Enter stop mode
-		STOP_TRIGGERED = 1;
+		osEventFlagsSet(event_flags, STOP_FLAG);
 		break;
 	}
 	case 0xE0: {
@@ -2293,21 +2291,24 @@ void UART_RX_init(void *argument)
 	/* Infinite loop */
 	for (;;) {
 		HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
-		if (STOP_TRIGGERED) {
-			STOP_TRIGGERED = 0;
+
+	    int current_flag = osEventFlagsGet(event_flags);
+
+		if ((current_flag & STOP_FLAG) != 0) {
+			osEventFlagsClear(event_flags, STOP_FLAG);
 			vTaskSuspendAll();
 			HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
 
-		    // Reinitialize system clock after wake-up
+			// When MCU is triggered to wake up, it resumes right here.
+			// That's why it looks like we enter stop mode and then instantly
+			// configure the clock and resume tasks, but in reality the MCU
+			// just stops right here.
+
 		    SystemClock_Config();
 
-		    // Re-enable interrupts if necessary
 		    HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
 
 			xTaskResumeAll();
-		}
-		else{
-
 		}
 		osDelay(5);
 	}
