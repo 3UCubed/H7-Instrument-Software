@@ -63,7 +63,6 @@ typedef enum {
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 // *********************************************************************************************************** DEFINES
-//#define DAMY
 //#define SIMULATE
 //#define ERPA_CAP 700
 //#define PMT_CAP 80
@@ -92,6 +91,9 @@ typedef enum {
 #define ERPA_SYNC 0xAA
 #define HK_SYNC 0xCC
 #define ERROR_SYNC 0xDD
+
+#define ACK 0xFF
+#define NACK 0x00
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -144,13 +146,6 @@ const osThreadAttr_t HK_task_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
-/* Definitions for UART_RX_task */
-osThreadId_t UART_RX_taskHandle;
-const osThreadAttr_t UART_RX_task_attributes = {
-  .name = "UART_RX_task",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
-};
 /* Definitions for GPIO_on_task */
 osThreadId_t GPIO_on_taskHandle;
 uint32_t GPIO_on_taskBuffer[ 128 ];
@@ -188,6 +183,13 @@ const osThreadAttr_t Voltage_Monitor_attributes = {
   .name = "Voltage_Monitor",
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityHigh,
+};
+/* Definitions for FLAG_task */
+osThreadId_t FLAG_taskHandle;
+const osThreadAttr_t FLAG_task_attributes = {
+  .name = "FLAG_task",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
 };
 /* USER CODE BEGIN PV */
 // *********************************************************************************************************** GLOBAL VARIABLES
@@ -268,21 +270,24 @@ static void MX_TIM4_Init(void);
 void PMT_init(void *argument);
 void ERPA_init(void *argument);
 void HK_init(void *argument);
-void UART_RX_init(void *argument);
 void GPIO_on_init(void *argument);
 void GPIO_off_init(void *argument);
 void UART_TX_init(void *argument);
 void Voltage_Monitor_init(void *argument);
+void FLAG_init(void *argument);
 
 /* USER CODE BEGIN PFP */
 // *********************************************************************************************************** FUNCTION PROTOYPES
-int handshake();
 void system_setup();
 int inRange(uint16_t raw, int min, int max);
 void error_protocol(ERROR_TAGS tag);
 packet_t create_packet(const uint8_t *data, uint16_t size);
 void sample_hk();
 void getUptime(uint8_t *buffer);
+void sendACK();
+void sendNACK();
+void sync();
+void enterStop();
 
 /* USER CODE END PFP */
 
@@ -523,6 +528,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		osEventFlagsSet(event_flags, STOP_FLAG);
 		break;
 	}
+	case 0xAF: {
+		sync();
+		break;
+	}
 	case 0xE0: {
 		printf("Auto Init\n");
 		xTaskResumeFromISR(GPIO_on_taskHandle);
@@ -586,11 +595,7 @@ int main(void)
   MX_RTC_Init();
   MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
-#ifndef DAMY
-	if (!handshake()) {
-		Error_Handler();
-	}
-#endif
+
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -627,9 +632,6 @@ int main(void)
   /* creation of HK_task */
   HK_taskHandle = osThreadNew(HK_init, NULL, &HK_task_attributes);
 
-  /* creation of UART_RX_task */
-  UART_RX_taskHandle = osThreadNew(UART_RX_init, NULL, &UART_RX_task_attributes);
-
   /* creation of GPIO_on_task */
   GPIO_on_taskHandle = osThreadNew(GPIO_on_init, NULL, &GPIO_on_task_attributes);
 
@@ -641,6 +643,9 @@ int main(void)
 
   /* creation of Voltage_Monitor */
   Voltage_MonitorHandle = osThreadNew(Voltage_Monitor_init, NULL, &Voltage_Monitor_attributes);
+
+  /* creation of FLAG_task */
+  FLAG_taskHandle = osThreadNew(FLAG_init, NULL, &FLAG_task_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
 	/* add threads, ... */
@@ -1779,6 +1784,131 @@ void receive_hk_adc3(uint16_t *buffer) {
 
 // *********************************************************************************************************** HELPER FUNCTIONS
 
+void enterStop(){
+
+	//flushMessageQueue();
+	sendACK();
+
+	vTaskSuspendAll();
+	HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
+
+	// When MCU is triggered to wake up, it resumes right here.
+	// That's why it looks like we enter stop mode and then instantly
+	// configure the clock and resume tasks, but in reality the MCU
+	// just stops right here.
+
+	xTaskResumeAll();
+	SystemClock_Config();
+}
+
+void calibrateRTC(uint8_t *buffer) {
+	//    [0]     [1]     [2]     [3]     [4]     [5]     [6]     [7]     [8]
+	//    0xFF    Year   Month    Day     Hour   Minute  Second  ms MSB  ms LSB
+
+	RTC_DateTypeDef dateStruct;
+	RTC_TimeTypeDef timeStruct;
+	uint8_t year = buffer[1];
+	uint8_t month = buffer[2];
+	uint8_t day = buffer[3];
+	uint8_t hour = buffer[4];
+	uint8_t minute = buffer[5];
+	uint8_t second = buffer[6];
+	uint16_t milliseconds = (buffer[7] << 8) | buffer[8];
+
+	dateStruct.Year = year;
+	dateStruct.Month = month;
+	dateStruct.Date = day;
+
+	timeStruct.Hours = hour;
+	timeStruct.Minutes = minute;
+	timeStruct.Seconds = second;
+	timeStruct.SubSeconds = milliseconds;
+
+	HAL_StatusTypeDef status;
+
+	status = HAL_RTC_SetDate(&hrtc, &dateStruct, RTC_FORMAT_BIN);
+	if (status != HAL_OK) {
+		Error_Handler();
+	}
+
+	status = HAL_RTC_SetTime(&hrtc, &timeStruct, RTC_FORMAT_BIN);
+	if (status != HAL_OK) {
+		Error_Handler();
+	}
+}
+
+void sync() {
+	// 1. Send acknowledgement (0xFF) (This tells OBC/GUI that we have woken up)
+	// 2. Wait to receive RTC generated timestamp from OBC/GUI
+	// 3. Calibrate our RTC from received timestamp
+	// 4. Send acknowledgement (0xFF) (This tells OBC/GUI that we have calibrated our RTC, and are now in run mode)
+	sendACK();
+
+	uint8_t key;
+
+	// Wait for 0xFF to be received
+	HAL_UART_AbortReceive(&huart1);
+	do {
+		HAL_UART_Receive(&huart1, UART_RX_BUFFER, 9, 100);
+		key = UART_RX_BUFFER[0];
+	} while (key != 0xFF);
+
+	//calibrateRTC(UART_RX_BUFFER);
+	HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
+
+	sendACK();
+}
+
+
+void sendACK() {
+	static uint8_t tx_buffer[1];
+
+	tx_buffer[0] = ACK;
+	HAL_UART_Transmit(&huart1, tx_buffer, 1, 100);
+}
+
+void sendNACK() {
+	static uint8_t tx_buffer[1];
+
+	tx_buffer[0] = NACK;
+	HAL_UART_Transmit(&huart1, tx_buffer, 1, 100);
+
+}
+
+void flushMessageQueue() {
+	static uint8_t tx_buffer[UART_TX_BUFFER_SIZE];
+
+	uint32_t total_size = 0;
+	osStatus_t status;
+	do {
+		status = osMessageQueueGet(mid_MsgQueue, &msg, NULL, osWaitForever);
+		if (status == osOK) {
+			if ((total_size + msg.size) < UART_TX_BUFFER_SIZE) {
+				memcpy(&tx_buffer[total_size], msg.array, msg.size);
+				free(msg.array);
+				total_size += msg.size;
+				if (total_size >= (UART_TX_BUFFER_SIZE - HK_DATA_SIZE)) {
+					break;
+				}
+			}
+		}
+		else{
+			break;
+		}
+	} while (status == osOK);
+
+	if (total_size > 0) {
+		HAL_UART_Transmit_DMA(&huart1, tx_buffer, total_size);
+
+		// Wait for transmission to complete
+		while (tx_flag == 0) {
+		}
+
+		tx_flag = 0;
+
+	}
+}
+
 int inRange(uint16_t raw, int min, int max) {
 	if (raw <= max && raw >= min) {
 		return 1;
@@ -1790,7 +1920,7 @@ void error_protocol(ERROR_TAGS tag) {
 	sample_hk();
 	packet_t error_packet;
 	uint8_t *buffer = (uint8_t*) malloc(
-			ERROR_PACKET_DATA_SIZE * sizeof(uint8_t));
+	ERROR_PACKET_DATA_SIZE * sizeof(uint8_t));
 
 	buffer[0] = ERROR_SYNC;
 	buffer[1] = ERROR_SYNC;
@@ -1830,68 +1960,6 @@ packet_t create_packet(const uint8_t *data, uint16_t size) {
 	return packet;
 }
 
-/**
- * @brief Performs a handshake by receiving and sending data over UART.
- * @return Status of the handshake operation.
- */
-int handshake() {
-	uint8_t tx_buffer[5];
-	uint8_t rx_buffer[9];
-	uint8_t key;
-	int allowed_tries = 10;
-
-	// Wait for 0xFF to be received
-	do {
-		HAL_UART_Receive(&huart1, rx_buffer, 9, 100);
-		key = rx_buffer[0];
-	} while (key != 0xFF);
-
-	//    [0]     [1]     [2]     [3]     [4]     [5]     [6]     [7]     [8]
-	//    0xFF    Year   Month    Day     Hour   Minute  Second  ms MSB  ms LSB
-
-	RTC_DateTypeDef dateStruct;
-	RTC_TimeTypeDef timeStruct;
-	uint8_t year = rx_buffer[1];
-	uint8_t month = rx_buffer[2];
-	uint8_t day = rx_buffer[3];
-	uint8_t hour = rx_buffer[4];
-	uint8_t minute = rx_buffer[5];
-	uint8_t second = rx_buffer[6];
-	uint16_t milliseconds = (rx_buffer[7] << 8) | rx_buffer[8];
-
-	dateStruct.Year = year;
-	dateStruct.Month = month;
-	dateStruct.Date = day;
-
-	timeStruct.Hours = hour;
-	timeStruct.Minutes = minute;
-	timeStruct.Seconds = second;
-	timeStruct.SubSeconds = milliseconds;
-
-	HAL_StatusTypeDef status;
-
-	status = HAL_RTC_SetDate(&hrtc, &dateStruct, RTC_FORMAT_BIN);
-	if (status != HAL_OK) {
-		Error_Handler();
-	}
-
-	status = HAL_RTC_SetTime(&hrtc, &timeStruct, RTC_FORMAT_BIN);
-	if (status != HAL_OK) {
-		Error_Handler();
-	}
-
-	tx_buffer[0] = 0xFA;
-	tx_buffer[1] = 2;
-	tx_buffer[2] = 0;
-	tx_buffer[3] = 0;
-	tx_buffer[4] = 1;
-
-	for (int i = 0; i < allowed_tries; i++) {
-		HAL_UART_Transmit(&huart1, tx_buffer, 5 * sizeof(uint8_t), 100);
-	}
-
-	return 1;
-}
 
 /**
  * @brief Performs system setup tasks.
@@ -1923,6 +1991,7 @@ void system_setup() {
 	ADC3_NUM_CHANNELS) != HAL_OK) {
 		Error_Handler();
 	}
+	HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
 }
 
 void getUptime(uint8_t *buffer) {
@@ -2278,43 +2347,6 @@ void HK_init(void *argument)
   /* USER CODE END HK_init */
 }
 
-/* USER CODE BEGIN Header_UART_RX_init */
-/**
- * @brief Function implementing the UART_RX_task thread.
- * @param argument: Not used
- * @retval None
- */
-/* USER CODE END Header_UART_RX_init */
-void UART_RX_init(void *argument)
-{
-  /* USER CODE BEGIN UART_RX_init */
-	/* Infinite loop */
-	for (;;) {
-		HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
-
-	    int current_flag = osEventFlagsGet(event_flags);
-
-		if ((current_flag & STOP_FLAG) != 0) {
-			osEventFlagsClear(event_flags, STOP_FLAG);
-			vTaskSuspendAll();
-			HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
-
-			// When MCU is triggered to wake up, it resumes right here.
-			// That's why it looks like we enter stop mode and then instantly
-			// configure the clock and resume tasks, but in reality the MCU
-			// just stops right here.
-
-		    SystemClock_Config();
-
-		    HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
-
-			xTaskResumeAll();
-		}
-		osDelay(5);
-	}
-  /* USER CODE END UART_RX_init */
-}
-
 /* USER CODE BEGIN Header_GPIO_on_init */
 /**
  * @brief Function implementing the GPIO_on_task thread.
@@ -2438,10 +2470,7 @@ void Voltage_Monitor_init(void *argument)
 {
   /* USER CODE BEGIN Voltage_Monitor_init */
 	/* Infinite loop */
-#ifdef DAMY
-		osThreadExit();
-#endif
-	//osThreadExit(); // REMOVE
+
 
 	for (;;) {
 		osEventFlagsWait(event_flags, VOLTAGE_MONITOR_FLAG_ID, osFlagsWaitAny,
@@ -2517,6 +2546,30 @@ void Voltage_Monitor_init(void *argument)
 		osThreadYield();
 	}
   /* USER CODE END Voltage_Monitor_init */
+}
+
+/* USER CODE BEGIN Header_FLAG_init */
+/**
+* @brief Function implementing the FLAG_task thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_FLAG_init */
+void FLAG_init(void *argument)
+{
+  /* USER CODE BEGIN FLAG_init */
+  /* Infinite loop */
+  for(;;)
+  {
+		int current_flag = osEventFlagsGet(event_flags);
+
+		if ((current_flag & STOP_FLAG) != 0) {
+			osEventFlagsClear(event_flags, STOP_FLAG);
+			enterStop();
+		}
+    osDelay(1);
+  }
+  /* USER CODE END FLAG_init */
 }
 
 /**
