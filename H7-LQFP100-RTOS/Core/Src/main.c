@@ -240,9 +240,9 @@ static const uint8_t ADT7410_2 = 0x4A << 1;
 static const uint8_t ADT7410_3 = 0x49 << 1;
 static const uint8_t ADT7410_4 = 0x4B << 1;
 
-uint32_t DAC_OUT[32] = { 0, 0, 0, 0, 620, 620, 1241, 1241, 1861, 1861, 2482,
+uint32_t DAC_OUT[32] = { 0, 0, 620, 620, 1241, 1241, 1861, 1861, 2482,
 		2482, 3103, 3103, 3723, 3723, 4095, 4095, 4095, 4095, 3723, 3723, 3103,
-		3103, 2482, 2482, 1861, 1861, 1241, 1241, 620, 620 }; // For 3.3 volts
+		3103, 2482, 2482, 1861, 1861, 1241, 1241, 620, 620, 0, 0 }; // For 3.3 volts
 
 const gpio_pins gpios[] = { { GPIOB, GPIO_PIN_5 }, { GPIOB, GPIO_PIN_6 }, {
 GPIOC, GPIO_PIN_7 }, { GPIOC, GPIO_PIN_13 }, { GPIOC, GPIO_PIN_10 }, {
