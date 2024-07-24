@@ -74,7 +74,7 @@ typedef enum {
 #define STOP_FLAG 0x0016
 
 #define PMT_DATA_SIZE 10
-#define ERPA_DATA_SIZE 14
+#define ERPA_DATA_SIZE 15
 #define HK_DATA_SIZE 48
 #define UART_RX_BUFFER_SIZE 64
 #define UART_TX_BUFFER_SIZE 1000
@@ -288,7 +288,7 @@ void sendACK();
 void sendNACK();
 void sync();
 void enterStop();
-
+uint8_t getCurrentStep();
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -1784,6 +1784,33 @@ void receive_hk_adc3(uint16_t *buffer) {
 
 // *********************************************************************************************************** HELPER FUNCTIONS
 
+uint8_t getCurrentStep(){
+	int dacValue;
+
+	dacValue = DAC1->DHR12R1;
+
+	switch (dacValue) {
+	case 0:
+		return 0;
+	case 620:
+		return 1;
+	case 1241:
+		return 2;
+	case 1861:
+		return 3;
+	case 2482:
+		return 4;
+	case 3103:
+		return 5;
+	case 3723:
+		return 6;
+	case 4095:
+		return 7;
+	default:
+		return -1;
+	}
+}
+
 void enterStop(){
 
 	//flushMessageQueue();
@@ -2103,9 +2130,10 @@ void sample_erpa() {
 	uint8_t *erpa_spi = (uint8_t*) malloc(2 * sizeof(uint8_t));
 	uint16_t *erpa_adc = (uint16_t*) malloc(2 * sizeof(uint16_t));
 	uint8_t *uptime = (uint8_t*) malloc(UPTIME_SIZE * sizeof(uint8_t));
+	uint8_t sweep_step = -1;
 
 	getUptime(uptime);
-
+	sweep_step = getCurrentStep();
 #ifdef SIMULATE
 	erpa_spi[0] = 0xE;
 	erpa_spi[1] = 0xD;
@@ -2121,16 +2149,17 @@ void sample_erpa() {
 	buffer[1] = ERPA_SYNC;
 	buffer[2] = ((erpa_seq & 0xFF00) >> 8);
 	buffer[3] = (erpa_seq & 0xFF);
-	buffer[4] = ((erpa_adc[0] & 0xFF00) >> 8);	// SWP Monitored MSB
-	buffer[5] = (erpa_adc[0] & 0xFF);           // SWP Monitored LSB
-	buffer[6] = ((erpa_adc[1] & 0xFF00) >> 8);  // TEMPURATURE 1 MSB
-	buffer[7] = (erpa_adc[1] & 0xFF);           // TEMPURATURE 1 LSB
-	buffer[8] = erpa_spi[0];					// ERPA eADC MSB
-	buffer[9] = erpa_spi[1];					// ERPA eADC LSB
-	buffer[10] = uptime[0];
-	buffer[11] = uptime[1];
-	buffer[12] = uptime[2];
-	buffer[13] = uptime[3];
+	buffer[4] = sweep_step;
+	buffer[5] = ((erpa_adc[0] & 0xFF00) >> 8);	// SWP Monitored MSB
+	buffer[6] = (erpa_adc[0] & 0xFF);           // SWP Monitored LSB
+	buffer[7] = ((erpa_adc[1] & 0xFF00) >> 8);  // TEMPURATURE 1 MSB
+	buffer[8] = (erpa_adc[1] & 0xFF);           // TEMPURATURE 1 LSB
+	buffer[9] = erpa_spi[0];					// ERPA eADC MSB
+	buffer[10] = erpa_spi[1];					// ERPA eADC LSB
+	buffer[11] = uptime[0];
+	buffer[12] = uptime[1];
+	buffer[13] = uptime[2];
+	buffer[14] = uptime[3];
 
 	packet_t erpa_packet = create_packet(buffer, ERPA_DATA_SIZE);
 	osMessageQueuePut(mid_MsgQueue, &erpa_packet, 0U, 0U);
