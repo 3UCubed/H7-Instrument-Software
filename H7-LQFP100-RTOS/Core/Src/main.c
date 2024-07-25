@@ -193,6 +193,16 @@ const osThreadAttr_t FLAG_task_attributes = {
 };
 /* USER CODE BEGIN PV */
 // *********************************************************************************************************** GLOBAL VARIABLES
+uint8_t _2v5_enabled = 0;
+uint8_t _3v3_enabled = 0;
+uint8_t _5v_enabled = 0;
+uint8_t _n3v3_enabled = 0;
+uint8_t _n5v_enabled = 0;
+uint8_t _15v_enabled = 0;
+uint8_t _5vref_enabled = 0;
+uint8_t _n200v_enabled = 0;
+uint8_t _n800v_enabled = 0;
+
 uint16_t _vsense;
 uint16_t _vrefint;
 uint16_t _busvmon;
@@ -327,6 +337,7 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim) {
  * @param huart Pointer to a UART_HandleTypeDef structure that contains
  *              the configuration information for the specified UART module.
  */
+
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
 	unsigned char key = UART_RX_BUFFER[0];
@@ -345,7 +356,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	case 0x11: {
 		printf("SYS ON PB5\n");
 		HAL_GPIO_WritePin(gpios[0].gpio, gpios[0].pin, GPIO_PIN_SET);
-
+		_2v5_enabled = 1;
 		break;
 	}
 	case 0x01: {
@@ -360,77 +371,101 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		HAL_GPIO_WritePin(gpios[2].gpio, gpios[2].pin, GPIO_PIN_RESET);
 		HAL_GPIO_WritePin(gpios[4].gpio, gpios[4].pin, GPIO_PIN_RESET);
 
+		_2v5_enabled = 0;
+		_3v3_enabled = 0;
+		_5v_enabled = 0;
+		_n3v3_enabled = 0;
+		_n5v_enabled = 0;
+		_15v_enabled = 0;
+		_5vref_enabled = 0;
+		_n200v_enabled = 0;
+		_n800v_enabled = 0;
+
 		break;
 	}
 	case 0x12: {
 		printf("3v3 ON PC10\n");
 		HAL_GPIO_WritePin(gpios[4].gpio, gpios[4].pin, GPIO_PIN_SET);
+		_3v3_enabled = 1;
 		break;
 	}
 	case 0x02: {
 		printf("3v3 OFF PC10\n");
 		HAL_GPIO_WritePin(gpios[4].gpio, gpios[4].pin, GPIO_PIN_RESET);
+		_3v3_enabled = 0;
 		break;
 	}
 	case 0x13: {
 		printf("5v ON PC7\n");
 		HAL_GPIO_WritePin(gpios[2].gpio, gpios[2].pin, GPIO_PIN_SET);
+		_5v_enabled = 1;
 		break;
 	}
 	case 0x03: {
 		printf("5v OFF PC7\n");
 		HAL_GPIO_WritePin(gpios[2].gpio, gpios[2].pin, GPIO_PIN_RESET);
+		_5v_enabled = 0;
 		break;
 	}
 	case 0x14: {
 		printf("n3v3 ON PC6\n");
 		HAL_GPIO_WritePin(gpios[7].gpio, gpios[7].pin, GPIO_PIN_SET);
+		_n3v3_enabled = 1;
 		break;
 	}
 	case 0x04: {
 		printf("n3v3 OFF PC6\n");
 		HAL_GPIO_WritePin(gpios[7].gpio, gpios[7].pin, GPIO_PIN_RESET);
+		_n3v3_enabled = 0;
 		break;
 	}
 	case 0x15: {
 		printf("n5v ON PC8\n");
 		HAL_GPIO_WritePin(gpios[5].gpio, gpios[5].pin, GPIO_PIN_SET);
+		_n5v_enabled = 1;
 		break;
 	}
 	case 0x05: {
 		printf("n5v OFF PC8\n");
 		HAL_GPIO_WritePin(gpios[5].gpio, gpios[5].pin, GPIO_PIN_RESET);
+		_n5v_enabled = 0;
 		break;
 	}
 	case 0x16: {
 		printf("15v ON PC9\n");
 		HAL_GPIO_WritePin(gpios[6].gpio, gpios[6].pin, GPIO_PIN_SET);
+		_15v_enabled = 1;
 		break;
 	}
 	case 0x06: {
 		printf("15v OFF PC9\n");
 		HAL_GPIO_WritePin(gpios[6].gpio, gpios[6].pin, GPIO_PIN_RESET);
+		_15v_enabled = 0;
 		break;
 	}
 	case 0x17: {
 		printf("n200v ON PC13\n");
 		HAL_GPIO_WritePin(gpios[3].gpio, gpios[3].pin, GPIO_PIN_SET);
+		_n200v_enabled = 1;
 		break;
 	}
 	case 0x07: {
 		printf("n200v OFF PC13\n");
 		HAL_GPIO_WritePin(gpios[3].gpio, gpios[3].pin, GPIO_PIN_RESET);
+		_n200v_enabled = 0;
 
 		break;
 	}
 	case 0x18: {
 		printf("800v ON PB6\n");
 		HAL_GPIO_WritePin(gpios[1].gpio, gpios[1].pin, GPIO_PIN_SET);
+		_n800v_enabled = 1;
 		break;
 	}
 	case 0x08: {
 		printf("800v OFF PB6\n");
 		HAL_GPIO_WritePin(gpios[1].gpio, gpios[1].pin, GPIO_PIN_RESET);
+		_n800v_enabled = 0;
 		break;
 	}
 	case 0x19: {
@@ -2134,6 +2169,8 @@ void sample_erpa() {
 
 	getUptime(uptime);
 	sweep_step = getCurrentStep();
+
+
 #ifdef SIMULATE
 	erpa_spi[0] = 0xE;
 	erpa_spi[1] = 0xD;
@@ -2500,6 +2537,7 @@ void Voltage_Monitor_init(void *argument)
   /* USER CODE BEGIN Voltage_Monitor_init */
 	/* Infinite loop */
 
+	// TODO: Figure out how we should monitor busvmon, busimon, vsense, and vrefint
 
 	for (;;) {
 		osEventFlagsWait(event_flags, VOLTAGE_MONITOR_FLAG_ID, osFlagsWaitAny,
@@ -2525,48 +2563,59 @@ void Voltage_Monitor_init(void *argument)
 		_n200v = hk_adc1[4];
 		_n800v = hk_adc1[5];
 
-//		if (!inRange(_busvmon, 1574, 1739)) {
-//			error_protocol(RAIL_BUSVMON);
+
+//		if (_2v5_enabled){
+//			if (!inRange(_2v5, 2947, 3257)) {
+//				error_protocol(RAIL_2v5);
+//			}
 //		}
 //
-//		if (!inRange(_busimon, 35, 39)) {
-//			error_protocol(RAIL_BUSIMON);
+//		if (_3v3_enabled){
+//			if (!inRange(_3v3, 3537, 3909)) {
+//				error_protocol(RAIL_3v3);
+//			}
 //		}
 //
-//		if (!inRange(_2v5, 2947, 3257)) {
-//			error_protocol(RAIL_2v5);
+//		if (_5v_enabled){
+//			if (!inRange(_5v, 3537, 3909)) {
+//				error_protocol(RAIL_5v);
+//			}
 //		}
 //
-//		if (!inRange(_3v3, 3537, 3909)) {
-//			error_protocol(RAIL_3v3);
+//		if (_n3v3_enabled){
+//			if (!inRange(_n3v3, 3702, 4091)) {
+//				error_protocol(RAIL_n3v3);
+//			}
 //		}
 //
-//		if (!inRange(_5v, 3537, 3909)) {
-//			error_protocol(RAIL_5v);
+//		if (_n5v_enabled) {
+//			if (!inRange(_n5v, 3619, 4000)) {
+//				error_protocol(RAIL_n5v);
+//			}
 //		}
 //
-//		if (!inRange(_n3v3, 3702, 4091)) {
-//			error_protocol(RAIL_n3v3);
+//		if (_15v_enabled) {
+//			if (!inRange(_15v, 3525, 3896)) {
+//				error_protocol(RAIL_15v);
+//			}
 //		}
 //
-//		if (!inRange(_n5v, 3619, 4000)) {
-//			error_protocol(RAIL_n5v);
+//		if (_5vref_enabled) {
+//			if (!inRange(_5vref, 3537, 3909)) {
+//				error_protocol(RAIL_5vref);
+//			}
 //		}
 //
-//		if (!inRange(_15v, 3525, 3896)) {
-//			error_protocol(RAIL_15v);
+//		if (_n200v_enabled) {
+//			if (!inRange(_n200v, 3796, 4196)) {
+//				error_protocol(RAIL_n200v);
+//			}
 //		}
 //
-//		if (!inRange(_5vref, 3537, 3909)) {
-//			error_protocol(RAIL_5vref);
-//		}
-//
-//		if (!inRange(_n200v, 3796, 4196)) {
-//			error_protocol(RAIL_n200v);
-//		}
-//
-//		if (!inRange(_n800v, 3018, 3336)) {
-//			error_protocol(RAIL_n800v);
+//		if (_n800v_enabled) {
+//			if (!inRange(_n800v, 3018, 3336)) {
+//				error_protocol(RAIL_n800v);
+//			}
 //		}
 
 		free(hk_adc1);
