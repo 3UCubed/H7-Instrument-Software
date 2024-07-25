@@ -1820,7 +1820,7 @@ void receive_hk_adc3(uint16_t *buffer) {
 // *********************************************************************************************************** HELPER FUNCTIONS
 
 void enter_flight_mode() {
-	vTaskResume(GPIO_on_taskHandle); 											// Auto init
+	xTaskResumeFromISR(GPIO_on_taskHandle);										// Auto Init
 	HAL_GPIO_WritePin(gpios[3].gpio, gpios[3].pin, GPIO_PIN_SET);				// Enable n200v
 	HAL_GPIO_WritePin(gpios[1].gpio, gpios[1].pin, GPIO_PIN_SET);				// Enable n800v
 	HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, DAC_OUT, 32, DAC_ALIGN_12B_R);		// Enable auto sweep (doesn't start until ERPA timer is started)
