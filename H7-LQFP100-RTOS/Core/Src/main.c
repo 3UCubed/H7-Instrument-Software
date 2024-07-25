@@ -299,6 +299,7 @@ void sync();
 void enter_stop();
 uint8_t get_current_step();
 void flush_message_queue();
+void enter_flight_mode();
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -573,7 +574,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		break;
 	}
 	case 0xBF: {
-		// TODO: enter_flight_mode();
+		enter_flight_mode();
 		break;
 	}
 	default: {
@@ -1817,6 +1818,17 @@ void receive_hk_adc3(uint16_t *buffer) {
 }
 
 // *********************************************************************************************************** HELPER FUNCTIONS
+
+void enter_flight_mode() {
+	vTaskResume(GPIO_on_taskHandle); 											// Auto init
+	HAL_GPIO_WritePin(gpios[3].gpio, gpios[3].pin, GPIO_PIN_SET);				// Enable n200v
+	HAL_GPIO_WritePin(gpios[1].gpio, gpios[1].pin, GPIO_PIN_SET);				// Enable n800v
+	HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, DAC_OUT, 32, DAC_ALIGN_12B_R);		// Enable auto sweep (doesn't start until ERPA timer is started)
+	HAL_TIM_OC_Start_IT(&htim2, TIM_CHANNEL_4);									// ERPA packet on
+	HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_1);									// PMT packet on
+	HAL_TIM_OC_Start_IT(&htim3, TIM_CHANNEL_1);									// HK packet on
+}
+
 
 uint8_t get_current_step(){
 	int dac_value;
