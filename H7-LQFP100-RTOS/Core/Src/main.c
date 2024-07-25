@@ -217,13 +217,12 @@ uint16_t _5vref;
 uint16_t _n200v;
 uint16_t _n800v;
 
-volatile uint32_t UptimeMillis = 0;
+volatile uint32_t uptime_millis = 0;
 osMessageQueueId_t mid_MsgQueue;
 packet_t msg;
 
 osStatus_t status;
 volatile int tx_flag = 1;
-volatile int available_msgs = 0;
 volatile int TEMPERATURE_COUNTER = 1000; // Starts at 1000 so that temperature sensors are sampled on first hk packet
 
 uint16_t pmt_seq = 0;
@@ -289,16 +288,17 @@ void FLAG_init(void *argument);
 /* USER CODE BEGIN PFP */
 // *********************************************************************************************************** FUNCTION PROTOYPES
 void system_setup();
-int inRange(uint16_t raw, int min, int max);
+int in_range(uint16_t raw, int min, int max);
 void error_protocol(ERROR_TAGS tag);
 packet_t create_packet(const uint8_t *data, uint16_t size);
 void sample_hk();
-void getUptime(uint8_t *buffer);
-void sendACK();
-void sendNACK();
+void get_uptime(uint8_t *buffer);
+void send_ACK();
+void send_NACK();
 void sync();
-void enterStop();
-uint8_t getCurrentStep();
+void enter_stop();
+uint8_t get_current_step();
+void flush_message_queue();
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -553,18 +553,9 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		}
 		break;
 	}
-	case 0x1F: {
-		printf("Exit STOP mode\n");
-		// TODO: Exit stop mode
-		break;
-	}
 	case 0x0F: {
 		printf("Enter STOP mode\n");
 		osEventFlagsSet(event_flags, STOP_FLAG);
-		break;
-	}
-	case 0xAF: {
-		sync();
 		break;
 	}
 	case 0xE0: {
@@ -575,6 +566,14 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	case 0xD0: {
 		printf("Auto Deinit\n");
 		xTaskResumeFromISR(GPIO_off_taskHandle);
+		break;
+	}
+	case 0xAF: {
+		sync();
+		break;
+	}
+	case 0xBF: {
+		// TODO: enter_flight_mode();
 		break;
 	}
 	default: {
@@ -1819,12 +1818,12 @@ void receive_hk_adc3(uint16_t *buffer) {
 
 // *********************************************************************************************************** HELPER FUNCTIONS
 
-uint8_t getCurrentStep(){
-	int dacValue;
+uint8_t get_current_step(){
+	int dac_value;
 
-	dacValue = DAC1->DHR12R1;
+	dac_value = DAC1->DHR12R1;
 
-	switch (dacValue) {
+	switch (dac_value) {
 	case 0:
 		return 0;
 	case 620:
@@ -1846,10 +1845,10 @@ uint8_t getCurrentStep(){
 	}
 }
 
-void enterStop(){
+void enter_stop(){
 
-	//flushMessageQueue();
-	sendACK();
+	//flush_message_queue();
+	send_ACK();
 
 	vTaskSuspendAll();
 	HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
@@ -1867,8 +1866,8 @@ void calibrateRTC(uint8_t *buffer) {
 	//    [0]     [1]     [2]     [3]     [4]     [5]     [6]     [7]     [8]
 	//    0xFF    Year   Month    Day     Hour   Minute  Second  ms MSB  ms LSB
 
-	RTC_DateTypeDef dateStruct;
-	RTC_TimeTypeDef timeStruct;
+	RTC_DateTypeDef date_struct;
+	RTC_TimeTypeDef time_struct;
 	uint8_t year = buffer[1];
 	uint8_t month = buffer[2];
 	uint8_t day = buffer[3];
@@ -1877,23 +1876,23 @@ void calibrateRTC(uint8_t *buffer) {
 	uint8_t second = buffer[6];
 	uint16_t milliseconds = (buffer[7] << 8) | buffer[8];
 
-	dateStruct.Year = year;
-	dateStruct.Month = month;
-	dateStruct.Date = day;
+	date_struct.Year = year;
+	date_struct.Month = month;
+	date_struct.Date = day;
 
-	timeStruct.Hours = hour;
-	timeStruct.Minutes = minute;
-	timeStruct.Seconds = second;
-	timeStruct.SubSeconds = milliseconds;
+	time_struct.Hours = hour;
+	time_struct.Minutes = minute;
+	time_struct.Seconds = second;
+	time_struct.SubSeconds = milliseconds;
 
 	HAL_StatusTypeDef status;
 
-	status = HAL_RTC_SetDate(&hrtc, &dateStruct, RTC_FORMAT_BIN);
+	status = HAL_RTC_SetDate(&hrtc, &date_struct, RTC_FORMAT_BIN);
 	if (status != HAL_OK) {
 		Error_Handler();
 	}
 
-	status = HAL_RTC_SetTime(&hrtc, &timeStruct, RTC_FORMAT_BIN);
+	status = HAL_RTC_SetTime(&hrtc, &time_struct, RTC_FORMAT_BIN);
 	if (status != HAL_OK) {
 		Error_Handler();
 	}
@@ -1904,7 +1903,7 @@ void sync() {
 	// 2. Wait to receive RTC generated timestamp from OBC/GUI
 	// 3. Calibrate our RTC from received timestamp
 	// 4. Send acknowledgement (0xFF) (This tells OBC/GUI that we have calibrated our RTC, and are now in run mode)
-	sendACK();
+	send_ACK();
 
 	uint8_t key;
 
@@ -1918,18 +1917,18 @@ void sync() {
 	//calibrateRTC(UART_RX_BUFFER);
 	HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
 
-	sendACK();
+	send_ACK();
 }
 
 
-void sendACK() {
+void send_ACK() {
 	static uint8_t tx_buffer[1];
 
 	tx_buffer[0] = ACK;
 	HAL_UART_Transmit(&huart1, tx_buffer, 1, 100);
 }
 
-void sendNACK() {
+void send_NACK() {
 	static uint8_t tx_buffer[1];
 
 	tx_buffer[0] = NACK;
@@ -1937,7 +1936,7 @@ void sendNACK() {
 
 }
 
-void flushMessageQueue() {
+void flush_message_queue() {
 	static uint8_t tx_buffer[UART_TX_BUFFER_SIZE];
 
 	uint32_t total_size = 0;
@@ -1971,7 +1970,7 @@ void flushMessageQueue() {
 	}
 }
 
-int inRange(uint16_t raw, int min, int max) {
+int in_range(uint16_t raw, int min, int max) {
 	if (raw <= max && raw >= min) {
 		return 1;
 	}
@@ -1990,7 +1989,6 @@ void error_protocol(ERROR_TAGS tag) {
 
 	error_packet = create_packet(buffer, ERROR_PACKET_DATA_SIZE);
 	osMessageQueuePut(mid_MsgQueue, &error_packet, 0U, 0U);
-	available_msgs++;
 
 	free(buffer);
 
@@ -2056,19 +2054,19 @@ void system_setup() {
 	HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
 }
 
-void getUptime(uint8_t *buffer) {
+void get_uptime(uint8_t *buffer) {
 	uint32_t uptime = 0;
-	uint32_t ms = UptimeMillis;
+	uint32_t ms = uptime_millis;
 	uint32_t st = SysTick->VAL;
 
-	// Did UptimeMillis rollover while reading SysTick->VAL?
-	if (ms != UptimeMillis) {
+	// Did uptime_millis rollover while reading SysTick->VAL?
+	if (ms != uptime_millis) {
 		// Rollover occurred so read both again.
 		// Must read both because we don't know whether the
 		// rollover occurred before or after reading SysTick->VAL.
 		// No need to check for another rollover because there is
 		// no chance of another rollover occurring so quickly.
-		ms = UptimeMillis;
+		ms = uptime_millis;
 		st = SysTick->VAL;
 	}
 	uptime = ms * 1000 - st / ((SysTick->LOAD + 1) / 1000);
@@ -2084,19 +2082,19 @@ void getUptime(uint8_t *buffer) {
  * @param buffer: Pointer to the buffer where the timestamp will be stored.
  */
 void getTimestamp(uint8_t *buffer) {
-	RTC_TimeTypeDef currentTime;
-	RTC_DateTypeDef currentDate;
+	RTC_TimeTypeDef current_time;
+	RTC_DateTypeDef current_date;
 
-	HAL_RTC_GetTime(&hrtc, &currentTime, RTC_FORMAT_BIN);
-	HAL_RTC_GetDate(&hrtc, &currentDate, RTC_FORMAT_BIN);
-	uint32_t milliseconds = 1000000 - (currentTime.SubSeconds * 100);
+	HAL_RTC_GetTime(&hrtc, &current_time, RTC_FORMAT_BIN);
+	HAL_RTC_GetDate(&hrtc, &current_date, RTC_FORMAT_BIN);
+	uint32_t milliseconds = 1000000 - (current_time.SubSeconds * 100);
 
-	buffer[0] = currentDate.Year;				// 0-99
-	buffer[1] = currentDate.Month;				// 1-12
-	buffer[2] = currentDate.Date;				// 1-31
-	buffer[3] = currentTime.Hours;				// 0-23
-	buffer[4] = currentTime.Minutes;			// 0-59
-	buffer[5] = currentTime.Seconds;			// 0-59
+	buffer[0] = current_date.Year;				// 0-99
+	buffer[1] = current_date.Month;				// 1-12
+	buffer[2] = current_date.Date;				// 1-31
+	buffer[3] = current_time.Hours;				// 0-23
+	buffer[4] = current_time.Minutes;			// 0-59
+	buffer[5] = current_time.Seconds;			// 0-59
 	buffer[6] = ((milliseconds >> 24) & 0xFF);
 	buffer[7] = ((milliseconds >> 16) & 0xFF);
 	buffer[8] = ((milliseconds >> 8) & 0xFF);
@@ -2119,7 +2117,7 @@ void sample_pmt() {
 	uint8_t *pmt_spi = (uint8_t*) malloc(2 * sizeof(uint8_t));
 	uint8_t *uptime = (uint8_t*) malloc(UPTIME_SIZE * sizeof(uint8_t));
 
-	getUptime(uptime);
+	get_uptime(uptime);
 
 #ifdef SIMULATE
 	pmt_spi[0] = 0xE;
@@ -2141,7 +2139,6 @@ void sample_pmt() {
 
 	packet_t pmt_packet = create_packet(buffer, PMT_DATA_SIZE);
 	osMessageQueuePut(mid_MsgQueue, &pmt_packet, 0U, 0U);
-	available_msgs++;
 	free(buffer);
 	free(pmt_spi);
 	free(uptime);
@@ -2167,8 +2164,8 @@ void sample_erpa() {
 	uint8_t *uptime = (uint8_t*) malloc(UPTIME_SIZE * sizeof(uint8_t));
 	uint8_t sweep_step = -1;
 
-	getUptime(uptime);
-	sweep_step = getCurrentStep();
+	get_uptime(uptime);
+	sweep_step = get_current_step();
 
 
 #ifdef SIMULATE
@@ -2200,7 +2197,6 @@ void sample_erpa() {
 
 	packet_t erpa_packet = create_packet(buffer, ERPA_DATA_SIZE);
 	osMessageQueuePut(mid_MsgQueue, &erpa_packet, 0U, 0U);
-	available_msgs++;
 	free(buffer);
 	free(erpa_spi);
 	free(erpa_adc);
@@ -2314,7 +2310,6 @@ void sample_hk() {
 
 	packet_t hk_packet = create_packet(buffer, HK_DATA_SIZE);
 	osMessageQueuePut(mid_MsgQueue, &hk_packet, 0U, 0U);
-	available_msgs++;
 
 	free(buffer);
 	free(hk_i2c);
@@ -2565,55 +2560,55 @@ void Voltage_Monitor_init(void *argument)
 
 
 //		if (_2v5_enabled){
-//			if (!inRange(_2v5, 2947, 3257)) {
+//			if (!in_range(_2v5, 2947, 3257)) {
 //				error_protocol(RAIL_2v5);
 //			}
 //		}
 //
 //		if (_3v3_enabled){
-//			if (!inRange(_3v3, 3537, 3909)) {
+//			if (!in_range(_3v3, 3537, 3909)) {
 //				error_protocol(RAIL_3v3);
 //			}
 //		}
 //
 //		if (_5v_enabled){
-//			if (!inRange(_5v, 3537, 3909)) {
+//			if (!in_range(_5v, 3537, 3909)) {
 //				error_protocol(RAIL_5v);
 //			}
 //		}
 //
 //		if (_n3v3_enabled){
-//			if (!inRange(_n3v3, 3702, 4091)) {
+//			if (!in_range(_n3v3, 3702, 4091)) {
 //				error_protocol(RAIL_n3v3);
 //			}
 //		}
 //
 //		if (_n5v_enabled) {
-//			if (!inRange(_n5v, 3619, 4000)) {
+//			if (!in_range(_n5v, 3619, 4000)) {
 //				error_protocol(RAIL_n5v);
 //			}
 //		}
 //
 //		if (_15v_enabled) {
-//			if (!inRange(_15v, 3525, 3896)) {
+//			if (!in_range(_15v, 3525, 3896)) {
 //				error_protocol(RAIL_15v);
 //			}
 //		}
 //
 //		if (_5vref_enabled) {
-//			if (!inRange(_5vref, 3537, 3909)) {
+//			if (!in_range(_5vref, 3537, 3909)) {
 //				error_protocol(RAIL_5vref);
 //			}
 //		}
 //
 //		if (_n200v_enabled) {
-//			if (!inRange(_n200v, 3796, 4196)) {
+//			if (!in_range(_n200v, 3796, 4196)) {
 //				error_protocol(RAIL_n200v);
 //			}
 //		}
 //
 //		if (_n800v_enabled) {
-//			if (!inRange(_n800v, 3018, 3336)) {
+//			if (!in_range(_n800v, 3018, 3336)) {
 //				error_protocol(RAIL_n800v);
 //			}
 //		}
@@ -2643,7 +2638,7 @@ void FLAG_init(void *argument)
 
 		if ((current_flag & STOP_FLAG) != 0) {
 			osEventFlagsClear(event_flags, STOP_FLAG);
-			enterStop();
+			enter_stop();
 		}
     osDelay(1);
   }

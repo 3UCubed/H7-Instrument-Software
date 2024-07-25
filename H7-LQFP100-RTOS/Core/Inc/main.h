@@ -41,7 +41,7 @@ extern "C" {
 
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
-extern volatile uint32_t UptimeMillis;
+extern volatile uint32_t uptime_millis;
 
 /* USER CODE END EC */
 
