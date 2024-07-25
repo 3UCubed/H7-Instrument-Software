@@ -1825,8 +1825,11 @@ void enter_flight_mode() {
 	HAL_GPIO_WritePin(gpios[1].gpio, gpios[1].pin, GPIO_PIN_SET);				// Enable n800v
 	HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, DAC_OUT, 32, DAC_ALIGN_12B_R);		// Enable auto sweep (doesn't start until ERPA timer is started)
 	HAL_TIM_OC_Start_IT(&htim2, TIM_CHANNEL_4);									// ERPA packet on
+	ERPA_ON = 1;
 	HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_1);									// PMT packet on
+	PMT_ON = 1;
 	HAL_TIM_OC_Start_IT(&htim3, TIM_CHANNEL_1);									// HK packet on
+	HK_ON = 1;
 }
 
 
