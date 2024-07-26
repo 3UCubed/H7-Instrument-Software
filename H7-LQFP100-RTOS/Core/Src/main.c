@@ -74,8 +74,8 @@ typedef enum {
 #define STOP_FLAG 0x0016
 
 #define PMT_DATA_SIZE 10
-#define ERPA_DATA_SIZE 15
-#define HK_DATA_SIZE 48
+#define ERPA_DATA_SIZE 13
+#define HK_DATA_SIZE 50
 #define UART_RX_BUFFER_SIZE 64
 #define UART_TX_BUFFER_SIZE 1000
 #define UPTIME_SIZE 4
@@ -216,6 +216,7 @@ uint16_t _15v;
 uint16_t _5vref;
 uint16_t _n200v;
 uint16_t _n800v;
+uint16_t _tmp1;
 
 volatile uint32_t uptime_millis = 0;
 osMessageQueueId_t mid_MsgQueue;
@@ -1744,10 +1745,8 @@ void receive_erpa_spi(uint8_t *buffer) {
  */
 void receive_erpa_adc(uint16_t *buffer) {
 	uint16_t PC4 = ADC1_raw_data[1];
-	uint16_t PB0 = ADC1_raw_data[5];
 
 	buffer[0] = PC4;
-	buffer[1] = PB0;
 }
 
 /**
@@ -1786,6 +1785,8 @@ void receive_hk_adc1(uint16_t *buffer) {
 	uint16_t PC1 = ADC1_raw_data[7];
 	uint16_t PC5 = ADC1_raw_data[4];
 	uint16_t PA6 = ADC1_raw_data[0];
+	uint16_t PB0 = ADC1_raw_data[5];
+
 
 	buffer[0] = PA1;
 	buffer[1] = PA2;
@@ -1796,6 +1797,8 @@ void receive_hk_adc1(uint16_t *buffer) {
 	buffer[6] = PC1;
 	buffer[7] = PC5;
 	buffer[8] = PA6;
+	buffer[9] = PB0;
+
 }
 
 /**
@@ -2175,7 +2178,7 @@ void sample_erpa() {
 	uint8_t *buffer = (uint8_t*) malloc(ERPA_DATA_SIZE * sizeof(uint8_t)); // Allocate memory for the buffer
 
 	uint8_t *erpa_spi = (uint8_t*) malloc(2 * sizeof(uint8_t));
-	uint16_t *erpa_adc = (uint16_t*) malloc(2 * sizeof(uint16_t));
+	uint16_t *erpa_adc = (uint16_t*) malloc(1 * sizeof(uint16_t));
 	uint8_t *uptime = (uint8_t*) malloc(UPTIME_SIZE * sizeof(uint8_t));
 	uint8_t sweep_step = -1;
 
@@ -2201,14 +2204,12 @@ void sample_erpa() {
 	buffer[4] = sweep_step;
 	buffer[5] = ((erpa_adc[0] & 0xFF00) >> 8);	// SWP Monitored MSB
 	buffer[6] = (erpa_adc[0] & 0xFF);           // SWP Monitored LSB
-	buffer[7] = ((erpa_adc[1] & 0xFF00) >> 8);  // TEMPURATURE 1 MSB
-	buffer[8] = (erpa_adc[1] & 0xFF);           // TEMPURATURE 1 LSB
-	buffer[9] = erpa_spi[0];					// ERPA eADC MSB
-	buffer[10] = erpa_spi[1];					// ERPA eADC LSB
-	buffer[11] = uptime[0];
-	buffer[12] = uptime[1];
-	buffer[13] = uptime[2];
-	buffer[14] = uptime[3];
+	buffer[7] = erpa_spi[0];					// ERPA eADC MSB
+	buffer[8] = erpa_spi[1];					// ERPA eADC LSB
+	buffer[9] = uptime[0];
+	buffer[10] = uptime[1];
+	buffer[11] = uptime[2];
+	buffer[12] = uptime[3];
 
 	packet_t erpa_packet = create_packet(buffer, ERPA_DATA_SIZE);
 	osMessageQueuePut(mid_MsgQueue, &erpa_packet, 0U, 0U);
@@ -2312,16 +2313,20 @@ void sample_hk() {
 	buffer[35] = (_n200v & 0xFF);				// HK n150vmon LSB
 	buffer[36] = ((_n800v & 0xFF00) >> 8);		// HK n800vmon MSB
 	buffer[37] = (_n800v & 0xFF);				// HK n800vmon LSB
-	buffer[38] = timestamp[0];
-	buffer[39] = timestamp[1];
-	buffer[40] = timestamp[2];
-	buffer[41] = timestamp[3];
-	buffer[42] = timestamp[4];
-	buffer[43] = timestamp[5];
-	buffer[44] = timestamp[6];
-	buffer[45] = timestamp[7];
-	buffer[46] = timestamp[8];
-	buffer[47] = timestamp[9];
+
+	buffer[38] = ((_tmp1 & 0xFF00) >> 8);  // TEMPURATURE 1 MSB
+	buffer[39] = (_tmp1 & 0xFF);           // TEMPURATURE 1 LSB
+
+	buffer[40] = timestamp[0];
+	buffer[41] = timestamp[1];
+	buffer[42] = timestamp[2];
+	buffer[43] = timestamp[3];
+	buffer[44] = timestamp[4];
+	buffer[45] = timestamp[5];
+	buffer[46] = timestamp[6];
+	buffer[47] = timestamp[7];
+	buffer[48] = timestamp[8];
+	buffer[49] = timestamp[9];
 
 	packet_t hk_packet = create_packet(buffer, HK_DATA_SIZE);
 	osMessageQueuePut(mid_MsgQueue, &hk_packet, 0U, 0U);
@@ -2553,7 +2558,7 @@ void Voltage_Monitor_init(void *argument)
 		osEventFlagsWait(event_flags, VOLTAGE_MONITOR_FLAG_ID, osFlagsWaitAny,
 		osWaitForever);
 
-		uint16_t *hk_adc1 = (uint16_t*) malloc(9 * sizeof(uint16_t));
+		uint16_t *hk_adc1 = (uint16_t*) malloc(10 * sizeof(uint16_t));
 		uint16_t *hk_adc3 = (uint16_t*) malloc(4 * sizeof(uint16_t));
 
 		receive_hk_adc1(hk_adc1);
@@ -2572,6 +2577,7 @@ void Voltage_Monitor_init(void *argument)
 		_5vref = hk_adc1[8];
 		_n200v = hk_adc1[4];
 		_n800v = hk_adc1[5];
+		_tmp1 = hk_adc1[9];
 
 
 //		if (_2v5_enabled){
