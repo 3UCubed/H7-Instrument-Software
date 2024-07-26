@@ -1,8 +1,8 @@
-# Project README
+# H7-Instrument-Software
 
 ## Overview
 
-This project involves a microcontroller-based system designed to handle and transmit various types of data related to housekeeping, PMT (Photomultiplier Tube), and ERPA (Enhanced Radiometer Payload Assembly). It features real-time data acquisition, processing, and transmission via UART with DMA. The system integrates multiple peripherals including ADCs, DACs, timers, and GPIOs to accomplish its tasks.
+This project involves a microcontroller-based system designed to handle and transmit various types of data related to housekeeping, PMT (Photomultiplier Tube), and ERPA. It features real-time data acquisition, processing, and transmission via UART with DMA. The system integrates multiple peripherals including ADCs, DACs, timers, and GPIOs to accomplish its tasks.
 
 ## Features
 
