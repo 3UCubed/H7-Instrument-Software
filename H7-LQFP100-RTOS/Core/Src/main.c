@@ -460,6 +460,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	case 0x1A: {
 		printf("ERPA ON\n");
 		HAL_TIM_OC_Start_IT(&htim2, TIM_CHANNEL_4);
+		osEventFlagsSet(event_flags, ERPA_FLAG_ID);
 		ERPA_ON = 1;
 		erpa_seq = 0;
 		break;
@@ -473,6 +474,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	case 0x1B: {
 		printf("PMT ON\n");
 		HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_1);
+		osEventFlagsSet(event_flags, PMT_FLAG_ID);
 		PMT_ON = 1;
 		pmt_seq = 0;
 		break;
@@ -1766,8 +1768,10 @@ void enter_flight_mode() {
 	HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, DAC_OUT, 32, DAC_ALIGN_12B_R);		// Enable auto sweep (doesn't start until ERPA timer is started)
 	HAL_TIM_OC_Start_IT(&htim2, TIM_CHANNEL_4);									// ERPA packet on
 	ERPA_ON = 1;
+	osEventFlagsSet(event_flags, ERPA_FLAG_ID);
 	HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_1);									// PMT packet on
 	PMT_ON = 1;
+	osEventFlagsSet(event_flags, PMT_FLAG_ID);
 	HAL_TIM_OC_Start_IT(&htim3, TIM_CHANNEL_1);									// HK packet on
 	HK_ON = 1;
 	osEventFlagsSet(event_flags, HK_FLAG_ID);
