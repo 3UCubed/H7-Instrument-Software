@@ -73,7 +73,7 @@ typedef enum {
 #define STOP_FLAG 0x0016
 
 #define PMT_DATA_SIZE 10
-#define ERPA_DATA_SIZE 13
+#define ERPA_DATA_SIZE 14
 #define HK_DATA_SIZE 50
 #define UART_RX_BUFFER_SIZE 64
 #define UART_TX_BUFFER_SIZE 1000
@@ -204,7 +204,7 @@ volatile int tx_flag = 1;
 volatile int TEMPERATURE_COUNTER = 1000; // Starts at 1000 so that temperature sensors are sampled on first hk packet
 
 uint16_t pmt_seq = 0;
-uint16_t erpa_seq = 0;
+uint32_t erpa_seq = 0;
 uint16_t hk_seq = 0;
 
 uint8_t PMT_ON = 0;
@@ -2194,17 +2194,18 @@ void sample_erpa() {
 
 	buffer[0] = ERPA_SYNC;
 	buffer[1] = ERPA_SYNC;
-	buffer[2] = ((erpa_seq & 0xFF00) >> 8);
-	buffer[3] = (erpa_seq & 0xFF);
-	buffer[4] = sweep_step;
-	buffer[5] = ((erpa_adc[0] & 0xFF00) >> 8);	// SWP Monitored MSB
-	buffer[6] = (erpa_adc[0] & 0xFF);           // SWP Monitored LSB
-	buffer[7] = erpa_spi[0];					// ERPA eADC MSB
-	buffer[8] = erpa_spi[1];					// ERPA eADC LSB
-	buffer[9] = uptime[0];
-	buffer[10] = uptime[1];
-	buffer[11] = uptime[2];
-	buffer[12] = uptime[3];
+	buffer[2] = ((erpa_seq >> 16) & 0xFF);
+	buffer[3] = ((erpa_seq >> 8) & 0xFF);
+	buffer[4] = erpa_seq & 0xFF;
+	buffer[5] = sweep_step;
+	buffer[6] = ((erpa_adc[0] & 0xFF00) >> 8);	// SWP Monitored MSB
+	buffer[7] = (erpa_adc[0] & 0xFF);           // SWP Monitored LSB
+	buffer[8] = erpa_spi[0];					// ERPA eADC MSB
+	buffer[9] = erpa_spi[1];					// ERPA eADC LSB
+	buffer[10] = uptime[0];
+	buffer[11] = uptime[1];
+	buffer[12] = uptime[2];
+	buffer[13] = uptime[3];
 
 	packet_t erpa_packet = create_packet(buffer, ERPA_DATA_SIZE);
 	osMessageQueuePut(mid_MsgQueue, &erpa_packet, 0U, 0U);
