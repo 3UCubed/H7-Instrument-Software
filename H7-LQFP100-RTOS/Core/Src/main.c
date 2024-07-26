@@ -509,6 +509,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	case 0x1C: {
 		printf("HK ON \n");
 		HAL_TIM_OC_Start_IT(&htim3, TIM_CHANNEL_1);
+		osEventFlagsSet(event_flags, HK_FLAG_ID);
 		HK_ON = 1;
 		hk_seq = 0;
 		break;
