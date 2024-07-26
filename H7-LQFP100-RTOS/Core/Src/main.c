@@ -1834,6 +1834,8 @@ void enter_flight_mode() {
 	PMT_ON = 1;
 	HAL_TIM_OC_Start_IT(&htim3, TIM_CHANNEL_1);									// HK packet on
 	HK_ON = 1;
+	osEventFlagsSet(event_flags, HK_FLAG_ID);
+
 }
 
 
@@ -1933,7 +1935,7 @@ void sync() {
 		key = UART_RX_BUFFER[0];
 	} while (key != 0xFF);
 
-	//calibrateRTC(UART_RX_BUFFER);
+	calibrateRTC(UART_RX_BUFFER);
 	HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
 
 	send_ACK();
