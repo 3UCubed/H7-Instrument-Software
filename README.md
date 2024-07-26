@@ -26,11 +26,6 @@ This project involves a microcontroller-based system designed to handle and tran
 - **`sample_erpa()`**: Collects data from the ERPA sensor, including SPI data, ADC readings, and uptime, then sends it as a packet.
 - **`sample_hk()`**: Collects housekeeping data from sensors and I2C devices, and sends it as a packet.
 
-### Data Handling
-
-- **`get_uptime(uint8_t *buffer)`**: Retrieves the system uptime and stores it in a provided buffer.
-- **`error_protocol(ERROR_TAGS tag)`**: Handles error reporting by creating and sending an error packet.
-
 ### Communication
 
 - **`UART_TX_init(void *argument)`**: Task responsible for retrieving messages from the queue and transmitting them via UART using DMA.
@@ -38,25 +33,10 @@ This project involves a microcontroller-based system designed to handle and tran
 ### Power Management
 
 - **`enter_stop()`**: Puts the system into stop mode and resumes operations upon waking.
-- **`system_setup()`**: Initializes system components, including timers, ADCs, and UART.
-
-### Calibration
-
-- **`calibrateRTC(uint8_t *buffer)`**: Sets the RTC date and time based on provided data.
 
 ### Synchronization
 
 - **`sync()`**: Handles synchronization with an external system, calibrates the RTC, and sends acknowledgements.
-
-## Setup and Initialization
-
-1. **System Setup**: Call `system_setup()` to initialize the system components.
-2. **Calibration**: Use `calibrateRTC()` to set the RTC from external data.
-3. **Synchronization**: Use `sync()` to synchronize with an external system and calibrate the RTC.
-
-## Task Management
-
-- **`UART_TX_init()`**: Initializes the UART transmission task, retrieves messages from the queue, and handles UART communication.
 
 ## Error Handling
 
@@ -74,6 +54,3 @@ This project involves a microcontroller-based system designed to handle and tran
 
 This project is licensed under the [MIT License](LICENSE). See the [LICENSE](LICENSE) file for details.
 
-## Contact
-
-For more information, please contact [Your Name] at [Your Email].
