@@ -278,6 +278,7 @@ void enter_stop();
 uint8_t get_current_step();
 void flush_message_queue();
 void enter_flight_mode();
+void RTC_SetTime(RTC_HandleTypeDef *hrtc, RTC_TimeTypeDef *sTime, uint32_t Format);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -1836,7 +1837,53 @@ void enter_stop() {
 	xTaskResumeAll();
 	SystemClock_Config();
 }
+void RTC_SetTime(RTC_HandleTypeDef *hrtc, RTC_TimeTypeDef *sTime, uint32_t Format) {
+	uint32_t tmpreg;
+	HAL_StatusTypeDef status;
 
+	/* Process Locked */
+	__HAL_LOCK(hrtc);
+
+	hrtc->State = HAL_RTC_STATE_BUSY;
+
+	/* Disable the write protection for RTC registers */
+	__HAL_RTC_WRITEPROTECTION_DISABLE(hrtc);
+	/* Enter Initialization mode */
+	status = RTC_EnterInitMode(hrtc);
+	if (status == HAL_OK)
+	{
+
+		sTime->TimeFormat = 0x00U;
+		assert_param(IS_RTC_HOUR24(sTime->Hours));
+
+		assert_param(IS_RTC_MINUTES(sTime->Minutes));
+		assert_param(IS_RTC_SECONDS(sTime->Seconds));
+
+		tmpreg = (uint32_t)(((uint32_t)RTC_ByteToBcd2(sTime->Hours)   << RTC_TR_HU_Pos)  | \
+				((uint32_t)RTC_ByteToBcd2(sTime->Minutes) << RTC_TR_MNU_Pos) | \
+				((uint32_t)RTC_ByteToBcd2(sTime->Seconds) << RTC_TR_SU_Pos)  | \
+				(((uint32_t)sTime->TimeFormat) << RTC_TR_PM_Pos));
+
+
+		/* Set the RTC_TR register */
+		hrtc->Instance->TR = (uint32_t)(tmpreg & RTC_TR_RESERVED_MASK);
+
+		/* Exit Initialization mode */
+		status = RTC_ExitInitMode(hrtc);
+	}
+
+	/* Enable the write protection for RTC registers */
+	__HAL_RTC_WRITEPROTECTION_ENABLE(hrtc);
+
+	if (status == HAL_OK)
+	{
+		hrtc->State = HAL_RTC_STATE_READY;
+	}
+
+	/* Process Unlocked */
+	__HAL_UNLOCK(hrtc);
+
+}
 /**
  * @brief Calibrates the RTC with the provided date and time values.
  *
@@ -1875,11 +1922,12 @@ void calibrateRTC(uint8_t *buffer) {
 	if (status != HAL_OK) {
 		Error_Handler();
 	}
+	RTC_SetTime(&hrtc, &time_struct, RTC_FORMAT_BIN);
 
-	status = HAL_RTC_SetTime(&hrtc, &time_struct, RTC_FORMAT_BIN);
-	if (status != HAL_OK) {
-		Error_Handler();
-	}
+//	status = HAL_RTC_SetTime(&hrtc, &time_struct, RTC_FORMAT_BIN);
+//	if (status != HAL_OK) {
+//		Error_Handler();
+//	}
 }
 
 /**
