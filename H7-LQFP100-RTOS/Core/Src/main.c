@@ -235,7 +235,6 @@ volatile uint32_t uptime_millis = 0;
 osMessageQueueId_t mid_MsgQueue;
 packet_t msg;
 
-osStatus_t status;
 volatile int tx_flag = 1;
 
 uint16_t pmt_seq = 0;
@@ -247,7 +246,7 @@ volatile uint8_t ERPA_ON = 0;
 volatile uint8_t HK_ON = 0;
 
 volatile uint32_t cadence = 3125;
-uint8_t step = 3;
+volatile uint8_t step = 3;
 
 osEventFlagsId_t event_flags;
 
@@ -510,7 +509,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		HAL_TIM_OC_Start_IT(&htim2, TIM_CHANNEL_4);
 		osEventFlagsSet(event_flags, ERPA_FLAG_ID);
 		ERPA_ON = 1;
-		erpa_seq = 0;
 		break;
 	}
 	case 0x0A: {
@@ -524,7 +522,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_1);
 		osEventFlagsSet(event_flags, PMT_FLAG_ID);
 		PMT_ON = 1;
-		pmt_seq = 0;
 		break;
 	}
 	case 0x0B: {
@@ -537,7 +534,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		printf("HK ON \n");
 		osEventFlagsSet(event_flags, HK_FLAG_ID);
 		HK_ON = 1;
-		hk_seq = 0;
 		break;
 	}
 	case 0x0C: {
