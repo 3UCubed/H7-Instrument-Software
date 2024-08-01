@@ -265,10 +265,17 @@ uint32_t DAC_OUT[32] = { 0, 0, 620, 620, 1241, 1241, 1861, 1861, 2482, 2482,
 		3103, 3103, 3723, 3723, 4095, 4095, 4095, 4095, 3723, 3723, 3103, 3103,
 		2482, 2482, 1861, 1861, 1241, 1241, 620, 620, 0, 0 }; // For 3.3 volts
 
-const gpio_pins gpios[] = { { GPIOB, GPIO_PIN_5 }, { GPIOB, GPIO_PIN_6 }, {
-GPIOC, GPIO_PIN_7 }, { GPIOC, GPIO_PIN_13 }, { GPIOC, GPIO_PIN_10 }, {
-GPIOC, GPIO_PIN_8 }, { GPIOC, GPIO_PIN_9 }, { GPIOC, GPIO_PIN_6 }, {
-GPIOB, GPIO_PIN_2 } };
+const gpio_pins gpios[] = {
+{ GPIOB, GPIO_PIN_2 },	// 0 -- SDN1
+{ GPIOB, GPIO_PIN_5 },	// 1 -- SYS_ON
+{ GPIOC, GPIO_PIN_10 },	// 2 -- 3v3_EN
+{ GPIOC, GPIO_PIN_7 },	// 3 -- 5v_EN
+{ GPIOC, GPIO_PIN_6 },	// 4 -- N3V3_EN
+{ GPIOC, GPIO_PIN_8 },	// 5 -- N5V_EN
+{ GPIOC, GPIO_PIN_9 },	// 6 -- 15V_EN
+{ GPIOC, GPIO_PIN_13 },	// 7 -- N150V_EN
+{ GPIOB, GPIO_PIN_6 }	// 8 -- 800HVON
+};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -371,31 +378,27 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	switch (key) {
 	case 0x10: {
 		printf("SDN1 ON\n");
-		HAL_GPIO_WritePin(gpios[8].gpio, gpios[8].pin, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(gpios[0].gpio, gpios[0].pin, GPIO_PIN_SET);
 		break;
 	}
 	case 0x00: {
 		printf("SDN1 OFF\n");
-		HAL_GPIO_WritePin(gpios[8].gpio, gpios[8].pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(gpios[0].gpio, gpios[0].pin, GPIO_PIN_RESET);
 		break;
 	}
 	case 0x11: {
 		printf("SYS ON PB5\n");
-		HAL_GPIO_WritePin(gpios[0].gpio, gpios[0].pin, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(gpios[1].gpio, gpios[1].pin, GPIO_PIN_SET);
 		_2v5_enabled = 1;
 		break;
 	}
 	case 0x01: {
 		printf("SYS OFF PB5\n");
-		HAL_GPIO_WritePin(gpios[0].gpio, gpios[0].pin, GPIO_PIN_RESET); // turning off PB5 & ensuring all other enables are off
 
-		HAL_GPIO_WritePin(gpios[1].gpio, gpios[1].pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(gpios[3].gpio, gpios[3].pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(gpios[6].gpio, gpios[6].pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(gpios[5].gpio, gpios[5].pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(gpios[7].gpio, gpios[7].pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(gpios[2].gpio, gpios[2].pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(gpios[4].gpio, gpios[4].pin, GPIO_PIN_RESET);
+		// Turning off all voltage enables (including high voltages) in order from highest to lowest, including SYS_ON
+		for (int i = 8; i > 0; i--) {
+			HAL_GPIO_WritePin(gpios[i].gpio, gpios[i].pin, GPIO_PIN_RESET);
+		}
 
 		_2v5_enabled = 0;
 		_3v3_enabled = 0;
@@ -411,37 +414,37 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	}
 	case 0x12: {
 		printf("3v3 ON PC10\n");
-		HAL_GPIO_WritePin(gpios[4].gpio, gpios[4].pin, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(gpios[2].gpio, gpios[2].pin, GPIO_PIN_SET);
 		_3v3_enabled = 1;
 		break;
 	}
 	case 0x02: {
 		printf("3v3 OFF PC10\n");
-		HAL_GPIO_WritePin(gpios[4].gpio, gpios[4].pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(gpios[2].gpio, gpios[2].pin, GPIO_PIN_RESET);
 		_3v3_enabled = 0;
 		break;
 	}
 	case 0x13: {
 		printf("5v ON PC7\n");
-		HAL_GPIO_WritePin(gpios[2].gpio, gpios[2].pin, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(gpios[3].gpio, gpios[3].pin, GPIO_PIN_SET);
 		_5v_enabled = 1;
 		break;
 	}
 	case 0x03: {
 		printf("5v OFF PC7\n");
-		HAL_GPIO_WritePin(gpios[2].gpio, gpios[2].pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(gpios[3].gpio, gpios[3].pin, GPIO_PIN_RESET);
 		_5v_enabled = 0;
 		break;
 	}
 	case 0x14: {
 		printf("n3v3 ON PC6\n");
-		HAL_GPIO_WritePin(gpios[7].gpio, gpios[7].pin, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(gpios[4].gpio, gpios[4].pin, GPIO_PIN_SET);
 		_n3v3_enabled = 1;
 		break;
 	}
 	case 0x04: {
 		printf("n3v3 OFF PC6\n");
-		HAL_GPIO_WritePin(gpios[7].gpio, gpios[7].pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(gpios[4].gpio, gpios[4].pin, GPIO_PIN_RESET);
 		_n3v3_enabled = 0;
 		break;
 	}
@@ -471,26 +474,26 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	}
 	case 0x17: {
 		printf("n200v ON PC13\n");
-		HAL_GPIO_WritePin(gpios[3].gpio, gpios[3].pin, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(gpios[7].gpio, gpios[7].pin, GPIO_PIN_SET);
 		_n200v_enabled = 1;
 		break;
 	}
 	case 0x07: {
 		printf("n200v OFF PC13\n");
-		HAL_GPIO_WritePin(gpios[3].gpio, gpios[3].pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(gpios[7].gpio, gpios[7].pin, GPIO_PIN_RESET);
 		_n200v_enabled = 0;
 
 		break;
 	}
 	case 0x18: {
 		printf("800v ON PB6\n");
-		HAL_GPIO_WritePin(gpios[1].gpio, gpios[1].pin, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(gpios[8].gpio, gpios[8].pin, GPIO_PIN_SET);
 		_n800v_enabled = 1;
 		break;
 	}
 	case 0x08: {
 		printf("800v OFF PB6\n");
-		HAL_GPIO_WritePin(gpios[1].gpio, gpios[1].pin, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(gpios[8].gpio, gpios[8].pin, GPIO_PIN_RESET);
 		_n800v_enabled = 0;
 		break;
 	}
@@ -2468,19 +2471,13 @@ void GPIO_on_init(void *argument)
 	osThreadSuspend(GPIO_on_taskHandle);
 	/* Infinite loop */
 	for (;;) {
-		HAL_GPIO_WritePin(gpios[8].gpio, gpios[8].pin, GPIO_PIN_SET); // sdn1
-		osDelay(100);
-		HAL_GPIO_WritePin(gpios[0].gpio, gpios[0].pin, GPIO_PIN_SET); // sys on pb5
-		osDelay(100);
-		HAL_GPIO_WritePin(gpios[4].gpio, gpios[4].pin, GPIO_PIN_SET); // 3v3 on pc1
-		osDelay(100);
-		HAL_GPIO_WritePin(gpios[2].gpio, gpios[2].pin, GPIO_PIN_SET); // 5v on pc7
-		osDelay(100);
-		HAL_GPIO_WritePin(gpios[7].gpio, gpios[7].pin, GPIO_PIN_SET); // n3v3 on pc6
-		osDelay(100);
-		HAL_GPIO_WritePin(gpios[5].gpio, gpios[5].pin, GPIO_PIN_SET); // n5v on pc8
-		osDelay(100);
-		HAL_GPIO_WritePin(gpios[6].gpio, gpios[6].pin, GPIO_PIN_SET); // 15v on pc9
+
+		// Enabling all voltages from SDN1 to 15V (inclusive)
+		for (int i = 0; i < 7; i++) {
+			HAL_GPIO_WritePin(gpios[i].gpio, gpios[i].pin, GPIO_PIN_SET);
+			osDelay(100);
+		}
+
 		osThreadSuspend(GPIO_on_taskHandle);
 	}
   /* USER CODE END GPIO_on_init */
@@ -2499,19 +2496,13 @@ void GPIO_off_init(void *argument)
 	osThreadSuspend(GPIO_off_taskHandle);
 	/* Infinite loop */
 	for (;;) {
-		HAL_GPIO_WritePin(gpios[6].gpio, gpios[6].pin, GPIO_PIN_RESET); // 15v on pc9
-		osDelay(100);
-		HAL_GPIO_WritePin(gpios[5].gpio, gpios[5].pin, GPIO_PIN_RESET); // n5v on pc8
-		osDelay(100);
-		HAL_GPIO_WritePin(gpios[7].gpio, gpios[7].pin, GPIO_PIN_RESET); // n3v3 on pc6
-		osDelay(100);
-		HAL_GPIO_WritePin(gpios[2].gpio, gpios[2].pin, GPIO_PIN_RESET); // 5v on pc7
-		osDelay(100);
-		HAL_GPIO_WritePin(gpios[4].gpio, gpios[4].pin, GPIO_PIN_RESET); // 3v3 on pc1
-		osDelay(100);
-		HAL_GPIO_WritePin(gpios[0].gpio, gpios[0].pin, GPIO_PIN_RESET); // sys on pb5
-		osDelay(100);
-		HAL_GPIO_WritePin(gpios[8].gpio, gpios[8].pin, GPIO_PIN_RESET); // sdn1
+
+		// Disabling all voltages from 15V to SDN1 (inclusive)
+		for (int i = 6; i >= 0; i--) {
+			HAL_GPIO_WritePin(gpios[i].gpio, gpios[i].pin, GPIO_PIN_RESET);
+			osDelay(100);
+		}
+
 		osThreadSuspend(GPIO_off_taskHandle);
 	}
   /* USER CODE END GPIO_off_init */
@@ -2713,24 +2704,11 @@ void Science_init(void *argument)
   /* Infinite loop */
   for(;;)
   {
-		HAL_GPIO_WritePin(gpios[8].gpio, gpios[8].pin, GPIO_PIN_SET); // sdn1
-		osDelay(100);
-		HAL_GPIO_WritePin(gpios[0].gpio, gpios[0].pin, GPIO_PIN_SET); // sys on pb5
-		osDelay(100);
-		HAL_GPIO_WritePin(gpios[4].gpio, gpios[4].pin, GPIO_PIN_SET); // 3v3 on pc1
-		osDelay(100);
-		HAL_GPIO_WritePin(gpios[2].gpio, gpios[2].pin, GPIO_PIN_SET); // 5v on pc7
-		osDelay(100);
-		HAL_GPIO_WritePin(gpios[7].gpio, gpios[7].pin, GPIO_PIN_SET); // n3v3 on pc6
-		osDelay(100);
-		HAL_GPIO_WritePin(gpios[5].gpio, gpios[5].pin, GPIO_PIN_SET); // n5v on pc8
-		osDelay(100);
-		HAL_GPIO_WritePin(gpios[6].gpio, gpios[6].pin, GPIO_PIN_SET); // 15v on pc9
-		osDelay(300);
-		HAL_GPIO_WritePin(gpios[3].gpio, gpios[3].pin, GPIO_PIN_SET);// Enable n200v
-		osDelay(300);
-		HAL_GPIO_WritePin(gpios[1].gpio, gpios[1].pin, GPIO_PIN_SET);// Enable n800v
-		osDelay(300);
+		// Enabling all voltages
+		for (int i = 0; i < 9; i++) {
+			HAL_GPIO_WritePin(gpios[i].gpio, gpios[i].pin, GPIO_PIN_SET);
+			osDelay(200);
+		}
 
 		__disable_irq();
 
@@ -2773,24 +2751,12 @@ void Idle_init(void *argument)
 		ERPA_ON = 0;
 		HK_ON = 0;
 		osDelay(100);
-		HAL_GPIO_WritePin(gpios[1].gpio, gpios[1].pin, GPIO_PIN_RESET); // Enable n800v
-		osDelay(100);
-		HAL_GPIO_WritePin(gpios[3].gpio, gpios[3].pin, GPIO_PIN_RESET); // Enable n200v
-		osDelay(100);
-		HAL_GPIO_WritePin(gpios[6].gpio, gpios[6].pin, GPIO_PIN_RESET); // 15v off pc9
-		osDelay(100);
-		HAL_GPIO_WritePin(gpios[5].gpio, gpios[5].pin, GPIO_PIN_RESET); // n5v off pc8
-		osDelay(100);
-		HAL_GPIO_WritePin(gpios[7].gpio, gpios[7].pin, GPIO_PIN_RESET); // n3v3 off pc6
-		osDelay(100);
-		HAL_GPIO_WritePin(gpios[2].gpio, gpios[2].pin, GPIO_PIN_RESET); // 5v off pc7
-		osDelay(100);
-		HAL_GPIO_WritePin(gpios[4].gpio, gpios[4].pin, GPIO_PIN_RESET); // 3v3 off pc1
-		osDelay(100);
-		HAL_GPIO_WritePin(gpios[0].gpio, gpios[0].pin, GPIO_PIN_RESET); // sys off pb5
-		osDelay(100);
-		HAL_GPIO_WritePin(gpios[8].gpio, gpios[8].pin, GPIO_PIN_RESET); // sdn1
-		osDelay(100);
+
+		// Disabling all voltages
+		for (int i = 8; i >= 0; i--) {
+			HAL_GPIO_WritePin(gpios[i].gpio, gpios[i].pin, GPIO_PIN_RESET);
+			osDelay(200);
+		}
 
 		osThreadSuspend(Idle_taskHandle);
   }
