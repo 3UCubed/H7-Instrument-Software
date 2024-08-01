@@ -64,7 +64,7 @@ typedef enum {
 /* USER CODE BEGIN PD */
 // *********************************************************************************************************** DEFINES
 
-#define FLIGHT_MODE
+//#define FLIGHT_MODE
 
 #define PMT_FLAG_ID 0x0001
 #define ERPA_FLAG_ID 0x0002
@@ -189,17 +189,17 @@ const osThreadAttr_t FLAG_task_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
-/* Definitions for Flight_task */
-osThreadId_t Flight_taskHandle;
-const osThreadAttr_t Flight_task_attributes = {
-  .name = "Flight_task",
+/* Definitions for Science_task */
+osThreadId_t Science_taskHandle;
+const osThreadAttr_t Science_task_attributes = {
+  .name = "Science_task",
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
-/* Definitions for UnFlight_task */
-osThreadId_t UnFlight_taskHandle;
-const osThreadAttr_t UnFlight_task_attributes = {
-  .name = "UnFlight_task",
+/* Definitions for Idle_task */
+osThreadId_t Idle_taskHandle;
+const osThreadAttr_t Idle_task_attributes = {
+  .name = "Idle_task",
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
@@ -296,8 +296,8 @@ void GPIO_off_init(void *argument);
 void UART_TX_init(void *argument);
 void Voltage_Monitor_init(void *argument);
 void FLAG_init(void *argument);
-void Flight_init(void *argument);
-void UnFlight_init(void *argument);
+void Science_init(void *argument);
+void Idle_init(void *argument);
 
 /* USER CODE BEGIN PFP */
 // *********************************************************************************************************** FUNCTION PROTOYPES
@@ -601,11 +601,11 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		break;
 	}
 	case 0xBF: {
-		xTaskResumeFromISR(Flight_taskHandle);
+		xTaskResumeFromISR(Science_taskHandle);
 		break;
 	}
 	case 0xCF: {
-		xTaskResumeFromISR(UnFlight_taskHandle);
+		xTaskResumeFromISR(Idle_taskHandle);
 		break;
 	}
 	default: {
@@ -712,11 +712,11 @@ int main(void)
   /* creation of FLAG_task */
   FLAG_taskHandle = osThreadNew(FLAG_init, NULL, &FLAG_task_attributes);
 
-  /* creation of Flight_task */
-  Flight_taskHandle = osThreadNew(Flight_init, NULL, &Flight_task_attributes);
+  /* creation of Science_task */
+  Science_taskHandle = osThreadNew(Science_init, NULL, &Science_task_attributes);
 
-  /* creation of UnFlight_task */
-  UnFlight_taskHandle = osThreadNew(UnFlight_init, NULL, &UnFlight_task_attributes);
+  /* creation of Idle_task */
+  Idle_taskHandle = osThreadNew(Idle_init, NULL, &Idle_task_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
 	/* add threads, ... */
@@ -2615,59 +2615,61 @@ void Voltage_Monitor_init(void *argument)
 		_n800v = hk_adc1[5];
 		_tmp1 = hk_adc1[9];
 
-//		if (_2v5_enabled){
-//			if (!in_range(_2v5, 2947, 3257)) {
-//				error_protocol(RAIL_2v5);
-//			}
-//		}
-//
-//		if (_3v3_enabled){
-//			if (!in_range(_3v3, 3537, 3909)) {
-//				error_protocol(RAIL_3v3);
-//			}
-//		}
-//
-//		if (_5v_enabled){
-//			if (!in_range(_5v, 3537, 3909)) {
-//				error_protocol(RAIL_5v);
-//			}
-//		}
-//
-//		if (_n3v3_enabled){
-//			if (!in_range(_n3v3, 3702, 4091)) {
-//				error_protocol(RAIL_n3v3);
-//			}
-//		}
-//
-//		if (_n5v_enabled) {
-//			if (!in_range(_n5v, 3619, 4000)) {
-//				error_protocol(RAIL_n5v);
-//			}
-//		}
-//
-//		if (_15v_enabled) {
-//			if (!in_range(_15v, 3525, 3896)) {
-//				error_protocol(RAIL_15v);
-//			}
-//		}
-//
-//		if (_5vref_enabled) {
-//			if (!in_range(_5vref, 3537, 3909)) {
-//				error_protocol(RAIL_5vref);
-//			}
-//		}
-//
-//		if (_n200v_enabled) {
-//			if (!in_range(_n200v, 3796, 4196)) {
-//				error_protocol(RAIL_n200v);
-//			}
-//		}
-//
-//		if (_n800v_enabled) {
-//			if (!in_range(_n800v, 3018, 3336)) {
-//				error_protocol(RAIL_n800v);
-//			}
-//		}
+#ifdef FLIGHT_MODE
+		if (_2v5_enabled){
+			if (!in_range(_2v5, 2947, 3257)) {
+				error_protocol(RAIL_2v5);
+			}
+		}
+
+		if (_3v3_enabled){
+			if (!in_range(_3v3, 3537, 3909)) {
+				error_protocol(RAIL_3v3);
+			}
+		}
+
+		if (_5v_enabled){
+			if (!in_range(_5v, 3537, 3909)) {
+				error_protocol(RAIL_5v);
+			}
+		}
+
+		if (_n3v3_enabled){
+			if (!in_range(_n3v3, 3702, 4091)) {
+				error_protocol(RAIL_n3v3);
+			}
+		}
+
+		if (_n5v_enabled) {
+			if (!in_range(_n5v, 3619, 4000)) {
+				error_protocol(RAIL_n5v);
+			}
+		}
+
+		if (_15v_enabled) {
+			if (!in_range(_15v, 3525, 3896)) {
+				error_protocol(RAIL_15v);
+			}
+		}
+
+		if (_5vref_enabled) {
+			if (!in_range(_5vref, 3537, 3909)) {
+				error_protocol(RAIL_5vref);
+			}
+		}
+
+		if (_n200v_enabled) {
+			if (!in_range(_n200v, 3796, 4196)) {
+				error_protocol(RAIL_n200v);
+			}
+		}
+
+		if (_n800v_enabled) {
+			if (!in_range(_n800v, 3018, 3336)) {
+				error_protocol(RAIL_n800v);
+			}
+		}
+#endif
 
 		free(hk_adc1);
 		free(hk_adc3);
@@ -2700,19 +2702,21 @@ void FLAG_init(void *argument)
   /* USER CODE END FLAG_init */
 }
 
-/* USER CODE BEGIN Header_Flight_init */
+/* USER CODE BEGIN Header_Science_init */
 /**
- * @brief Function implementing the Flight_task thread.
- * @param argument: Not used
- * @retval None
- */
-/* USER CODE END Header_Flight_init */
-void Flight_init(void *argument)
+* @brief Function implementing the Science_task thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_Science_init */
+void Science_init(void *argument)
 {
-  /* USER CODE BEGIN Flight_init */
-	osThreadSuspend(Flight_taskHandle);
-	/* Infinite loop */
-	for (;;) {
+  /* USER CODE BEGIN Science_init */
+	osThreadSuspend(Science_taskHandle);
+
+  /* Infinite loop */
+  for(;;)
+  {
 		HAL_GPIO_WritePin(gpios[8].gpio, gpios[8].pin, GPIO_PIN_SET); // sdn1
 		osDelay(100);
 		HAL_GPIO_WritePin(gpios[0].gpio, gpios[0].pin, GPIO_PIN_SET); // sys on pb5
@@ -2747,26 +2751,31 @@ void Flight_init(void *argument)
 
 		__enable_irq();
 
-		osThreadSuspend(Flight_taskHandle);
-	}
-  /* USER CODE END Flight_init */
+		osThreadSuspend(Science_taskHandle);
+  }
+  /* USER CODE END Science_init */
 }
 
-/* USER CODE BEGIN Header_UnFlight_init */
+/* USER CODE BEGIN Header_Idle_init */
 /**
- * @brief Function implementing the UnFlight_task thread.
- * @param argument: Not used
- * @retval None
- */
-/* USER CODE END Header_UnFlight_init */
-void UnFlight_init(void *argument)
+* @brief Function implementing the Idle_task thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_Idle_init */
+void Idle_init(void *argument)
 {
-  /* USER CODE BEGIN UnFlight_init */
-	osThreadSuspend(UnFlight_taskHandle);
-	/* Infinite loop */
-	for (;;) {
+  /* USER CODE BEGIN Idle_init */
+	osThreadSuspend(Idle_taskHandle);
+
+  /* Infinite loop */
+  for(;;)
+  {
 		HAL_TIM_OC_Stop_IT(&htim1, TIM_CHANNEL_1);
+		PMT_ON = 0;
 		HAL_TIM_OC_Stop_IT(&htim2, TIM_CHANNEL_4);
+		ERPA_ON = 0;
+		HK_ON = 0;
 		osDelay(100);
 		HAL_GPIO_WritePin(gpios[1].gpio, gpios[1].pin, GPIO_PIN_RESET); // Enable n800v
 		osDelay(100);
@@ -2787,9 +2796,9 @@ void UnFlight_init(void *argument)
 		HAL_GPIO_WritePin(gpios[8].gpio, gpios[8].pin, GPIO_PIN_RESET); // sdn1
 		osDelay(100);
 
-		osThreadSuspend(UnFlight_taskHandle);
-	}
-  /* USER CODE END UnFlight_init */
+		osThreadSuspend(Idle_taskHandle);
+  }
+  /* USER CODE END Idle_init */
 }
 
 /**

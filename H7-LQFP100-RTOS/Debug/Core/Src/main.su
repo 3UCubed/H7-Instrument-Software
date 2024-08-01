@@ -48,8 +48,8 @@
 ../Core/Src/main.c:2500:6:GPIO_off_init	16	static
 ../Core/Src/main.c:2537:6:UART_TX_init	24	static
 ../Core/Src/main.c:2587:6:Voltage_Monitor_init	24	static
-../Core/Src/main.c:2687:6:FLAG_init	24	static
-../Core/Src/main.c:2710:6:Flight_init	24	static,ignoring_inline_asm
-../Core/Src/main.c:2762:6:UnFlight_init	16	static
-../Core/Src/main.c:2803:6:HAL_TIM_PeriodElapsedCallback	16	static
-../Core/Src/main.c:2820:6:Error_Handler	4	static,ignoring_inline_asm
+../Core/Src/main.c:2689:6:FLAG_init	24	static
+../Core/Src/main.c:2712:6:Science_init	24	static,ignoring_inline_asm
+../Core/Src/main.c:2766:6:Idle_init	16	static
+../Core/Src/main.c:2812:6:HAL_TIM_PeriodElapsedCallback	16	static
+../Core/Src/main.c:2829:6:Error_Handler	4	static,ignoring_inline_asm
