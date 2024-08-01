@@ -63,9 +63,9 @@ typedef enum {
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 // *********************************************************************************************************** DEFINES
-//#define ERPA_CAP 700
-//#define PMT_CAP 80
-//#define HK_CAP 10000
+
+#define FLIGHT_MODE
+
 #define PMT_FLAG_ID 0x0001
 #define ERPA_FLAG_ID 0x0002
 #define HK_FLAG_ID 0x0004
@@ -74,7 +74,7 @@ typedef enum {
 
 #define PMT_DATA_SIZE 10
 #define ERPA_DATA_SIZE 14
-#define HK_DATA_SIZE 50
+#define HK_DATA_SIZE 54
 #define UART_RX_BUFFER_SIZE 64
 #define UART_TX_BUFFER_SIZE 1000
 #define UPTIME_SIZE 4
@@ -119,7 +119,6 @@ SPI_HandleTypeDef hspi2;
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
-TIM_HandleTypeDef htim4;
 
 UART_HandleTypeDef huart1;
 DMA_HandleTypeDef hdma_usart1_tx;
@@ -231,21 +230,21 @@ uint16_t _n200v;
 uint16_t _n800v;
 uint16_t _tmp1;
 
+volatile uint8_t HK_10_second_counter = 0;
 volatile uint32_t uptime_millis = 0;
 osMessageQueueId_t mid_MsgQueue;
 packet_t msg;
 
 osStatus_t status;
 volatile int tx_flag = 1;
-volatile int TEMPERATURE_COUNTER = 1000; // Starts at 1000 so that temperature sensors are sampled on first hk packet
 
 uint16_t pmt_seq = 0;
 uint32_t erpa_seq = 0;
 uint16_t hk_seq = 0;
 
-uint8_t PMT_ON = 0;
-uint8_t ERPA_ON = 0;
-uint8_t HK_ON = 0;
+volatile uint8_t PMT_ON = 0;
+volatile uint8_t ERPA_ON = 0;
+volatile uint8_t HK_ON = 0;
 
 volatile uint32_t cadence = 3125;
 uint8_t step = 3;
@@ -289,7 +288,6 @@ static void MX_ADC1_Init(void);
 static void MX_DAC1_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_RTC_Init(void);
-static void MX_TIM4_Init(void);
 void PMT_init(void *argument);
 void ERPA_init(void *argument);
 void HK_init(void *argument);
@@ -337,9 +335,20 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim) {
 	} else if (htim == &htim2) {
 		osEventFlagsSet(event_flags, ERPA_FLAG_ID);
 	} else if (htim == &htim3) {
-		osEventFlagsSet(event_flags, HK_FLAG_ID);
-	} else if (htim == &htim4) {
 		osEventFlagsSet(event_flags, VOLTAGE_MONITOR_FLAG_ID);
+
+// - If flight mode is defined, we only create HK packets every 100 interrupts of TIM3 (running at 100ms)
+// - Otherwise, we create HK packets every time TIM3 interrupts
+#ifdef FLIGHT_MODE
+		if (HK_10_second_counter == 100) {
+			osEventFlagsSet(event_flags, HK_FLAG_ID);
+			HK_10_second_counter = 0;
+		}
+		HK_10_second_counter++;
+#else
+		osEventFlagsSet(event_flags, HK_FLAG_ID);
+#endif
+
 	} else {
 		printf("Unknown Timer Interrupt\n");
 	}
@@ -526,7 +535,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	}
 	case 0x1C: {
 		printf("HK ON \n");
-		HAL_TIM_OC_Start_IT(&htim3, TIM_CHANNEL_1);
 		osEventFlagsSet(event_flags, HK_FLAG_ID);
 		HK_ON = 1;
 		hk_seq = 0;
@@ -534,7 +542,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	}
 	case 0x0C: {
 		printf("HK OFF\n");
-		HAL_TIM_OC_Stop_IT(&htim3, TIM_CHANNEL_1);
 		HK_ON = 0;
 		break;
 	}
@@ -652,7 +659,6 @@ int main(void)
   MX_DAC1_Init();
   MX_SPI1_Init();
   MX_RTC_Init();
-  MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -1479,7 +1485,7 @@ static void MX_TIM3_Init(void)
 
   /* USER CODE END TIM3_Init 1 */
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 10-1;
+  htim3.Init.Prescaler = 100-1;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim3.Init.Period = 50000-1;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -1502,51 +1508,6 @@ static void MX_TIM3_Init(void)
   /* USER CODE BEGIN TIM3_Init 2 */
 
   /* USER CODE END TIM3_Init 2 */
-
-}
-
-/**
-  * @brief TIM4 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_TIM4_Init(void)
-{
-
-  /* USER CODE BEGIN TIM4_Init 0 */
-
-  /* USER CODE END TIM4_Init 0 */
-
-  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
-  TIM_MasterConfigTypeDef sMasterConfig = {0};
-
-  /* USER CODE BEGIN TIM4_Init 1 */
-
-  /* USER CODE END TIM4_Init 1 */
-  htim4.Instance = TIM4;
-  htim4.Init.Prescaler = 10-1;
-  htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim4.Init.Period = 50000-1;
-  htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_Base_Init(&htim4) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-  if (HAL_TIM_ConfigClockSource(&htim4, &sClockSourceConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim4, &sMasterConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN TIM4_Init 2 */
-
-  /* USER CODE END TIM4_Init 2 */
 
 }
 
@@ -2174,7 +2135,7 @@ packet_t create_packet(const uint8_t *data, uint16_t size) {
  * and checks for errors during the configuration process.
  */
 void system_setup() {
-	HAL_TIM_OC_Start_IT(&htim4, TIM_CHANNEL_1);
+	HAL_TIM_OC_Start_IT(&htim3, TIM_CHANNEL_1);
 
 	TIM2->CCR4 = 312;
 	if (HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_OFFSET_LINEARITY,
@@ -2350,27 +2311,14 @@ void sample_erpa() {
  */
 void sample_hk() {
 	uint8_t *buffer = (uint8_t*) malloc(HK_DATA_SIZE * sizeof(uint8_t));
-
-	static uint16_t last_i2c_reading[4];
 	int16_t *hk_i2c = (int16_t*) malloc(4 * sizeof(int16_t));
 	uint8_t *timestamp = (uint8_t*) malloc(TIMESTAMP_SIZE * sizeof(uint8_t));
+	uint8_t *uptime = (uint8_t*) malloc(UPTIME_SIZE * sizeof(uint8_t));
 
+	get_uptime(uptime);
 	getTimestamp(timestamp);
+	receive_hk_i2c(hk_i2c);
 
-	if (TEMPERATURE_COUNTER > 999) {
-		receive_hk_i2c(hk_i2c);
-		last_i2c_reading[0] = hk_i2c[0];
-		last_i2c_reading[1] = hk_i2c[1];
-		last_i2c_reading[2] = hk_i2c[2];
-		last_i2c_reading[3] = hk_i2c[3];
-		TEMPERATURE_COUNTER = 0;
-	} else {
-		TEMPERATURE_COUNTER++;
-		hk_i2c[0] = last_i2c_reading[0];
-		hk_i2c[1] = last_i2c_reading[1];
-		hk_i2c[2] = last_i2c_reading[2];
-		hk_i2c[3] = last_i2c_reading[3];
-	}
 
 	buffer[0] = HK_SYNC;                     	// HK SYNC 0xCC MSB
 	buffer[1] = HK_SYNC;                     	// HK SYNC 0xCC LSB
@@ -2410,10 +2358,8 @@ void sample_hk() {
 	buffer[35] = (_n200v & 0xFF);				// HK n150vmon LSB
 	buffer[36] = ((_n800v & 0xFF00) >> 8);		// HK n800vmon MSB
 	buffer[37] = (_n800v & 0xFF);				// HK n800vmon LSB
-
 	buffer[38] = ((_tmp1 & 0xFF00) >> 8);  // TEMPURATURE 1 MSB
 	buffer[39] = (_tmp1 & 0xFF);           // TEMPURATURE 1 LSB
-
 	buffer[40] = timestamp[0];
 	buffer[41] = timestamp[1];
 	buffer[42] = timestamp[2];
@@ -2424,6 +2370,10 @@ void sample_hk() {
 	buffer[47] = timestamp[7];
 	buffer[48] = timestamp[8];
 	buffer[49] = timestamp[9];
+	buffer[50] = uptime[0];
+	buffer[51] = uptime[1];
+	buffer[52] = uptime[2];
+	buffer[53] = uptime[3];
 
 	packet_t hk_packet = create_packet(buffer, HK_DATA_SIZE);
 	osMessageQueuePut(mid_MsgQueue, &hk_packet, 0U, 0U);
@@ -2431,6 +2381,7 @@ void sample_hk() {
 	free(buffer);
 	free(hk_i2c);
 	free(timestamp);
+	free(uptime);
 }
 
 /* USER CODE END 4 */
@@ -2781,16 +2732,20 @@ void Flight_init(void *argument)
 		HAL_GPIO_WritePin(gpios[1].gpio, gpios[1].pin, GPIO_PIN_SET);// Enable n800v
 		osDelay(300);
 
+		__disable_irq();
+
 		HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, DAC_OUT, 32, DAC_ALIGN_12B_R);	// Enable auto sweep (doesn't start until ERPA timer is started)
+		HK_ON = 1;
 		HAL_TIM_OC_Start_IT(&htim2, TIM_CHANNEL_4);			// ERPA packet on
 		ERPA_ON = 1;
-		osEventFlagsSet(event_flags, ERPA_FLAG_ID);
 		HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_1);				// PMT packet on
 		PMT_ON = 1;
-		osEventFlagsSet(event_flags, PMT_FLAG_ID);
-		HAL_TIM_OC_Start_IT(&htim3, TIM_CHANNEL_1);				// HK packet on
-		HK_ON = 1;
+
 		osEventFlagsSet(event_flags, HK_FLAG_ID);
+		osEventFlagsSet(event_flags, ERPA_FLAG_ID);
+		osEventFlagsSet(event_flags, PMT_FLAG_ID);
+
+		__enable_irq();
 
 		osThreadSuspend(Flight_taskHandle);
 	}
@@ -2810,7 +2765,6 @@ void UnFlight_init(void *argument)
 	osThreadSuspend(UnFlight_taskHandle);
 	/* Infinite loop */
 	for (;;) {
-		HAL_TIM_OC_Stop_IT(&htim3, TIM_CHANNEL_1);
 		HAL_TIM_OC_Stop_IT(&htim1, TIM_CHANNEL_1);
 		HAL_TIM_OC_Stop_IT(&htim2, TIM_CHANNEL_4);
 		osDelay(100);
