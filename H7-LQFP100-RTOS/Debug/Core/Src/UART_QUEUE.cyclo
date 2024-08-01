@@ -1,0 +1,6 @@
+UART_QUEUE.c:13:6:queue_init	1
+UART_QUEUE.c:22:6:queue_free	1
+UART_QUEUE.c:27:6:queue_enqueue	2
+UART_QUEUE.c:39:6:queue_dequeue	2
+UART_QUEUE.c:53:6:queue_is_empty	1
+UART_QUEUE.c:58:6:queue_is_full	1

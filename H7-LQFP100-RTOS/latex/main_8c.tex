@@ -1,0 +1,1219 @@
+\doxysection{Core/\+Src/main.c File Reference}
+\hypertarget{main_8c}{}\label{main_8c}\index{Core/Src/main.c@{Core/Src/main.c}}
+
+
+\+: Main program body  
+
+
+{\ttfamily \#include "{}main.\+h"{}}\newline
+{\ttfamily \#include "{}cmsis\+\_\+os.\+h"{}}\newline
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include $<$string.\+h$>$}\newline
+{\ttfamily \#include $<$time.\+h$>$}\newline
+\doxysubsubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structpacket__t}{packet\+\_\+t}}
+\item 
+struct \mbox{\hyperlink{structgpio__pins}{gpio\+\_\+pins}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{main_8c_ad60277bfc7e45c8c1324f9389c6f84ff}\label{main_8c_ad60277bfc7e45c8c1324f9389c6f84ff} 
+\#define {\bfseries PMT\+\_\+\+FLAG\+\_\+\+ID}~0x0001
+\item 
+\Hypertarget{main_8c_affd3afc7e7c506db7bcb43368e6845f2}\label{main_8c_affd3afc7e7c506db7bcb43368e6845f2} 
+\#define {\bfseries ERPA\+\_\+\+FLAG\+\_\+\+ID}~0x0002
+\item 
+\Hypertarget{main_8c_aabed20853bb484058ba3dd8f0cb2c3e4}\label{main_8c_aabed20853bb484058ba3dd8f0cb2c3e4} 
+\#define {\bfseries HK\+\_\+\+FLAG\+\_\+\+ID}~0x0004
+\item 
+\Hypertarget{main_8c_a802b24dd69df6fa41b1b6b61f275df0b}\label{main_8c_a802b24dd69df6fa41b1b6b61f275df0b} 
+\#define {\bfseries VOLTAGE\+\_\+\+MONITOR\+\_\+\+FLAG\+\_\+\+ID}~0x0008
+\item 
+\Hypertarget{main_8c_ae58ade827ae6570e768a26165ba6dd90}\label{main_8c_ae58ade827ae6570e768a26165ba6dd90} 
+\#define {\bfseries STOP\+\_\+\+FLAG}~0x0016
+\item 
+\Hypertarget{main_8c_a44c269ff7cea3d748ed72875248e239d}\label{main_8c_a44c269ff7cea3d748ed72875248e239d} 
+\#define {\bfseries PMT\+\_\+\+DATA\+\_\+\+SIZE}~10
+\item 
+\Hypertarget{main_8c_a7edc1aaa46e6bdf5e6475e68c48a25f1}\label{main_8c_a7edc1aaa46e6bdf5e6475e68c48a25f1} 
+\#define {\bfseries ERPA\+\_\+\+DATA\+\_\+\+SIZE}~13
+\item 
+\Hypertarget{main_8c_a4a30f5dc7d531c20e6d54ab16b22c2ec}\label{main_8c_a4a30f5dc7d531c20e6d54ab16b22c2ec} 
+\#define {\bfseries HK\+\_\+\+DATA\+\_\+\+SIZE}~50
+\item 
+\Hypertarget{main_8c_a5bdd6772c246436bb14377095de79b31}\label{main_8c_a5bdd6772c246436bb14377095de79b31} 
+\#define {\bfseries UART\+\_\+\+RX\+\_\+\+BUFFER\+\_\+\+SIZE}~64
+\item 
+\Hypertarget{main_8c_a05f5d709605c6317c97e4974bec3402a}\label{main_8c_a05f5d709605c6317c97e4974bec3402a} 
+\#define {\bfseries UART\+\_\+\+TX\+\_\+\+BUFFER\+\_\+\+SIZE}~1000
+\item 
+\Hypertarget{main_8c_a41a15639b79c54d63cd32cf304a1b7c0}\label{main_8c_a41a15639b79c54d63cd32cf304a1b7c0} 
+\#define {\bfseries UPTIME\+\_\+\+SIZE}~4
+\item 
+\Hypertarget{main_8c_a7b4282b06832a01cee279660fd4b829d}\label{main_8c_a7b4282b06832a01cee279660fd4b829d} 
+\#define {\bfseries TIMESTAMP\+\_\+\+SIZE}~10
+\item 
+\Hypertarget{main_8c_a731cf5cff8c7c2a7fc41c19a5325ac2c}\label{main_8c_a731cf5cff8c7c2a7fc41c19a5325ac2c} 
+\#define {\bfseries MSGQUEUE\+\_\+\+OBJECTS}~128
+\item 
+\Hypertarget{main_8c_a86754b1165d64c8447090e409ab140ab}\label{main_8c_a86754b1165d64c8447090e409ab140ab} 
+\#define {\bfseries ERROR\+\_\+\+PACKET\+\_\+\+DATA\+\_\+\+SIZE}~3
+\item 
+\Hypertarget{main_8c_a50b7b5c5d681a826c830d3734aeb52ab}\label{main_8c_a50b7b5c5d681a826c830d3734aeb52ab} 
+\#define {\bfseries ADC1\+\_\+\+NUM\+\_\+\+CHANNELS}~11
+\item 
+\Hypertarget{main_8c_ab9ef1dab382d54ac40c28b2020d08ba5}\label{main_8c_ab9ef1dab382d54ac40c28b2020d08ba5} 
+\#define {\bfseries ADC3\+\_\+\+NUM\+\_\+\+CHANNELS}~4
+\item 
+\Hypertarget{main_8c_adb613cbcf8681847f691f76d2533d11f}\label{main_8c_adb613cbcf8681847f691f76d2533d11f} 
+\#define {\bfseries PMT\+\_\+\+SYNC}~0x\+BB
+\item 
+\Hypertarget{main_8c_a5a7d643fcf8d256fb918bebbb26e25b8}\label{main_8c_a5a7d643fcf8d256fb918bebbb26e25b8} 
+\#define {\bfseries ERPA\+\_\+\+SYNC}~0x\+AA
+\item 
+\Hypertarget{main_8c_af97a37a0f42ab2bfd6b57f779c1b4fe7}\label{main_8c_af97a37a0f42ab2bfd6b57f779c1b4fe7} 
+\#define {\bfseries HK\+\_\+\+SYNC}~0x\+CC
+\item 
+\Hypertarget{main_8c_a68efefa6bbe10a4217d6b87280811b41}\label{main_8c_a68efefa6bbe10a4217d6b87280811b41} 
+\#define {\bfseries ERROR\+\_\+\+SYNC}~0x\+DD
+\item 
+\Hypertarget{main_8c_a6f6489887e08bff4887d0bc5dcf214d8}\label{main_8c_a6f6489887e08bff4887d0bc5dcf214d8} 
+\#define {\bfseries ACK}~0x\+FF
+\item 
+\Hypertarget{main_8c_a958518a45b12053ae33606ee7cb68a55}\label{main_8c_a958518a45b12053ae33606ee7cb68a55} 
+\#define {\bfseries NACK}~0x00
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{main_8c_a5bee4f77f84f0c92aeb06fdccdb82573}\label{main_8c_a5bee4f77f84f0c92aeb06fdccdb82573} 
+typedef Static\+Task\+\_\+t {\bfseries os\+Static\+Thread\+Def\+\_\+t}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{main_8c_a23702aeba3b6dba1f11d050f6b872580}\label{main_8c_a23702aeba3b6dba1f11d050f6b872580} 
+enum {\bfseries ERROR\+\_\+\+TAGS} \{ \newline
+{\bfseries RAIL\+\_\+\+BUSVMON}
+, {\bfseries RAIL\+\_\+\+BUSIMON}
+, {\bfseries RAIL\+\_\+2v5}
+, {\bfseries RAIL\+\_\+3v3}
+, \newline
+{\bfseries RAIL\+\_\+5v}
+, {\bfseries RAIL\+\_\+n3v3}
+, {\bfseries RAIL\+\_\+n5v}
+, {\bfseries RAIL\+\_\+15v}
+, \newline
+{\bfseries RAIL\+\_\+5vref}
+, {\bfseries RAIL\+\_\+n200v}
+, {\bfseries RAIL\+\_\+n800v}
+ \}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{main_8c_a09f8a1b1741ecd6a3a7c978cd1ceb9a9}\label{main_8c_a09f8a1b1741ecd6a3a7c978cd1ceb9a9} 
+{\bfseries ALIGN\+\_\+32\+BYTES} (static uint16\+\_\+t ADC1\+\_\+raw\+\_\+data\mbox{[}ADC1\+\_\+\+NUM\+\_\+\+CHANNELS\mbox{]})
+\item 
+\Hypertarget{main_8c_af2f481d25e68569fc4d8c3785ad2afdc}\label{main_8c_af2f481d25e68569fc4d8c3785ad2afdc} 
+{\bfseries ALIGN\+\_\+32\+BYTES} (static uint16\+\_\+t ADC3\+\_\+raw\+\_\+data\mbox{[}ADC3\+\_\+\+NUM\+\_\+\+CHANNELS\mbox{]})
+\item 
+void \mbox{\hyperlink{main_8c_a70af21c671abfcc773614a9a4f63d920}{System\+Clock\+\_\+\+Config}} (void)
+\begin{DoxyCompactList}\small\item\em System Clock Configuration. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_a336c5acb34a801b2984e602b97ed7b73}{Periph\+Common\+Clock\+\_\+\+Config}} (void)
+\begin{DoxyCompactList}\small\item\em Peripherals Common Clock Configuration. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_a337ce00173018ad9f84f8596a6ac9c6e}{PMT\+\_\+init}} (void \texorpdfstring{$\ast$}{*}argument)
+\begin{DoxyCompactList}\small\item\em Function implementing the PMT\+\_\+task thread. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_a7594dc6f42ed797c97c88068562de9c4}{ERPA\+\_\+init}} (void \texorpdfstring{$\ast$}{*}argument)
+\begin{DoxyCompactList}\small\item\em Function implementing the ERPA\+\_\+task thread. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_a8d36ce2d327909513102b49dcde4e3c3}{HK\+\_\+init}} (void \texorpdfstring{$\ast$}{*}argument)
+\begin{DoxyCompactList}\small\item\em Function implementing the HK\+\_\+task thread. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_a4ce5c41570c63e07daba95bf5ef7797e}{GPIO\+\_\+on\+\_\+init}} (void \texorpdfstring{$\ast$}{*}argument)
+\begin{DoxyCompactList}\small\item\em Function implementing the GPIO\+\_\+on\+\_\+task thread. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_ae4f97f53dbd1966acc831e0e4186f613}{GPIO\+\_\+off\+\_\+init}} (void \texorpdfstring{$\ast$}{*}argument)
+\begin{DoxyCompactList}\small\item\em Function implementing the GPIO\+\_\+off\+\_\+task thread. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_a054e78ad04c36387171d81eb4c6be89c}{UART\+\_\+\+TX\+\_\+init}} (void \texorpdfstring{$\ast$}{*}argument)
+\begin{DoxyCompactList}\small\item\em UART transmission initialization and processing task. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_ac8c01aba361e85357de8c66aceb4c544}{Voltage\+\_\+\+Monitor\+\_\+init}} (void \texorpdfstring{$\ast$}{*}argument)
+\begin{DoxyCompactList}\small\item\em Function implementing the Voltage\+\_\+\+Monitor thread. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_ac49b15c4f81cb02ec427080bf24debac}{FLAG\+\_\+init}} (void \texorpdfstring{$\ast$}{*}argument)
+\begin{DoxyCompactList}\small\item\em Function implementing the FLAG\+\_\+task thread. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_ade84f7557ff2c4c54418ea5d849ebe4a}{system\+\_\+setup}} ()
+\begin{DoxyCompactList}\small\item\em Performs system initialization and configuration. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{main_8c_ad8057d46558743ecf6304877188ad125}{in\+\_\+range}} (uint16\+\_\+t raw, int min, int max)
+\begin{DoxyCompactList}\small\item\em Checks if a value is within a specified range. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_ab793b90e7e2a47adc24bf8971f791f91}{error\+\_\+protocol}} (ERROR\+\_\+\+TAGS tag)
+\begin{DoxyCompactList}\small\item\em Handles error reporting by creating and sending an error packet. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{structpacket__t}{packet\+\_\+t}} \mbox{\hyperlink{main_8c_a4897051c3779edc23e6357339a343563}{create\+\_\+packet}} (const uint8\+\_\+t \texorpdfstring{$\ast$}{*}data, uint16\+\_\+t size)
+\begin{DoxyCompactList}\small\item\em Creates a packet with given data and size. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_ab92a1c2c3a8aedd2be56dc6e89e03630}{sample\+\_\+hk}} ()
+\begin{DoxyCompactList}\small\item\em Samples housekeeping data and sends it as a packet. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_ae0ddbac79bae3c5f0508df7d50196177}{get\+\_\+uptime}} (uint8\+\_\+t \texorpdfstring{$\ast$}{*}buffer)
+\begin{DoxyCompactList}\small\item\em Retrieves the system uptime in milliseconds and stores it in the buffer. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_ac2c0f781ac38ca35f3ec5115c5f9b981}{send\+\_\+\+ACK}} ()
+\begin{DoxyCompactList}\small\item\em Sends an acknowledgment byte via UART. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_a92fe58192c69ebc45158bf31a95cc071}{send\+\_\+\+NACK}} ()
+\begin{DoxyCompactList}\small\item\em Sends a negative acknowledgment byte via UART. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_ad55f80ed3cd8b6c4f247763b747016af}{sync}} ()
+\begin{DoxyCompactList}\small\item\em Synchronizes the system\textquotesingle{}s RTC with the OBC/\+GUI timestamp. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_a0322b72ab110431a0425c2911346bb6a}{enter\+\_\+stop}} ()
+\begin{DoxyCompactList}\small\item\em Enters STOP mode and configures the system upon wakeup. \end{DoxyCompactList}\item 
+uint8\+\_\+t \mbox{\hyperlink{main_8c_ad6563de0a104b1b0a6af02e5793cf77e}{get\+\_\+current\+\_\+step}} ()
+\begin{DoxyCompactList}\small\item\em Gets the current step based on the DAC value. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_acb79fa650eed60393320c223213b1e8e}{flush\+\_\+message\+\_\+queue}} ()
+\begin{DoxyCompactList}\small\item\em Flushes the message queue and sends accumulated messages via UART. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_af754f8b736268fb63680f2cd437c2ef5}{enter\+\_\+flight\+\_\+mode}} ()
+\begin{DoxyCompactList}\small\item\em Enters flight mode by enabling various components and starting timers. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_a1fc39499fe9db8b7fb88005e9f107a36}{HAL\+\_\+\+TIM\+\_\+\+OC\+\_\+\+Delay\+Elapsed\+Callback}} (TIM\+\_\+\+Handle\+Type\+Def \texorpdfstring{$\ast$}{*}htim)
+\begin{DoxyCompactList}\small\item\em Handles the callback for timer delay elapsed events. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_ae494a9643f29b87d6d81e5264e60e57b}{HAL\+\_\+\+UART\+\_\+\+Rx\+Cplt\+Callback}} (UART\+\_\+\+Handle\+Type\+Def \texorpdfstring{$\ast$}{*}huart)
+\begin{DoxyCompactList}\small\item\em UART receive complete callback. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{main_8c_a840291bc02cba5474a4cb46a9b9566fe}{main}} (void)
+\begin{DoxyCompactList}\small\item\em The application entry point. \end{DoxyCompactList}\item 
+int16\+\_\+t \mbox{\hyperlink{main_8c_a1239679f86b97e0d2b5af783d6e25003}{poll\+\_\+i2c\+\_\+sensor}} (const uint8\+\_\+t TEMP\+\_\+\+ADDR)
+\begin{DoxyCompactList}\small\item\em Polls an I2C temperature sensor. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_af42ef2a2762f9286b78f885e996d81a6}{receive\+\_\+pmt\+\_\+spi}} (uint8\+\_\+t \texorpdfstring{$\ast$}{*}buffer)
+\begin{DoxyCompactList}\small\item\em Receives data from an SPI device. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_a68321bdcb014b110acc0a380fd0b77b0}{receive\+\_\+erpa\+\_\+spi}} (uint8\+\_\+t \texorpdfstring{$\ast$}{*}buffer)
+\begin{DoxyCompactList}\small\item\em Receives data from an SPI device. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_a4a354af602f3ca5b466117a9471d563e}{receive\+\_\+erpa\+\_\+adc}} (uint16\+\_\+t \texorpdfstring{$\ast$}{*}buffer)
+\begin{DoxyCompactList}\small\item\em Receives ERPA ADC data and stores it in the provided buffer. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_a695e1f0be41874e2a88a52a75356be32}{receive\+\_\+hk\+\_\+i2c}} (int16\+\_\+t \texorpdfstring{$\ast$}{*}buffer)
+\begin{DoxyCompactList}\small\item\em Receives housekeeping I2C sensor data. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_a159fbfaca21e3caf9d009f1219bc5801}{receive\+\_\+hk\+\_\+adc1}} (uint16\+\_\+t \texorpdfstring{$\ast$}{*}buffer)
+\begin{DoxyCompactList}\small\item\em Receives housekeeping ADC1 data and stores it in the provided buffer. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_a45cf407364424a56b9e471156f3f8954}{receive\+\_\+hk\+\_\+adc3}} (uint16\+\_\+t \texorpdfstring{$\ast$}{*}buffer)
+\begin{DoxyCompactList}\small\item\em Receives housekeeping ADC3 sensor data. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_a41922de9acb8bdc558a1c769d438d32d}{calibrate\+RTC}} (uint8\+\_\+t \texorpdfstring{$\ast$}{*}buffer)
+\begin{DoxyCompactList}\small\item\em Calibrates the RTC with the provided date and time values. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_abcdf9b59049eccbc87d54042f9235b1a}{HAL\+\_\+\+UART\+\_\+\+Tx\+Cplt\+Callback}} (UART\+\_\+\+Handle\+Type\+Def \texorpdfstring{$\ast$}{*}huart)
+\begin{DoxyCompactList}\small\item\em UART transmit complete callback. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_a12560d892fbd7d536af5fc897d5fedb6}{get\+Timestamp}} (uint8\+\_\+t \texorpdfstring{$\ast$}{*}buffer)
+\begin{DoxyCompactList}\small\item\em Gets the current timestamp and stores it in the provided buffer. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_ae0a4481d6887102716688f5f0b945f09}{sample\+\_\+pmt}} ()
+\begin{DoxyCompactList}\small\item\em Samples PMT data and sends it as a packet. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_a8b4133989cd893523cfa2e3a24f8fb2d}{sample\+\_\+erpa}} ()
+\begin{DoxyCompactList}\small\item\em Samples ERPA data and sends it as a packet. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_a8a3b0ad512a6e6c6157440b68d395eac}{HAL\+\_\+\+TIM\+\_\+\+Period\+Elapsed\+Callback}} (TIM\+\_\+\+Handle\+Type\+Def \texorpdfstring{$\ast$}{*}htim)
+\begin{DoxyCompactList}\small\item\em Period elapsed callback in non blocking mode. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_a1730ffe1e560465665eb47d9264826f9}{Error\+\_\+\+Handler}} (void)
+\begin{DoxyCompactList}\small\item\em This function is executed in case of error occurrence. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{main_8c_a22b804736f5648d52f639b2647d4ed13}\label{main_8c_a22b804736f5648d52f639b2647d4ed13} 
+ADC\+\_\+\+Handle\+Type\+Def {\bfseries hadc1}
+\item 
+\Hypertarget{main_8c_a984624bcf28d1b2fb7e4e18349f65d5c}\label{main_8c_a984624bcf28d1b2fb7e4e18349f65d5c} 
+ADC\+\_\+\+Handle\+Type\+Def {\bfseries hadc3}
+\item 
+\Hypertarget{main_8c_a1c126854bb1813d31ab4776b21dcc51f}\label{main_8c_a1c126854bb1813d31ab4776b21dcc51f} 
+DMA\+\_\+\+Handle\+Type\+Def {\bfseries hdma\+\_\+adc1}
+\item 
+\Hypertarget{main_8c_a348c49f75bc918736d17997ac3f02e82}\label{main_8c_a348c49f75bc918736d17997ac3f02e82} 
+DMA\+\_\+\+Handle\+Type\+Def {\bfseries hdma\+\_\+adc3}
+\item 
+\Hypertarget{main_8c_aa25a57382819e79fbde3687939c0fd0b}\label{main_8c_aa25a57382819e79fbde3687939c0fd0b} 
+DAC\+\_\+\+Handle\+Type\+Def {\bfseries hdac1}
+\item 
+\Hypertarget{main_8c_a25415b774b85bdc41b3fd661ceae8a1c}\label{main_8c_a25415b774b85bdc41b3fd661ceae8a1c} 
+DMA\+\_\+\+Handle\+Type\+Def {\bfseries hdma\+\_\+dac1\+\_\+ch1}
+\item 
+\Hypertarget{main_8c_af7b2c26e44dadaaa798a5c3d82914ba7}\label{main_8c_af7b2c26e44dadaaa798a5c3d82914ba7} 
+I2\+C\+\_\+\+Handle\+Type\+Def {\bfseries hi2c1}
+\item 
+\Hypertarget{main_8c_aa0c7fca836406ade332e1e3f1039d8ab}\label{main_8c_aa0c7fca836406ade332e1e3f1039d8ab} 
+RTC\+\_\+\+Handle\+Type\+Def {\bfseries hrtc}
+\item 
+\Hypertarget{main_8c_a9c6222bae4d0328dd843ae099623b40b}\label{main_8c_a9c6222bae4d0328dd843ae099623b40b} 
+SPI\+\_\+\+Handle\+Type\+Def {\bfseries hspi1}
+\item 
+\Hypertarget{main_8c_ab9da65f935e805137e2eb4e18c5ab224}\label{main_8c_ab9da65f935e805137e2eb4e18c5ab224} 
+SPI\+\_\+\+Handle\+Type\+Def {\bfseries hspi2}
+\item 
+\Hypertarget{main_8c_a25fc663547539bc49fecc0011bd76ab5}\label{main_8c_a25fc663547539bc49fecc0011bd76ab5} 
+TIM\+\_\+\+Handle\+Type\+Def {\bfseries htim1}
+\item 
+\Hypertarget{main_8c_a2c80fd5510e2990a59a5c90d745c716c}\label{main_8c_a2c80fd5510e2990a59a5c90d745c716c} 
+TIM\+\_\+\+Handle\+Type\+Def {\bfseries htim2}
+\item 
+\Hypertarget{main_8c_aac3d2c59ee0e3bbae1b99529a154eb62}\label{main_8c_aac3d2c59ee0e3bbae1b99529a154eb62} 
+TIM\+\_\+\+Handle\+Type\+Def {\bfseries htim3}
+\item 
+\Hypertarget{main_8c_a85788cec5a97ee377e4ee2e74f026484}\label{main_8c_a85788cec5a97ee377e4ee2e74f026484} 
+TIM\+\_\+\+Handle\+Type\+Def {\bfseries htim4}
+\item 
+\Hypertarget{main_8c_a2cf715bef37f7e8ef385a30974a5f0d5}\label{main_8c_a2cf715bef37f7e8ef385a30974a5f0d5} 
+UART\+\_\+\+Handle\+Type\+Def {\bfseries huart1}
+\item 
+\Hypertarget{main_8c_a5af94ab36bfe698db3e6beea96d10a90}\label{main_8c_a5af94ab36bfe698db3e6beea96d10a90} 
+DMA\+\_\+\+Handle\+Type\+Def {\bfseries hdma\+\_\+usart1\+\_\+tx}
+\item 
+\Hypertarget{main_8c_a1af15f327b59218af935726964c12961}\label{main_8c_a1af15f327b59218af935726964c12961} 
+os\+Thread\+Id\+\_\+t {\bfseries PMT\+\_\+task\+Handle}
+\item 
+const os\+Thread\+Attr\+\_\+t \mbox{\hyperlink{main_8c_a11620c10ef7eb1257cfaab7045d0004d}{PMT\+\_\+task\+\_\+attributes}}
+\item 
+\Hypertarget{main_8c_a0b9f540022a881212bfa4c18157092b6}\label{main_8c_a0b9f540022a881212bfa4c18157092b6} 
+os\+Thread\+Id\+\_\+t {\bfseries ERPA\+\_\+task\+Handle}
+\item 
+const os\+Thread\+Attr\+\_\+t \mbox{\hyperlink{main_8c_ac9580a41c5ba189ea2adb7a55186e1bd}{ERPA\+\_\+task\+\_\+attributes}}
+\item 
+\Hypertarget{main_8c_ad07df42b36d816d2e2d9caca7c0f9cc6}\label{main_8c_ad07df42b36d816d2e2d9caca7c0f9cc6} 
+os\+Thread\+Id\+\_\+t {\bfseries HK\+\_\+task\+Handle}
+\item 
+const os\+Thread\+Attr\+\_\+t \mbox{\hyperlink{main_8c_ac01d5151416e4a83683b76e5e9c09c18}{HK\+\_\+task\+\_\+attributes}}
+\item 
+\Hypertarget{main_8c_ad3b079ed9a921fed137b48c2e8c030dd}\label{main_8c_ad3b079ed9a921fed137b48c2e8c030dd} 
+os\+Thread\+Id\+\_\+t {\bfseries GPIO\+\_\+on\+\_\+task\+Handle}
+\item 
+\Hypertarget{main_8c_a87ffa6b520cd61a0125c6c2607f1dcf8}\label{main_8c_a87ffa6b520cd61a0125c6c2607f1dcf8} 
+uint32\+\_\+t {\bfseries GPIO\+\_\+on\+\_\+task\+Buffer} \mbox{[}128\mbox{]}
+\item 
+\Hypertarget{main_8c_a249475e99cb1a5b83f61e5735c200792}\label{main_8c_a249475e99cb1a5b83f61e5735c200792} 
+os\+Static\+Thread\+Def\+\_\+t {\bfseries GPIO\+\_\+on\+\_\+task\+Control\+Block}
+\item 
+const os\+Thread\+Attr\+\_\+t \mbox{\hyperlink{main_8c_ac4cd438aeb58d7abc7535b3da07b1405}{GPIO\+\_\+on\+\_\+task\+\_\+attributes}}
+\item 
+\Hypertarget{main_8c_a75540f5ccdbaebfcd42d01de056c42a1}\label{main_8c_a75540f5ccdbaebfcd42d01de056c42a1} 
+os\+Thread\+Id\+\_\+t {\bfseries GPIO\+\_\+off\+\_\+task\+Handle}
+\item 
+\Hypertarget{main_8c_a557fdf6e226100d002b28df4128fbafb}\label{main_8c_a557fdf6e226100d002b28df4128fbafb} 
+uint32\+\_\+t {\bfseries GPIO\+\_\+off\+\_\+task\+Buffer} \mbox{[}128\mbox{]}
+\item 
+\Hypertarget{main_8c_a618cfc92e525b582aff7ef3cb5540d8b}\label{main_8c_a618cfc92e525b582aff7ef3cb5540d8b} 
+os\+Static\+Thread\+Def\+\_\+t {\bfseries GPIO\+\_\+off\+\_\+task\+Control\+Block}
+\item 
+const os\+Thread\+Attr\+\_\+t \mbox{\hyperlink{main_8c_a06d6d576172b9c4b893fa65976bae0d8}{GPIO\+\_\+off\+\_\+task\+\_\+attributes}}
+\item 
+\Hypertarget{main_8c_a2a450a832abc639fec20c829c86115fd}\label{main_8c_a2a450a832abc639fec20c829c86115fd} 
+os\+Thread\+Id\+\_\+t {\bfseries UART\+\_\+\+TX\+\_\+task\+Handle}
+\item 
+const os\+Thread\+Attr\+\_\+t \mbox{\hyperlink{main_8c_a884257c462efcba3cbce2e89ebfa5543}{UART\+\_\+\+TX\+\_\+task\+\_\+attributes}}
+\item 
+\Hypertarget{main_8c_aff9653f5ffff4ee2911d8000b15e0ab3}\label{main_8c_aff9653f5ffff4ee2911d8000b15e0ab3} 
+os\+Thread\+Id\+\_\+t {\bfseries Voltage\+\_\+\+Monitor\+Handle}
+\item 
+const os\+Thread\+Attr\+\_\+t \mbox{\hyperlink{main_8c_a96a3780cd543aa30b92a92d899fab568}{Voltage\+\_\+\+Monitor\+\_\+attributes}}
+\item 
+\Hypertarget{main_8c_a7c706d1b99066108ff3c538901800d2b}\label{main_8c_a7c706d1b99066108ff3c538901800d2b} 
+os\+Thread\+Id\+\_\+t {\bfseries FLAG\+\_\+task\+Handle}
+\item 
+const os\+Thread\+Attr\+\_\+t \mbox{\hyperlink{main_8c_a159f4cdd051edfd18ac064fa2326002d}{FLAG\+\_\+task\+\_\+attributes}}
+\item 
+\Hypertarget{main_8c_a076ad5c64977013dd01f230cbe741999}\label{main_8c_a076ad5c64977013dd01f230cbe741999} 
+uint8\+\_\+t {\bfseries \+\_\+2v5\+\_\+enabled} = 0
+\item 
+\Hypertarget{main_8c_a13a5eafcaa6a522f817d5b9d72805bbe}\label{main_8c_a13a5eafcaa6a522f817d5b9d72805bbe} 
+uint8\+\_\+t {\bfseries \+\_\+3v3\+\_\+enabled} = 0
+\item 
+\Hypertarget{main_8c_a9ba8db9aba2380f563a6c2074250fca5}\label{main_8c_a9ba8db9aba2380f563a6c2074250fca5} 
+uint8\+\_\+t {\bfseries \+\_\+5v\+\_\+enabled} = 0
+\item 
+\Hypertarget{main_8c_a47dd79b5dd8862b5658250b8543b098b}\label{main_8c_a47dd79b5dd8862b5658250b8543b098b} 
+uint8\+\_\+t {\bfseries \+\_\+n3v3\+\_\+enabled} = 0
+\item 
+\Hypertarget{main_8c_a9d2fb09c1410b275c74ba01d8767adfa}\label{main_8c_a9d2fb09c1410b275c74ba01d8767adfa} 
+uint8\+\_\+t {\bfseries \+\_\+n5v\+\_\+enabled} = 0
+\item 
+\Hypertarget{main_8c_ac37d05913b4f705475f6dc200f20d038}\label{main_8c_ac37d05913b4f705475f6dc200f20d038} 
+uint8\+\_\+t {\bfseries \+\_\+15v\+\_\+enabled} = 0
+\item 
+\Hypertarget{main_8c_ae942dde737c3c1ad8682c20419704cf3}\label{main_8c_ae942dde737c3c1ad8682c20419704cf3} 
+uint8\+\_\+t {\bfseries \+\_\+5vref\+\_\+enabled} = 0
+\item 
+\Hypertarget{main_8c_a334bfacecfc6fbda343015f525df0c05}\label{main_8c_a334bfacecfc6fbda343015f525df0c05} 
+uint8\+\_\+t {\bfseries \+\_\+n200v\+\_\+enabled} = 0
+\item 
+\Hypertarget{main_8c_a110055d7a96ca8ca512ea5e392c0716d}\label{main_8c_a110055d7a96ca8ca512ea5e392c0716d} 
+uint8\+\_\+t {\bfseries \+\_\+n800v\+\_\+enabled} = 0
+\item 
+\Hypertarget{main_8c_a540295ec60d6a98070312ac70239b27b}\label{main_8c_a540295ec60d6a98070312ac70239b27b} 
+uint16\+\_\+t {\bfseries \+\_\+vsense}
+\item 
+\Hypertarget{main_8c_a62f07836de3a11dbb5d3346cde06f25c}\label{main_8c_a62f07836de3a11dbb5d3346cde06f25c} 
+uint16\+\_\+t {\bfseries \+\_\+vrefint}
+\item 
+\Hypertarget{main_8c_ad43833ac52df340d0bb0ea2cc57af37a}\label{main_8c_ad43833ac52df340d0bb0ea2cc57af37a} 
+uint16\+\_\+t {\bfseries \+\_\+busvmon}
+\item 
+\Hypertarget{main_8c_a2761e463660af1fd0e4d07540dffcab9}\label{main_8c_a2761e463660af1fd0e4d07540dffcab9} 
+uint16\+\_\+t {\bfseries \+\_\+busimon}
+\item 
+\Hypertarget{main_8c_a4b7d28cd649c855cebb627d20c443946}\label{main_8c_a4b7d28cd649c855cebb627d20c443946} 
+uint16\+\_\+t {\bfseries \+\_\+2v5}
+\item 
+\Hypertarget{main_8c_afb02b8d04640ae6d0d573f7dc2b657f7}\label{main_8c_afb02b8d04640ae6d0d573f7dc2b657f7} 
+uint16\+\_\+t {\bfseries \+\_\+3v3}
+\item 
+\Hypertarget{main_8c_ac619894121a4c7eda3163860b15c6120}\label{main_8c_ac619894121a4c7eda3163860b15c6120} 
+uint16\+\_\+t {\bfseries \+\_\+5v}
+\item 
+\Hypertarget{main_8c_a293a0b978399610558c5d78bd4339820}\label{main_8c_a293a0b978399610558c5d78bd4339820} 
+uint16\+\_\+t {\bfseries \+\_\+n3v3}
+\item 
+\Hypertarget{main_8c_afa0595132960690b585aa16170128652}\label{main_8c_afa0595132960690b585aa16170128652} 
+uint16\+\_\+t {\bfseries \+\_\+n5v}
+\item 
+\Hypertarget{main_8c_a8e039f1179357291fc5e467876e3da43}\label{main_8c_a8e039f1179357291fc5e467876e3da43} 
+uint16\+\_\+t {\bfseries \+\_\+15v}
+\item 
+\Hypertarget{main_8c_a0dba32af26991f117c78cca0e823585d}\label{main_8c_a0dba32af26991f117c78cca0e823585d} 
+uint16\+\_\+t {\bfseries \+\_\+5vref}
+\item 
+\Hypertarget{main_8c_a72f45b02b052fc38f0043b0cbd2e06b4}\label{main_8c_a72f45b02b052fc38f0043b0cbd2e06b4} 
+uint16\+\_\+t {\bfseries \+\_\+n200v}
+\item 
+\Hypertarget{main_8c_a500077407b05450554d5276f2fce676e}\label{main_8c_a500077407b05450554d5276f2fce676e} 
+uint16\+\_\+t {\bfseries \+\_\+n800v}
+\item 
+\Hypertarget{main_8c_acb1a3070e029a14bb0c41f745b32bd3f}\label{main_8c_acb1a3070e029a14bb0c41f745b32bd3f} 
+uint16\+\_\+t {\bfseries \+\_\+tmp1}
+\item 
+\Hypertarget{main_8c_a6a1cef5f74698e4131fd59aa93db4fc1}\label{main_8c_a6a1cef5f74698e4131fd59aa93db4fc1} 
+volatile uint32\+\_\+t {\bfseries uptime\+\_\+millis} = 0
+\item 
+\Hypertarget{main_8c_ac3f484e81c06c0019fe76aff2bb64009}\label{main_8c_ac3f484e81c06c0019fe76aff2bb64009} 
+os\+Message\+Queue\+Id\+\_\+t {\bfseries mid\+\_\+\+Msg\+Queue}
+\item 
+\Hypertarget{main_8c_a17d9d3a5d4598f9b5cea9d14e658eec7}\label{main_8c_a17d9d3a5d4598f9b5cea9d14e658eec7} 
+\mbox{\hyperlink{structpacket__t}{packet\+\_\+t}} {\bfseries msg}
+\item 
+\Hypertarget{main_8c_a7df51f480bed9ab2a9cb4b4fc971ef14}\label{main_8c_a7df51f480bed9ab2a9cb4b4fc971ef14} 
+os\+Status\+\_\+t {\bfseries status}
+\item 
+\Hypertarget{main_8c_a21d3fd7f2476736a3d5f1c29fcf01a66}\label{main_8c_a21d3fd7f2476736a3d5f1c29fcf01a66} 
+volatile int {\bfseries tx\+\_\+flag} = 1
+\item 
+\Hypertarget{main_8c_a3bf75db9cb8a389ddc42149081c78de8}\label{main_8c_a3bf75db9cb8a389ddc42149081c78de8} 
+volatile int {\bfseries TEMPERATURE\+\_\+\+COUNTER} = 1000
+\item 
+\Hypertarget{main_8c_adc9e4a67aedf3eefcd08a618aa19f390}\label{main_8c_adc9e4a67aedf3eefcd08a618aa19f390} 
+uint16\+\_\+t {\bfseries pmt\+\_\+seq} = 0
+\item 
+\Hypertarget{main_8c_a2dcfbada6d69cbbbae67d0cce510be59}\label{main_8c_a2dcfbada6d69cbbbae67d0cce510be59} 
+uint16\+\_\+t {\bfseries erpa\+\_\+seq} = 0
+\item 
+\Hypertarget{main_8c_ab32ddd0dc4772ea581a17ef771c76f3a}\label{main_8c_ab32ddd0dc4772ea581a17ef771c76f3a} 
+uint16\+\_\+t {\bfseries hk\+\_\+seq} = 0
+\item 
+\Hypertarget{main_8c_a8c5ee3a78034964998c4bb8cfb2e3913}\label{main_8c_a8c5ee3a78034964998c4bb8cfb2e3913} 
+uint8\+\_\+t {\bfseries PMT\+\_\+\+ON} = 0
+\item 
+\Hypertarget{main_8c_aaa0d819566d6f27d1913cf10b5825b1e}\label{main_8c_aaa0d819566d6f27d1913cf10b5825b1e} 
+uint8\+\_\+t {\bfseries ERPA\+\_\+\+ON} = 0
+\item 
+\Hypertarget{main_8c_a2349a6f01d1742bed06857cd49abada5}\label{main_8c_a2349a6f01d1742bed06857cd49abada5} 
+uint8\+\_\+t {\bfseries HK\+\_\+\+ON} = 0
+\item 
+\Hypertarget{main_8c_a6bfc42d998299c82886ece358d66dbda}\label{main_8c_a6bfc42d998299c82886ece358d66dbda} 
+volatile uint32\+\_\+t {\bfseries cadence} = 3125
+\item 
+\Hypertarget{main_8c_a4a2eb71e89c989655301c2f2070e29b3}\label{main_8c_a4a2eb71e89c989655301c2f2070e29b3} 
+uint8\+\_\+t {\bfseries step} = 3
+\item 
+\Hypertarget{main_8c_a1bfb5e57ccbbf5524e87c8f316b919e4}\label{main_8c_a1bfb5e57ccbbf5524e87c8f316b919e4} 
+os\+Event\+Flags\+Id\+\_\+t {\bfseries event\+\_\+flags}
+\item 
+\Hypertarget{main_8c_aa6b1cbbc5d6619a4f1fb91264d2eb277}\label{main_8c_aa6b1cbbc5d6619a4f1fb91264d2eb277} 
+unsigned char {\bfseries UART\+\_\+\+RX\+\_\+\+BUFFER} \mbox{[}UART\+\_\+\+RX\+\_\+\+BUFFER\+\_\+\+SIZE\mbox{]}
+\item 
+uint32\+\_\+t \mbox{\hyperlink{main_8c_ad75232664858394289f7df39a1895028}{DAC\+\_\+\+OUT}} \mbox{[}32\mbox{]}
+\item 
+const \mbox{\hyperlink{structgpio__pins}{gpio\+\_\+pins}} \mbox{\hyperlink{main_8c_a9090902cad57b8863e80ab36ee3ddb5e}{gpios}} \mbox{[}$\,$\mbox{]}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\+: Main program body 
+
+\begin{DoxyAuthor}{Author}
+\+: Jared Morrison 
+\end{DoxyAuthor}
+\begin{DoxyVersion}{Version}
+\+: 2.\+0.\+0-\/alpha 
+\end{DoxyVersion}
+\begin{DoxyAttention}{Attention}
+
+\end{DoxyAttention}
+Copyright (c) 2024 STMicroelectronics. All rights reserved.
+
+This software is licensed under terms that can be found in the LICENSE file in the root directory of this software component. If no LICENSE file comes with this software, it is provided AS-\/\+IS. 
+
+\doxysubsection{Function Documentation}
+\Hypertarget{main_8c_a41922de9acb8bdc558a1c769d438d32d}\index{main.c@{main.c}!calibrateRTC@{calibrateRTC}}
+\index{calibrateRTC@{calibrateRTC}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{calibrateRTC()}{calibrateRTC()}}
+{\footnotesize\ttfamily \label{main_8c_a41922de9acb8bdc558a1c769d438d32d} 
+void calibrate\+RTC (\begin{DoxyParamCaption}\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{buffer}{}\end{DoxyParamCaption})}
+
+
+
+Calibrates the RTC with the provided date and time values. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em buffer} & Pointer to an array containing date and time values.\\
+\hline
+\end{DoxyParams}
+This function extracts date and time information from the provided buffer and sets the RTC accordingly. It handles years, months, days, hours, minutes, seconds, and milliseconds. \Hypertarget{main_8c_a4897051c3779edc23e6357339a343563}\index{main.c@{main.c}!create\_packet@{create\_packet}}
+\index{create\_packet@{create\_packet}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{create\_packet()}{create\_packet()}}
+{\footnotesize\ttfamily \label{main_8c_a4897051c3779edc23e6357339a343563} 
+\mbox{\hyperlink{structpacket__t}{packet\+\_\+t}} create\+\_\+packet (\begin{DoxyParamCaption}\item[{const uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{data}{, }\item[{uint16\+\_\+t}]{size}{}\end{DoxyParamCaption})}
+
+
+
+Creates a packet with given data and size. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em data} & Pointer to data to be copied into the packet. \\
+\hline
+{\em size} & Size of the data. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Created packet. 
+\end{DoxyReturn}
+\Hypertarget{main_8c_af754f8b736268fb63680f2cd437c2ef5}\index{main.c@{main.c}!enter\_flight\_mode@{enter\_flight\_mode}}
+\index{enter\_flight\_mode@{enter\_flight\_mode}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{enter\_flight\_mode()}{enter\_flight\_mode()}}
+{\footnotesize\ttfamily \label{main_8c_af754f8b736268fb63680f2cd437c2ef5} 
+void enter\+\_\+flight\+\_\+mode (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Enters flight mode by enabling various components and starting timers. 
+
+This function resumes the GPIO task, enables voltage rails, starts the DAC in DMA mode, and starts various timers for packet transmission. It also sets the relevant status flags. \Hypertarget{main_8c_a0322b72ab110431a0425c2911346bb6a}\index{main.c@{main.c}!enter\_stop@{enter\_stop}}
+\index{enter\_stop@{enter\_stop}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{enter\_stop()}{enter\_stop()}}
+{\footnotesize\ttfamily \label{main_8c_a0322b72ab110431a0425c2911346bb6a} 
+void enter\+\_\+stop (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Enters STOP mode and configures the system upon wakeup. 
+
+This function sends an acknowledgment message, suspends all tasks, and enters STOP mode. Upon waking up, it resumes all tasks and reconfigures the system clock. \Hypertarget{main_8c_a7594dc6f42ed797c97c88068562de9c4}\index{main.c@{main.c}!ERPA\_init@{ERPA\_init}}
+\index{ERPA\_init@{ERPA\_init}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{ERPA\_init()}{ERPA\_init()}}
+{\footnotesize\ttfamily \label{main_8c_a7594dc6f42ed797c97c88068562de9c4} 
+void ERPA\+\_\+init (\begin{DoxyParamCaption}\item[{void \texorpdfstring{$\ast$}{*}}]{argument}{}\end{DoxyParamCaption})}
+
+
+
+Function implementing the ERPA\+\_\+task thread. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em argument} & Not used \\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyRetVals}{Return values}
+{\em None} & \\
+\hline
+\end{DoxyRetVals}
+\Hypertarget{main_8c_a1730ffe1e560465665eb47d9264826f9}\index{main.c@{main.c}!Error\_Handler@{Error\_Handler}}
+\index{Error\_Handler@{Error\_Handler}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{Error\_Handler()}{Error\_Handler()}}
+{\footnotesize\ttfamily \label{main_8c_a1730ffe1e560465665eb47d9264826f9} 
+void Error\+\_\+\+Handler (\begin{DoxyParamCaption}\item[{void}]{}{}\end{DoxyParamCaption})}
+
+
+
+This function is executed in case of error occurrence. 
+
+
+\begin{DoxyRetVals}{Return values}
+{\em None} & \\
+\hline
+\end{DoxyRetVals}
+\Hypertarget{main_8c_ab793b90e7e2a47adc24bf8971f791f91}\index{main.c@{main.c}!error\_protocol@{error\_protocol}}
+\index{error\_protocol@{error\_protocol}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{error\_protocol()}{error\_protocol()}}
+{\footnotesize\ttfamily \label{main_8c_ab793b90e7e2a47adc24bf8971f791f91} 
+void error\+\_\+protocol (\begin{DoxyParamCaption}\item[{ERROR\+\_\+\+TAGS}]{tag}{}\end{DoxyParamCaption})}
+
+
+
+Handles error reporting by creating and sending an error packet. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em tag} & An identifier for the type of error.\\
+\hline
+\end{DoxyParams}
+This function samples the housekeeping data, creates an error packet with the provided error tag, and places it in the message queue. It also includes synchronization bytes in the packet. The function currently includes a TODO for adding shutdown procedures. \Hypertarget{main_8c_ac49b15c4f81cb02ec427080bf24debac}\index{main.c@{main.c}!FLAG\_init@{FLAG\_init}}
+\index{FLAG\_init@{FLAG\_init}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{FLAG\_init()}{FLAG\_init()}}
+{\footnotesize\ttfamily \label{main_8c_ac49b15c4f81cb02ec427080bf24debac} 
+void FLAG\+\_\+init (\begin{DoxyParamCaption}\item[{void \texorpdfstring{$\ast$}{*}}]{argument}{}\end{DoxyParamCaption})}
+
+
+
+Function implementing the FLAG\+\_\+task thread. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em argument} & Not used \\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyRetVals}{Return values}
+{\em None} & \\
+\hline
+\end{DoxyRetVals}
+\Hypertarget{main_8c_acb79fa650eed60393320c223213b1e8e}\index{main.c@{main.c}!flush\_message\_queue@{flush\_message\_queue}}
+\index{flush\_message\_queue@{flush\_message\_queue}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{flush\_message\_queue()}{flush\_message\_queue()}}
+{\footnotesize\ttfamily \label{main_8c_acb79fa650eed60393320c223213b1e8e} 
+void flush\+\_\+message\+\_\+queue (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Flushes the message queue and sends accumulated messages via UART. 
+
+This function retrieves messages from the message queue and accumulates them in a buffer. When the buffer is full or the queue is empty, it sends the buffer contents via UART using DMA. It waits for the transmission to complete before returning. \Hypertarget{main_8c_ad6563de0a104b1b0a6af02e5793cf77e}\index{main.c@{main.c}!get\_current\_step@{get\_current\_step}}
+\index{get\_current\_step@{get\_current\_step}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{get\_current\_step()}{get\_current\_step()}}
+{\footnotesize\ttfamily \label{main_8c_ad6563de0a104b1b0a6af02e5793cf77e} 
+uint8\+\_\+t get\+\_\+current\+\_\+step (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Gets the current step based on the DAC value. 
+
+\begin{DoxyReturn}{Returns}
+uint8\+\_\+t The current step number or -\/1 if the DAC value is invalid.
+\end{DoxyReturn}
+This function reads the current value from the DAC and returns the corresponding step based on predefined DAC values. \Hypertarget{main_8c_ae0ddbac79bae3c5f0508df7d50196177}\index{main.c@{main.c}!get\_uptime@{get\_uptime}}
+\index{get\_uptime@{get\_uptime}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{get\_uptime()}{get\_uptime()}}
+{\footnotesize\ttfamily \label{main_8c_ae0ddbac79bae3c5f0508df7d50196177} 
+void get\+\_\+uptime (\begin{DoxyParamCaption}\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{buffer}{}\end{DoxyParamCaption})}
+
+
+
+Retrieves the system uptime in milliseconds and stores it in the buffer. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em buffer} & Pointer to an array where the uptime will be stored as 4 bytes.\\
+\hline
+\end{DoxyParams}
+This function calculates the system uptime based on the {\ttfamily uptime\+\_\+millis} variable and the current value of the Sys\+Tick timer. It handles potential rollovers by checking and correcting the values before storing the uptime in the provided buffer. \Hypertarget{main_8c_a12560d892fbd7d536af5fc897d5fedb6}\index{main.c@{main.c}!getTimestamp@{getTimestamp}}
+\index{getTimestamp@{getTimestamp}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{getTimestamp()}{getTimestamp()}}
+{\footnotesize\ttfamily \label{main_8c_a12560d892fbd7d536af5fc897d5fedb6} 
+void get\+Timestamp (\begin{DoxyParamCaption}\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{buffer}{}\end{DoxyParamCaption})}
+
+
+
+Gets the current timestamp and stores it in the provided buffer. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em buffer} & Pointer to the buffer where the timestamp will be stored. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{main_8c_ae4f97f53dbd1966acc831e0e4186f613}\index{main.c@{main.c}!GPIO\_off\_init@{GPIO\_off\_init}}
+\index{GPIO\_off\_init@{GPIO\_off\_init}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{GPIO\_off\_init()}{GPIO\_off\_init()}}
+{\footnotesize\ttfamily \label{main_8c_ae4f97f53dbd1966acc831e0e4186f613} 
+void GPIO\+\_\+off\+\_\+init (\begin{DoxyParamCaption}\item[{void \texorpdfstring{$\ast$}{*}}]{argument}{}\end{DoxyParamCaption})}
+
+
+
+Function implementing the GPIO\+\_\+off\+\_\+task thread. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em argument} & Not used \\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyRetVals}{Return values}
+{\em None} & \\
+\hline
+\end{DoxyRetVals}
+\Hypertarget{main_8c_a4ce5c41570c63e07daba95bf5ef7797e}\index{main.c@{main.c}!GPIO\_on\_init@{GPIO\_on\_init}}
+\index{GPIO\_on\_init@{GPIO\_on\_init}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{GPIO\_on\_init()}{GPIO\_on\_init()}}
+{\footnotesize\ttfamily \label{main_8c_a4ce5c41570c63e07daba95bf5ef7797e} 
+void GPIO\+\_\+on\+\_\+init (\begin{DoxyParamCaption}\item[{void \texorpdfstring{$\ast$}{*}}]{argument}{}\end{DoxyParamCaption})}
+
+
+
+Function implementing the GPIO\+\_\+on\+\_\+task thread. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em argument} & Not used \\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyRetVals}{Return values}
+{\em None} & \\
+\hline
+\end{DoxyRetVals}
+\Hypertarget{main_8c_a1fc39499fe9db8b7fb88005e9f107a36}\index{main.c@{main.c}!HAL\_TIM\_OC\_DelayElapsedCallback@{HAL\_TIM\_OC\_DelayElapsedCallback}}
+\index{HAL\_TIM\_OC\_DelayElapsedCallback@{HAL\_TIM\_OC\_DelayElapsedCallback}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{HAL\_TIM\_OC\_DelayElapsedCallback()}{HAL\_TIM\_OC\_DelayElapsedCallback()}}
+{\footnotesize\ttfamily \label{main_8c_a1fc39499fe9db8b7fb88005e9f107a36} 
+void HAL\+\_\+\+TIM\+\_\+\+OC\+\_\+\+Delay\+Elapsed\+Callback (\begin{DoxyParamCaption}\item[{TIM\+\_\+\+Handle\+Type\+Def \texorpdfstring{$\ast$}{*}}]{htim}{}\end{DoxyParamCaption})}
+
+
+
+Handles the callback for timer delay elapsed events. 
+
+This function is called when a timer\textquotesingle{}s delay has elapsed and performs specific actions based on the timer instance.
+
+
+\begin{DoxyParams}{Parameters}
+{\em htim} & Pointer to the timer handle structure. Supported timer instances are htim1, htim2, and htim3. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{main_8c_a8a3b0ad512a6e6c6157440b68d395eac}\index{main.c@{main.c}!HAL\_TIM\_PeriodElapsedCallback@{HAL\_TIM\_PeriodElapsedCallback}}
+\index{HAL\_TIM\_PeriodElapsedCallback@{HAL\_TIM\_PeriodElapsedCallback}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{HAL\_TIM\_PeriodElapsedCallback()}{HAL\_TIM\_PeriodElapsedCallback()}}
+{\footnotesize\ttfamily \label{main_8c_a8a3b0ad512a6e6c6157440b68d395eac} 
+void HAL\+\_\+\+TIM\+\_\+\+Period\+Elapsed\+Callback (\begin{DoxyParamCaption}\item[{TIM\+\_\+\+Handle\+Type\+Def \texorpdfstring{$\ast$}{*}}]{htim}{}\end{DoxyParamCaption})}
+
+
+
+Period elapsed callback in non blocking mode. 
+
+\begin{DoxyNote}{Note}
+This function is called when TIM6 interrupt took place, inside HAL\+\_\+\+TIM\+\_\+\+IRQHandler(). It makes a direct call to HAL\+\_\+\+Inc\+Tick() to increment a global variable "{}uw\+Tick"{} used as application time base. 
+\end{DoxyNote}
+
+\begin{DoxyParams}{Parameters}
+{\em htim} & \+: TIM handle \\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyRetVals}{Return values}
+{\em None} & \\
+\hline
+\end{DoxyRetVals}
+\Hypertarget{main_8c_ae494a9643f29b87d6d81e5264e60e57b}\index{main.c@{main.c}!HAL\_UART\_RxCpltCallback@{HAL\_UART\_RxCpltCallback}}
+\index{HAL\_UART\_RxCpltCallback@{HAL\_UART\_RxCpltCallback}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{HAL\_UART\_RxCpltCallback()}{HAL\_UART\_RxCpltCallback()}}
+{\footnotesize\ttfamily \label{main_8c_ae494a9643f29b87d6d81e5264e60e57b} 
+void HAL\+\_\+\+UART\+\_\+\+Rx\+Cplt\+Callback (\begin{DoxyParamCaption}\item[{UART\+\_\+\+Handle\+Type\+Def \texorpdfstring{$\ast$}{*}}]{huart}{}\end{DoxyParamCaption})}
+
+
+
+UART receive complete callback. 
+
+This function is called when a UART receive operation is complete. It handles various commands received via UART and performs corresponding actions, such as toggling GPIO pins, starting or stopping timers, and other operations.
+
+
+\begin{DoxyParams}{Parameters}
+{\em huart} & Pointer to a UART\+\_\+\+Handle\+Type\+Def structure that contains the configuration information for the specified UART module. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{main_8c_abcdf9b59049eccbc87d54042f9235b1a}\index{main.c@{main.c}!HAL\_UART\_TxCpltCallback@{HAL\_UART\_TxCpltCallback}}
+\index{HAL\_UART\_TxCpltCallback@{HAL\_UART\_TxCpltCallback}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{HAL\_UART\_TxCpltCallback()}{HAL\_UART\_TxCpltCallback()}}
+{\footnotesize\ttfamily \label{main_8c_abcdf9b59049eccbc87d54042f9235b1a} 
+void HAL\+\_\+\+UART\+\_\+\+Tx\+Cplt\+Callback (\begin{DoxyParamCaption}\item[{UART\+\_\+\+Handle\+Type\+Def \texorpdfstring{$\ast$}{*}}]{huart}{}\end{DoxyParamCaption})}
+
+
+
+UART transmit complete callback. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em huart} & UART handle. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{main_8c_a8d36ce2d327909513102b49dcde4e3c3}\index{main.c@{main.c}!HK\_init@{HK\_init}}
+\index{HK\_init@{HK\_init}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{HK\_init()}{HK\_init()}}
+{\footnotesize\ttfamily \label{main_8c_a8d36ce2d327909513102b49dcde4e3c3} 
+void HK\+\_\+init (\begin{DoxyParamCaption}\item[{void \texorpdfstring{$\ast$}{*}}]{argument}{}\end{DoxyParamCaption})}
+
+
+
+Function implementing the HK\+\_\+task thread. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em argument} & Not used \\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyRetVals}{Return values}
+{\em None} & \\
+\hline
+\end{DoxyRetVals}
+\Hypertarget{main_8c_ad8057d46558743ecf6304877188ad125}\index{main.c@{main.c}!in\_range@{in\_range}}
+\index{in\_range@{in\_range}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{in\_range()}{in\_range()}}
+{\footnotesize\ttfamily \label{main_8c_ad8057d46558743ecf6304877188ad125} 
+int in\+\_\+range (\begin{DoxyParamCaption}\item[{uint16\+\_\+t}]{raw}{, }\item[{int}]{min}{, }\item[{int}]{max}{}\end{DoxyParamCaption})}
+
+
+
+Checks if a value is within a specified range. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em raw} & The value to check. \\
+\hline
+{\em min} & The minimum value of the range (inclusive). \\
+\hline
+{\em max} & The maximum value of the range (inclusive).\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+int Returns 1 if the value is within the range, otherwise 0. 
+\end{DoxyReturn}
+\Hypertarget{main_8c_a840291bc02cba5474a4cb46a9b9566fe}\index{main.c@{main.c}!main@{main}}
+\index{main@{main}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{main()}{main()}}
+{\footnotesize\ttfamily \label{main_8c_a840291bc02cba5474a4cb46a9b9566fe} 
+int main (\begin{DoxyParamCaption}\item[{void}]{}{}\end{DoxyParamCaption})}
+
+
+
+The application entry point. 
+
+
+\begin{DoxyRetVals}{Return values}
+{\em int} & \\
+\hline
+\end{DoxyRetVals}
+\Hypertarget{main_8c_a336c5acb34a801b2984e602b97ed7b73}\index{main.c@{main.c}!PeriphCommonClock\_Config@{PeriphCommonClock\_Config}}
+\index{PeriphCommonClock\_Config@{PeriphCommonClock\_Config}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{PeriphCommonClock\_Config()}{PeriphCommonClock\_Config()}}
+{\footnotesize\ttfamily \label{main_8c_a336c5acb34a801b2984e602b97ed7b73} 
+void Periph\+Common\+Clock\+\_\+\+Config (\begin{DoxyParamCaption}\item[{void}]{}{}\end{DoxyParamCaption})}
+
+
+
+Peripherals Common Clock Configuration. 
+
+
+\begin{DoxyRetVals}{Return values}
+{\em None} & \\
+\hline
+\end{DoxyRetVals}
+Initializes the peripherals clock\Hypertarget{main_8c_a337ce00173018ad9f84f8596a6ac9c6e}\index{main.c@{main.c}!PMT\_init@{PMT\_init}}
+\index{PMT\_init@{PMT\_init}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{PMT\_init()}{PMT\_init()}}
+{\footnotesize\ttfamily \label{main_8c_a337ce00173018ad9f84f8596a6ac9c6e} 
+void PMT\+\_\+init (\begin{DoxyParamCaption}\item[{void \texorpdfstring{$\ast$}{*}}]{argument}{}\end{DoxyParamCaption})}
+
+
+
+Function implementing the PMT\+\_\+task thread. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em argument} & Not used \\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyRetVals}{Return values}
+{\em None} & \\
+\hline
+\end{DoxyRetVals}
+\Hypertarget{main_8c_a1239679f86b97e0d2b5af783d6e25003}\index{main.c@{main.c}!poll\_i2c\_sensor@{poll\_i2c\_sensor}}
+\index{poll\_i2c\_sensor@{poll\_i2c\_sensor}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{poll\_i2c\_sensor()}{poll\_i2c\_sensor()}}
+{\footnotesize\ttfamily \label{main_8c_a1239679f86b97e0d2b5af783d6e25003} 
+int16\+\_\+t poll\+\_\+i2c\+\_\+sensor (\begin{DoxyParamCaption}\item[{const uint8\+\_\+t}]{TEMP\+\_\+\+ADDR}{}\end{DoxyParamCaption})}
+
+
+
+Polls an I2C temperature sensor. 
+
+This function transmits a read request to the specified I2C temperature sensor and reads the temperature value.
+
+
+\begin{DoxyParams}{Parameters}
+{\em TEMP\+\_\+\+ADDR} & The I2C address of the temperature sensor. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The temperature reading from the sensor, or an error code. 
+\end{DoxyReturn}
+\Hypertarget{main_8c_a4a354af602f3ca5b466117a9471d563e}\index{main.c@{main.c}!receive\_erpa\_adc@{receive\_erpa\_adc}}
+\index{receive\_erpa\_adc@{receive\_erpa\_adc}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{receive\_erpa\_adc()}{receive\_erpa\_adc()}}
+{\footnotesize\ttfamily \label{main_8c_a4a354af602f3ca5b466117a9471d563e} 
+void receive\+\_\+erpa\+\_\+adc (\begin{DoxyParamCaption}\item[{uint16\+\_\+t \texorpdfstring{$\ast$}{*}}]{buffer}{}\end{DoxyParamCaption})}
+
+
+
+Receives ERPA ADC data and stores it in the provided buffer. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em buffer} & Pointer to an array where ADC data will be stored.\\
+\hline
+\end{DoxyParams}
+This function reads the raw data from the ERPA ADC and writes it to the first element of the provided buffer. \Hypertarget{main_8c_a68321bdcb014b110acc0a380fd0b77b0}\index{main.c@{main.c}!receive\_erpa\_spi@{receive\_erpa\_spi}}
+\index{receive\_erpa\_spi@{receive\_erpa\_spi}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{receive\_erpa\_spi()}{receive\_erpa\_spi()}}
+{\footnotesize\ttfamily \label{main_8c_a68321bdcb014b110acc0a380fd0b77b0} 
+void receive\+\_\+erpa\+\_\+spi (\begin{DoxyParamCaption}\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{buffer}{}\end{DoxyParamCaption})}
+
+
+
+Receives data from an SPI device. 
+
+This function receives data from the specified SPI device and stores the result in the provided buffer.
+
+
+\begin{DoxyParams}{Parameters}
+{\em spi\+\_\+handle} & The handle to the SPI device. \\
+\hline
+{\em buffer} & The buffer to store the received data. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{main_8c_a159fbfaca21e3caf9d009f1219bc5801}\index{main.c@{main.c}!receive\_hk\_adc1@{receive\_hk\_adc1}}
+\index{receive\_hk\_adc1@{receive\_hk\_adc1}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{receive\_hk\_adc1()}{receive\_hk\_adc1()}}
+{\footnotesize\ttfamily \label{main_8c_a159fbfaca21e3caf9d009f1219bc5801} 
+void receive\+\_\+hk\+\_\+adc1 (\begin{DoxyParamCaption}\item[{uint16\+\_\+t \texorpdfstring{$\ast$}{*}}]{buffer}{}\end{DoxyParamCaption})}
+
+
+
+Receives housekeeping ADC1 data and stores it in the provided buffer. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em buffer} & Pointer to an array where ADC data will be stored.\\
+\hline
+\end{DoxyParams}
+This function reads the raw housekeeping ADC1 data and writes it to the corresponding elements of the provided buffer. \Hypertarget{main_8c_a45cf407364424a56b9e471156f3f8954}\index{main.c@{main.c}!receive\_hk\_adc3@{receive\_hk\_adc3}}
+\index{receive\_hk\_adc3@{receive\_hk\_adc3}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{receive\_hk\_adc3()}{receive\_hk\_adc3()}}
+{\footnotesize\ttfamily \label{main_8c_a45cf407364424a56b9e471156f3f8954} 
+void receive\+\_\+hk\+\_\+adc3 (\begin{DoxyParamCaption}\item[{uint16\+\_\+t \texorpdfstring{$\ast$}{*}}]{buffer}{}\end{DoxyParamCaption})}
+
+
+
+Receives housekeeping ADC3 sensor data. 
+
+This function retrieves specific ADC3 sensor data and stores the results in the provided buffer.
+
+
+\begin{DoxyParams}{Parameters}
+{\em buffer} & The buffer to store the received ADC3 sensor data. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{main_8c_a695e1f0be41874e2a88a52a75356be32}\index{main.c@{main.c}!receive\_hk\_i2c@{receive\_hk\_i2c}}
+\index{receive\_hk\_i2c@{receive\_hk\_i2c}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{receive\_hk\_i2c()}{receive\_hk\_i2c()}}
+{\footnotesize\ttfamily \label{main_8c_a695e1f0be41874e2a88a52a75356be32} 
+void receive\+\_\+hk\+\_\+i2c (\begin{DoxyParamCaption}\item[{int16\+\_\+t \texorpdfstring{$\ast$}{*}}]{buffer}{}\end{DoxyParamCaption})}
+
+
+
+Receives housekeeping I2C sensor data. 
+
+This function polls multiple I2C sensors and stores the results in the provided buffer.
+
+
+\begin{DoxyParams}{Parameters}
+{\em buffer} & The buffer to store the received I2C sensor data. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{main_8c_af42ef2a2762f9286b78f885e996d81a6}\index{main.c@{main.c}!receive\_pmt\_spi@{receive\_pmt\_spi}}
+\index{receive\_pmt\_spi@{receive\_pmt\_spi}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{receive\_pmt\_spi()}{receive\_pmt\_spi()}}
+{\footnotesize\ttfamily \label{main_8c_af42ef2a2762f9286b78f885e996d81a6} 
+void receive\+\_\+pmt\+\_\+spi (\begin{DoxyParamCaption}\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{buffer}{}\end{DoxyParamCaption})}
+
+
+
+Receives data from an SPI device. 
+
+This function receives data from the specified SPI device and stores the result in the provided buffer.
+
+
+\begin{DoxyParams}{Parameters}
+{\em spi\+\_\+handle} & The handle to the SPI device. \\
+\hline
+{\em buffer} & The buffer to store the received data. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{main_8c_a8b4133989cd893523cfa2e3a24f8fb2d}\index{main.c@{main.c}!sample\_erpa@{sample\_erpa}}
+\index{sample\_erpa@{sample\_erpa}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{sample\_erpa()}{sample\_erpa()}}
+{\footnotesize\ttfamily \label{main_8c_a8b4133989cd893523cfa2e3a24f8fb2d} 
+void sample\+\_\+erpa (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Samples ERPA data and sends it as a packet. 
+
+This function waits for a specific GPIO pin state, allocates memory for the ERPA data, retrieves uptime, SPI data, and ADC readings, and constructs a data packet with synchronization bytes, sequence information, and the collected data. The packet is then placed in the message queue, and the allocated memory is freed. \Hypertarget{main_8c_ab92a1c2c3a8aedd2be56dc6e89e03630}\index{main.c@{main.c}!sample\_hk@{sample\_hk}}
+\index{sample\_hk@{sample\_hk}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{sample\_hk()}{sample\_hk()}}
+{\footnotesize\ttfamily \label{main_8c_ab92a1c2c3a8aedd2be56dc6e89e03630} 
+void sample\+\_\+hk (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Samples housekeeping data and sends it as a packet. 
+
+This function allocates memory for the housekeeping data buffer, retrieves and processes I2C readings, and updates the buffer with various system metrics, including voltage readings and temperatures. It then constructs a data packet with synchronization bytes, sequence information, and sampled data, and places the packet in the message queue. The allocated memory is subsequently freed. \Hypertarget{main_8c_ae0a4481d6887102716688f5f0b945f09}\index{main.c@{main.c}!sample\_pmt@{sample\_pmt}}
+\index{sample\_pmt@{sample\_pmt}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{sample\_pmt()}{sample\_pmt()}}
+{\footnotesize\ttfamily \label{main_8c_ae0a4481d6887102716688f5f0b945f09} 
+void sample\+\_\+pmt (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Samples PMT data and sends it as a packet. 
+
+This function waits for a specific GPIO pin state, allocates memory for PMT data, SPI data, and uptime information, and retrieves the current uptime and PMT SPI data. It then constructs a data packet including synchronization bytes, sequence information, and the retrieved data, and places the packet in the message queue. Memory allocated for the data is subsequently freed. \Hypertarget{main_8c_ac2c0f781ac38ca35f3ec5115c5f9b981}\index{main.c@{main.c}!send\_ACK@{send\_ACK}}
+\index{send\_ACK@{send\_ACK}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{send\_ACK()}{send\_ACK()}}
+{\footnotesize\ttfamily \label{main_8c_ac2c0f781ac38ca35f3ec5115c5f9b981} 
+void send\+\_\+\+ACK (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Sends an acknowledgment byte via UART. 
+
+This function sends a single acknowledgment byte (0x\+FF) using the UART interface to indicate a successful operation or state transition. \Hypertarget{main_8c_a92fe58192c69ebc45158bf31a95cc071}\index{main.c@{main.c}!send\_NACK@{send\_NACK}}
+\index{send\_NACK@{send\_NACK}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{send\_NACK()}{send\_NACK()}}
+{\footnotesize\ttfamily \label{main_8c_a92fe58192c69ebc45158bf31a95cc071} 
+void send\+\_\+\+NACK (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Sends a negative acknowledgment byte via UART. 
+
+This function sends a single negative acknowledgment byte (0x00) using the UART interface to indicate a failed operation or state transition. \Hypertarget{main_8c_ad55f80ed3cd8b6c4f247763b747016af}\index{main.c@{main.c}!sync@{sync}}
+\index{sync@{sync}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{sync()}{sync()}}
+{\footnotesize\ttfamily \label{main_8c_ad55f80ed3cd8b6c4f247763b747016af} 
+void sync (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Synchronizes the system\textquotesingle{}s RTC with the OBC/\+GUI timestamp. 
+
+This function performs the following steps to synchronize the RTC\+:
+\begin{DoxyEnumerate}
+\item Sends an acknowledgment to indicate the system is awake.
+\item Waits to receive an RTC-\/generated timestamp from the OBC/\+GUI.
+\item Calibrates the RTC with the received timestamp.
+\item Sends an acknowledgment to indicate the RTC calibration is complete. 
+\end{DoxyEnumerate}\Hypertarget{main_8c_ade84f7557ff2c4c54418ea5d849ebe4a}\index{main.c@{main.c}!system\_setup@{system\_setup}}
+\index{system\_setup@{system\_setup}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{system\_setup()}{system\_setup()}}
+{\footnotesize\ttfamily \label{main_8c_ade84f7557ff2c4c54418ea5d849ebe4a} 
+void system\+\_\+setup (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Performs system initialization and configuration. 
+
+This function starts a timer channel, calibrates and starts ADCs with DMA, and initializes UART reception. It sets up various hardware components and checks for errors during the configuration process. \Hypertarget{main_8c_a70af21c671abfcc773614a9a4f63d920}\index{main.c@{main.c}!SystemClock\_Config@{SystemClock\_Config}}
+\index{SystemClock\_Config@{SystemClock\_Config}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{SystemClock\_Config()}{SystemClock\_Config()}}
+{\footnotesize\ttfamily \label{main_8c_a70af21c671abfcc773614a9a4f63d920} 
+void System\+Clock\+\_\+\+Config (\begin{DoxyParamCaption}\item[{void}]{}{}\end{DoxyParamCaption})}
+
+
+
+System Clock Configuration. 
+
+
+\begin{DoxyRetVals}{Return values}
+{\em None} & \\
+\hline
+\end{DoxyRetVals}
+Supply configuration update enable
+
+Configure the main internal regulator output voltage
+
+Initializes the RCC Oscillators according to the specified parameters in the RCC\+\_\+\+Osc\+Init\+Type\+Def structure.
+
+Initializes the CPU, AHB and APB buses clocks\Hypertarget{main_8c_a054e78ad04c36387171d81eb4c6be89c}\index{main.c@{main.c}!UART\_TX\_init@{UART\_TX\_init}}
+\index{UART\_TX\_init@{UART\_TX\_init}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{UART\_TX\_init()}{UART\_TX\_init()}}
+{\footnotesize\ttfamily \label{main_8c_a054e78ad04c36387171d81eb4c6be89c} 
+void UART\+\_\+\+TX\+\_\+init (\begin{DoxyParamCaption}\item[{void \texorpdfstring{$\ast$}{*}}]{argument}{}\end{DoxyParamCaption})}
+
+
+
+UART transmission initialization and processing task. 
+
+This function continuously retrieves messages from the message queue, stores them in a buffer, and sends the buffer data via UART using DMA. It handles transmission completion by waiting for a flag and yields thread control periodically. The function operates in an infinite loop, processing and transmitting data as long as the task is running.
+
+
+\begin{DoxyParams}{Parameters}
+{\em argument} & Pointer to the argument passed to the thread (not used). \\
+\hline
+\end{DoxyParams}
+\Hypertarget{main_8c_ac8c01aba361e85357de8c66aceb4c544}\index{main.c@{main.c}!Voltage\_Monitor\_init@{Voltage\_Monitor\_init}}
+\index{Voltage\_Monitor\_init@{Voltage\_Monitor\_init}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{Voltage\_Monitor\_init()}{Voltage\_Monitor\_init()}}
+{\footnotesize\ttfamily \label{main_8c_ac8c01aba361e85357de8c66aceb4c544} 
+void Voltage\+\_\+\+Monitor\+\_\+init (\begin{DoxyParamCaption}\item[{void \texorpdfstring{$\ast$}{*}}]{argument}{}\end{DoxyParamCaption})}
+
+
+
+Function implementing the Voltage\+\_\+\+Monitor thread. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em argument} & Not used \\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyRetVals}{Return values}
+{\em None} & \\
+\hline
+\end{DoxyRetVals}
+
+
+\doxysubsection{Variable Documentation}
+\Hypertarget{main_8c_ad75232664858394289f7df39a1895028}\index{main.c@{main.c}!DAC\_OUT@{DAC\_OUT}}
+\index{DAC\_OUT@{DAC\_OUT}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{DAC\_OUT}{DAC\_OUT}}
+{\footnotesize\ttfamily \label{main_8c_ad75232664858394289f7df39a1895028} 
+uint32\+\_\+t DAC\+\_\+\+OUT\mbox{[}32\mbox{]}}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{=\ \{\ 0,\ 0,\ 620,\ 620,\ 1241,\ 1241,\ 1861,\ 1861,\ 2482,\ 2482,}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ 3103,\ 3103,\ 3723,\ 3723,\ 4095,\ 4095,\ 4095,\ 4095,\ 3723,\ 3723,\ 3103,\ 3103,}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ 2482,\ 2482,\ 1861,\ 1861,\ 1241,\ 1241,\ 620,\ 620,\ 0,\ 0\ \}}
+
+\end{DoxyCode}
+\Hypertarget{main_8c_ac9580a41c5ba189ea2adb7a55186e1bd}\index{main.c@{main.c}!ERPA\_task\_attributes@{ERPA\_task\_attributes}}
+\index{ERPA\_task\_attributes@{ERPA\_task\_attributes}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{ERPA\_task\_attributes}{ERPA\_task\_attributes}}
+{\footnotesize\ttfamily \label{main_8c_ac9580a41c5ba189ea2adb7a55186e1bd} 
+const os\+Thread\+Attr\+\_\+t ERPA\+\_\+task\+\_\+attributes}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{=\ \{\ .name\ =\ \textcolor{stringliteral}{"{}ERPA\_task"{}},\ .stack\_size\ =}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ 128\ *\ 4,\ .priority\ =\ (osPriority\_t)\ osPriorityNormal,\ \}}
+
+\end{DoxyCode}
+\Hypertarget{main_8c_a159f4cdd051edfd18ac064fa2326002d}\index{main.c@{main.c}!FLAG\_task\_attributes@{FLAG\_task\_attributes}}
+\index{FLAG\_task\_attributes@{FLAG\_task\_attributes}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{FLAG\_task\_attributes}{FLAG\_task\_attributes}}
+{\footnotesize\ttfamily \label{main_8c_a159f4cdd051edfd18ac064fa2326002d} 
+const os\+Thread\+Attr\+\_\+t FLAG\+\_\+task\+\_\+attributes}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{=\ \{\ .name\ =\ \textcolor{stringliteral}{"{}FLAG\_task"{}},\ .stack\_size\ =}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ 128\ *\ 4,\ .priority\ =\ (osPriority\_t)\ osPriorityLow,\ \}}
+
+\end{DoxyCode}
+\Hypertarget{main_8c_a06d6d576172b9c4b893fa65976bae0d8}\index{main.c@{main.c}!GPIO\_off\_task\_attributes@{GPIO\_off\_task\_attributes}}
+\index{GPIO\_off\_task\_attributes@{GPIO\_off\_task\_attributes}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{GPIO\_off\_task\_attributes}{GPIO\_off\_task\_attributes}}
+{\footnotesize\ttfamily \label{main_8c_a06d6d576172b9c4b893fa65976bae0d8} 
+const os\+Thread\+Attr\+\_\+t GPIO\+\_\+off\+\_\+task\+\_\+attributes}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{=\ \{\ .name\ =\ \textcolor{stringliteral}{"{}GPIO\_off\_task"{}},}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ .cb\_mem\ =\ \&GPIO\_off\_taskControlBlock,\ .cb\_size\ =}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{sizeof}(GPIO\_off\_taskControlBlock),\ .stack\_mem\ =}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \&GPIO\_off\_taskBuffer[0],\ .stack\_size\ =}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{sizeof}(GPIO\_off\_taskBuffer),\ .priority\ =}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (osPriority\_t)\ osPriorityLow,\ \}}
+
+\end{DoxyCode}
+\Hypertarget{main_8c_ac4cd438aeb58d7abc7535b3da07b1405}\index{main.c@{main.c}!GPIO\_on\_task\_attributes@{GPIO\_on\_task\_attributes}}
+\index{GPIO\_on\_task\_attributes@{GPIO\_on\_task\_attributes}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{GPIO\_on\_task\_attributes}{GPIO\_on\_task\_attributes}}
+{\footnotesize\ttfamily \label{main_8c_ac4cd438aeb58d7abc7535b3da07b1405} 
+const os\+Thread\+Attr\+\_\+t GPIO\+\_\+on\+\_\+task\+\_\+attributes}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{=\ \{\ .name\ =\ \textcolor{stringliteral}{"{}GPIO\_on\_task"{}},}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ .cb\_mem\ =\ \&GPIO\_on\_taskControlBlock,\ .cb\_size\ =}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keyword}{sizeof}(GPIO\_on\_taskControlBlock),\ .stack\_mem\ =}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \&GPIO\_on\_taskBuffer[0],}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ .stack\_size\ =\ \textcolor{keyword}{sizeof}(GPIO\_on\_taskBuffer),\ .priority\ =}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (osPriority\_t)\ osPriorityLow,\ \}}
+
+\end{DoxyCode}
+\Hypertarget{main_8c_a9090902cad57b8863e80ab36ee3ddb5e}\index{main.c@{main.c}!gpios@{gpios}}
+\index{gpios@{gpios}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{gpios}{gpios}}
+{\footnotesize\ttfamily \label{main_8c_a9090902cad57b8863e80ab36ee3ddb5e} 
+const \mbox{\hyperlink{structgpio__pins}{gpio\+\_\+pins}} gpios\mbox{[}$\,$\mbox{]}}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{=\ \{\ \{\ GPIOB,\ GPIO\_PIN\_5\ \},\ \{\ GPIOB,\ GPIO\_PIN\_6\ \},\ \{}
+\DoxyCodeLine{GPIOC,\ GPIO\_PIN\_7\ \},\ \{\ GPIOC,\ GPIO\_PIN\_13\ \},\ \{\ GPIOC,\ GPIO\_PIN\_10\ \},\ \{}
+\DoxyCodeLine{GPIOC,\ GPIO\_PIN\_8\ \},\ \{\ GPIOC,\ GPIO\_PIN\_9\ \},\ \{\ GPIOC,\ GPIO\_PIN\_6\ \},\ \{}
+\DoxyCodeLine{GPIOB,\ GPIO\_PIN\_2\ \}\ \}}
+
+\end{DoxyCode}
+\Hypertarget{main_8c_ac01d5151416e4a83683b76e5e9c09c18}\index{main.c@{main.c}!HK\_task\_attributes@{HK\_task\_attributes}}
+\index{HK\_task\_attributes@{HK\_task\_attributes}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{HK\_task\_attributes}{HK\_task\_attributes}}
+{\footnotesize\ttfamily \label{main_8c_ac01d5151416e4a83683b76e5e9c09c18} 
+const os\+Thread\+Attr\+\_\+t HK\+\_\+task\+\_\+attributes}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{=\ \{\ .name\ =\ \textcolor{stringliteral}{"{}HK\_task"{}},\ .stack\_size\ =\ 128}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ *\ 4,\ .priority\ =\ (osPriority\_t)\ osPriorityNormal,\ \}}
+
+\end{DoxyCode}
+\Hypertarget{main_8c_a11620c10ef7eb1257cfaab7045d0004d}\index{main.c@{main.c}!PMT\_task\_attributes@{PMT\_task\_attributes}}
+\index{PMT\_task\_attributes@{PMT\_task\_attributes}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{PMT\_task\_attributes}{PMT\_task\_attributes}}
+{\footnotesize\ttfamily \label{main_8c_a11620c10ef7eb1257cfaab7045d0004d} 
+const os\+Thread\+Attr\+\_\+t PMT\+\_\+task\+\_\+attributes}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{=\ \{\ .name\ =\ \textcolor{stringliteral}{"{}PMT\_task"{}},\ .stack\_size\ =}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ 128\ *\ 4,\ .priority\ =\ (osPriority\_t)\ osPriorityNormal,\ \}}
+
+\end{DoxyCode}
+\Hypertarget{main_8c_a884257c462efcba3cbce2e89ebfa5543}\index{main.c@{main.c}!UART\_TX\_task\_attributes@{UART\_TX\_task\_attributes}}
+\index{UART\_TX\_task\_attributes@{UART\_TX\_task\_attributes}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{UART\_TX\_task\_attributes}{UART\_TX\_task\_attributes}}
+{\footnotesize\ttfamily \label{main_8c_a884257c462efcba3cbce2e89ebfa5543} 
+const os\+Thread\+Attr\+\_\+t UART\+\_\+\+TX\+\_\+task\+\_\+attributes}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{=\ \{\ .name\ =\ \textcolor{stringliteral}{"{}UART\_TX\_task"{}},}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ .stack\_size\ =\ 128\ *\ 4,\ .priority\ =\ (osPriority\_t)\ osPriorityLow,\ \}}
+
+\end{DoxyCode}
+\Hypertarget{main_8c_a96a3780cd543aa30b92a92d899fab568}\index{main.c@{main.c}!Voltage\_Monitor\_attributes@{Voltage\_Monitor\_attributes}}
+\index{Voltage\_Monitor\_attributes@{Voltage\_Monitor\_attributes}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{Voltage\_Monitor\_attributes}{Voltage\_Monitor\_attributes}}
+{\footnotesize\ttfamily \label{main_8c_a96a3780cd543aa30b92a92d899fab568} 
+const os\+Thread\+Attr\+\_\+t Voltage\+\_\+\+Monitor\+\_\+attributes}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{=\ \{\ .name\ =\ \textcolor{stringliteral}{"{}Voltage\_Monitor"{}},}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ .stack\_size\ =\ 128\ *\ 4,\ .priority\ =\ (osPriority\_t)\ osPriorityHigh,\ \}}
+
+\end{DoxyCode}
