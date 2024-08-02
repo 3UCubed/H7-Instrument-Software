@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include "stm32h7xx_hal.h"
 
 /* USER CODE END Includes */
 
@@ -319,7 +320,7 @@ void sync();
 void enter_stop();
 uint8_t get_current_step();
 void flush_message_queue();
-void RTC_SetTime(RTC_HandleTypeDef *hrtc, RTC_TimeTypeDef *sTime,
+HAL_StatusTypeDef RTC_SetTime(RTC_HandleTypeDef *hrtc, RTC_TimeTypeDef *sTime,
 		uint32_t Format);
 /* USER CODE END PFP */
 
@@ -1870,7 +1871,7 @@ void enter_stop() {
 	xTaskResumeAll();
 }
 
-void RTC_SetTime(RTC_HandleTypeDef *hrtc, RTC_TimeTypeDef *sTime,
+HAL_StatusTypeDef RTC_SetTime(RTC_HandleTypeDef *hrtc, RTC_TimeTypeDef *sTime,
 		uint32_t Format) {
 	uint32_t tmpreg;
 	HAL_StatusTypeDef status;
@@ -1914,6 +1915,7 @@ void RTC_SetTime(RTC_HandleTypeDef *hrtc, RTC_TimeTypeDef *sTime,
 
 	/* Process Unlocked */
 	__HAL_UNLOCK(hrtc);
+	return status;
 
 }
 /**
