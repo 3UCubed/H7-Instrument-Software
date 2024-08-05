@@ -46,18 +46,34 @@ typedef struct {
 } gpio_pins;
 
 typedef enum {
-	RAIL_BUSVMON,	// 0
-	RAIL_BUSIMON,	// 1
-	RAIL_2v5,		// 2
-	RAIL_3v3,		// 3
-	RAIL_5v,		// 4
-	RAIL_n3v3,		// 5
-	RAIL_n5v,		// 6
-	RAIL_15v,		// 7
-	RAIL_5vref,		// 8
-	RAIL_n200v,		// 9
-	RAIL_n800v,		// 10
-} ERROR_TAGS;
+	RAIL_vsense,	// 0
+	RAIL_vrefint,	// 1
+	RAIL_TEMP1,		// 2
+	RAIL_TEMP2,		// 3
+	RAIL_TEMP3,		// 4
+	RAIL_TEMP4,		// 5
+	RAIL_busvmon,	// 6
+	RAIL_busimon,	// 7
+	RAIL_2v5,		// 8
+	RAIL_3v3,		// 9
+	RAIL_5v,		// 10
+	RAIL_n3v3,		// 11
+	RAIL_n5v,		// 12
+	RAIL_15v,		// 13
+	RAIL_5vref,		// 14
+	RAIL_n200v,		// 15
+	RAIL_n800v,		// 16
+	RAIL_TMP1		// 17
+} VOLTAGE_RAIL_NAME;
+
+typedef struct {
+	VOLTAGE_RAIL_NAME name;
+	uint8_t error_count;
+	uint8_t is_enabled;
+	uint16_t data;
+	uint16_t max_voltage;
+	uint16_t min_voltage;
+} VOLTAGE_RAIL;
 
 /* USER CODE END PTD */
 
@@ -94,6 +110,8 @@ typedef enum {
 
 #define ACK 0xFF
 #define NACK 0x00
+
+#define NUM_VOLTAGE_RAILS 18
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -206,30 +224,7 @@ const osThreadAttr_t Idle_task_attributes = {
 };
 /* USER CODE BEGIN PV */
 // *********************************************************************************************************** GLOBAL VARIABLES
-uint8_t _2v5_enabled = 0;
-uint8_t _3v3_enabled = 0;
-uint8_t _5v_enabled = 0;
-uint8_t _n3v3_enabled = 0;
-uint8_t _n5v_enabled = 0;
-uint8_t _15v_enabled = 0;
-uint8_t _5vref_enabled = 0;
-uint8_t _n200v_enabled = 0;
-uint8_t _n800v_enabled = 0;
-
-uint16_t _vsense;
-uint16_t _vrefint;
-uint16_t _busvmon;
-uint16_t _busimon;
-uint16_t _2v5;
-uint16_t _3v3;
-uint16_t _5v;
-uint16_t _n3v3;
-uint16_t _n5v;
-uint16_t _15v;
-uint16_t _5vref;
-uint16_t _n200v;
-uint16_t _n800v;
-uint16_t _tmp1;
+VOLTAGE_RAIL rail_monitor[NUM_VOLTAGE_RAILS];
 
 volatile uint8_t HK_10_second_counter = 0;
 volatile uint32_t uptime_millis = 0;
@@ -310,7 +305,7 @@ void Idle_init(void *argument);
 // *********************************************************************************************************** FUNCTION PROTOYPES
 void system_setup();
 int in_range(uint16_t raw, int min, int max);
-void error_protocol(ERROR_TAGS tag);
+void error_protocol(VOLTAGE_RAIL_NAME failed_rail);
 packet_t create_packet(const uint8_t *data, uint16_t size);
 void sample_hk();
 void get_uptime(uint8_t *buffer);
@@ -390,7 +385,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	case 0x11: {
 		printf("SYS ON PB5\n");
 		HAL_GPIO_WritePin(gpios[1].gpio, gpios[1].pin, GPIO_PIN_SET);
-		_2v5_enabled = 1;
+		rail_monitor[RAIL_2v5].is_enabled = 1;
 		break;
 	}
 	case 0x01: {
@@ -399,103 +394,94 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		// Turning off all voltage enables (including high voltages) in order from highest to lowest, including SYS_ON
 		for (int i = 8; i > 0; i--) {
 			HAL_GPIO_WritePin(gpios[i].gpio, gpios[i].pin, GPIO_PIN_RESET);
+			rail_monitor[i].is_enabled = 0;
 		}
-
-		_2v5_enabled = 0;
-		_3v3_enabled = 0;
-		_5v_enabled = 0;
-		_n3v3_enabled = 0;
-		_n5v_enabled = 0;
-		_15v_enabled = 0;
-		_5vref_enabled = 0;
-		_n200v_enabled = 0;
-		_n800v_enabled = 0;
 
 		break;
 	}
 	case 0x12: {
 		printf("3v3 ON PC10\n");
 		HAL_GPIO_WritePin(gpios[2].gpio, gpios[2].pin, GPIO_PIN_SET);
-		_3v3_enabled = 1;
+		rail_monitor[RAIL_3v3].is_enabled = 1;
+
 		break;
 	}
 	case 0x02: {
 		printf("3v3 OFF PC10\n");
 		HAL_GPIO_WritePin(gpios[2].gpio, gpios[2].pin, GPIO_PIN_RESET);
-		_3v3_enabled = 0;
+		rail_monitor[RAIL_3v3].is_enabled = 0;
 		break;
 	}
 	case 0x13: {
 		printf("5v ON PC7\n");
 		HAL_GPIO_WritePin(gpios[3].gpio, gpios[3].pin, GPIO_PIN_SET);
-		_5v_enabled = 1;
+		rail_monitor[RAIL_5v].is_enabled = 1;
 		break;
 	}
 	case 0x03: {
 		printf("5v OFF PC7\n");
 		HAL_GPIO_WritePin(gpios[3].gpio, gpios[3].pin, GPIO_PIN_RESET);
-		_5v_enabled = 0;
+		rail_monitor[RAIL_5v].is_enabled = 0;
 		break;
 	}
 	case 0x14: {
 		printf("n3v3 ON PC6\n");
 		HAL_GPIO_WritePin(gpios[4].gpio, gpios[4].pin, GPIO_PIN_SET);
-		_n3v3_enabled = 1;
+		rail_monitor[RAIL_n3v3].is_enabled = 1;
 		break;
 	}
 	case 0x04: {
 		printf("n3v3 OFF PC6\n");
 		HAL_GPIO_WritePin(gpios[4].gpio, gpios[4].pin, GPIO_PIN_RESET);
-		_n3v3_enabled = 0;
+		rail_monitor[RAIL_n3v3].is_enabled = 0;
 		break;
 	}
 	case 0x15: {
 		printf("n5v ON PC8\n");
 		HAL_GPIO_WritePin(gpios[5].gpio, gpios[5].pin, GPIO_PIN_SET);
-		_n5v_enabled = 1;
+		rail_monitor[RAIL_n5v].is_enabled = 1;
 		break;
 	}
 	case 0x05: {
 		printf("n5v OFF PC8\n");
 		HAL_GPIO_WritePin(gpios[5].gpio, gpios[5].pin, GPIO_PIN_RESET);
-		_n5v_enabled = 0;
+		rail_monitor[RAIL_n5v].is_enabled = 0;
 		break;
 	}
 	case 0x16: {
 		printf("15v ON PC9\n");
 		HAL_GPIO_WritePin(gpios[6].gpio, gpios[6].pin, GPIO_PIN_SET);
-		_15v_enabled = 1;
+		rail_monitor[RAIL_15v].is_enabled = 1;
 		break;
 	}
 	case 0x06: {
 		printf("15v OFF PC9\n");
 		HAL_GPIO_WritePin(gpios[6].gpio, gpios[6].pin, GPIO_PIN_RESET);
-		_15v_enabled = 0;
+		rail_monitor[RAIL_15v].is_enabled = 0;
 		break;
 	}
 	case 0x17: {
 		printf("n200v ON PC13\n");
 		HAL_GPIO_WritePin(gpios[7].gpio, gpios[7].pin, GPIO_PIN_SET);
-		_n200v_enabled = 1;
+		rail_monitor[RAIL_n200v].is_enabled = 1;
 		break;
 	}
 	case 0x07: {
 		printf("n200v OFF PC13\n");
 		HAL_GPIO_WritePin(gpios[7].gpio, gpios[7].pin, GPIO_PIN_RESET);
-		_n200v_enabled = 0;
-
+		rail_monitor[RAIL_n200v].is_enabled = 0;
 		break;
 	}
 	case 0x18: {
 		printf("800v ON PB6\n");
 		HAL_GPIO_WritePin(gpios[8].gpio, gpios[8].pin, GPIO_PIN_SET);
-		_n800v_enabled = 1;
+		rail_monitor[RAIL_n800v].is_enabled = 1;
 		break;
 	}
 	case 0x08: {
 		printf("800v OFF PB6\n");
 		HAL_GPIO_WritePin(gpios[8].gpio, gpios[8].pin, GPIO_PIN_RESET);
-		_n800v_enabled = 0;
+		rail_monitor[RAIL_n800v].is_enabled = 0;
 		break;
 	}
 	case 0x19: {
@@ -2085,7 +2071,11 @@ int in_range(uint16_t raw, int min, int max) {
  * synchronization bytes in the packet. The function currently includes a TODO
  * for adding shutdown procedures.
  */
-void error_protocol(ERROR_TAGS tag) {
+void error_protocol(VOLTAGE_RAIL_NAME failed_rail) {
+	vTaskSuspend(HK_taskHandle);
+	vTaskSuspend(ERPA_taskHandle);
+	vTaskSuspend(PMT_taskHandle);
+
 	sample_hk();
 	packet_t error_packet;
 	uint8_t *buffer = (uint8_t*) malloc(
@@ -2093,13 +2083,13 @@ void error_protocol(ERROR_TAGS tag) {
 
 	buffer[0] = ERROR_SYNC;
 	buffer[1] = ERROR_SYNC;
-	buffer[2] = tag;
+	buffer[2] = failed_rail;
 
 	error_packet = create_packet(buffer, ERROR_PACKET_DATA_SIZE);
 	osMessageQueuePut(mid_MsgQueue, &error_packet, 0U, 0U);
 
 	free(buffer);
-
+	//vTaskSuspendAll();
 	//TODO: Shutdown
 }
 
@@ -2136,6 +2126,138 @@ packet_t create_packet(const uint8_t *data, uint16_t size) {
  * and checks for errors during the configuration process.
  */
 void system_setup() {
+
+	rail_monitor[RAIL_vsense].name = RAIL_vsense;
+	rail_monitor[RAIL_vsense].error_count = 0;
+	rail_monitor[RAIL_vsense].is_enabled = 1;
+	rail_monitor[RAIL_vsense].data = 0;
+	rail_monitor[RAIL_vsense].max_voltage = 10000; // TODO: Get actual range from Sanj
+	rail_monitor[RAIL_vsense].min_voltage = 0;
+
+	rail_monitor[RAIL_vrefint].name = RAIL_vrefint;
+	rail_monitor[RAIL_vrefint].error_count = 0;
+	rail_monitor[RAIL_vrefint].is_enabled = 1;
+	rail_monitor[RAIL_vrefint].data = 0;
+	rail_monitor[RAIL_vrefint].max_voltage = 10000; // TODO: Get actual range from Sanj
+	rail_monitor[RAIL_vrefint].min_voltage = 0;
+
+	rail_monitor[RAIL_TEMP1].name = RAIL_TEMP1;
+	rail_monitor[RAIL_TEMP1].error_count = 0;
+	rail_monitor[RAIL_TEMP1].is_enabled = 1;
+	rail_monitor[RAIL_TEMP1].data = 0;
+	rail_monitor[RAIL_TEMP1].max_voltage = 10000; // TODO: Get actual range from Sanj
+	rail_monitor[RAIL_TEMP1].min_voltage = 0;
+
+	rail_monitor[RAIL_TEMP2].name = RAIL_TEMP2;
+	rail_monitor[RAIL_TEMP2].error_count = 0;
+	rail_monitor[RAIL_TEMP2].is_enabled = 1;
+	rail_monitor[RAIL_TEMP2].data = 0;
+	rail_monitor[RAIL_TEMP2].max_voltage = 10000; // TODO: Get actual range from Sanj
+	rail_monitor[RAIL_TEMP2].min_voltage = 0;
+
+	rail_monitor[RAIL_TEMP3].name = RAIL_TEMP3;
+	rail_monitor[RAIL_TEMP3].error_count = 0;
+	rail_monitor[RAIL_TEMP3].is_enabled = 1;
+	rail_monitor[RAIL_TEMP3].data = 0;
+	rail_monitor[RAIL_TEMP3].max_voltage = 10000; // TODO: Get actual range from Sanj
+	rail_monitor[RAIL_TEMP3].min_voltage = 0;
+
+	rail_monitor[RAIL_TEMP4].name = RAIL_TEMP4;
+	rail_monitor[RAIL_TEMP4].error_count = 0;
+	rail_monitor[RAIL_TEMP4].is_enabled = 1;
+	rail_monitor[RAIL_TEMP4].data = 0;
+	rail_monitor[RAIL_TEMP4].max_voltage = 10000; // TODO: Get actual range from Sanj
+	rail_monitor[RAIL_TEMP4].min_voltage = 0;
+
+	rail_monitor[RAIL_busvmon].name = RAIL_busvmon;
+	rail_monitor[RAIL_busvmon].error_count = 0;
+	rail_monitor[RAIL_busvmon].is_enabled = 1;
+	rail_monitor[RAIL_busvmon].data = 0;
+	rail_monitor[RAIL_busvmon].max_voltage = 10000; // TODO: Get actual range from Sanj
+	rail_monitor[RAIL_busvmon].min_voltage = 0;
+
+	rail_monitor[RAIL_busimon].name = RAIL_busimon;
+	rail_monitor[RAIL_busimon].error_count = 0;
+	rail_monitor[RAIL_busimon].is_enabled = 1;
+	rail_monitor[RAIL_busimon].data = 0;
+	rail_monitor[RAIL_busimon].max_voltage = 10000; // TODO: Get actual range from Sanj
+	rail_monitor[RAIL_busimon].min_voltage = 0;
+
+	rail_monitor[RAIL_2v5].name = RAIL_2v5;
+	rail_monitor[RAIL_2v5].error_count = 0;
+	rail_monitor[RAIL_2v5].is_enabled = 0;
+	rail_monitor[RAIL_2v5].data = 0;
+	rail_monitor[RAIL_2v5].max_voltage = 3257;
+	rail_monitor[RAIL_2v5].min_voltage = 2947;
+
+	rail_monitor[RAIL_3v3].name = RAIL_3v3;
+	rail_monitor[RAIL_3v3].error_count = 0;
+	rail_monitor[RAIL_3v3].is_enabled = 0;
+	rail_monitor[RAIL_3v3].data = 0;
+	rail_monitor[RAIL_3v3].max_voltage = 3909;
+	//rail_monitor[RAIL_3v3].min_voltage = 3537;
+	rail_monitor[RAIL_3v3].min_voltage = 0;
+
+
+	rail_monitor[RAIL_5v].name = RAIL_5v;
+	rail_monitor[RAIL_5v].error_count = 0;
+	rail_monitor[RAIL_5v].is_enabled = 0;
+	rail_monitor[RAIL_5v].data = 0;
+	rail_monitor[RAIL_5v].max_voltage = 3909;
+	rail_monitor[RAIL_5v].min_voltage = 3537;
+
+	rail_monitor[RAIL_n3v3].name = RAIL_n3v3;
+	rail_monitor[RAIL_n3v3].error_count = 0;
+	rail_monitor[RAIL_n3v3].is_enabled = 0;
+	rail_monitor[RAIL_n3v3].data = 0;
+	rail_monitor[RAIL_n3v3].max_voltage = 4091;
+	rail_monitor[RAIL_n3v3].min_voltage = 3702;
+
+	rail_monitor[RAIL_n5v].name = RAIL_n5v;
+	rail_monitor[RAIL_n5v].error_count = 0;
+	rail_monitor[RAIL_n5v].is_enabled = 0;
+	rail_monitor[RAIL_n5v].data = 0;
+	rail_monitor[RAIL_n5v].max_voltage = 4000;
+	//rail_monitor[RAIL_n5v].min_voltage = 3619;
+	rail_monitor[RAIL_n5v].min_voltage = 0;
+
+	rail_monitor[RAIL_15v].name = RAIL_15v;
+	rail_monitor[RAIL_15v].error_count = 0;
+	rail_monitor[RAIL_15v].is_enabled = 0;
+	rail_monitor[RAIL_15v].data = 0;
+	rail_monitor[RAIL_15v].max_voltage = 3896;
+	rail_monitor[RAIL_15v].min_voltage = 3525;
+
+	rail_monitor[RAIL_5vref].name = RAIL_5vref;
+	rail_monitor[RAIL_5vref].error_count = 0;
+	rail_monitor[RAIL_5vref].is_enabled = 0;
+	rail_monitor[RAIL_5vref].data = 0;
+	rail_monitor[RAIL_5vref].max_voltage = 3909;
+	rail_monitor[RAIL_5vref].min_voltage = 3537;
+
+	rail_monitor[RAIL_n200v].name = RAIL_n200v;
+	rail_monitor[RAIL_n200v].error_count = 0;
+	rail_monitor[RAIL_n200v].is_enabled = 0;
+	rail_monitor[RAIL_n200v].data = 0;
+	rail_monitor[RAIL_n200v].max_voltage = 4196;
+	//rail_monitor[RAIL_n200v].min_voltage = 3796;
+	rail_monitor[RAIL_n200v].min_voltage = 0;		// TODO: Currently set to 0, kept triggering because it has been reading ~3351
+
+
+	rail_monitor[RAIL_n800v].name = RAIL_n800v;
+	rail_monitor[RAIL_n800v].error_count = 0;
+	rail_monitor[RAIL_n800v].is_enabled = 0;
+	rail_monitor[RAIL_n800v].data = 0;
+	rail_monitor[RAIL_n800v].max_voltage = 3336;
+	rail_monitor[RAIL_n800v].min_voltage = 3018;
+
+	rail_monitor[RAIL_TMP1].name = RAIL_TMP1;
+	rail_monitor[RAIL_TMP1].error_count = 0;
+	rail_monitor[RAIL_TMP1].is_enabled = 1;
+	rail_monitor[RAIL_TMP1].data = 0;
+	rail_monitor[RAIL_TMP1].max_voltage = 10000; // TODO: Get actual range from Sanj
+	rail_monitor[RAIL_TMP1].min_voltage = 0;
+
 	HAL_TIM_OC_Start_IT(&htim3, TIM_CHANNEL_1);
 
 	TIM2->CCR4 = 312;
@@ -2312,55 +2434,52 @@ void sample_erpa() {
  */
 void sample_hk() {
 	uint8_t *buffer = (uint8_t*) malloc(HK_DATA_SIZE * sizeof(uint8_t));
-	int16_t *hk_i2c = (int16_t*) malloc(4 * sizeof(int16_t));
 	uint8_t *timestamp = (uint8_t*) malloc(TIMESTAMP_SIZE * sizeof(uint8_t));
 	uint8_t *uptime = (uint8_t*) malloc(UPTIME_SIZE * sizeof(uint8_t));
 
 	get_uptime(uptime);
 	getTimestamp(timestamp);
-	receive_hk_i2c(hk_i2c);
-
 
 	buffer[0] = HK_SYNC;                     	// HK SYNC 0xCC MSB
 	buffer[1] = HK_SYNC;                     	// HK SYNC 0xCC LSB
 	buffer[2] = ((hk_seq & 0xFF00) >> 8);    	// HK SEQ # MSB
 	buffer[3] = (hk_seq & 0xFF);             	// HK SEQ # LSB
-	buffer[4] = ((_vsense & 0xFF00) >> 8);		// HK vsense MSB
-	buffer[5] = (_vsense & 0xFF);				// HK vsense LSB
-	buffer[6] = ((_vrefint & 0xFF00) >> 8);		// HK vrefint MSB
-	buffer[7] = (_vrefint & 0xFF);				// HK vrefint LSB
-	buffer[8] = ((hk_i2c[0] & 0xFF00) >> 8);	// HK TEMP1 MSB
-	buffer[9] = (hk_i2c[0] & 0xFF);				// HK TEMP1 LSB
-	buffer[10] = ((hk_i2c[1] & 0xFF00) >> 8);	// HK TEMP2 MSB
-	buffer[11] = (hk_i2c[1] & 0xFF);			// HK TEMP2 LSB
-	buffer[12] = ((hk_i2c[2] & 0xFF00) >> 8);	// HK TEMP3 MSB
-	buffer[13] = (hk_i2c[2] & 0xFF);			// HK TEMP3 LSB
-	buffer[14] = ((hk_i2c[3] & 0xFF00) >> 8);	// HK TEMP4 MSB
-	buffer[15] = (hk_i2c[3] & 0xFF);			// HK TEMP4 LSB
-	buffer[16] = ((_busvmon & 0xFF00) >> 8);	// HK BUSvmon MSB
-	buffer[17] = (_busvmon & 0xFF);				// HK BUSvmon LSB
-	buffer[18] = ((_busimon & 0xFF00) >> 8);	// HK BUSimon MSB
-	buffer[19] = (_busimon & 0xFF);				// HK BUSimon LSB
-	buffer[20] = ((_2v5 & 0xFF00) >> 8);		// HK 2v5mon MSB
-	buffer[21] = (_2v5 & 0xFF);					// HK 2v5mon LSB
-	buffer[22] = ((_3v3 & 0xFF00) >> 8);		// HK 3v3mon MSB
-	buffer[23] = (_3v3 & 0xFF);					// HK 3v3mon LSB
-	buffer[24] = ((_5v & 0xFF00) >> 8);			// HK 5vmon MSB
-	buffer[25] = (_5v & 0xFF);					// HK 5vmon LSB
-	buffer[26] = ((_n3v3 & 0xFF00) >> 8);		// HK n3v3mon MSB
-	buffer[27] = (_n3v3 & 0xFF);				// HK n3v3mon LSB
-	buffer[28] = ((_n5v & 0xFF00) >> 8);		// HK n5vmon MSB
-	buffer[29] = (_n5v & 0xFF);					// HK n5vmon LSB
-	buffer[30] = ((_15v & 0xFF00) >> 8);		// HK 15vmon MSB
-	buffer[31] = (_15v & 0xFF);					// HK 15vmon LSB
-	buffer[32] = ((_5vref & 0xFF00) >> 8);		// HK 5vrefmon MSB
-	buffer[33] = (_5vref & 0xFF);				// HK 5vrefmon LSB
-	buffer[34] = ((_n200v & 0xFF00) >> 8);		// HK n150vmon MSB
-	buffer[35] = (_n200v & 0xFF);				// HK n150vmon LSB
-	buffer[36] = ((_n800v & 0xFF00) >> 8);		// HK n800vmon MSB
-	buffer[37] = (_n800v & 0xFF);				// HK n800vmon LSB
-	buffer[38] = ((_tmp1 & 0xFF00) >> 8);  // TEMPURATURE 1 MSB
-	buffer[39] = (_tmp1 & 0xFF);           // TEMPURATURE 1 LSB
+	buffer[4] = ((rail_monitor[RAIL_vsense].data & 0xFF00) >> 8);		// HK vsense MSB
+	buffer[5] = (rail_monitor[RAIL_vsense].data & 0xFF);				// HK vsense LSB
+	buffer[6] = ((rail_monitor[RAIL_vrefint].data & 0xFF00) >> 8);		// HK vrefint MSB
+	buffer[7] = (rail_monitor[RAIL_vrefint].data & 0xFF);				// HK vrefint LSB
+	buffer[8] = ((rail_monitor[RAIL_TEMP1].data & 0xFF00) >> 8);	// HK TEMP1 MSB
+	buffer[9] = (rail_monitor[RAIL_TEMP1].data & 0xFF);				// HK TEMP1 LSB
+	buffer[10] = ((rail_monitor[RAIL_TEMP2].data & 0xFF00) >> 8);	// HK TEMP2 MSB
+	buffer[11] = (rail_monitor[RAIL_TEMP2].data & 0xFF);			// HK TEMP2 LSB
+	buffer[12] = ((rail_monitor[RAIL_TEMP3].data & 0xFF00) >> 8);	// HK TEMP3 MSB
+	buffer[13] = (rail_monitor[RAIL_TEMP3].data & 0xFF);			// HK TEMP3 LSB
+	buffer[14] = ((rail_monitor[RAIL_TEMP4].data & 0xFF00) >> 8);	// HK TEMP4 MSB
+	buffer[15] = (rail_monitor[RAIL_TEMP4].data & 0xFF);			// HK TEMP4 LSB
+	buffer[16] = ((rail_monitor[RAIL_busvmon].data & 0xFF00) >> 8);	// HK BUSvmon MSB
+	buffer[17] = (rail_monitor[RAIL_busvmon].data & 0xFF);				// HK BUSvmon LSB
+	buffer[18] = ((rail_monitor[RAIL_busimon].data & 0xFF00) >> 8);	// HK BUSimon MSB
+	buffer[19] = (rail_monitor[RAIL_busimon].data & 0xFF);				// HK BUSimon LSB
+	buffer[20] = ((rail_monitor[RAIL_2v5].data & 0xFF00) >> 8);		// HK 2v5mon MSB
+	buffer[21] = (rail_monitor[RAIL_2v5].data & 0xFF);					// HK 2v5mon LSB
+	buffer[22] = ((rail_monitor[RAIL_3v3].data & 0xFF00) >> 8);		// HK 3v3mon MSB
+	buffer[23] = (rail_monitor[RAIL_3v3].data & 0xFF);					// HK 3v3mon LSB
+	buffer[24] = ((rail_monitor[RAIL_5v].data & 0xFF00) >> 8);			// HK 5vmon MSB
+	buffer[25] = (rail_monitor[RAIL_5v].data & 0xFF);					// HK 5vmon LSB
+	buffer[26] = ((rail_monitor[RAIL_n3v3].data & 0xFF00) >> 8);		// HK n3v3mon MSB
+	buffer[27] = (rail_monitor[RAIL_n3v3].data & 0xFF);				// HK n3v3mon LSB
+	buffer[28] = ((rail_monitor[RAIL_n5v].data & 0xFF00) >> 8);		// HK n5vmon MSB
+	buffer[29] = (rail_monitor[RAIL_n5v].data & 0xFF);					// HK n5vmon LSB
+	buffer[30] = ((rail_monitor[RAIL_15v].data & 0xFF00) >> 8);		// HK 15vmon MSB
+	buffer[31] = (rail_monitor[RAIL_15v].data & 0xFF);					// HK 15vmon LSB
+	buffer[32] = ((rail_monitor[RAIL_5vref].data & 0xFF00) >> 8);		// HK 5vrefmon MSB
+	buffer[33] = (rail_monitor[RAIL_5vref].data & 0xFF);				// HK 5vrefmon LSB
+	buffer[34] = ((rail_monitor[RAIL_n200v].data & 0xFF00) >> 8);		// HK n150vmon MSB
+	buffer[35] = (rail_monitor[RAIL_n200v].data & 0xFF);				// HK n150vmon LSB
+	buffer[36] = ((rail_monitor[RAIL_n800v].data & 0xFF00) >> 8);		// HK n800vmon MSB
+	buffer[37] = (rail_monitor[RAIL_n800v].data & 0xFF);				// HK n800vmon LSB
+	buffer[38] = ((rail_monitor[RAIL_TMP1].data & 0xFF00) >> 8);  // TEMPURATURE 1 MSB
+	buffer[39] = (rail_monitor[RAIL_TMP1].data & 0xFF);           // TEMPURATURE 1 LSB
 	buffer[40] = timestamp[0];
 	buffer[41] = timestamp[1];
 	buffer[42] = timestamp[2];
@@ -2380,7 +2499,6 @@ void sample_hk() {
 	osMessageQueuePut(mid_MsgQueue, &hk_packet, 0U, 0U);
 
 	free(buffer);
-	free(hk_i2c);
 	free(timestamp);
 	free(uptime);
 }
@@ -2480,6 +2598,11 @@ void GPIO_on_init(void *argument)
 			osDelay(100);
 		}
 
+		// Telling rail monitor which rails are now enabled
+		for (int i = RAIL_2v5; i <= RAIL_15v; i++){
+			rail_monitor[i].is_enabled = 1;
+		}
+
 		osThreadSuspend(GPIO_on_taskHandle);
 	}
   /* USER CODE END GPIO_on_init */
@@ -2499,11 +2622,19 @@ void GPIO_off_init(void *argument)
 	/* Infinite loop */
 	for (;;) {
 
+		// Telling rail monitor which rails are now disabled
+		for (int i = RAIL_15v; i >= RAIL_2v5; i--){
+			rail_monitor[i].is_enabled = 0;
+		}
+
 		// Disabling all voltages from 15V to SDN1 (inclusive)
 		for (int i = 6; i >= 0; i--) {
 			HAL_GPIO_WritePin(gpios[i].gpio, gpios[i].pin, GPIO_PIN_RESET);
 			osDelay(100);
 		}
+
+
+
 
 		osThreadSuspend(GPIO_off_taskHandle);
 	}
@@ -2546,7 +2677,7 @@ void UART_TX_init(void *argument)
 					}
 				}
 			}
-		} while (status == osOK);
+		} while (osMessageQueueGetCount(mid_MsgQueue));
 
 		if (total_size > 0) {
 			HAL_UART_Transmit_DMA(&huart1, tx_buffer, total_size);
@@ -2585,83 +2716,53 @@ void Voltage_Monitor_init(void *argument)
 
 		uint16_t *hk_adc1 = (uint16_t*) malloc(10 * sizeof(uint16_t));
 		uint16_t *hk_adc3 = (uint16_t*) malloc(4 * sizeof(uint16_t));
+		int16_t *hk_i2c = (int16_t*) malloc(4 * sizeof(int16_t));
 
+		receive_hk_i2c(hk_i2c);
 		receive_hk_adc1(hk_adc1);
 		receive_hk_adc3(hk_adc3);
 
-		_vsense = hk_adc3[1];
-		_vrefint = hk_adc3[0];
-		_busvmon = hk_adc1[0];
-		_busimon = hk_adc1[1];
-		_2v5 = hk_adc1[2];
-		_3v3 = hk_adc3[3];
-		_5v = hk_adc1[6];
-		_n3v3 = hk_adc1[3];
-		_n5v = hk_adc3[2];
-		_15v = hk_adc1[7];
-		_5vref = hk_adc1[8];
-		_n200v = hk_adc1[4];
-		_n800v = hk_adc1[5];
-		_tmp1 = hk_adc1[9];
+		rail_monitor[RAIL_vsense].data = hk_adc3[1];
+		rail_monitor[RAIL_vrefint].data = hk_adc3[0];
+		rail_monitor[RAIL_TEMP1].data = hk_i2c[0];
+		rail_monitor[RAIL_TEMP2].data = hk_i2c[1];
+		rail_monitor[RAIL_TEMP3].data = hk_i2c[2];
+		rail_monitor[RAIL_TEMP4].data = hk_i2c[3];
+		rail_monitor[RAIL_busvmon].data = hk_adc1[0];
+		rail_monitor[RAIL_busimon].data = hk_adc1[1];
+		rail_monitor[RAIL_2v5].data = hk_adc1[2];
+		rail_monitor[RAIL_3v3].data = hk_adc3[3];
+		rail_monitor[RAIL_5v].data = hk_adc1[6];
+		rail_monitor[RAIL_n3v3].data = hk_adc1[3];
+		rail_monitor[RAIL_n5v].data = hk_adc3[2];
+		rail_monitor[RAIL_15v].data = hk_adc1[7];
+		rail_monitor[RAIL_5vref].data = hk_adc1[8];
+		rail_monitor[RAIL_n200v].data = hk_adc1[4];
+		rail_monitor[RAIL_n800v].data = hk_adc1[5];
+		rail_monitor[RAIL_TMP1].data = hk_adc1[9];
+
+		// Iterate through all voltage rails
+		for (int i = 0; i < NUM_VOLTAGE_RAILS; i++){
+			if (rail_monitor[i].is_enabled){
+				// If current rail is not in range...
+				if (!in_range(rail_monitor[i].data, rail_monitor[i].min_voltage, rail_monitor[i].max_voltage)){
+					// Increase that rails error count
+					rail_monitor[i].error_count++;
+					// If that rails' error count is at 3, proceed with error protocol for that rail
+					if (rail_monitor[i].error_count == 3) {
+						error_protocol(rail_monitor[i].name);
+					}
+				}
+			}
+		}
 
 #ifdef FLIGHT_MODE
-		if (_2v5_enabled){
-			if (!in_range(_2v5, 2947, 3257)) {
-				error_protocol(RAIL_2v5);
-			}
-		}
 
-		if (_3v3_enabled){
-			if (!in_range(_3v3, 3537, 3909)) {
-				error_protocol(RAIL_3v3);
-			}
-		}
-
-		if (_5v_enabled){
-			if (!in_range(_5v, 3537, 3909)) {
-				error_protocol(RAIL_5v);
-			}
-		}
-
-		if (_n3v3_enabled){
-			if (!in_range(_n3v3, 3702, 4091)) {
-				error_protocol(RAIL_n3v3);
-			}
-		}
-
-		if (_n5v_enabled) {
-			if (!in_range(_n5v, 3619, 4000)) {
-				error_protocol(RAIL_n5v);
-			}
-		}
-
-		if (_15v_enabled) {
-			if (!in_range(_15v, 3525, 3896)) {
-				error_protocol(RAIL_15v);
-			}
-		}
-
-		if (_5vref_enabled) {
-			if (!in_range(_5vref, 3537, 3909)) {
-				error_protocol(RAIL_5vref);
-			}
-		}
-
-		if (_n200v_enabled) {
-			if (!in_range(_n200v, 3796, 4196)) {
-				error_protocol(RAIL_n200v);
-			}
-		}
-
-		if (_n800v_enabled) {
-			if (!in_range(_n800v, 3018, 3336)) {
-				error_protocol(RAIL_n800v);
-			}
-		}
 #endif
 
 		free(hk_adc1);
 		free(hk_adc3);
+		free(hk_i2c);
 
 		osThreadYield();
 	}
@@ -2712,6 +2813,11 @@ void Science_init(void *argument)
 			osDelay(200);
 		}
 
+		// Telling rail monitor which voltages are now enabled
+		for (int i = RAIL_2v5; i <= RAIL_n800v; i++) {
+			rail_monitor[i].is_enabled = 1;
+		}
+
 		__disable_irq();
 
 		HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, DAC_OUT, 32, DAC_ALIGN_12B_R);	// Enable auto sweep (doesn't start until ERPA timer is started)
@@ -2753,6 +2859,11 @@ void Idle_init(void *argument)
 		ERPA_ON = 0;
 		HK_ON = 0;
 		osDelay(100);
+
+		// Telling rail monitor which voltages are now disabled
+		for (int i = RAIL_n800v; i >= RAIL_2v5; i--) {
+			rail_monitor[i].is_enabled = 0;
+		}
 
 		// Disabling all voltages
 		for (int i = 8; i >= 0; i--) {
