@@ -1,1 +1,12 @@
-freertos.c:59:6:vApplicationTickHook	1
+freertos.c:154:6:vApplicationTickHook	1
+freertos.c:170:6:MX_FREERTOS_Init	1
+freertos.c:239:6:PMT_init	1
+freertos.c:257:6:ERPA_init	1
+freertos.c:275:6:HK_init	1
+freertos.c:293:6:GPIO_on_init	1
+freertos.c:311:6:GPIO_off_init	1
+freertos.c:329:6:UART_TX_init	1
+freertos.c:347:6:Voltage_Monitor_init	1
+freertos.c:365:6:FLAG_init	1
+freertos.c:383:6:Science_init	1
+freertos.c:401:6:Idle_init	1
