@@ -44,6 +44,8 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
+// TODO: HK packets
+
 //#define FLIGHT_MODE
 
 #define ACK 0xFF
@@ -104,6 +106,9 @@ void sync();
 void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim) {
 	if (htim == &htim1) {
 		osEventFlagsSet(packet_event_flags, PMT_FLAG_ID);
+	}
+	else if (htim == &htim2) {
+		osEventFlagsSet(packet_event_flags, ERPA_FLAG_ID);
 	}
 }
 
@@ -584,6 +589,33 @@ void send_NACK() {
 	tx_buffer[0] = NACK;
 	HAL_UART_Transmit(&huart1, tx_buffer, 1, 100);
 
+}
+
+uint8_t get_current_step() {
+	int dac_value;
+
+	dac_value = DAC1->DHR12R1;
+
+	switch (dac_value) {
+	case 0:
+		return 0;
+	case 620:
+		return 1;
+	case 1241:
+		return 2;
+	case 1861:
+		return 3;
+	case 2482:
+		return 4;
+	case 3103:
+		return 5;
+	case 3723:
+		return 6;
+	case 4095:
+		return 7;
+	default:
+		return -1;
+	}
 }
 /* USER CODE END 4 */
 

@@ -253,7 +253,11 @@ void ERPA_init(void *argument)
   /* USER CODE BEGIN ERPA_init */
   /* Infinite loop */
 	for (;;) {
-		osDelay(1);
+		osEventFlagsWait(packet_event_flags, ERPA_FLAG_ID, osFlagsWaitAny, osWaitForever);
+
+		create_erpa_packet();
+
+		osThreadYield();
 	}
   /* USER CODE END ERPA_init */
 }

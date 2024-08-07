@@ -42,6 +42,7 @@ extern "C" {
 #define UART_RX_BUFFER_SIZE 64
 #define UART_TX_BUFFER_SIZE 1000
 #define PMT_DATA_SIZE 10
+#define ERPA_DATA_SIZE 14
 #define HK_DATA_SIZE 54
 #define UPTIME_SIZE 4
 
@@ -55,6 +56,7 @@ extern "C" {
 #define AUTODEINIT_FLAG 0x0008
 
 #define PMT_SYNC 0xBB
+#define ERPA_SYNC 0xAA
 
 /* USER CODE END Includes */
 
@@ -94,7 +96,7 @@ extern volatile uint8_t tx_flag;
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-
+uint8_t get_current_step();
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
