@@ -1,7 +1,10 @@
-main.c:95:6:HAL_UART_RxCpltCallback	41
-main.c:341:5:main	1
-main.c:405:6:SystemClock_Config	4
-main.c:465:6:PeriphCommonClock_Config	2
-main.c:488:6:system_setup	5
-main.c:540:6:HAL_TIM_PeriodElapsedCallback	2
-main.c:557:6:Error_Handler	1
+main.c:101:6:HAL_UART_RxCpltCallback	42
+main.c:346:5:main	1
+main.c:410:6:SystemClock_Config	4
+main.c:470:6:PeriphCommonClock_Config	2
+main.c:493:6:system_setup	5
+main.c:535:6:sync	2
+main.c:553:6:send_ACK	1
+main.c:560:6:send_NACK	1
+main.c:577:6:HAL_TIM_PeriodElapsedCallback	2
+main.c:594:6:Error_Handler	1

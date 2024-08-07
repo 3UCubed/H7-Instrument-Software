@@ -46,6 +46,9 @@
 
 //#define FLIGHT_MODE
 
+#define ACK 0xFF
+#define NACK 0x00
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -87,6 +90,9 @@ void PeriphCommonClock_Config(void);
 void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
 void system_setup();
+void send_ACK();
+void send_NACK();
+void sync();
 
 /* USER CODE END PFP */
 
@@ -313,8 +319,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		break;
 	}
 	case 0xAF: {
-		//sync();
-		// TODO: sync
+		sync();
 		break;
 	}
 	case 0xBF: {
@@ -527,6 +532,38 @@ void system_setup() {
 
 }
 
+void sync() {
+	send_ACK();
+
+	uint8_t key;
+
+	// Wait for 0xFF to be received
+	HAL_UART_AbortReceive(&huart1);
+	do {
+		HAL_UART_Receive(&huart1, UART_RX_BUFFER, 9, 100);
+		key = UART_RX_BUFFER[0];
+	} while (key != 0xFF);
+
+	//calibrateRTC(UART_RX_BUFFER); // TODO: calibrate rtc
+	HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
+
+	send_ACK();
+}
+
+void send_ACK() {
+	static uint8_t tx_buffer[1];
+
+	tx_buffer[0] = ACK;
+	HAL_UART_Transmit(&huart1, tx_buffer, 1, 100);
+}
+
+void send_NACK() {
+	static uint8_t tx_buffer[1];
+
+	tx_buffer[0] = NACK;
+	HAL_UART_Transmit(&huart1, tx_buffer, 1, 100);
+
+}
 /* USER CODE END 4 */
 
 /**
