@@ -1,1 +1,2 @@
 ../Core/Src/voltage_monitor.c:12:9:voltage_monitor_init	16	static
+../Core/Src/voltage_monitor.c:152:9:set_rail_monitor_enable	24	static

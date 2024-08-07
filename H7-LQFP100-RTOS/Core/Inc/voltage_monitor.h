@@ -46,5 +46,6 @@ typedef struct {
 
 
 uint8_t voltage_monitor_init();
+uint8_t set_rail_monitor_enable(VOLTAGE_RAIL_NAME rail_name, uint8_t enable_value);
 
 #endif /* INC_VOLTAGE_MONITOR_H_ */

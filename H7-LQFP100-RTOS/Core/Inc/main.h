@@ -31,9 +31,18 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "cmsis_os.h"
-#include "voltage_monitor.h"
-#include "sample_data.h"
+#include "cmsis_os.h"			// For freeRTOS commands
+#include "voltage_monitor.h"	// For initializing voltage monitor in system_setup
+#include "sample_data.h"		// For initializing adc dma in system_setup
+
+#define MSGQUEUE_SIZE 128
+#define UART_RX_BUFFER_SIZE 64
+
+#define PMT_FLAG_ID 0x0001
+#define ERPA_FLAG_ID 0x0002
+#define HK_FLAG_ID 0x0004
+#define VOLTAGE_MONITOR_FLAG_ID 0x0008
+#define STOP_FLAG 0x0016
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -42,17 +51,24 @@ typedef struct {
 	uint8_t *array;  // Pointer to the array data
 	uint16_t size;   // Size of the array
 } packet_t;
+
+typedef struct {
+	GPIO_TypeDef *gpio;
+	uint16_t pin;
+} gpio_pins;
+
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
 extern osEventFlagsId_t event_flags;
 extern osMessageQueueId_t mid_MsgQueue;
+extern unsigned char UART_RX_BUFFER[UART_RX_BUFFER_SIZE];
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
-#define MSGQUEUE_SIZE 128
+
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/

@@ -147,3 +147,12 @@ uint8_t voltage_monitor_init() {
 
 	return status;
 }
+
+
+uint8_t set_rail_monitor_enable(VOLTAGE_RAIL_NAME rail_name, uint8_t enable_value) {
+	uint8_t status = 0;
+	rail_monitor[rail_name].is_enabled = enable_value;
+	status = 1;
+
+	return status;
+}
