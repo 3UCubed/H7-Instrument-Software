@@ -1,5 +1,0 @@
-voltage_monitor.c:13:9:set_rail_monitor_enable	1
-voltage_monitor.c:21:9:set_rail_monitor	1
-voltage_monitor.c:68:9:in_range	3
-voltage_monitor.c:75:15:get_rail_monitor	1
-voltage_monitor.c:80:9:voltage_monitor_init	1

@@ -1,5 +1,0 @@
-../Core/Src/packet_creation.c:15:9:get_current_step	16	static
-../Core/Src/packet_creation.c:42:10:create_packet	32	static
-../Core/Src/packet_creation.c:62:6:sample_pmt	32	static
-../Core/Src/packet_creation.c:101:6:sample_erpa	40	static
-../Core/Src/packet_creation.c:152:6:sample_hk	32	static

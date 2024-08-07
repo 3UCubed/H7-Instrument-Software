@@ -25,9 +25,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "error_packet_handler.h"
-#include "flags.h"
-#include "usart.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -47,9 +45,6 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
-osEventFlagsId_t event_flags;
-volatile uint32_t uptime_millis = 0;
-volatile int tx_flag = 1;
 
 /* USER CODE END Variables */
 /* Definitions for PMT_task */
@@ -152,7 +147,6 @@ void vApplicationTickHook( void )
    added here, but the tick hook is called from an interrupt context, so
    code must not attempt to block, and only the interrupt safe FreeRTOS API
    functions can be used (those that end in FromISR()). */
-	uptime_millis++;
 }
 /* USER CODE END 3 */
 
@@ -235,11 +229,7 @@ void PMT_init(void *argument)
   /* USER CODE BEGIN PMT_init */
   /* Infinite loop */
 	for (;;) {
-
-		osEventFlagsWait(event_flags, PMT_FLAG_ID, osFlagsWaitAny,
-		osWaitForever);
-		sample_pmt();
-		osThreadYield();
+		osDelay(1);
 	}
   /* USER CODE END PMT_init */
 }
@@ -256,10 +246,7 @@ void ERPA_init(void *argument)
   /* USER CODE BEGIN ERPA_init */
   /* Infinite loop */
 	for (;;) {
-		osEventFlagsWait(event_flags, ERPA_FLAG_ID, osFlagsWaitAny,
-		osWaitForever);
-		sample_erpa();
-		osThreadYield();
+		osDelay(1);
 	}
   /* USER CODE END ERPA_init */
 }
@@ -276,10 +263,7 @@ void HK_init(void *argument)
   /* USER CODE BEGIN HK_init */
   /* Infinite loop */
 	for (;;) {
-		osEventFlagsWait(event_flags, HK_FLAG_ID, osFlagsWaitAny,
-		osWaitForever);
-		sample_hk();
-		osThreadYield();
+		osDelay(1);
 	}
   /* USER CODE END HK_init */
 }
@@ -330,42 +314,8 @@ void AUTODEINIT_init(void *argument)
 void UART_TX_init(void *argument)
 {
   /* USER CODE BEGIN UART_TX_init */
-	static uint8_t tx_buffer[UART_TX_BUFFER_SIZE];
-	packet_t msg;
-	uint32_t total_size = 0;
-	osStatus_t status;
-
-	while (1) {
-		total_size = 0;
-		// Retrieve all messages from the queue and store them in tx_buffer
-		do {
-			status = osMessageQueueGet(mid_MsgQueue, &msg, NULL, osWaitForever);
-			if (status == osOK) {
-				if ((total_size + msg.size) < UART_TX_BUFFER_SIZE) {
-					memcpy(&tx_buffer[total_size], msg.array, msg.size);
-					free(msg.array);
-					total_size += msg.size;
-					if (total_size >= (UART_TX_BUFFER_SIZE - HK_DATA_SIZE)) {
-						break;
-					}
-				}
-			}
-		} while (osMessageQueueGetCount(mid_MsgQueue));
-
-		if (total_size > 0) {
-			HAL_UART_Transmit_DMA(&huart1, tx_buffer, total_size);
-
-			// Wait for transmission to complete
-			while (tx_flag == 0) {
-				osThreadYield();
-			}
-
-			// Reset the flag
-			tx_flag = 0;
-		}
-
-		// Yield thread control
-		osThreadYield();
+	for (;;) {
+		osDelay(1);
 	}
   /* USER CODE END UART_TX_init */
 }
@@ -380,32 +330,9 @@ void UART_TX_init(void *argument)
 void Voltage_Monitor_init(void *argument)
 {
   /* USER CODE BEGIN Voltage_Monitor_init */
-	VOLTAGE_RAIL *rail_monitor_ptr;
-  /* Infinite loop */
-  for(;;)
-  {
-	  osEventFlagsWait(event_flags, VOLTAGE_MONITOR_FLAG_ID, osFlagsWaitAny,
-	  		osWaitForever);
-
-	  set_rail_monitor();
-
-	  rail_monitor_ptr = get_rail_monitor();
-
-		// Iterate through all voltage rails
-		for (int i = 0; i < NUM_VOLTAGE_RAILS; i++){
-			if (rail_monitor_ptr[i].is_enabled){
-				// If current rail is not in range...
-				if (!in_range(rail_monitor_ptr[i].data, rail_monitor_ptr[i].min_voltage, rail_monitor_ptr[i].max_voltage)){
-					// Increase that rails error count
-					rail_monitor_ptr[i].error_count++;
-					// If that rails' error count is at 3, proceed with error protocol for that rail
-					if (rail_monitor_ptr[i].error_count == 3) {
-						error_protocol(rail_monitor_ptr[i].name);
-					}
-				}
-			}
-		}
-  }
+	for (;;) {
+		osDelay(1);
+	}
   /* USER CODE END Voltage_Monitor_init */
 }
 
@@ -465,8 +392,6 @@ void Idle_init(void *argument)
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
-void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
-	tx_flag = 1;
-}
+
 /* USER CODE END Application */
 

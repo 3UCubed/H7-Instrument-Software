@@ -40,7 +40,6 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_tim_ex.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart_ex.h \
- ../Core/Inc/flags.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h \
  ../Core/Inc/FreeRTOSConfig.h \
@@ -52,12 +51,9 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h \
- ../Core/Inc/time_tagging.h ../Core/Inc/rtc.h ../Core/Inc/main.h \
- ../Core/Inc/adc.h ../Core/Inc/dac.h ../Core/Inc/dma.h ../Core/Inc/i2c.h \
- ../Core/Inc/rtc.h ../Core/Inc/spi.h ../Core/Inc/tim.h \
- ../Core/Inc/usart.h ../Core/Inc/gpio.h ../Core/Inc/voltage_monitor.h \
- ../Core/Inc/sample_data.h ../Core/Inc/i2c.h ../Core/Inc/spi.h \
- ../Core/Inc/adc.h ../Core/Inc/dma.h
+ ../Core/Inc/adc.h ../Core/Inc/main.h ../Core/Inc/dac.h ../Core/Inc/dma.h \
+ ../Core/Inc/i2c.h ../Core/Inc/rtc.h ../Core/Inc/spi.h ../Core/Inc/tim.h \
+ ../Core/Inc/usart.h ../Core/Inc/gpio.h
 ../Core/Inc/main.h:
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h:
 ../Core/Inc/stm32h7xx_hal_conf.h:
@@ -100,7 +96,6 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_tim_ex.h:
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart.h:
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart_ex.h:
-../Core/Inc/flags.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h:
 ../Core/Inc/FreeRTOSConfig.h:
@@ -112,10 +107,8 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h:
-../Core/Inc/time_tagging.h:
-../Core/Inc/rtc.h:
-../Core/Inc/main.h:
 ../Core/Inc/adc.h:
+../Core/Inc/main.h:
 ../Core/Inc/dac.h:
 ../Core/Inc/dma.h:
 ../Core/Inc/i2c.h:
@@ -124,9 +117,3 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Core/Inc/tim.h:
 ../Core/Inc/usart.h:
 ../Core/Inc/gpio.h:
-../Core/Inc/voltage_monitor.h:
-../Core/Inc/sample_data.h:
-../Core/Inc/i2c.h:
-../Core/Inc/spi.h:
-../Core/Inc/adc.h:
-../Core/Inc/dma.h:

@@ -31,8 +31,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "flags.h"
-#include "time_tagging.h"
+
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -49,29 +48,6 @@ extern "C" {
 
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
-#define PMT_DATA_SIZE 10
-#define ERPA_DATA_SIZE 14
-#define HK_DATA_SIZE 54
-#define UART_RX_BUFFER_SIZE 64
-#define UART_TX_BUFFER_SIZE 1000
-#define UPTIME_SIZE 4
-#define TIMESTAMP_SIZE 10
-#define MSGQUEUE_OBJECTS 128
-#define ERROR_PACKET_DATA_SIZE 3
-
-#define PMT_SYNC 0xBB
-#define ERPA_SYNC 0xAA
-#define HK_SYNC 0xCC
-#define ERROR_SYNC 0xDD
-
-#define ACK 0xFF
-#define NACK 0x00
-
-extern volatile uint32_t uptime_millis;
-extern osMessageQueueId_t mid_MsgQueue;
-extern unsigned char UART_RX_BUFFER[UART_RX_BUFFER_SIZE];
-
-
 
 
 /* USER CODE END EM */

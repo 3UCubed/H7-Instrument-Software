@@ -1,8 +1,0 @@
-sample_data.c:14:9:init_adc_dma	5
-sample_data.c:50:9:poll_i2c_sensor	3
-sample_data.c:80:6:receive_pmt_spi	1
-sample_data.c:105:6:receive_erpa_spi	1
-sample_data.c:129:6:receive_erpa_adc	1
-sample_data.c:142:6:receive_hk_i2c	1
-sample_data.c:162:6:receive_hk_adc1	1
-sample_data.c:193:6:receive_hk_adc3	1
