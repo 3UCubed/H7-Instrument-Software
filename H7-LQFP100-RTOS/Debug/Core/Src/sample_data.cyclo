@@ -1,1 +1,2 @@
 sample_data.c:14:9:init_adc_dma	5
+sample_data.c:41:6:sample_pmt_spi	1

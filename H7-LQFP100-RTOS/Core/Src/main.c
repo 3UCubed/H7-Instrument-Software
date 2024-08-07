@@ -82,6 +82,8 @@ unsigned char UART_RX_BUFFER[UART_RX_BUFFER_SIZE];
 volatile uint8_t HK_ENABLED = 0;
 volatile uint8_t step = 3;
 volatile uint32_t cadence = 3125;
+volatile uint32_t uptime_millis = 0;
+volatile uint8_t tx_flag = 1;
 
 /* USER CODE END PV */
 
@@ -99,6 +101,13 @@ void sync();
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim) {
+	if (htim == &htim1) {
+		osEventFlagsSet(packet_event_flags, PMT_FLAG_ID);
+	}
+}
+
+
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
 	unsigned char key = UART_RX_BUFFER[0];
@@ -338,6 +347,11 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	}
 	}
 }
+
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
+	tx_flag = 1;
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -534,6 +548,7 @@ void system_setup() {
 		while (1);
 	}
 
+	// ---- 7 ---- //
 	HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
 
 }

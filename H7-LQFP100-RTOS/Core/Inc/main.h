@@ -32,11 +32,18 @@ extern "C" {
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "cmsis_os.h"			// For freeRTOS commands
+#include <stdio.h>				// For uint data types
+#include "string.h"				// For memcpy
+#include "stdlib.h"				// For malloc
 #include "voltage_monitor.h"	// For initializing voltage monitor in system_setup
 #include "sample_data.h"		// For initializing adc dma in system_setup
 
 #define MSGQUEUE_SIZE 128
 #define UART_RX_BUFFER_SIZE 64
+#define UART_TX_BUFFER_SIZE 1000
+#define PMT_DATA_SIZE 10
+#define HK_DATA_SIZE 54
+#define UPTIME_SIZE 4
 
 #define PMT_FLAG_ID 0x0001
 #define ERPA_FLAG_ID 0x0002
@@ -46,6 +53,9 @@ extern "C" {
 #define STOP_FLAG 0x0002
 #define AUTOINIT_FLAG 0x0004
 #define AUTODEINIT_FLAG 0x0008
+
+#define PMT_SYNC 0xBB
+
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -70,6 +80,9 @@ extern osEventFlagsId_t utility_event_flags;
 extern osMessageQueueId_t mid_MsgQueue;
 extern unsigned char UART_RX_BUFFER[UART_RX_BUFFER_SIZE];
 extern const gpio_pins gpios[];
+extern volatile uint32_t uptime_millis;
+extern volatile uint8_t tx_flag;
+
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/

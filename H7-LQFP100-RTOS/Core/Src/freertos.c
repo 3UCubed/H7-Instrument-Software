@@ -25,7 +25,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "usart.h"				// For uart handle
 #include "voltage_monitor.h"	// For AUTOINIT and AUTODEINIT tasks
+#include "packet_creation.h"	// For creating packets
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -147,6 +149,7 @@ void vApplicationTickHook( void )
    added here, but the tick hook is called from an interrupt context, so
    code must not attempt to block, and only the interrupt safe FreeRTOS API
    functions can be used (those that end in FromISR()). */
+	uptime_millis++;
 }
 /* USER CODE END 3 */
 
@@ -229,7 +232,11 @@ void PMT_init(void *argument)
   /* USER CODE BEGIN PMT_init */
   /* Infinite loop */
 	for (;;) {
-		osDelay(1);
+		osEventFlagsWait(packet_event_flags, PMT_FLAG_ID, osFlagsWaitAny, osWaitForever);
+
+		create_pmt_packet();
+
+		osThreadYield();
 	}
   /* USER CODE END PMT_init */
 }
@@ -340,8 +347,43 @@ void AUTODEINIT_init(void *argument)
 void UART_TX_init(void *argument)
 {
   /* USER CODE BEGIN UART_TX_init */
-	for (;;) {
-		osDelay(1);
+	static uint8_t tx_buffer[UART_TX_BUFFER_SIZE];
+
+	uint32_t total_size = 0;
+	osStatus_t status;
+	packet_t msg;
+
+	while (1) {
+		total_size = 0;
+		// Retrieve all messages from the queue and store them in tx_buffer
+		do {
+			status = osMessageQueueGet(mid_MsgQueue, &msg, NULL, osWaitForever);
+			if (status == osOK) {
+				if ((total_size + msg.size) < UART_TX_BUFFER_SIZE) {
+					memcpy(&tx_buffer[total_size], msg.array, msg.size);
+					free(msg.array);
+					total_size += msg.size;
+					if (total_size >= (UART_TX_BUFFER_SIZE - HK_DATA_SIZE)) {
+						break;
+					}
+				}
+			}
+		} while (osMessageQueueGetCount(mid_MsgQueue));
+
+		if (total_size > 0) {
+			HAL_UART_Transmit_DMA(&huart1, tx_buffer, total_size);
+
+			// Wait for transmission to complete
+			while (tx_flag == 0) {
+				osThreadYield();
+			}
+
+			// Reset the flag
+			tx_flag = 0;
+		}
+
+		// Yield thread control
+		osThreadYield();
 	}
   /* USER CODE END UART_TX_init */
 }

@@ -8,10 +8,9 @@
 #ifndef INC_VOLTAGE_MONITOR_H_
 #define INC_VOLTAGE_MONITOR_H_
 
-#include <stdio.h>	// For uint data types
-
 #define NUM_VOLTAGE_RAILS 18
 
+#include "main.h"
 
 // Private Typedefs
 typedef enum {

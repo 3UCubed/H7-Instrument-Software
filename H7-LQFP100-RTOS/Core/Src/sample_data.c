@@ -37,3 +37,21 @@ uint8_t init_adc_dma() {
 
 	return status;
 }
+
+void sample_pmt_spi(uint8_t *buffer) {
+	uint8_t spi_raw_data[2];
+	uint8_t spi_MSB;
+	uint8_t spi_LSB;
+
+	HAL_SPI_Receive(&hspi1, (uint8_t*) spi_raw_data, 1, 1);
+
+	spi_LSB = ((spi_raw_data[0] & 0xFF00) >> 8);
+	spi_MSB = (spi_raw_data[1] & 0xFF);
+
+	hspi1.Instance->CR1 |= 1 << 10;
+
+	buffer[0] = spi_MSB;
+	buffer[1] = spi_LSB;
+}
+
+
