@@ -56,7 +56,8 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+osEventFlagsId_t event_flags;
+osMessageQueueId_t mid_MsgQueue;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -226,7 +227,41 @@ void PeriphCommonClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 void system_setup() {
+	// 1 -- Init event flags
+	// 2 -- Init message queue
+	// 3 -- Init rail monitor
+	// 4 -- Start timer 3
+	// 5 -- Set timer 2 PWM
+	// 6 -- Init ADC DMA
 
+
+	// ---- 1 ---- //
+	event_flags = osEventFlagsNew(NULL);
+    if (event_flags == NULL) {
+        while (1);
+    }
+
+	// ---- 2 ---- //
+	mid_MsgQueue = osMessageQueueNew(MSGQUEUE_SIZE, sizeof(packet_t), NULL);
+	if (mid_MsgQueue == NULL) {
+		while (1);
+	}
+
+	// ---- 3 ---- //
+	if (!voltage_monitor_init()) {
+		while (1);
+	}
+
+	// ---- 4 ---- //
+	HAL_TIM_OC_Start_IT(&htim3, TIM_CHANNEL_1);
+
+	// ---- 5 ---- //
+	TIM2->CCR4 = 312;
+
+	// ---- 6 ---- //
+	if (!init_adc_dma()) {
+		while (1);
+	}
 }
 
 /* USER CODE END 4 */

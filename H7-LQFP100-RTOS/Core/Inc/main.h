@@ -31,25 +31,28 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "cmsis_os.h"
+#include "voltage_monitor.h"
+#include "sample_data.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
-
+typedef struct {
+	uint8_t *array;  // Pointer to the array data
+	uint16_t size;   // Size of the array
+} packet_t;
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
-
-
-
+extern osEventFlagsId_t event_flags;
+extern osMessageQueueId_t mid_MsgQueue;
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
-
-
+#define MSGQUEUE_SIZE 128
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
