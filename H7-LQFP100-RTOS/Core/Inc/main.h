@@ -41,8 +41,11 @@ extern "C" {
 #define PMT_FLAG_ID 0x0001
 #define ERPA_FLAG_ID 0x0002
 #define HK_FLAG_ID 0x0004
-#define VOLTAGE_MONITOR_FLAG_ID 0x0008
-#define STOP_FLAG 0x0016
+
+#define VOLTAGE_MONITOR_FLAG_ID 0x0001
+#define STOP_FLAG 0x0002
+#define AUTOINIT_FLAG 0x0004
+#define AUTODEINIT_FLAG 0x0008
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -61,9 +64,12 @@ typedef struct {
 
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
-extern osEventFlagsId_t event_flags;
+extern osEventFlagsId_t packet_event_flags;
+extern osEventFlagsId_t utility_event_flags;
+
 extern osMessageQueueId_t mid_MsgQueue;
 extern unsigned char UART_RX_BUFFER[UART_RX_BUFFER_SIZE];
+extern const gpio_pins gpios[];
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/

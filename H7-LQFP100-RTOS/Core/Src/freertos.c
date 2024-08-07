@@ -25,7 +25,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "voltage_monitor.h"	// For AUTOINIT and AUTODEINIT tasks
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -279,10 +279,22 @@ void AUTOINIT_init(void *argument)
 {
   /* USER CODE BEGIN AUTOINIT_init */
   /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
+	for (;;) {
+
+		osEventFlagsWait(utility_event_flags, AUTOINIT_FLAG, osFlagsWaitAny, osWaitForever);
+
+		// Enabling all voltages from SDN1 to 15V (inclusive)
+		for (int i = 0; i < 7; i++) {
+			HAL_GPIO_WritePin(gpios[i].gpio, gpios[i].pin, GPIO_PIN_SET);
+			osDelay(100);
+		}
+
+		// Telling rail monitor which rails are now enabled
+		for (int i = RAIL_2v5; i <= RAIL_15v; i++){
+			set_rail_monitor_enable(i, 1);
+		}
+		osThreadYield();
+	}
   /* USER CODE END AUTOINIT_init */
 }
 
@@ -297,10 +309,24 @@ void AUTODEINIT_init(void *argument)
 {
   /* USER CODE BEGIN AUTODEINIT_init */
   /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
+	for (;;) {
+
+		osEventFlagsWait(utility_event_flags, AUTODEINIT_FLAG, osFlagsWaitAny, osWaitForever);
+
+		// Telling rail monitor which rails are now disabled
+		for (int i = RAIL_15v; i >= RAIL_2v5; i--){
+			set_rail_monitor_enable(i, 0);
+		}
+
+		// Disabling all voltages from 15V to SDN1 (inclusive)
+		for (int i = 6; i >= 0; i--) {
+			HAL_GPIO_WritePin(gpios[i].gpio, gpios[i].pin, GPIO_PIN_RESET);
+			osDelay(100);
+		}
+
+
+		osThreadYield();
+	}
   /* USER CODE END AUTODEINIT_init */
 }
 

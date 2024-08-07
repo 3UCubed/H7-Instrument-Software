@@ -75,7 +75,8 @@ uint32_t DAC_OUT[32] = { 0, 0, 620, 620, 1241, 1241, 1861, 1861, 2482, 2482,
 		3103, 3103, 3723, 3723, 4095, 4095, 4095, 4095, 3723, 3723, 3103, 3103,
 		2482, 2482, 1861, 1861, 1241, 1241, 620, 620, 0, 0 }; // For 3.3 volts
 
-osEventFlagsId_t event_flags;
+osEventFlagsId_t packet_event_flags;
+osEventFlagsId_t utility_event_flags;
 osMessageQueueId_t mid_MsgQueue;
 unsigned char UART_RX_BUFFER[UART_RX_BUFFER_SIZE];
 volatile uint8_t HK_ENABLED = 0;
@@ -237,7 +238,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	case 0x1A: {
 		printf("ERPA ON\n");
 		HAL_TIM_OC_Start_IT(&htim2, TIM_CHANNEL_4);
-		osEventFlagsSet(event_flags, ERPA_FLAG_ID);
+		osEventFlagsSet(packet_event_flags, ERPA_FLAG_ID);
 		break;
 	}
 	case 0x0A: {
@@ -248,7 +249,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	case 0x1B: {
 		printf("PMT ON\n");
 		HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_1);
-		osEventFlagsSet(event_flags, PMT_FLAG_ID);
+		osEventFlagsSet(packet_event_flags, PMT_FLAG_ID);
 		break;
 	}
 	case 0x0B: {
@@ -258,7 +259,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	}
 	case 0x1C: {
 		printf("HK ON \n");
-		osEventFlagsSet(event_flags, HK_FLAG_ID);
+		osEventFlagsSet(packet_event_flags, HK_FLAG_ID);
 		HK_ENABLED = 1;
 		break;
 	}
@@ -305,17 +306,17 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	}
 	case 0x0F: {
 		printf("Enter STOP mode\n");
-		osEventFlagsSet(event_flags, STOP_FLAG);
+		osEventFlagsSet(utility_event_flags, STOP_FLAG);
 		break;
 	}
 	case 0xE0: {
 		printf("Auto Init\n");
-		// TODO: set a flag to start it
+		osEventFlagsSet(utility_event_flags, AUTOINIT_FLAG);
 		break;
 	}
 	case 0xD0: {
 		printf("Auto Deinit\n");
-		// TODO: set a flag to start it
+		osEventFlagsSet(utility_event_flags, AUTODEINIT_FLAG);
 		break;
 	}
 	case 0xAF: {
@@ -501,8 +502,13 @@ void system_setup() {
 
 
 	// ---- 1 ---- //
-	event_flags = osEventFlagsNew(NULL);
-    if (event_flags == NULL) {
+	packet_event_flags = osEventFlagsNew(NULL);
+    if (packet_event_flags == NULL) {
+        while (1);
+    }
+
+    utility_event_flags = osEventFlagsNew(NULL);
+    if (utility_event_flags == NULL) {
         while (1);
     }
 
