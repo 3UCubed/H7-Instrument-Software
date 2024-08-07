@@ -53,7 +53,8 @@ Core/Src/sample_data.o: ../Core/Src/sample_data.c \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h \
- ../Core/Inc/spi.h ../Core/Inc/adc.h ../Core/Inc/dma.h
+ ../Core/Inc/time_tagging.h ../Core/Inc/rtc.h ../Core/Inc/spi.h \
+ ../Core/Inc/adc.h ../Core/Inc/dma.h
 ../Core/Inc/sample_data.h:
 ../Core/Inc/i2c.h:
 ../Core/Inc/main.h:
@@ -110,6 +111,8 @@ Core/Src/sample_data.o: ../Core/Src/sample_data.c \
 ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h:
+../Core/Inc/time_tagging.h:
+../Core/Inc/rtc.h:
 ../Core/Inc/spi.h:
 ../Core/Inc/adc.h:
 ../Core/Inc/dma.h:

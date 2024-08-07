@@ -7,6 +7,9 @@
 
 #include "sample_data.h"
 
+ALIGN_32BYTES(static uint16_t ADC1_raw_data[ADC1_NUM_CHANNELS]);
+ALIGN_32BYTES(static uint16_t ADC3_raw_data[ADC3_NUM_CHANNELS]);
+
 // Public Functions
 uint8_t init_adc_dma() {
 	uint8_t status = 0;

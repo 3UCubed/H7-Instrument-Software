@@ -1,0 +1,13 @@
+main.c:119:6:HAL_TIM_OC_DelayElapsedCallback	4
+main.c:155:6:HAL_UART_RxCpltCallback	42
+main.c:398:5:main	1
+main.c:462:6:SystemClock_Config	4
+main.c:522:6:PeriphCommonClock_Config	2
+main.c:550:6:enter_stop	1
+main.c:568:6:sync	2
+main.c:587:6:send_ACK	1
+main.c:595:6:send_NACK	1
+main.c:604:6:HAL_UART_TxCpltCallback	1
+main.c:609:6:system_setup	1
+main.c:627:6:HAL_TIM_PeriodElapsedCallback	2
+main.c:644:6:Error_Handler	1

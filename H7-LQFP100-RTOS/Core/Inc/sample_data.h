@@ -16,8 +16,6 @@
 #define ADC1_NUM_CHANNELS 11
 #define ADC3_NUM_CHANNELS 4
 
-ALIGN_32BYTES(static uint16_t ADC1_raw_data[ADC1_NUM_CHANNELS]);
-ALIGN_32BYTES(static uint16_t ADC3_raw_data[ADC3_NUM_CHANNELS]);
 
 static const uint8_t REG_TEMP = 0x00;
 static const uint8_t ADT7410_1 = 0x48 << 1;

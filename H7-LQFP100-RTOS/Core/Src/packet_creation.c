@@ -7,6 +7,38 @@
 
 #include "packet_creation.h"
 
+uint16_t pmt_seq = 0;
+uint32_t erpa_seq = 0;
+uint16_t hk_seq = 0;
+
+
+uint8_t get_current_step() {
+	int dac_value;
+
+	dac_value = DAC1->DHR12R1;
+
+	switch (dac_value) {
+	case 0:
+		return 0;
+	case 620:
+		return 1;
+	case 1241:
+		return 2;
+	case 1861:
+		return 3;
+	case 2482:
+		return 4;
+	case 3103:
+		return 5;
+	case 3723:
+		return 6;
+	case 4095:
+		return 7;
+	default:
+		return -1;
+	}
+}
+
 packet_t create_packet(const uint8_t *data, uint16_t size) {
 	packet_t packet;
 	packet.array = (uint8_t*) malloc(size * sizeof(uint8_t));
@@ -51,6 +83,7 @@ void sample_pmt() {
 
 	packet_t pmt_packet = create_packet(buffer, PMT_DATA_SIZE);
 	osMessageQueuePut(mid_MsgQueue, &pmt_packet, 0U, 0U);
+	pmt_seq++;
 	free(buffer);
 	free(pmt_spi);
 	free(uptime);
@@ -99,6 +132,7 @@ void sample_erpa() {
 
 	packet_t erpa_packet = create_packet(buffer, ERPA_DATA_SIZE);
 	osMessageQueuePut(mid_MsgQueue, &erpa_packet, 0U, 0U);
+	erpa_seq++;
 	free(buffer);
 	free(erpa_spi);
 	free(erpa_adc);
@@ -116,53 +150,56 @@ void sample_erpa() {
  * subsequently freed.
  */
 void sample_hk() {
+	VOLTAGE_RAIL *rail_monitor_ptr;
 	uint8_t *buffer = (uint8_t*) malloc(HK_DATA_SIZE * sizeof(uint8_t));
 	uint8_t *timestamp = (uint8_t*) malloc(TIMESTAMP_SIZE * sizeof(uint8_t));
 	uint8_t *uptime = (uint8_t*) malloc(UPTIME_SIZE * sizeof(uint8_t));
 
 	get_uptime(uptime);
-	getTimestamp(timestamp);
+	get_timestamp(timestamp);
+	rail_monitor_ptr = get_rail_monitor();
+
 
 	buffer[0] = HK_SYNC;                     	// HK SYNC 0xCC MSB
 	buffer[1] = HK_SYNC;                     	// HK SYNC 0xCC LSB
 	buffer[2] = ((hk_seq & 0xFF00) >> 8);    	// HK SEQ # MSB
 	buffer[3] = (hk_seq & 0xFF);             	// HK SEQ # LSB
-	buffer[4] = ((rail_monitor[RAIL_vsense].data & 0xFF00) >> 8);		// HK vsense MSB
-	buffer[5] = (rail_monitor[RAIL_vsense].data & 0xFF);				// HK vsense LSB
-	buffer[6] = ((rail_monitor[RAIL_vrefint].data & 0xFF00) >> 8);		// HK vrefint MSB
-	buffer[7] = (rail_monitor[RAIL_vrefint].data & 0xFF);				// HK vrefint LSB
-	buffer[8] = ((rail_monitor[RAIL_TEMP1].data & 0xFF00) >> 8);	// HK TEMP1 MSB
-	buffer[9] = (rail_monitor[RAIL_TEMP1].data & 0xFF);				// HK TEMP1 LSB
-	buffer[10] = ((rail_monitor[RAIL_TEMP2].data & 0xFF00) >> 8);	// HK TEMP2 MSB
-	buffer[11] = (rail_monitor[RAIL_TEMP2].data & 0xFF);			// HK TEMP2 LSB
-	buffer[12] = ((rail_monitor[RAIL_TEMP3].data & 0xFF00) >> 8);	// HK TEMP3 MSB
-	buffer[13] = (rail_monitor[RAIL_TEMP3].data & 0xFF);			// HK TEMP3 LSB
-	buffer[14] = ((rail_monitor[RAIL_TEMP4].data & 0xFF00) >> 8);	// HK TEMP4 MSB
-	buffer[15] = (rail_monitor[RAIL_TEMP4].data & 0xFF);			// HK TEMP4 LSB
-	buffer[16] = ((rail_monitor[RAIL_busvmon].data & 0xFF00) >> 8);	// HK BUSvmon MSB
-	buffer[17] = (rail_monitor[RAIL_busvmon].data & 0xFF);				// HK BUSvmon LSB
-	buffer[18] = ((rail_monitor[RAIL_busimon].data & 0xFF00) >> 8);	// HK BUSimon MSB
-	buffer[19] = (rail_monitor[RAIL_busimon].data & 0xFF);				// HK BUSimon LSB
-	buffer[20] = ((rail_monitor[RAIL_2v5].data & 0xFF00) >> 8);		// HK 2v5mon MSB
-	buffer[21] = (rail_monitor[RAIL_2v5].data & 0xFF);					// HK 2v5mon LSB
-	buffer[22] = ((rail_monitor[RAIL_3v3].data & 0xFF00) >> 8);		// HK 3v3mon MSB
-	buffer[23] = (rail_monitor[RAIL_3v3].data & 0xFF);					// HK 3v3mon LSB
-	buffer[24] = ((rail_monitor[RAIL_5v].data & 0xFF00) >> 8);			// HK 5vmon MSB
-	buffer[25] = (rail_monitor[RAIL_5v].data & 0xFF);					// HK 5vmon LSB
-	buffer[26] = ((rail_monitor[RAIL_n3v3].data & 0xFF00) >> 8);		// HK n3v3mon MSB
-	buffer[27] = (rail_monitor[RAIL_n3v3].data & 0xFF);				// HK n3v3mon LSB
-	buffer[28] = ((rail_monitor[RAIL_n5v].data & 0xFF00) >> 8);		// HK n5vmon MSB
-	buffer[29] = (rail_monitor[RAIL_n5v].data & 0xFF);					// HK n5vmon LSB
-	buffer[30] = ((rail_monitor[RAIL_15v].data & 0xFF00) >> 8);		// HK 15vmon MSB
-	buffer[31] = (rail_monitor[RAIL_15v].data & 0xFF);					// HK 15vmon LSB
-	buffer[32] = ((rail_monitor[RAIL_5vref].data & 0xFF00) >> 8);		// HK 5vrefmon MSB
-	buffer[33] = (rail_monitor[RAIL_5vref].data & 0xFF);				// HK 5vrefmon LSB
-	buffer[34] = ((rail_monitor[RAIL_n200v].data & 0xFF00) >> 8);		// HK n150vmon MSB
-	buffer[35] = (rail_monitor[RAIL_n200v].data & 0xFF);				// HK n150vmon LSB
-	buffer[36] = ((rail_monitor[RAIL_n800v].data & 0xFF00) >> 8);		// HK n800vmon MSB
-	buffer[37] = (rail_monitor[RAIL_n800v].data & 0xFF);				// HK n800vmon LSB
-	buffer[38] = ((rail_monitor[RAIL_TMP1].data & 0xFF00) >> 8);  // TEMPURATURE 1 MSB
-	buffer[39] = (rail_monitor[RAIL_TMP1].data & 0xFF);           // TEMPURATURE 1 LSB
+	buffer[4] = ((rail_monitor_ptr[RAIL_vsense].data & 0xFF00) >> 8);		// HK vsense MSB
+	buffer[5] = (rail_monitor_ptr[RAIL_vsense].data & 0xFF);				// HK vsense LSB
+	buffer[6] = ((rail_monitor_ptr[RAIL_vrefint].data & 0xFF00) >> 8);		// HK vrefint MSB
+	buffer[7] = (rail_monitor_ptr[RAIL_vrefint].data & 0xFF);				// HK vrefint LSB
+	buffer[8] = ((rail_monitor_ptr[RAIL_TEMP1].data & 0xFF00) >> 8);	// HK TEMP1 MSB
+	buffer[9] = (rail_monitor_ptr[RAIL_TEMP1].data & 0xFF);				// HK TEMP1 LSB
+	buffer[10] = ((rail_monitor_ptr[RAIL_TEMP2].data & 0xFF00) >> 8);	// HK TEMP2 MSB
+	buffer[11] = (rail_monitor_ptr[RAIL_TEMP2].data & 0xFF);			// HK TEMP2 LSB
+	buffer[12] = ((rail_monitor_ptr[RAIL_TEMP3].data & 0xFF00) >> 8);	// HK TEMP3 MSB
+	buffer[13] = (rail_monitor_ptr[RAIL_TEMP3].data & 0xFF);			// HK TEMP3 LSB
+	buffer[14] = ((rail_monitor_ptr[RAIL_TEMP4].data & 0xFF00) >> 8);	// HK TEMP4 MSB
+	buffer[15] = (rail_monitor_ptr[RAIL_TEMP4].data & 0xFF);			// HK TEMP4 LSB
+	buffer[16] = ((rail_monitor_ptr[RAIL_busvmon].data & 0xFF00) >> 8);	// HK BUSvmon MSB
+	buffer[17] = (rail_monitor_ptr[RAIL_busvmon].data & 0xFF);				// HK BUSvmon LSB
+	buffer[18] = ((rail_monitor_ptr[RAIL_busimon].data & 0xFF00) >> 8);	// HK BUSimon MSB
+	buffer[19] = (rail_monitor_ptr[RAIL_busimon].data & 0xFF);				// HK BUSimon LSB
+	buffer[20] = ((rail_monitor_ptr[RAIL_2v5].data & 0xFF00) >> 8);		// HK 2v5mon MSB
+	buffer[21] = (rail_monitor_ptr[RAIL_2v5].data & 0xFF);					// HK 2v5mon LSB
+	buffer[22] = ((rail_monitor_ptr[RAIL_3v3].data & 0xFF00) >> 8);		// HK 3v3mon MSB
+	buffer[23] = (rail_monitor_ptr[RAIL_3v3].data & 0xFF);					// HK 3v3mon LSB
+	buffer[24] = ((rail_monitor_ptr[RAIL_5v].data & 0xFF00) >> 8);			// HK 5vmon MSB
+	buffer[25] = (rail_monitor_ptr[RAIL_5v].data & 0xFF);					// HK 5vmon LSB
+	buffer[26] = ((rail_monitor_ptr[RAIL_n3v3].data & 0xFF00) >> 8);		// HK n3v3mon MSB
+	buffer[27] = (rail_monitor_ptr[RAIL_n3v3].data & 0xFF);				// HK n3v3mon LSB
+	buffer[28] = ((rail_monitor_ptr[RAIL_n5v].data & 0xFF00) >> 8);		// HK n5vmon MSB
+	buffer[29] = (rail_monitor_ptr[RAIL_n5v].data & 0xFF);					// HK n5vmon LSB
+	buffer[30] = ((rail_monitor_ptr[RAIL_15v].data & 0xFF00) >> 8);		// HK 15vmon MSB
+	buffer[31] = (rail_monitor_ptr[RAIL_15v].data & 0xFF);					// HK 15vmon LSB
+	buffer[32] = ((rail_monitor_ptr[RAIL_5vref].data & 0xFF00) >> 8);		// HK 5vrefmon MSB
+	buffer[33] = (rail_monitor_ptr[RAIL_5vref].data & 0xFF);				// HK 5vrefmon LSB
+	buffer[34] = ((rail_monitor_ptr[RAIL_n200v].data & 0xFF00) >> 8);		// HK n150vmon MSB
+	buffer[35] = (rail_monitor_ptr[RAIL_n200v].data & 0xFF);				// HK n150vmon LSB
+	buffer[36] = ((rail_monitor_ptr[RAIL_n800v].data & 0xFF00) >> 8);		// HK n800vmon MSB
+	buffer[37] = (rail_monitor_ptr[RAIL_n800v].data & 0xFF);				// HK n800vmon LSB
+	buffer[38] = ((rail_monitor_ptr[RAIL_TMP1].data & 0xFF00) >> 8);  // TEMPURATURE 1 MSB
+	buffer[39] = (rail_monitor_ptr[RAIL_TMP1].data & 0xFF);           // TEMPURATURE 1 LSB
 	buffer[40] = timestamp[0];
 	buffer[41] = timestamp[1];
 	buffer[42] = timestamp[2];
@@ -180,7 +217,7 @@ void sample_hk() {
 
 	packet_t hk_packet = create_packet(buffer, HK_DATA_SIZE);
 	osMessageQueuePut(mid_MsgQueue, &hk_packet, 0U, 0U);
-
+	hk_seq++;
 	free(buffer);
 	free(timestamp);
 	free(uptime);

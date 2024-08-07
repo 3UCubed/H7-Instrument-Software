@@ -69,7 +69,7 @@ typedef struct {
 
 /* USER CODE BEGIN PV */
 // *********************************************************************************************************** GLOBAL VARIABLES
-
+unsigned char UART_RX_BUFFER[UART_RX_BUFFER_SIZE];
 uint32_t DAC_OUT[32] = { 0, 0, 620, 620, 1241, 1241, 1861, 1861, 2482, 2482,
 		3103, 3103, 3723, 3723, 4095, 4095, 4095, 4095, 3723, 3723, 3103, 3103,
 		2482, 2482, 1861, 1861, 1241, 1241, 620, 620, 0, 0 }; // For 3.3 volts
@@ -86,8 +86,10 @@ const gpio_pins gpios[] = {
 { GPIOB, GPIO_PIN_6 }	// 8 -- 800HVON
 };
 
-osEventFlagsId_t event_flags;
 volatile uint8_t HK_10_second_counter = 0;
+volatile uint8_t step = 3;
+volatile uint32_t cadence = 3125;
+volatile int tx_flag = 1;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -97,7 +99,9 @@ void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
 // *********************************************************************************************************** FUNCTION PROTOYPES
 void system_setup();
-
+void sync();
+void send_ACK();
+void send_NACK();
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -288,37 +292,31 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		printf("ERPA ON\n");
 		HAL_TIM_OC_Start_IT(&htim2, TIM_CHANNEL_4);
 		osEventFlagsSet(event_flags, ERPA_FLAG_ID);
-		ERPA_ON = 1;
 		break;
 	}
 	case 0x0A: {
 		printf("ERPA OFF\n");
 		HAL_TIM_OC_Stop_IT(&htim2, TIM_CHANNEL_4);
-		ERPA_ON = 0;
 		break;
 	}
 	case 0x1B: {
 		printf("PMT ON\n");
 		HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_1);
 		osEventFlagsSet(event_flags, PMT_FLAG_ID);
-		PMT_ON = 1;
 		break;
 	}
 	case 0x0B: {
 		printf("PMT OFF\n");
 		HAL_TIM_OC_Stop_IT(&htim1, TIM_CHANNEL_1);
-		PMT_ON = 0;
 		break;
 	}
 	case 0x1C: {
 		printf("HK ON \n");
 		osEventFlagsSet(event_flags, HK_FLAG_ID);
-		HK_ON = 1;
 		break;
 	}
 	case 0x0C: {
 		printf("HK OFF\n");
-		HK_ON = 0;
 		break;
 	}
 	case 0x1D: {
@@ -364,12 +362,12 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	}
 	case 0xE0: {
 		printf("Auto Init\n");
-		xTaskResumeFromISR(GPIO_on_taskHandle);
+		// TODO: set a flag to start it
 		break;
 	}
 	case 0xD0: {
 		printf("Auto Deinit\n");
-		xTaskResumeFromISR(GPIO_off_taskHandle);
+		// TODO: set a flag to start it
 		break;
 	}
 	case 0xAF: {
@@ -377,11 +375,12 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		break;
 	}
 	case 0xBF: {
-		xTaskResumeFromISR(Science_taskHandle);
+		// TODO: set a flag to start science mode
+
 		break;
 	}
 	case 0xCF: {
-		xTaskResumeFromISR(Idle_taskHandle);
+		// TODO: set a flag to start idle mode
 		break;
 	}
 	default: {
@@ -545,32 +544,7 @@ void PeriphCommonClock_Config(void)
 /* USER CODE BEGIN 4 */
 // *********************************************************************************************************** HELPER FUNCTIONS
 
-uint8_t get_current_step() {
-	int dac_value;
 
-	dac_value = DAC1->DHR12R1;
-
-	switch (dac_value) {
-	case 0:
-		return 0;
-	case 620:
-		return 1;
-	case 1241:
-		return 2;
-	case 1861:
-		return 3;
-	case 2482:
-		return 4;
-	case 3103:
-		return 5;
-	case 3723:
-		return 6;
-	case 4095:
-		return 7;
-	default:
-		return -1;
-	}
-}
 
 
 void enter_stop() {

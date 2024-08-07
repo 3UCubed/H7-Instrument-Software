@@ -7,6 +7,9 @@
 
 #include "voltage_monitor.h"
 
+VOLTAGE_RAIL rail_monitor[NUM_VOLTAGE_RAILS];
+
+
 uint8_t set_rail_monitor_enable(VOLTAGE_RAIL_NAME rail_name, uint8_t enable_value) {
 	uint8_t status = 0;
 	rail_monitor[rail_name].is_enabled = enable_value;

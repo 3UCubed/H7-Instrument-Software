@@ -9,6 +9,8 @@
 #define INC_VOLTAGE_MONITOR_H_
 
 #include "sample_data.h"
+#include <stdlib.h>
+
 
 #define NUM_VOLTAGE_RAILS 18
 
@@ -44,7 +46,6 @@ typedef struct {
 	uint16_t min_voltage;
 } VOLTAGE_RAIL;
 
-VOLTAGE_RAIL rail_monitor[NUM_VOLTAGE_RAILS];
 
 uint8_t voltage_monitor_init();
 VOLTAGE_RAIL* get_rail_monitor();

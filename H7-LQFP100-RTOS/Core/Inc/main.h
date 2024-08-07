@@ -32,6 +32,7 @@ extern "C" {
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "flags.h"
+#include "time_tagging.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -41,8 +42,7 @@ extern "C" {
 
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
-extern volatile uint32_t uptime_millis;
-extern osMessageQueueId_t mid_MsgQueue;
+
 
 
 /* USER CODE END EC */
@@ -66,6 +66,14 @@ extern osMessageQueueId_t mid_MsgQueue;
 
 #define ACK 0xFF
 #define NACK 0x00
+
+extern volatile uint32_t uptime_millis;
+extern osMessageQueueId_t mid_MsgQueue;
+extern unsigned char UART_RX_BUFFER[UART_RX_BUFFER_SIZE];
+
+
+
+
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
