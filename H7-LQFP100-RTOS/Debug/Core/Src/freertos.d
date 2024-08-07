@@ -56,7 +56,7 @@ Core/Src/freertos.o: ../Core/Src/freertos.c \
  ../Core/Inc/error_packet_handler.h ../Core/Inc/voltage_monitor.h \
  ../Core/Inc/sample_data.h ../Core/Inc/i2c.h ../Core/Inc/spi.h \
  ../Core/Inc/adc.h ../Core/Inc/dma.h ../Core/Inc/packet_creation.h \
- ../Core/Inc/flags.h
+ ../Core/Inc/flags.h ../Core/Inc/usart.h
 ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h:
 ../Core/Inc/FreeRTOSConfig.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h:
@@ -123,3 +123,4 @@ Core/Src/freertos.o: ../Core/Src/freertos.c \
 ../Core/Inc/dma.h:
 ../Core/Inc/packet_creation.h:
 ../Core/Inc/flags.h:
+../Core/Inc/usart.h:

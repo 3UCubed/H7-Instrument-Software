@@ -89,7 +89,7 @@ const gpio_pins gpios[] = {
 volatile uint8_t HK_10_second_counter = 0;
 volatile uint8_t step = 3;
 volatile uint32_t cadence = 3125;
-volatile int tx_flag = 1;
+volatile uint8_t HK_ENABLED = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -127,13 +127,15 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim) {
 // - If flight mode is defined, we only create HK packets every 100 interrupts of TIM3 (running at 100ms)
 // - Otherwise, we create HK packets every time TIM3 interrupts
 #ifdef FLIGHT_MODE
-		if (HK_10_second_counter == 100) {
+		if (HK_10_second_counter == 100 && HK_ENABLED) {
 			osEventFlagsSet(event_flags, HK_FLAG_ID);
 			HK_10_second_counter = 0;
 		}
 		HK_10_second_counter++;
 #else
-		osEventFlagsSet(event_flags, HK_FLAG_ID);
+		if (HK_ENABLED){
+			osEventFlagsSet(event_flags, HK_FLAG_ID);
+		}
 #endif
 
 	} else {
@@ -313,10 +315,12 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	case 0x1C: {
 		printf("HK ON \n");
 		osEventFlagsSet(event_flags, HK_FLAG_ID);
+		HK_ENABLED = 1;
 		break;
 	}
 	case 0x0C: {
 		printf("HK OFF\n");
+		HK_ENABLED = 0;
 		break;
 	}
 	case 0x1D: {
@@ -601,9 +605,7 @@ void send_NACK() {
 }
 
 
-void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
-	tx_flag = 1;
-}
+
 
 
 void system_setup() {
