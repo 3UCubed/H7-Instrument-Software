@@ -55,7 +55,7 @@ Core/Src/freertos.o: ../Core/Src/freertos.c \
  ../Core/Inc/sample_data.h ../Core/Inc/adc.h ../Core/Inc/spi.h \
  ../Core/Inc/i2c.h ../Core/Inc/time_tagging.h ../Core/Inc/rtc.h \
  ../Core/Inc/usart.h ../Core/Inc/voltage_monitor.h \
- ../Core/Inc/packet_creation.h
+ ../Core/Inc/packet_creation.h ../Core/Inc/dac.h ../Core/Inc/tim.h
 ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h:
 ../Core/Inc/FreeRTOSConfig.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h:
@@ -120,3 +120,5 @@ Core/Src/freertos.o: ../Core/Src/freertos.c \
 ../Core/Inc/usart.h:
 ../Core/Inc/voltage_monitor.h:
 ../Core/Inc/packet_creation.h:
+../Core/Inc/dac.h:
+../Core/Inc/tim.h:

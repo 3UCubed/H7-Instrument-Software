@@ -28,6 +28,8 @@
 #include "usart.h"				// For uart handle
 #include "voltage_monitor.h"	// For AUTOINIT and AUTODEINIT tasks
 #include "packet_creation.h"	// For creating packets
+#include "dac.h"				// For Science/Idle modes
+#include "tim.h"				// For Science/Idle modes
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -54,21 +56,21 @@ osThreadId_t PMT_taskHandle;
 const osThreadAttr_t PMT_task_attributes = {
   .name = "PMT_task",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityRealtime1,
 };
 /* Definitions for ERPA_task */
 osThreadId_t ERPA_taskHandle;
 const osThreadAttr_t ERPA_task_attributes = {
   .name = "ERPA_task",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityRealtime1,
 };
 /* Definitions for HK_task */
 osThreadId_t HK_taskHandle;
 const osThreadAttr_t HK_task_attributes = {
   .name = "HK_task",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityRealtime,
 };
 /* Definitions for AUTOINIT_task */
 osThreadId_t AUTOINIT_taskHandle;
@@ -96,7 +98,7 @@ osThreadId_t Voltage_MonitorHandle;
 const osThreadAttr_t Voltage_Monitor_attributes = {
   .name = "Voltage_Monitor",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityHigh,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for STOP_task */
 osThreadId_t STOP_taskHandle;
@@ -463,10 +465,38 @@ void STOP_init(void *argument)
 void Science_init(void *argument)
 {
   /* USER CODE BEGIN Science_init */
-  /* Infinite loop */
+
+	/* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+		osEventFlagsWait(mode_event_flags, SCIENCE_FLAG, osFlagsWaitAny, osWaitForever);
+
+		// Enabling all voltages
+		for (int i = 0; i < 9; i++) {
+			HAL_GPIO_WritePin(gpios[i].gpio, gpios[i].pin, GPIO_PIN_SET);
+			osDelay(200);
+		}
+
+		// Telling rail monitor which voltages are now enabled
+		for (int i = RAIL_2v5; i <= RAIL_n800v; i++) {
+			set_rail_monitor_enable(i, 1);
+		}
+
+		__disable_irq();
+
+		HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, DAC_OUT, 32, DAC_ALIGN_12B_R);	// Enable auto sweep (doesn't start until ERPA timer is started)
+		HK_ENABLED = 1;
+		HAL_TIM_OC_Start_IT(&htim2, TIM_CHANNEL_4);			// ERPA packet on
+		HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_1);			// PMT packet on
+		osEventFlagsSet(packet_event_flags, HK_FLAG_ID);
+		osEventFlagsSet(packet_event_flags, ERPA_FLAG_ID);
+		osEventFlagsSet(packet_event_flags, PMT_FLAG_ID);
+
+		__enable_irq();
+
+		// Yield thread control
+		osThreadYield();
+
   }
   /* USER CODE END Science_init */
 }
@@ -481,10 +511,32 @@ void Science_init(void *argument)
 void Idle_init(void *argument)
 {
   /* USER CODE BEGIN Idle_init */
+
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+		osEventFlagsWait(mode_event_flags, IDLE_FLAG, osFlagsWaitAny, osWaitForever);
+
+
+		HAL_TIM_OC_Stop_IT(&htim2, TIM_CHANNEL_4);			// ERPA packet off
+		HAL_TIM_OC_Stop_IT(&htim1, TIM_CHANNEL_1);			// PMT packet off
+		HK_ENABLED = 0;
+		HAL_DAC_Stop_DMA(&hdac1, DAC_CHANNEL_1);			// Disable auto sweep
+
+		// Telling rail monitor which voltages are now disabled
+		for (int i = RAIL_n800v; i >= RAIL_2v5; i--) {
+			set_rail_monitor_enable(i, 0);
+		}
+
+		// Disabling all voltages
+		for (int i = 8; i >= 0; i--) {
+			HAL_GPIO_WritePin(gpios[i].gpio, gpios[i].pin, GPIO_PIN_RESET);
+			osDelay(200);
+		}
+
+		// Yield thread control
+		osThreadYield();
+
   }
   /* USER CODE END Idle_init */
 }

@@ -77,6 +77,8 @@ uint32_t DAC_OUT[32] = { 0, 0, 620, 620, 1241, 1241, 1861, 1861, 2482, 2482,
 
 osEventFlagsId_t packet_event_flags;
 osEventFlagsId_t utility_event_flags;
+osEventFlagsId_t mode_event_flags;
+
 osMessageQueueId_t mid_MsgQueue;
 unsigned char UART_RX_BUFFER[UART_RX_BUFFER_SIZE];
 volatile uint8_t HK_ENABLED = 0;
@@ -356,12 +358,11 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		break;
 	}
 	case 0xBF: {
-		// TODO: set a flag to start science mode
-
+		osEventFlagsSet(mode_event_flags, SCIENCE_FLAG);
 		break;
 	}
 	case 0xCF: {
-		// TODO: set a flag to start idle mode
+		osEventFlagsSet(mode_event_flags, IDLE_FLAG);
 		break;
 	}
 	default: {
@@ -546,6 +547,11 @@ void system_setup() {
 
     utility_event_flags = osEventFlagsNew(NULL);
     if (utility_event_flags == NULL) {
+        while (1);
+    }
+
+    mode_event_flags = osEventFlagsNew(NULL);
+    if (mode_event_flags == NULL) {
         while (1);
     }
 

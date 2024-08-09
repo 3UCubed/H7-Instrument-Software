@@ -57,6 +57,9 @@ extern "C" {
 #define AUTOINIT_FLAG 0x0004
 #define AUTODEINIT_FLAG 0x0008
 
+#define SCIENCE_FLAG 0x0001
+#define IDLE_FLAG 0x0002
+
 #define PMT_SYNC 0xBB
 #define ERPA_SYNC 0xAA
 #define HK_SYNC 0xCC
@@ -81,13 +84,15 @@ typedef struct {
 /* USER CODE BEGIN EC */
 extern osEventFlagsId_t packet_event_flags;
 extern osEventFlagsId_t utility_event_flags;
+extern osEventFlagsId_t mode_event_flags;
 
 extern osMessageQueueId_t mid_MsgQueue;
 extern unsigned char UART_RX_BUFFER[UART_RX_BUFFER_SIZE];
 extern const gpio_pins gpios[];
 extern volatile uint32_t uptime_millis;
 extern volatile uint8_t tx_flag;
-
+extern uint32_t DAC_OUT[32];
+extern volatile uint8_t HK_ENABLED;
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
