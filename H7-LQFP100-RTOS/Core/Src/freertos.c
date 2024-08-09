@@ -450,7 +450,10 @@ void STOP_init(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+	  osEventFlagsWait(utility_event_flags, STOP_FLAG, osFlagsWaitAny,osWaitForever);
+	  osEventFlagsClear(utility_event_flags, STOP_FLAG);
+
+	  enter_stop();
   }
   /* USER CODE END STOP_init */
 }

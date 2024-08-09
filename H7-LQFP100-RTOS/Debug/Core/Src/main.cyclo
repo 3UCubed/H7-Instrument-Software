@@ -9,5 +9,6 @@ main.c:585:6:sync	2
 main.c:603:6:send_ACK	1
 main.c:610:6:send_NACK	1
 main.c:618:9:get_current_step	15
-main.c:654:6:HAL_TIM_PeriodElapsedCallback	2
-main.c:671:6:Error_Handler	1
+main.c:645:6:enter_stop	1
+main.c:669:6:HAL_TIM_PeriodElapsedCallback	2
+main.c:686:6:Error_Handler	1

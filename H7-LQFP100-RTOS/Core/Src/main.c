@@ -641,6 +641,21 @@ uint8_t get_current_step() {
 		return -1;
 	}
 }
+
+void enter_stop() {
+	  send_ACK();
+
+	  vTaskSuspendAll();
+	  HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
+
+		// When MCU is triggered to wake up, it resumes right here.
+		// That's why it looks like we enter stop mode and then instantly
+		// configure the clock and resume tasks, but in reality the MCU
+		// just stops right here.
+
+	  SystemClock_Config();
+	  xTaskResumeAll();
+}
 /* USER CODE END 4 */
 
 /**

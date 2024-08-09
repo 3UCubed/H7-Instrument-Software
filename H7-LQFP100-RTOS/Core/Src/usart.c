@@ -67,6 +67,20 @@ void MX_USART1_UART_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN USART1_Init 2 */
+	/* Set the RXFIFO threshold */
+	HAL_UARTEx_SetRxFifoThreshold(&huart1, UART_RXFIFO_THRESHOLD_1_4);
+
+	/* Enable the FIFO mode */
+	HAL_UARTEx_EnableFifoMode(&huart1);
+
+	/* Enable MCU wakeup by UART */
+	HAL_UARTEx_EnableStopMode(&huart1);
+
+	/* Enable the UART RX FIFO threshold interrupt */
+	__HAL_UART_ENABLE_IT(&huart1, UART_IT_RXFT);
+
+	/* Enable the UART wakeup from stop mode interrupt */
+	__HAL_UART_ENABLE_IT(&huart1, UART_IT_WUF);
 
   /* USER CODE END USART1_Init 2 */
 

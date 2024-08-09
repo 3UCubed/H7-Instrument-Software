@@ -105,6 +105,7 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
 uint8_t get_current_step();
+void enter_stop();
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
