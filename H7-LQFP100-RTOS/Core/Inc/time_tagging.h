@@ -13,5 +13,6 @@
 
 void get_uptime(uint8_t *buffer);
 void get_timestamp(uint8_t *buffer);
-
+void calibrateRTC(uint8_t *buffer);
+HAL_StatusTypeDef RTC_SetTime(RTC_HandleTypeDef *hrtc, RTC_TimeTypeDef *sTime, uint32_t Format);
 #endif /* INC_TIME_TAGGING_H_ */

@@ -44,8 +44,6 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
-// TODO: HK packets
-
 //#define FLIGHT_MODE
 
 #define ACK 0xFF
@@ -590,7 +588,7 @@ void sync() {
 		key = UART_RX_BUFFER[0];
 	} while (key != 0xFF);
 
-	//calibrateRTC(UART_RX_BUFFER); // TODO: calibrate rtc
+	calibrateRTC(UART_RX_BUFFER); // TODO: calibrate rtc
 	HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
 
 	send_ACK();

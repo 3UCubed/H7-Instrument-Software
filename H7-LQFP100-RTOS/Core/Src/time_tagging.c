@@ -44,3 +44,88 @@ void get_timestamp(uint8_t *buffer) {
 	buffer[8] = ((milliseconds >> 8) & 0xFF);
 	buffer[9] = milliseconds & 0xFF;
 }
+
+void calibrateRTC(uint8_t *buffer) {
+	//    [0]     [1]     [2]     [3]     [4]     [5]     [6]     [7]     [8]
+	//    0xFF    Year   Month    Day     Hour   Minute  Second  ms MSB  ms LSB
+
+	RTC_DateTypeDef date_struct;
+	RTC_TimeTypeDef time_struct;
+	uint8_t year = buffer[1];
+	uint8_t month = buffer[2];
+	uint8_t day = buffer[3];
+	uint8_t hour = buffer[4];
+	uint8_t minute = buffer[5];
+	uint8_t second = buffer[6];
+	uint16_t milliseconds = (buffer[7] << 8) | buffer[8];
+
+	date_struct.Year = year;
+	date_struct.Month = month;
+	date_struct.Date = day;
+
+	time_struct.Hours = hour;
+	time_struct.Minutes = minute;
+	time_struct.Seconds = second;
+	time_struct.SubSeconds = milliseconds;
+
+	HAL_StatusTypeDef status;
+
+	status = HAL_RTC_SetDate(&hrtc, &date_struct, RTC_FORMAT_BIN);
+	if (status != HAL_OK) {
+		Error_Handler();
+	}
+	RTC_SetTime(&hrtc, &time_struct, RTC_FORMAT_BIN);
+}
+
+
+HAL_StatusTypeDef RTC_SetTime(RTC_HandleTypeDef *hrtc, RTC_TimeTypeDef *sTime,
+		uint32_t Format) {
+	uint32_t tmpreg;
+	HAL_StatusTypeDef status;
+
+	/* Process Locked */
+	__HAL_LOCK(hrtc);
+
+	hrtc->State = HAL_RTC_STATE_BUSY;
+
+	/* Disable the write protection for RTC registers */
+	__HAL_RTC_WRITEPROTECTION_DISABLE(hrtc);
+	/* Enter Initialization mode */
+	status = RTC_EnterInitMode(hrtc);
+	if (status == HAL_OK) {
+
+		sTime->TimeFormat = 0x00U;
+		assert_param(IS_RTC_HOUR24(sTime->Hours));
+
+		assert_param(IS_RTC_MINUTES(sTime->Minutes));
+		assert_param(IS_RTC_SECONDS(sTime->Seconds));
+
+		tmpreg = (uint32_t) (((uint32_t) RTC_ByteToBcd2(sTime->Hours)
+				<< RTC_TR_HU_Pos)
+				| ((uint32_t) RTC_ByteToBcd2(sTime->Minutes) << RTC_TR_MNU_Pos)
+				| ((uint32_t) RTC_ByteToBcd2(sTime->Seconds) << RTC_TR_SU_Pos)
+				| (((uint32_t) sTime->TimeFormat) << RTC_TR_PM_Pos));
+
+		/* Set the RTC_TR register */
+		hrtc->Instance->TR = (uint32_t) (tmpreg & RTC_TR_RESERVED_MASK);
+
+		/* Exit Initialization mode */
+		status = RTC_ExitInitMode(hrtc);
+	}
+
+	/* Enable the write protection for RTC registers */
+	__HAL_RTC_WRITEPROTECTION_ENABLE(hrtc);
+
+	if (status == HAL_OK) {
+		hrtc->State = HAL_RTC_STATE_READY;
+	}
+
+	/* Process Unlocked */
+	__HAL_UNLOCK(hrtc);
+	return status;
+
+}
+
+
+
+
