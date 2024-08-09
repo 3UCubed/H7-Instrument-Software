@@ -53,7 +53,7 @@ Core/Src/stm32h7xx_it.o: ../Core/Src/stm32h7xx_it.c ../Core/Inc/main.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h \
  ../Core/Inc/voltage_monitor.h ../Core/Inc/main.h \
  ../Core/Inc/sample_data.h ../Core/Inc/adc.h ../Core/Inc/spi.h \
- ../Core/Inc/stm32h7xx_it.h
+ ../Core/Inc/i2c.h ../Core/Inc/stm32h7xx_it.h
 ../Core/Inc/main.h:
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h:
 ../Core/Inc/stm32h7xx_hal_conf.h:
@@ -112,4 +112,5 @@ Core/Src/stm32h7xx_it.o: ../Core/Src/stm32h7xx_it.c ../Core/Inc/main.h \
 ../Core/Inc/sample_data.h:
 ../Core/Inc/adc.h:
 ../Core/Inc/spi.h:
+../Core/Inc/i2c.h:
 ../Core/Inc/stm32h7xx_it.h:

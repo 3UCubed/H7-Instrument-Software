@@ -45,6 +45,7 @@ extern "C" {
 #define ERPA_DATA_SIZE 14
 #define HK_DATA_SIZE 54
 #define UPTIME_SIZE 4
+#define TIMESTAMP_SIZE 10
 
 #define PMT_FLAG_ID 0x0001
 #define ERPA_FLAG_ID 0x0002
@@ -57,6 +58,7 @@ extern "C" {
 
 #define PMT_SYNC 0xBB
 #define ERPA_SYNC 0xAA
+#define HK_SYNC 0xCC
 
 /* USER CODE END Includes */
 

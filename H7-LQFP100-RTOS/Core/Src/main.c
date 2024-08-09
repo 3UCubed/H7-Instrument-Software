@@ -86,6 +86,7 @@ volatile uint8_t step = 3;
 volatile uint32_t cadence = 3125;
 volatile uint32_t uptime_millis = 0;
 volatile uint8_t tx_flag = 1;
+volatile uint8_t HK_10_second_counter = 0;
 
 /* USER CODE END PV */
 
@@ -109,6 +110,25 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim) {
 	}
 	else if (htim == &htim2) {
 		osEventFlagsSet(packet_event_flags, ERPA_FLAG_ID);
+	} else if (htim == &htim3) {
+		osEventFlagsSet(utility_event_flags, VOLTAGE_MONITOR_FLAG_ID);
+
+// - If flight mode is defined, we only create HK packets every 100 interrupts of TIM3 (running at 100ms)
+// - Otherwise, we create HK packets every time TIM3 interrupts
+#ifdef FLIGHT_MODE
+		if (HK_10_second_counter == 100) {
+			osEventFlagsSet(packet_event_flags, HK_FLAG_ID);
+			HK_10_second_counter = 0;
+		}
+		HK_10_second_counter++;
+#else
+		if (HK_ENABLED){
+			osEventFlagsSet(packet_event_flags, HK_FLAG_ID);
+		}
+#endif
+
+	} else {
+		printf("Unknown Timer Interrupt\n");
 	}
 }
 

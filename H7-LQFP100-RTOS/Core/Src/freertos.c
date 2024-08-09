@@ -274,7 +274,11 @@ void HK_init(void *argument)
   /* USER CODE BEGIN HK_init */
   /* Infinite loop */
 	for (;;) {
-		osDelay(1);
+		osEventFlagsWait(packet_event_flags, HK_FLAG_ID, osFlagsWaitAny, osWaitForever);
+
+		create_hk_packet();
+
+		osThreadYield();
 	}
   /* USER CODE END HK_init */
 }
@@ -402,9 +406,32 @@ void UART_TX_init(void *argument)
 void Voltage_Monitor_init(void *argument)
 {
   /* USER CODE BEGIN Voltage_Monitor_init */
-	for (;;) {
-		osDelay(1);
-	}
+	VOLTAGE_RAIL *rail_monitor_ptr;
+  /* Infinite loop */
+  for(;;)
+  {
+	  osEventFlagsWait(utility_event_flags, VOLTAGE_MONITOR_FLAG_ID, osFlagsWaitAny,
+	  		osWaitForever);
+
+	  set_rail_monitor();
+
+	  rail_monitor_ptr = get_rail_monitor();
+
+		// Iterate through all voltage rails
+		for (int i = 0; i < NUM_VOLTAGE_RAILS; i++){
+			if (rail_monitor_ptr[i].is_enabled){
+				// If current rail is not in range...
+				if (!in_range(rail_monitor_ptr[i].data, rail_monitor_ptr[i].min_voltage, rail_monitor_ptr[i].max_voltage)){
+					// Increase that rails error count
+					rail_monitor_ptr[i].error_count++;
+					// If that rails' error count is at 3, proceed with error protocol for that rail
+					if (rail_monitor_ptr[i].error_count == 3) {
+						//error_protocol(rail_monitor_ptr[i].name);
+					}
+				}
+			}
+		}
+  }
   /* USER CODE END Voltage_Monitor_init */
 }
 

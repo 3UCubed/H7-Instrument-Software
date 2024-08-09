@@ -14,5 +14,7 @@
 
 packet_t packetize(const uint8_t *data, uint16_t size);
 void create_pmt_packet();
+void create_erpa_packet();
+void create_hk_packet();
 
 #endif /* INC_PACKET_CREATION_H_ */

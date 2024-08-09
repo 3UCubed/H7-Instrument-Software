@@ -156,3 +156,59 @@ uint8_t set_rail_monitor_enable(VOLTAGE_RAIL_NAME rail_name, uint8_t enable_valu
 
 	return status;
 }
+
+VOLTAGE_RAIL* get_rail_monitor() {
+	return rail_monitor;
+}
+
+uint8_t set_rail_monitor() {
+	uint8_t status = 0;
+	uint16_t *hk_adc1 = (uint16_t*) malloc(10 * sizeof(uint16_t));
+	uint16_t *hk_adc3 = (uint16_t*) malloc(4 * sizeof(uint16_t));
+	int16_t *hk_i2c = (int16_t*) malloc(4 * sizeof(int16_t));
+
+	sample_hk_i2c(hk_i2c);
+	sample_hk_adc1(hk_adc1);
+	sample_hk_adc3(hk_adc3);
+
+	rail_monitor[RAIL_vsense].data = hk_adc3[1];
+	rail_monitor[RAIL_vrefint].data = hk_adc3[0];
+	rail_monitor[RAIL_TEMP1].data = hk_i2c[0];
+	rail_monitor[RAIL_TEMP2].data = hk_i2c[1];
+	rail_monitor[RAIL_TEMP3].data = hk_i2c[2];
+	rail_monitor[RAIL_TEMP4].data = hk_i2c[3];
+	rail_monitor[RAIL_busvmon].data = hk_adc1[0];
+	rail_monitor[RAIL_busimon].data = hk_adc1[1];
+	rail_monitor[RAIL_2v5].data = hk_adc1[2];
+	rail_monitor[RAIL_3v3].data = hk_adc3[3];
+	rail_monitor[RAIL_5v].data = hk_adc1[6];
+	rail_monitor[RAIL_n3v3].data = hk_adc1[3];
+	rail_monitor[RAIL_n5v].data = hk_adc3[2];
+	rail_monitor[RAIL_15v].data = hk_adc1[7];
+	rail_monitor[RAIL_5vref].data = hk_adc1[8];
+	rail_monitor[RAIL_n200v].data = hk_adc1[4];
+	rail_monitor[RAIL_n800v].data = hk_adc1[5];
+	rail_monitor[RAIL_TMP1].data = hk_adc1[9];
+
+	free(hk_adc1);
+	free(hk_adc3);
+	free(hk_i2c);
+
+	status = 1;
+
+	return status;
+}
+
+
+uint8_t in_range(uint16_t raw, int min, int max) {
+	if (raw <= max && raw >= min) {
+		return 1;
+	}
+	return 0;
+}
+
+
+
+
+
+
