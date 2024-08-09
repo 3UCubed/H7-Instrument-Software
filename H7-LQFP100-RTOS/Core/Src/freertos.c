@@ -56,14 +56,14 @@ osThreadId_t PMT_taskHandle;
 const osThreadAttr_t PMT_task_attributes = {
   .name = "PMT_task",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityRealtime1,
+  .priority = (osPriority_t) osPriorityRealtime2,
 };
 /* Definitions for ERPA_task */
 osThreadId_t ERPA_taskHandle;
 const osThreadAttr_t ERPA_task_attributes = {
   .name = "ERPA_task",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityRealtime1,
+  .priority = (osPriority_t) osPriorityRealtime3,
 };
 /* Definitions for HK_task */
 osThreadId_t HK_taskHandle;
@@ -98,7 +98,7 @@ osThreadId_t Voltage_MonitorHandle;
 const osThreadAttr_t Voltage_Monitor_attributes = {
   .name = "Voltage_Monitor",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityRealtime1,
 };
 /* Definitions for STOP_task */
 osThreadId_t STOP_taskHandle;
