@@ -4099,11 +4099,11 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLN = 32;
  8001f92:	2320      	movs	r3, #32
  8001f94:	657b      	str	r3, [r7, #84]	; 0x54
-  RCC_OscInitStruct.PLL.PLLP = 4;
- 8001f96:	2304      	movs	r3, #4
+  RCC_OscInitStruct.PLL.PLLP = 2;
+ 8001f96:	2302      	movs	r3, #2
  8001f98:	65bb      	str	r3, [r7, #88]	; 0x58
-  RCC_OscInitStruct.PLL.PLLQ = 4;
- 8001f9a:	2304      	movs	r3, #4
+  RCC_OscInitStruct.PLL.PLLQ = 2;
+ 8001f9a:	2302      	movs	r3, #2
  8001f9c:	65fb      	str	r3, [r7, #92]	; 0x5c
   RCC_OscInitStruct.PLL.PLLR = 2;
  8001f9e:	2302      	movs	r3, #2
@@ -4148,8 +4148,8 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB3CLKDivider = RCC_APB3_DIV1;
  8001fd2:	2300      	movs	r3, #0
  8001fd4:	617b      	str	r3, [r7, #20]
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_APB1_DIV1;
- 8001fd6:	2300      	movs	r3, #0
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_APB1_DIV2;
+ 8001fd6:	2340      	movs	r3, #64	; 0x40
  8001fd8:	61bb      	str	r3, [r7, #24]
   RCC_ClkInitStruct.APB2CLKDivider = RCC_APB2_DIV1;
  8001fda:	2300      	movs	r3, #0
@@ -4158,9 +4158,9 @@ void SystemClock_Config(void)
  8001fde:	2300      	movs	r3, #0
  8001fe0:	623b      	str	r3, [r7, #32]
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
  8001fe2:	1d3b      	adds	r3, r7, #4
- 8001fe4:	2101      	movs	r1, #1
+ 8001fe4:	2102      	movs	r1, #2
  8001fe6:	4618      	mov	r0, r3
  8001fe8:	f008 fe36 	bl	800ac58 <HAL_RCC_ClockConfig>
  8001fec:	4603      	mov	r3, r0
@@ -4211,8 +4211,8 @@ void PeriphCommonClock_Config(void)
   PeriphClkInitStruct.PLL2.PLL2P = 8;
  800202e:	2308      	movs	r3, #8
  8002030:	613b      	str	r3, [r7, #16]
-  PeriphClkInitStruct.PLL2.PLL2Q = 4;
- 8002032:	2304      	movs	r3, #4
+  PeriphClkInitStruct.PLL2.PLL2Q = 2;
+ 8002032:	2302      	movs	r3, #2
  8002034:	617b      	str	r3, [r7, #20]
   PeriphClkInitStruct.PLL2.PLL2R = 2;
  8002036:	2302      	movs	r3, #2
@@ -7804,9 +7804,9 @@ void MX_TIM1_Init(void)
  80034bc:	4b44      	ldr	r3, [pc, #272]	; (80035d0 <MX_TIM1_Init+0x154>)
  80034be:	4a45      	ldr	r2, [pc, #276]	; (80035d4 <MX_TIM1_Init+0x158>)
  80034c0:	601a      	str	r2, [r3, #0]
-  htim1.Init.Prescaler = 50-1;
+  htim1.Init.Prescaler = 100-1;
  80034c2:	4b43      	ldr	r3, [pc, #268]	; (80035d0 <MX_TIM1_Init+0x154>)
- 80034c4:	2231      	movs	r2, #49	; 0x31
+ 80034c4:	2263      	movs	r2, #99	; 0x63
  80034c6:	605a      	str	r2, [r3, #4]
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
  80034c8:	4b41      	ldr	r3, [pc, #260]	; (80035d0 <MX_TIM1_Init+0x154>)
@@ -8022,9 +8022,9 @@ void MX_TIM2_Init(void)
  800360a:	4b2d      	ldr	r3, [pc, #180]	; (80036c0 <MX_TIM2_Init+0xe8>)
  800360c:	f04f 4280 	mov.w	r2, #1073741824	; 0x40000000
  8003610:	601a      	str	r2, [r3, #0]
-  htim2.Init.Prescaler = 50-1;
+  htim2.Init.Prescaler = 100-1;
  8003612:	4b2b      	ldr	r3, [pc, #172]	; (80036c0 <MX_TIM2_Init+0xe8>)
- 8003614:	2231      	movs	r2, #49	; 0x31
+ 8003614:	2263      	movs	r2, #99	; 0x63
  8003616:	605a      	str	r2, [r3, #4]
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
  8003618:	4b29      	ldr	r3, [pc, #164]	; (80036c0 <MX_TIM2_Init+0xe8>)
@@ -8167,9 +8167,9 @@ void MX_TIM3_Init(void)
  80036e2:	4b1d      	ldr	r3, [pc, #116]	; (8003758 <MX_TIM3_Init+0x94>)
  80036e4:	4a1d      	ldr	r2, [pc, #116]	; (800375c <MX_TIM3_Init+0x98>)
  80036e6:	601a      	str	r2, [r3, #0]
-  htim3.Init.Prescaler = 100-1;
+  htim3.Init.Prescaler = 200-1;
  80036e8:	4b1b      	ldr	r3, [pc, #108]	; (8003758 <MX_TIM3_Init+0x94>)
- 80036ea:	2263      	movs	r2, #99	; 0x63
+ 80036ea:	22c7      	movs	r2, #199	; 0xc7
  80036ec:	605a      	str	r2, [r3, #4]
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
  80036ee:	4b1a      	ldr	r3, [pc, #104]	; (8003758 <MX_TIM3_Init+0x94>)
