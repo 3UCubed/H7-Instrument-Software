@@ -82,7 +82,7 @@ osEventFlagsId_t mode_event_flags;
 osMessageQueueId_t mid_MsgQueue;
 unsigned char UART_RX_BUFFER[UART_RX_BUFFER_SIZE];
 volatile uint8_t HK_ENABLED = 0;
-volatile uint8_t step = 3;
+volatile uint8_t step = 0;
 volatile uint32_t cadence = 3125;
 volatile uint32_t uptime_millis = 0;
 volatile uint8_t tx_flag = 1;
@@ -304,7 +304,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	}
 	case 0x1D: {
 		printf("Step Up\n");
-		if (step < 17) {
+		if (step < 14) {
 			step += 2;
 			HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R,
 					DAC_OUT[step]);
@@ -314,7 +314,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	}
 	case 0x0D: {
 		printf("Step Down\n");
-		if (step > 3) {
+		if (step > 1) {
 			step -= 2;
 			HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R,
 					DAC_OUT[step]);
