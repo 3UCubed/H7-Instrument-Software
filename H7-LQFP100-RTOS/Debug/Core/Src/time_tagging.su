@@ -1,0 +1,4 @@
+../Core/Src/time_tagging.c:10:6:get_uptime	32	static
+../Core/Src/time_tagging.c:28:6:get_timestamp	48	static
+../Core/Src/time_tagging.c:48:6:calibrateRTC	56	static
+../Core/Src/time_tagging.c:81:19:RTC_SetTime	40	static

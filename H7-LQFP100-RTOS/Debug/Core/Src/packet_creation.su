@@ -1,0 +1,4 @@
+../Core/Src/packet_creation.c:14:10:packetize	32	static
+../Core/Src/packet_creation.c:25:6:create_pmt_packet	32	static
+../Core/Src/packet_creation.c:56:6:create_erpa_packet	40	static
+../Core/Src/packet_creation.c:98:6:create_hk_packet	32	static
