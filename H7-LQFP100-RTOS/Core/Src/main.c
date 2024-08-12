@@ -652,7 +652,7 @@ void enter_stop() {
 		// That's why it looks like we enter stop mode and then instantly
 		// configure the clock and resume tasks, but in reality the MCU
 		// just stops right here.
-
+	  NVIC_SystemReset();
 	  SystemClock_Config();
 	  xTaskResumeAll();
 }

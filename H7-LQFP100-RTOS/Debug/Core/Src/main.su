@@ -1,3 +1,4 @@
+../Drivers/CMSIS/Include/core_cm7.h:2156:34:__NVIC_SystemReset	4	static,ignoring_inline_asm
 ../Core/Src/main.c:107:6:HAL_TIM_OC_DelayElapsedCallback	16	static
 ../Core/Src/main.c:136:6:HAL_UART_RxCpltCallback	40	static
 ../Core/Src/main.c:375:6:HAL_UART_TxCpltCallback	16	static
