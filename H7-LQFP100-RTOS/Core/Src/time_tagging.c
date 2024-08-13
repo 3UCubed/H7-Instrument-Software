@@ -19,6 +19,10 @@ void get_uptime(uint8_t *buffer) {
 	}
 	uptime = ms * 1000 - st / ((SysTick->LOAD + 1) / 1000);
 
+	if (ms == 0){
+		uptime = 0;
+	}
+
 	buffer[0] = ((uptime >> 24) & 0xFF);
 	buffer[1] = ((uptime >> 16) & 0xFF);
 	buffer[2] = ((uptime >> 8) & 0xFF);

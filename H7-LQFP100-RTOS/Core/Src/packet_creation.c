@@ -11,26 +11,16 @@ uint16_t pmt_seq = 0;
 uint32_t erpa_seq = 0;
 uint16_t hk_seq = 0;
 
-packet_t packetize(const uint8_t *data, uint16_t size) {
-	packet_t packet;
-	packet.array = (uint8_t*) malloc(size * sizeof(uint8_t));
-	if (packet.array == NULL) {
-		// Packet array is null somehow, should probably do something about this edge case
-	}
-	memcpy(packet.array, data, size);
-	packet.size = size;
-	return packet;
-}
+
 
 void create_pmt_packet() {
 	while (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_8)) {
 	}
-	uint8_t *buffer = (uint8_t*) malloc(PMT_DATA_SIZE * sizeof(uint8_t));
-	uint8_t *pmt_spi = (uint8_t*) malloc(2 * sizeof(uint8_t));
-	uint8_t *uptime = (uint8_t*) malloc(UPTIME_SIZE * sizeof(uint8_t));
+	uint8_t buffer[PMT_DATA_SIZE];
+	uint8_t pmt_spi[2];
+	uint8_t uptime[UPTIME_SIZE];
 
 	get_uptime(uptime);
-
 	sample_pmt_spi(pmt_spi);
 
 	buffer[0] = PMT_SYNC;
@@ -44,12 +34,9 @@ void create_pmt_packet() {
 	buffer[8] = uptime[2];
 	buffer[9] = uptime[3];
 
-	packet_t pmt_packet = packetize(buffer, PMT_DATA_SIZE);
-	osMessageQueuePut(mid_MsgQueue, &pmt_packet, 0U, 0U);
+	HAL_UART_Transmit(&huart1, buffer, PMT_DATA_SIZE, 100);
+
 	pmt_seq++;
-	free(buffer);
-	free(pmt_spi);
-	free(uptime);
 }
 
 
@@ -57,11 +44,10 @@ void create_erpa_packet() {
 	while (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_11)) {
 	}
 
-	uint8_t *buffer = (uint8_t*) malloc(ERPA_DATA_SIZE * sizeof(uint8_t)); // Allocate memory for the buffer
-
-	uint8_t *erpa_spi = (uint8_t*) malloc(2 * sizeof(uint8_t));
-	uint16_t *erpa_adc = (uint16_t*) malloc(1 * sizeof(uint16_t));
-	uint8_t *uptime = (uint8_t*) malloc(UPTIME_SIZE * sizeof(uint8_t));
+	uint8_t buffer[ERPA_DATA_SIZE];
+	uint8_t erpa_spi[2];
+	uint16_t erpa_adc[1];
+	uint8_t uptime[UPTIME_SIZE];
 	uint8_t sweep_step = -1;
 
 	get_uptime(uptime);
@@ -85,21 +71,17 @@ void create_erpa_packet() {
 	buffer[12] = uptime[2];
 	buffer[13] = uptime[3];
 
-	packet_t erpa_packet = packetize(buffer, ERPA_DATA_SIZE);
-	osMessageQueuePut(mid_MsgQueue, &erpa_packet, 0U, 0U);
+	HAL_UART_Transmit(&huart1, buffer, ERPA_DATA_SIZE, 100);
+
 	erpa_seq++;
-	free(buffer);
-	free(erpa_spi);
-	free(erpa_adc);
-	free(uptime);
 }
 
 
 void create_hk_packet() {
 	VOLTAGE_RAIL *rail_monitor_ptr;
-	uint8_t *buffer = (uint8_t*) malloc(HK_DATA_SIZE * sizeof(uint8_t));
-	uint8_t *timestamp = (uint8_t*) malloc(TIMESTAMP_SIZE * sizeof(uint8_t));
-	uint8_t *uptime = (uint8_t*) malloc(UPTIME_SIZE * sizeof(uint8_t));
+	uint8_t buffer[HK_DATA_SIZE];
+	uint8_t timestamp[TIMESTAMP_SIZE];
+	uint8_t uptime[UPTIME_SIZE];
 
 	get_uptime(uptime);
 	get_timestamp(timestamp);
@@ -161,12 +143,9 @@ void create_hk_packet() {
 	buffer[52] = uptime[2];
 	buffer[53] = uptime[3];
 
-	packet_t hk_packet = packetize(buffer, HK_DATA_SIZE);
-	osMessageQueuePut(mid_MsgQueue, &hk_packet, 0U, 0U);
+	HAL_UART_Transmit(&huart1, buffer, HK_DATA_SIZE, 100);
+
 	hk_seq++;
-	free(buffer);
-	free(timestamp);
-	free(uptime);
 }
 
 

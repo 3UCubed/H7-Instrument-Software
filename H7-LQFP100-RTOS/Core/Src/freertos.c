@@ -33,6 +33,7 @@
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
+typedef StaticTask_t osStaticThreadDef_t;
 /* USER CODE BEGIN PTD */
 
 /* USER CODE END PTD */
@@ -53,73 +54,111 @@
 /* USER CODE END Variables */
 /* Definitions for PMT_task */
 osThreadId_t PMT_taskHandle;
+uint32_t PMT_taskBuffer[ 128 ];
+osStaticThreadDef_t PMT_taskControlBlock;
 const osThreadAttr_t PMT_task_attributes = {
   .name = "PMT_task",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityRealtime2,
+  .cb_mem = &PMT_taskControlBlock,
+  .cb_size = sizeof(PMT_taskControlBlock),
+  .stack_mem = &PMT_taskBuffer[0],
+  .stack_size = sizeof(PMT_taskBuffer),
+  .priority = (osPriority_t) osPriorityRealtime6,
 };
 /* Definitions for ERPA_task */
 osThreadId_t ERPA_taskHandle;
+uint32_t ERPA_taskBuffer[ 128 ];
+osStaticThreadDef_t ERPA_taskControlBlock;
 const osThreadAttr_t ERPA_task_attributes = {
   .name = "ERPA_task",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityRealtime3,
+  .cb_mem = &ERPA_taskControlBlock,
+  .cb_size = sizeof(ERPA_taskControlBlock),
+  .stack_mem = &ERPA_taskBuffer[0],
+  .stack_size = sizeof(ERPA_taskBuffer),
+  .priority = (osPriority_t) osPriorityRealtime7,
 };
 /* Definitions for HK_task */
 osThreadId_t HK_taskHandle;
+uint32_t HK_taskBuffer[ 128 ];
+osStaticThreadDef_t HK_taskControlBlock;
 const osThreadAttr_t HK_task_attributes = {
   .name = "HK_task",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityRealtime,
+  .cb_mem = &HK_taskControlBlock,
+  .cb_size = sizeof(HK_taskControlBlock),
+  .stack_mem = &HK_taskBuffer[0],
+  .stack_size = sizeof(HK_taskBuffer),
+  .priority = (osPriority_t) osPriorityRealtime4,
 };
 /* Definitions for AUTOINIT_task */
 osThreadId_t AUTOINIT_taskHandle;
+uint32_t AUTOINIT_taskBuffer[ 128 ];
+osStaticThreadDef_t AUTOINIT_taskControlBlock;
 const osThreadAttr_t AUTOINIT_task_attributes = {
   .name = "AUTOINIT_task",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .cb_mem = &AUTOINIT_taskControlBlock,
+  .cb_size = sizeof(AUTOINIT_taskControlBlock),
+  .stack_mem = &AUTOINIT_taskBuffer[0],
+  .stack_size = sizeof(AUTOINIT_taskBuffer),
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for AUTODEINIT_task */
 osThreadId_t AUTODEINIT_taskHandle;
+uint32_t AUTODEINIT_taskBuffer[ 128 ];
+osStaticThreadDef_t AUTODEINIT_taskControlBlock;
 const osThreadAttr_t AUTODEINIT_task_attributes = {
   .name = "AUTODEINIT_task",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
-};
-/* Definitions for UART_TX_task */
-osThreadId_t UART_TX_taskHandle;
-const osThreadAttr_t UART_TX_task_attributes = {
-  .name = "UART_TX_task",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .cb_mem = &AUTODEINIT_taskControlBlock,
+  .cb_size = sizeof(AUTODEINIT_taskControlBlock),
+  .stack_mem = &AUTODEINIT_taskBuffer[0],
+  .stack_size = sizeof(AUTODEINIT_taskBuffer),
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for Voltage_Monitor */
 osThreadId_t Voltage_MonitorHandle;
+uint32_t Voltage_MonitorBuffer[ 128 ];
+osStaticThreadDef_t Voltage_MonitorControlBlock;
 const osThreadAttr_t Voltage_Monitor_attributes = {
   .name = "Voltage_Monitor",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityRealtime1,
+  .cb_mem = &Voltage_MonitorControlBlock,
+  .cb_size = sizeof(Voltage_MonitorControlBlock),
+  .stack_mem = &Voltage_MonitorBuffer[0],
+  .stack_size = sizeof(Voltage_MonitorBuffer),
+  .priority = (osPriority_t) osPriorityRealtime5,
 };
 /* Definitions for STOP_task */
 osThreadId_t STOP_taskHandle;
+uint32_t STOP_taskBuffer[ 128 ];
+osStaticThreadDef_t STOP_taskControlBlock;
 const osThreadAttr_t STOP_task_attributes = {
   .name = "STOP_task",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .cb_mem = &STOP_taskControlBlock,
+  .cb_size = sizeof(STOP_taskControlBlock),
+  .stack_mem = &STOP_taskBuffer[0],
+  .stack_size = sizeof(STOP_taskBuffer),
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for Science_task */
 osThreadId_t Science_taskHandle;
+uint32_t Science_taskBuffer[ 128 ];
+osStaticThreadDef_t Science_taskControlBlock;
 const osThreadAttr_t Science_task_attributes = {
   .name = "Science_task",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .cb_mem = &Science_taskControlBlock,
+  .cb_size = sizeof(Science_taskControlBlock),
+  .stack_mem = &Science_taskBuffer[0],
+  .stack_size = sizeof(Science_taskBuffer),
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for Idle_task */
 osThreadId_t Idle_taskHandle;
+uint32_t Idle_taskBuffer[ 128 ];
+osStaticThreadDef_t Idle_taskControlBlock;
 const osThreadAttr_t Idle_task_attributes = {
   .name = "Idle_task",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .cb_mem = &Idle_taskControlBlock,
+  .cb_size = sizeof(Idle_taskControlBlock),
+  .stack_mem = &Idle_taskBuffer[0],
+  .stack_size = sizeof(Idle_taskBuffer),
+  .priority = (osPriority_t) osPriorityNormal,
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -132,7 +171,6 @@ void ERPA_init(void *argument);
 void HK_init(void *argument);
 void AUTOINIT_init(void *argument);
 void AUTODEINIT_init(void *argument);
-void UART_TX_init(void *argument);
 void Voltage_Monitor_init(void *argument);
 void STOP_init(void *argument);
 void Science_init(void *argument);
@@ -142,6 +180,7 @@ void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
 /* Hook prototypes */
 void vApplicationTickHook(void);
+void vApplicationStackOverflowHook(xTaskHandle xTask, signed char *pcTaskName);
 
 /* USER CODE BEGIN 3 */
 void vApplicationTickHook( void )
@@ -154,6 +193,15 @@ void vApplicationTickHook( void )
 	uptime_millis++;
 }
 /* USER CODE END 3 */
+
+/* USER CODE BEGIN 4 */
+void vApplicationStackOverflowHook(xTaskHandle xTask, signed char *pcTaskName)
+{
+   /* Run time stack overflow checking is performed if
+   configCHECK_FOR_STACK_OVERFLOW is defined to 1 or 2. This hook function is
+   called if a stack overflow is detected. */
+}
+/* USER CODE END 4 */
 
 /**
   * @brief  FreeRTOS initialization
@@ -196,9 +244,6 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of AUTODEINIT_task */
   AUTODEINIT_taskHandle = osThreadNew(AUTODEINIT_init, NULL, &AUTODEINIT_task_attributes);
-
-  /* creation of UART_TX_task */
-  UART_TX_taskHandle = osThreadNew(UART_TX_init, NULL, &UART_TX_task_attributes);
 
   /* creation of Voltage_Monitor */
   Voltage_MonitorHandle = osThreadNew(Voltage_Monitor_init, NULL, &Voltage_Monitor_attributes);
@@ -347,57 +392,6 @@ void AUTODEINIT_init(void *argument)
   /* USER CODE END AUTODEINIT_init */
 }
 
-/* USER CODE BEGIN Header_UART_TX_init */
-/**
-* @brief Function implementing the UART_TX_task thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_UART_TX_init */
-void UART_TX_init(void *argument)
-{
-  /* USER CODE BEGIN UART_TX_init */
-	static uint8_t tx_buffer[UART_TX_BUFFER_SIZE];
-
-	uint32_t total_size = 0;
-	osStatus_t status;
-	packet_t msg;
-
-	while (1) {
-		total_size = 0;
-		// Retrieve all messages from the queue and store them in tx_buffer
-		do {
-			status = osMessageQueueGet(mid_MsgQueue, &msg, NULL, osWaitForever);
-			if (status == osOK) {
-				if ((total_size + msg.size) < UART_TX_BUFFER_SIZE) {
-					memcpy(&tx_buffer[total_size], msg.array, msg.size);
-					free(msg.array);
-					total_size += msg.size;
-					if (total_size >= (UART_TX_BUFFER_SIZE - HK_DATA_SIZE)) {
-						break;
-					}
-				}
-			}
-		} while (osMessageQueueGetCount(mid_MsgQueue));
-
-		if (total_size > 0) {
-			HAL_UART_Transmit_DMA(&huart1, tx_buffer, total_size);
-
-			// Wait for transmission to complete
-			while (tx_flag == 0) {
-				osThreadYield();
-			}
-
-			// Reset the flag
-			tx_flag = 0;
-		}
-
-		// Yield thread control
-		osThreadYield();
-	}
-  /* USER CODE END UART_TX_init */
-}
-
 /* USER CODE BEGIN Header_Voltage_Monitor_init */
 /**
 * @brief Function implementing the Voltage_Monitor thread.
@@ -489,11 +483,9 @@ void Science_init(void *argument)
 
 		HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, DAC_OUT, 32, DAC_ALIGN_12B_R);	// Enable auto sweep (doesn't start until ERPA timer is started)
 		HK_ENABLED = 1;
+		uptime_millis = 0;
 		HAL_TIM_OC_Start_IT(&htim2, TIM_CHANNEL_4);			// ERPA packet on
 		HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_1);			// PMT packet on
-		osEventFlagsSet(packet_event_flags, HK_FLAG_ID);
-		osEventFlagsSet(packet_event_flags, ERPA_FLAG_ID);
-		osEventFlagsSet(packet_event_flags, PMT_FLAG_ID);
 
 		__enable_irq();
 
