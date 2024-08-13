@@ -39,9 +39,7 @@ extern "C" {
 #include "sample_data.h"		// For initializing adc dma in system_setup
 #include "time_tagging.h"		// For letting sync calibrate RTC
 
-#define MSGQUEUE_SIZE 128
 #define UART_RX_BUFFER_SIZE 64
-#define UART_TX_BUFFER_SIZE 1000
 #define PMT_DATA_SIZE 10
 #define ERPA_DATA_SIZE 14
 #define HK_DATA_SIZE 54
@@ -68,10 +66,6 @@ extern "C" {
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
-typedef struct {
-	uint8_t *array;  // Pointer to the array data
-	uint16_t size;   // Size of the array
-} packet_t;
 
 typedef struct {
 	GPIO_TypeDef *gpio;
@@ -86,11 +80,9 @@ extern osEventFlagsId_t packet_event_flags;
 extern osEventFlagsId_t utility_event_flags;
 extern osEventFlagsId_t mode_event_flags;
 
-extern osMessageQueueId_t mid_MsgQueue;
 extern unsigned char UART_RX_BUFFER[UART_RX_BUFFER_SIZE];
 extern const gpio_pins gpios[];
 extern volatile uint32_t uptime_millis;
-extern volatile uint8_t tx_flag;
 extern uint32_t DAC_OUT[32];
 extern volatile uint8_t HK_ENABLED;
 /* USER CODE END EC */

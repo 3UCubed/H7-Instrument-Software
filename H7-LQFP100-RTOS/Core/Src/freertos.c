@@ -86,13 +86,6 @@ const osThreadAttr_t AUTODEINIT_task_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
-/* Definitions for UART_TX_task */
-osThreadId_t UART_TX_taskHandle;
-const osThreadAttr_t UART_TX_task_attributes = {
-  .name = "UART_TX_task",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
-};
 /* Definitions for Voltage_Monitor */
 osThreadId_t Voltage_MonitorHandle;
 const osThreadAttr_t Voltage_Monitor_attributes = {
@@ -132,7 +125,6 @@ void ERPA_init(void *argument);
 void HK_init(void *argument);
 void AUTOINIT_init(void *argument);
 void AUTODEINIT_init(void *argument);
-void UART_TX_init(void *argument);
 void Voltage_Monitor_init(void *argument);
 void STOP_init(void *argument);
 void Science_init(void *argument);
@@ -142,6 +134,7 @@ void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
 /* Hook prototypes */
 void vApplicationTickHook(void);
+void vApplicationStackOverflowHook(xTaskHandle xTask, signed char *pcTaskName);
 
 /* USER CODE BEGIN 3 */
 void vApplicationTickHook( void )
@@ -154,6 +147,15 @@ void vApplicationTickHook( void )
 	uptime_millis++;
 }
 /* USER CODE END 3 */
+
+/* USER CODE BEGIN 4 */
+void vApplicationStackOverflowHook(xTaskHandle xTask, signed char *pcTaskName)
+{
+   /* Run time stack overflow checking is performed if
+   configCHECK_FOR_STACK_OVERFLOW is defined to 1 or 2. This hook function is
+   called if a stack overflow is detected. */
+}
+/* USER CODE END 4 */
 
 /**
   * @brief  FreeRTOS initialization
@@ -196,9 +198,6 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of AUTODEINIT_task */
   AUTODEINIT_taskHandle = osThreadNew(AUTODEINIT_init, NULL, &AUTODEINIT_task_attributes);
-
-  /* creation of UART_TX_task */
-  UART_TX_taskHandle = osThreadNew(UART_TX_init, NULL, &UART_TX_task_attributes);
 
   /* creation of Voltage_Monitor */
   Voltage_MonitorHandle = osThreadNew(Voltage_Monitor_init, NULL, &Voltage_Monitor_attributes);
@@ -345,57 +344,6 @@ void AUTODEINIT_init(void *argument)
 		osThreadYield();
 	}
   /* USER CODE END AUTODEINIT_init */
-}
-
-/* USER CODE BEGIN Header_UART_TX_init */
-/**
-* @brief Function implementing the UART_TX_task thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_UART_TX_init */
-void UART_TX_init(void *argument)
-{
-  /* USER CODE BEGIN UART_TX_init */
-	static uint8_t tx_buffer[UART_TX_BUFFER_SIZE];
-
-	uint32_t total_size = 0;
-	osStatus_t status;
-	packet_t msg;
-
-	while (1) {
-		total_size = 0;
-		// Retrieve all messages from the queue and store them in tx_buffer
-		do {
-			status = osMessageQueueGet(mid_MsgQueue, &msg, NULL, osWaitForever);
-			if (status == osOK) {
-				if ((total_size + msg.size) < UART_TX_BUFFER_SIZE) {
-					memcpy(&tx_buffer[total_size], msg.array, msg.size);
-					free(msg.array);
-					total_size += msg.size;
-					if (total_size >= (UART_TX_BUFFER_SIZE - HK_DATA_SIZE)) {
-						break;
-					}
-				}
-			}
-		} while (osMessageQueueGetCount(mid_MsgQueue));
-
-		if (total_size > 0) {
-			HAL_UART_Transmit_DMA(&huart1, tx_buffer, total_size);
-
-			// Wait for transmission to complete
-			while (tx_flag == 0) {
-				osThreadYield();
-			}
-
-			// Reset the flag
-			tx_flag = 0;
-		}
-
-		// Yield thread control
-		osThreadYield();
-	}
-  /* USER CODE END UART_TX_init */
 }
 
 /* USER CODE BEGIN Header_Voltage_Monitor_init */

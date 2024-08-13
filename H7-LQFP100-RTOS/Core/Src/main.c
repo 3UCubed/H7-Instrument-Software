@@ -79,7 +79,6 @@ osEventFlagsId_t packet_event_flags;
 osEventFlagsId_t utility_event_flags;
 osEventFlagsId_t mode_event_flags;
 
-osMessageQueueId_t mid_MsgQueue;
 unsigned char UART_RX_BUFFER[UART_RX_BUFFER_SIZE];
 volatile uint8_t HK_ENABLED = 0;
 volatile uint8_t step = 0;
@@ -372,10 +371,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	}
 }
 
-void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
-	tx_flag = 1;
-}
-
 /* USER CODE END 0 */
 
 /**
@@ -531,7 +526,6 @@ void PeriphCommonClock_Config(void)
 /* USER CODE BEGIN 4 */
 void system_setup() {
 	// 1 -- Init event flags
-	// 2 -- Init message queue
 	// 3 -- Init rail monitor
 	// 4 -- Start timer 3
 	// 5 -- Set timer 2 PWM
@@ -555,11 +549,7 @@ void system_setup() {
         while (1);
     }
 
-	// ---- 2 ---- //
-	mid_MsgQueue = osMessageQueueNew(MSGQUEUE_SIZE, sizeof(packet_t), NULL);
-	if (mid_MsgQueue == NULL) {
-		while (1);
-	}
+
 
 	// ---- 3 ---- //
 	if (!voltage_monitor_init()) {
