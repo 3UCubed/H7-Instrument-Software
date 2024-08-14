@@ -54,6 +54,7 @@ Core/Src/stm32h7xx_it.o: ../Core/Src/stm32h7xx_it.c ../Core/Inc/main.h \
  ../Core/Inc/voltage_monitor.h ../Core/Inc/main.h \
  ../Core/Inc/sample_data.h ../Core/Inc/adc.h ../Core/Inc/spi.h \
  ../Core/Inc/i2c.h ../Core/Inc/time_tagging.h ../Core/Inc/rtc.h \
+ ../Core/Inc/packet_creation.h ../Core/Inc/usart.h \
  ../Core/Inc/stm32h7xx_it.h
 ../Core/Inc/main.h:
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h:
@@ -116,4 +117,6 @@ Core/Src/stm32h7xx_it.o: ../Core/Src/stm32h7xx_it.c ../Core/Inc/main.h \
 ../Core/Inc/i2c.h:
 ../Core/Inc/time_tagging.h:
 ../Core/Inc/rtc.h:
+../Core/Inc/packet_creation.h:
+../Core/Inc/usart.h:
 ../Core/Inc/stm32h7xx_it.h:

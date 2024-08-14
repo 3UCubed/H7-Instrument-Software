@@ -54,9 +54,10 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Core/Inc/voltage_monitor.h ../Core/Inc/main.h \
  ../Core/Inc/sample_data.h ../Core/Inc/adc.h ../Core/Inc/spi.h \
  ../Core/Inc/i2c.h ../Core/Inc/time_tagging.h ../Core/Inc/rtc.h \
- ../Core/Inc/adc.h ../Core/Inc/dac.h ../Core/Inc/dma.h ../Core/Inc/i2c.h \
- ../Core/Inc/rtc.h ../Core/Inc/spi.h ../Core/Inc/tim.h \
- ../Core/Inc/usart.h ../Core/Inc/gpio.h
+ ../Core/Inc/packet_creation.h ../Core/Inc/usart.h ../Core/Inc/adc.h \
+ ../Core/Inc/dac.h ../Core/Inc/dma.h ../Core/Inc/i2c.h ../Core/Inc/rtc.h \
+ ../Core/Inc/spi.h ../Core/Inc/tim.h ../Core/Inc/usart.h \
+ ../Core/Inc/gpio.h
 ../Core/Inc/main.h:
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h:
 ../Core/Inc/stm32h7xx_hal_conf.h:
@@ -118,6 +119,8 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Core/Inc/i2c.h:
 ../Core/Inc/time_tagging.h:
 ../Core/Inc/rtc.h:
+../Core/Inc/packet_creation.h:
+../Core/Inc/usart.h:
 ../Core/Inc/adc.h:
 ../Core/Inc/dac.h:
 ../Core/Inc/dma.h:

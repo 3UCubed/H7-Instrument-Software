@@ -148,7 +148,11 @@ void create_hk_packet() {
 	hk_seq++;
 }
 
-
+void reset_packet_sequence_numbers() {
+	pmt_seq = 0;
+	erpa_seq = 0;
+	hk_seq = 0;
+}
 
 
 

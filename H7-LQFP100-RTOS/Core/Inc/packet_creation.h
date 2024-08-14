@@ -16,5 +16,6 @@
 void create_pmt_packet();
 void create_erpa_packet();
 void create_hk_packet();
+void reset_packet_sequence_numbers();
 
 #endif /* INC_PACKET_CREATION_H_ */

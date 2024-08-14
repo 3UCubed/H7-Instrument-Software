@@ -637,6 +637,7 @@ void enter_stop() {
 		// just stops right here.
 	  NVIC_SystemReset();
 	  SystemClock_Config();
+	  reset_packet_sequence_numbers();
 	  xTaskResumeAll();
 }
 /* USER CODE END 4 */

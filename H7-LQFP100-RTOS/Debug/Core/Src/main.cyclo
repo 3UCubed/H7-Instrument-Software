@@ -10,5 +10,5 @@ main.c:586:6:send_ACK	1
 main.c:593:6:send_NACK	1
 main.c:601:9:get_current_step	15
 main.c:628:6:enter_stop	0
-main.c:652:6:HAL_TIM_PeriodElapsedCallback	2
-main.c:669:6:Error_Handler	1
+main.c:653:6:HAL_TIM_PeriodElapsedCallback	2
+main.c:670:6:Error_Handler	1

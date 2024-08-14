@@ -9,4 +9,4 @@
 ../Core/Src/freertos.c:402:6:Voltage_Monitor_init	24	static
 ../Core/Src/freertos.c:441:6:STOP_init	16	static
 ../Core/Src/freertos.c:462:6:Science_init	32	static,ignoring_inline_asm
-../Core/Src/freertos.c:506:6:Idle_init	24	static
+../Core/Src/freertos.c:507:6:Idle_init	24	static
