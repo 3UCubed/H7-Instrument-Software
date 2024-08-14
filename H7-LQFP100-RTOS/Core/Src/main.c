@@ -87,6 +87,8 @@ volatile uint32_t uptime_millis = 0;
 volatile uint8_t tx_flag = 1;
 volatile uint8_t HK_10_second_counter = 0;
 
+volatile uint8_t HK_100_ms_counter = 0;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -109,22 +111,16 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim) {
 	}
 	else if (htim == &htim2) {
 		osEventFlagsSet(packet_event_flags, ERPA_FLAG_ID);
-	} else if (htim == &htim3) {
-		osEventFlagsSet(utility_event_flags, VOLTAGE_MONITOR_FLAG_ID);
 
-// - If flight mode is defined, we only create HK packets every 100 interrupts of TIM3 (running at 100ms)
-// - Otherwise, we create HK packets every time TIM3 interrupts
-#ifdef FLIGHT_MODE
-		if (HK_10_second_counter == 100) {
-			osEventFlagsSet(packet_event_flags, HK_FLAG_ID);
-			HK_10_second_counter = 0;
+		if (HK_100_ms_counter == 32) {
+			osEventFlagsSet(utility_event_flags, VOLTAGE_MONITOR_FLAG_ID);
+
+			if (HK_ENABLED){
+				osEventFlagsSet(packet_event_flags, HK_FLAG_ID);
+			}
+			HK_100_ms_counter = 0;
 		}
-		HK_10_second_counter++;
-#else
-		if (HK_ENABLED){
-			osEventFlagsSet(packet_event_flags, HK_FLAG_ID);
-		}
-#endif
+		HK_100_ms_counter++;
 
 	} else {
 		printf("Unknown Timer Interrupt\n");
@@ -405,7 +401,6 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_DMA_Init();
-  MX_TIM3_Init();
   MX_USART1_UART_Init();
   MX_I2C1_Init();
   MX_SPI2_Init();
@@ -556,8 +551,6 @@ void system_setup() {
 		while (1);
 	}
 
-	// ---- 4 ---- //
-	HAL_TIM_OC_Start_IT(&htim3, TIM_CHANNEL_1);
 
 	// ---- 5 ---- //
 	TIM2->CCR4 = 312;
@@ -584,7 +577,7 @@ void sync() {
 		key = UART_RX_BUFFER[0];
 	} while (key != 0xFF);
 
-	calibrateRTC(UART_RX_BUFFER); // TODO: calibrate rtc
+	//calibrateRTC(UART_RX_BUFFER); // TODO: calibrate rtc
 	HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
 
 	send_ACK();
