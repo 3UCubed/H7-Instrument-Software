@@ -2526,7 +2526,7 @@ void MX_I2C1_Init(void)
  8001338:	4b1c      	ldr	r3, [pc, #112]	; (80013ac <MX_I2C1_Init+0x78>)
  800133a:	4a1d      	ldr	r2, [pc, #116]	; (80013b0 <MX_I2C1_Init+0x7c>)
  800133c:	601a      	str	r2, [r3, #0]
-  hi2c1.Init.Timing = 0x0020081F;
+  hi2c1.Init.Timing = 0x00100517;
  800133e:	4b1b      	ldr	r3, [pc, #108]	; (80013ac <MX_I2C1_Init+0x78>)
  8001340:	4a1c      	ldr	r2, [pc, #112]	; (80013b4 <MX_I2C1_Init+0x80>)
  8001342:	605a      	str	r2, [r3, #4]
@@ -2611,7 +2611,7 @@ void MX_I2C1_Init(void)
  80013aa:	bd80      	pop	{r7, pc}
  80013ac:	240018c0 	.word	0x240018c0
  80013b0:	40005400 	.word	0x40005400
- 80013b4:	0020081f 	.word	0x0020081f
+ 80013b4:	00100517 	.word	0x00100517
 
 080013b8 <HAL_I2C_MspInit>:
 
@@ -4002,8 +4002,8 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLM = 4;
  8001ed6:	2304      	movs	r3, #4
  8001ed8:	653b      	str	r3, [r7, #80]	; 0x50
-  RCC_OscInitStruct.PLL.PLLN = 32;
- 8001eda:	2320      	movs	r3, #32
+  RCC_OscInitStruct.PLL.PLLN = 24;
+ 8001eda:	2318      	movs	r3, #24
  8001edc:	657b      	str	r3, [r7, #84]	; 0x54
   RCC_OscInitStruct.PLL.PLLP = 2;
  8001ede:	2302      	movs	r3, #2
@@ -4017,8 +4017,8 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLRGE = RCC_PLL1VCIRANGE_2;
  8001eea:	2308      	movs	r3, #8
  8001eec:	667b      	str	r3, [r7, #100]	; 0x64
-  RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1VCOWIDE;
- 8001eee:	2300      	movs	r3, #0
+  RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1VCOMEDIUM;
+ 8001eee:	2302      	movs	r3, #2
  8001ef0:	66bb      	str	r3, [r7, #104]	; 0x68
   RCC_OscInitStruct.PLL.PLLFRACN = 0;
  8001ef2:	2300      	movs	r3, #0
@@ -4064,9 +4064,9 @@ void SystemClock_Config(void)
  8001f26:	2300      	movs	r3, #0
  8001f28:	623b      	str	r3, [r7, #32]
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK)
  8001f2a:	1d3b      	adds	r3, r7, #4
- 8001f2c:	2102      	movs	r1, #2
+ 8001f2c:	2101      	movs	r1, #1
  8001f2e:	4618      	mov	r0, r3
  8001f30:	f008 fbce 	bl	800a6d0 <HAL_RCC_ClockConfig>
  8001f34:	4603      	mov	r3, r0
@@ -4111,8 +4111,8 @@ void PeriphCommonClock_Config(void)
   PeriphClkInitStruct.PLL2.PLL2M = 4;
  8001f6e:	2304      	movs	r3, #4
  8001f70:	60bb      	str	r3, [r7, #8]
-  PeriphClkInitStruct.PLL2.PLL2N = 32;
- 8001f72:	2320      	movs	r3, #32
+  PeriphClkInitStruct.PLL2.PLL2N = 24;
+ 8001f72:	2318      	movs	r3, #24
  8001f74:	60fb      	str	r3, [r7, #12]
   PeriphClkInitStruct.PLL2.PLL2P = 8;
  8001f76:	2308      	movs	r3, #8
@@ -4126,8 +4126,8 @@ void PeriphCommonClock_Config(void)
   PeriphClkInitStruct.PLL2.PLL2RGE = RCC_PLL2VCIRANGE_2;
  8001f82:	2380      	movs	r3, #128	; 0x80
  8001f84:	61fb      	str	r3, [r7, #28]
-  PeriphClkInitStruct.PLL2.PLL2VCOSEL = RCC_PLL2VCOWIDE;
- 8001f86:	2300      	movs	r3, #0
+  PeriphClkInitStruct.PLL2.PLL2VCOSEL = RCC_PLL2VCOMEDIUM;
+ 8001f86:	2320      	movs	r3, #32
  8001f88:	623b      	str	r3, [r7, #32]
   PeriphClkInitStruct.PLL2.PLL2FRACN = 0;
  8001f8a:	2300      	movs	r3, #0
@@ -7376,9 +7376,9 @@ void MX_TIM1_Init(void)
  80031dc:	4b44      	ldr	r3, [pc, #272]	; (80032f0 <MX_TIM1_Init+0x154>)
  80031de:	4a45      	ldr	r2, [pc, #276]	; (80032f4 <MX_TIM1_Init+0x158>)
  80031e0:	601a      	str	r2, [r3, #0]
-  htim1.Init.Prescaler = 100-1;
+  htim1.Init.Prescaler = 75-1;
  80031e2:	4b43      	ldr	r3, [pc, #268]	; (80032f0 <MX_TIM1_Init+0x154>)
- 80031e4:	2263      	movs	r2, #99	; 0x63
+ 80031e4:	224a      	movs	r2, #74	; 0x4a
  80031e6:	605a      	str	r2, [r3, #4]
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
  80031e8:	4b41      	ldr	r3, [pc, #260]	; (80032f0 <MX_TIM1_Init+0x154>)
@@ -7594,9 +7594,9 @@ void MX_TIM2_Init(void)
  800332a:	4b2d      	ldr	r3, [pc, #180]	; (80033e0 <MX_TIM2_Init+0xe8>)
  800332c:	f04f 4280 	mov.w	r2, #1073741824	; 0x40000000
  8003330:	601a      	str	r2, [r3, #0]
-  htim2.Init.Prescaler = 100-1;
+  htim2.Init.Prescaler = 75-1;
  8003332:	4b2b      	ldr	r3, [pc, #172]	; (80033e0 <MX_TIM2_Init+0xe8>)
- 8003334:	2263      	movs	r2, #99	; 0x63
+ 8003334:	224a      	movs	r2, #74	; 0x4a
  8003336:	605a      	str	r2, [r3, #4]
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
  8003338:	4b29      	ldr	r3, [pc, #164]	; (80033e0 <MX_TIM2_Init+0xe8>)
