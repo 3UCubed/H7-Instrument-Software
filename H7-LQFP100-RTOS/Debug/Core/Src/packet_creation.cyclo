@@ -1,4 +1,6 @@
 packet_creation.c:16:6:create_pmt_packet	2
 packet_creation.c:43:6:create_erpa_packet	2
 packet_creation.c:80:6:create_hk_packet	1
-packet_creation.c:151:6:reset_packet_sequence_numbers	1
+packet_creation.c:151:6:create_error_packet	1
+packet_creation.c:161:6:create_junk_packet	2
+packet_creation.c:173:6:reset_packet_sequence_numbers	1

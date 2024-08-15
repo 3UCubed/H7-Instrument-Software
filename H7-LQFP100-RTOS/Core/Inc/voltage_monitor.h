@@ -10,7 +10,7 @@
 
 #define NUM_VOLTAGE_RAILS 18
 
-#include "main.h"
+#include <stdio.h>				// For uint data types
 
 // Private Typedefs
 typedef enum {

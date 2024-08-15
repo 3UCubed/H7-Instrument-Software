@@ -34,18 +34,14 @@ extern "C" {
 #include "cmsis_os.h"			// For freeRTOS commands
 #include <stdio.h>				// For uint data types
 #include "string.h"				// For memcpy
-#include "stdlib.h"				// For malloc
+
+#include "packet_creation.h"	// For resetting packet sequence numbers
 #include "voltage_monitor.h"	// For initializing voltage monitor in system_setup
 #include "sample_data.h"		// For initializing adc dma in system_setup
 #include "time_tagging.h"		// For letting sync calibrate RTC
-#include "packet_creation.h"	// For resetting packet sequence numbers
 
 #define UART_RX_BUFFER_SIZE 64
-#define PMT_DATA_SIZE 10
-#define ERPA_DATA_SIZE 14
-#define HK_DATA_SIZE 54
-#define UPTIME_SIZE 4
-#define TIMESTAMP_SIZE 10
+
 
 #define PMT_FLAG_ID 0x0001
 #define ERPA_FLAG_ID 0x0002
@@ -59,9 +55,7 @@ extern "C" {
 #define SCIENCE_FLAG 0x0001
 #define IDLE_FLAG 0x0002
 
-#define PMT_SYNC 0xBB
-#define ERPA_SYNC 0xAA
-#define HK_SYNC 0xCC
+
 
 /* USER CODE END Includes */
 
@@ -77,6 +71,7 @@ typedef struct {
 
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
+
 extern osEventFlagsId_t packet_event_flags;
 extern osEventFlagsId_t utility_event_flags;
 extern osEventFlagsId_t mode_event_flags;

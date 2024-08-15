@@ -30,6 +30,7 @@
 #include "packet_creation.h"	// For creating packets
 #include "dac.h"				// For Science/Idle modes
 #include "tim.h"				// For Science/Idle modes
+#include "error_packet_handler.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -422,7 +423,7 @@ void Voltage_Monitor_init(void *argument)
 					rail_monitor_ptr[i].error_count++;
 					// If that rails' error count is at 3, proceed with error protocol for that rail
 					if (rail_monitor_ptr[i].error_count == 3) {
-						//error_protocol(rail_monitor_ptr[i].name);
+						error_protocol(rail_monitor_ptr[i].name);
 					}
 				}
 			}
