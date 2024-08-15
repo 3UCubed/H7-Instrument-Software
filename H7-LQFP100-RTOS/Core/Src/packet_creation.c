@@ -34,7 +34,7 @@ void create_pmt_packet() {
 	buffer[8] = uptime[2];
 	buffer[9] = uptime[3];
 
-	HAL_UART_Transmit(&huart1, buffer, PMT_DATA_SIZE, 100);
+	HAL_UART_Transmit_DMA(&huart1, buffer, PMT_DATA_SIZE);
 
 	pmt_seq++;
 }
@@ -71,7 +71,7 @@ void create_erpa_packet() {
 	buffer[12] = uptime[2];
 	buffer[13] = uptime[3];
 
-	HAL_UART_Transmit(&huart1, buffer, ERPA_DATA_SIZE, 100);
+	HAL_UART_Transmit_DMA(&huart1, buffer, ERPA_DATA_SIZE);
 
 	erpa_seq++;
 }
@@ -143,7 +143,7 @@ void create_hk_packet() {
 	buffer[52] = uptime[2];
 	buffer[53] = uptime[3];
 
-	HAL_UART_Transmit(&huart1, buffer, HK_DATA_SIZE, 100);
+	HAL_UART_Transmit_DMA(&huart1, buffer, HK_DATA_SIZE);
 
 	hk_seq++;
 }
@@ -155,7 +155,7 @@ void create_error_packet(VOLTAGE_RAIL_NAME rail_name) {
 	buffer[1] = ERROR_PACKET_SYNC;
 	buffer[2] = rail_name;
 
-	HAL_UART_Transmit(&huart1, buffer, ERROR_PACKET_SIZE, 100);
+	HAL_UART_Transmit_DMA(&huart1, buffer, ERROR_PACKET_SIZE);
 }
 
 void create_junk_packet() {
@@ -165,7 +165,7 @@ void create_junk_packet() {
 		buffer[i] = 0x00;
 	}
 
-	HAL_UART_Transmit(&huart1, buffer, JUNK_PACKET_SIZE, 100);
+	HAL_UART_Transmit_DMA(&huart1, buffer, JUNK_PACKET_SIZE);
 }
 
 
