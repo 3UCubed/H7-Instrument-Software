@@ -9,12 +9,10 @@
 #define INC_SAMPLE_DATA_H_
 
 
-#include "main.h"
-#include <stdio.h>			// For uint data types
-#include "adc.h"			// For ADC handles
-#include "spi.h"			// For SPI handles
+#include <stdio.h>				// For uint data types
+#include <adc.h>
+#include "spi.h"
 #include "i2c.h"
-
 
 #define ADC1_NUM_CHANNELS 11
 #define ADC3_NUM_CHANNELS 4

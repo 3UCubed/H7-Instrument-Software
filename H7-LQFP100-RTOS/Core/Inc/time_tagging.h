@@ -8,8 +8,8 @@
 #ifndef INC_TIME_TAGGING_H_
 #define INC_TIME_TAGGING_H_
 
-#include "main.h"
-#include "rtc.h"	// For RTC handle
+#include "rtc.h"
+#include <stdio.h>				// For uint data types
 
 void get_uptime(uint8_t *buffer);
 void get_timestamp(uint8_t *buffer);

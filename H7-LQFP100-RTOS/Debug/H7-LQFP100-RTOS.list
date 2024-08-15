@@ -23,23 +23,23 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
   9 .ARM.attributes 0000002e  00000000  00000000  000300fc  2**0
                   CONTENTS, READONLY
- 10 .debug_info   0003b274  00000000  00000000  0003012a  2**0
+ 10 .debug_info   0003b307  00000000  00000000  0003012a  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 11 .debug_abbrev 0000705f  00000000  00000000  0006b39e  2**0
+ 11 .debug_abbrev 000070a6  00000000  00000000  0006b431  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 12 .debug_aranges 000028c8  00000000  00000000  00072400  2**3
+ 12 .debug_aranges 000028d8  00000000  00000000  000724d8  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 13 .debug_ranges 000025e0  00000000  00000000  00074cc8  2**3
+ 13 .debug_ranges 000025f0  00000000  00000000  00074db0  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_macro  00044bd8  00000000  00000000  000772a8  2**0
+ 14 .debug_macro  00044b35  00000000  00000000  000773a0  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_line   0003ca59  00000000  00000000  000bbe80  2**0
+ 15 .debug_line   0003c98f  00000000  00000000  000bbed5  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_str    00194f83  00000000  00000000  000f88d9  2**0
+ 16 .debug_str    0019501c  00000000  00000000  000f8864  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .comment      00000050  00000000  00000000  0028d85c  2**0
+ 17 .comment      00000050  00000000  00000000  0028d880  2**0
                   CONTENTS, READONLY
- 18 .debug_frame  0000b1c4  00000000  00000000  0028d8ac  2**2
+ 18 .debug_frame  0000b20c  00000000  00000000  0028d8d0  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -5090,6 +5090,10 @@ void create_hk_packet() {
  8002594:	24001bc0 	.word	0x24001bc0
 
 08002598 <reset_packet_sequence_numbers>:
+	HAL_UART_Transmit(&huart1, buffer, JUNK_PACKET_SIZE, 100);
+}
+
+
 
 void reset_packet_sequence_numbers() {
  8002598:	b480      	push	{r7}
@@ -8691,6 +8695,7 @@ uint8_t voltage_monitor_init() {
  8003a46:	4b62      	ldr	r3, [pc, #392]	; (8003bd0 <voltage_monitor_init+0x314>)
  8003a48:	f640 3283 	movw	r2, #2947	; 0xb83
  8003a4c:	f8a3 2058 	strh.w	r2, [r3, #88]	; 0x58
+
 
 	rail_monitor[RAIL_3v3].name = RAIL_3v3;
  8003a50:	4b5f      	ldr	r3, [pc, #380]	; (8003bd0 <voltage_monitor_init+0x314>)

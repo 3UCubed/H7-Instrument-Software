@@ -30,6 +30,7 @@
 #include "packet_creation.h"	// For creating packets
 #include "dac.h"				// For Science/Idle modes
 #include "tim.h"				// For Science/Idle modes
+#include "error_packet_handler.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/

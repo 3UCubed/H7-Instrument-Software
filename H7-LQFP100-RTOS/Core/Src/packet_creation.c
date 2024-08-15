@@ -148,6 +148,28 @@ void create_hk_packet() {
 	hk_seq++;
 }
 
+void create_error_packet(VOLTAGE_RAIL_NAME rail_name) {
+	uint8_t buffer[ERROR_PACKET_SIZE];
+
+	buffer[0] = ERROR_PACKET_SYNC;
+	buffer[1] = ERROR_PACKET_SYNC;
+	buffer[2] = rail_name;
+
+	HAL_UART_Transmit(&huart1, buffer, ERROR_PACKET_SIZE, 100);
+}
+
+void create_junk_packet() {
+	uint8_t buffer[JUNK_PACKET_SIZE];
+
+	for (int i = 0; i < JUNK_PACKET_SIZE; i++) {
+		buffer[i] = 0x00;
+	}
+
+	HAL_UART_Transmit(&huart1, buffer, JUNK_PACKET_SIZE, 100);
+}
+
+
+
 void reset_packet_sequence_numbers() {
 	pmt_seq = 0;
 	erpa_seq = 0;

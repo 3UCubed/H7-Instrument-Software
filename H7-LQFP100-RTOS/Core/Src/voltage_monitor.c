@@ -75,6 +75,7 @@ uint8_t voltage_monitor_init() {
 	rail_monitor[RAIL_2v5].max_voltage = 3257;
 	rail_monitor[RAIL_2v5].min_voltage = 2947;
 
+
 	rail_monitor[RAIL_3v3].name = RAIL_3v3;
 	rail_monitor[RAIL_3v3].error_count = 0;
 	rail_monitor[RAIL_3v3].is_enabled = 0;
