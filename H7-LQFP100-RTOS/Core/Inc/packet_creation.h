@@ -8,7 +8,7 @@
 #ifndef INC_PACKET_CREATION_H_
 #define INC_PACKET_CREATION_H_
 
-#include "voltage_monitor.h"
+#include "shared_types.h"
 #include "time_tagging.h"
 #include "usart.h"
 

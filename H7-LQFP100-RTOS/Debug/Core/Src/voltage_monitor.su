@@ -1,5 +1,5 @@
 ../Core/Src/voltage_monitor.c:12:9:voltage_monitor_init	16	static
-../Core/Src/voltage_monitor.c:152:9:set_rail_monitor_enable	24	static
-../Core/Src/voltage_monitor.c:160:15:get_rail_monitor	4	static
-../Core/Src/voltage_monitor.c:164:9:set_rail_monitor	48	static
-../Core/Src/voltage_monitor.c:199:9:in_range	24	static
+../Core/Src/voltage_monitor.c:153:9:set_rail_monitor_enable	24	static
+../Core/Src/voltage_monitor.c:161:15:get_rail_monitor	4	static
+../Core/Src/voltage_monitor.c:165:9:set_rail_monitor	48	static
+../Core/Src/voltage_monitor.c:200:9:in_range	24	static
