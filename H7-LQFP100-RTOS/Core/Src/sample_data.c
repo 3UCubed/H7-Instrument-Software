@@ -16,6 +16,7 @@ static const uint8_t ADT7410_4 = 0x4B << 1;
 ALIGN_32BYTES(static uint16_t ADC1_raw_data[ADC1_NUM_CHANNELS]);
 ALIGN_32BYTES(static uint16_t ADC3_raw_data[ADC3_NUM_CHANNELS]);
 ALIGN_32BYTES(static uint16_t erpa_spi_raw_data[2]);
+ALIGN_32BYTES(static uint16_t pmt_spi_raw_data[2]);
 
 // Public Functions
 uint8_t init_adc_dma() {
@@ -41,6 +42,7 @@ uint8_t init_adc_dma() {
 		Error_Handler();
 	}
 	hspi2.Instance->CR1 |= 1 << 10;
+	hspi1.Instance->CR1 |= 1 << 10;
 
 
 	status = 1;
@@ -59,15 +61,14 @@ void sample_pmt_spi(uint8_t *buffer) {
 	uint8_t spi_MSB;
 	uint8_t spi_LSB;
 
-	HAL_SPI_Receive(&hspi1, (uint8_t*) spi_raw_data, 1, 1);
+	HAL_SPI_Receive_DMA(&hspi1, (uint8_t*) pmt_spi_raw_data, 1);
 
-	spi_LSB = ((spi_raw_data[0] & 0xFF00) >> 8);
-	spi_MSB = (spi_raw_data[1] & 0xFF);
+	spi_LSB = ((pmt_spi_raw_data[0] & 0xFF00) >> 8);
+	spi_MSB = (pmt_spi_raw_data[0] & 0xFF);
 
-	hspi1.Instance->CR1 |= 1 << 10;
 
-	buffer[0] = spi_MSB;
-	buffer[1] = spi_LSB;
+	buffer[0] = spi_LSB;
+	buffer[1] = spi_MSB;
 }
 
 
