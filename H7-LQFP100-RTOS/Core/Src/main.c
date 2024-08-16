@@ -89,6 +89,8 @@ volatile uint8_t HK_10_second_counter = 0;
 
 volatile uint8_t HK_100_ms_counter = 0;
 
+
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -268,6 +270,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		printf("ERPA ON\n");
 		HAL_TIM_OC_Start_IT(&htim2, TIM_CHANNEL_4);
 		osEventFlagsSet(packet_event_flags, ERPA_FLAG_ID);
+
 		break;
 	}
 	case 0x0A: {
@@ -367,6 +370,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	}
 }
 
+
+
 /* USER CODE END 0 */
 
 /**
@@ -413,6 +418,7 @@ int main(void)
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
   system_setup();
+
   /* USER CODE END 2 */
 
   /* Init scheduler */

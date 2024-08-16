@@ -15,6 +15,7 @@ static const uint8_t ADT7410_4 = 0x4B << 1;
 
 ALIGN_32BYTES(static uint16_t ADC1_raw_data[ADC1_NUM_CHANNELS]);
 ALIGN_32BYTES(static uint16_t ADC3_raw_data[ADC3_NUM_CHANNELS]);
+ALIGN_32BYTES(static uint16_t erpa_spi_raw_data[2]);
 
 // Public Functions
 uint8_t init_adc_dma() {
@@ -39,10 +40,19 @@ uint8_t init_adc_dma() {
 	ADC3_NUM_CHANNELS) != HAL_OK) {
 		Error_Handler();
 	}
+	hspi2.Instance->CR1 |= 1 << 10;
+
+
 	status = 1;
 
 	return status;
 }
+
+//void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef * hspi)
+//{
+//	HAL_SPI_Receive_IT(&hspi2, (uint8_t*) erpa_spi_raw_data, 1);
+//
+//}
 
 void sample_pmt_spi(uint8_t *buffer) {
 	uint8_t spi_raw_data[2];
@@ -60,21 +70,22 @@ void sample_pmt_spi(uint8_t *buffer) {
 	buffer[1] = spi_LSB;
 }
 
+
 void sample_erpa_spi(uint8_t *buffer) {
-	uint8_t spi_raw_data[2];
 	uint8_t spi_MSB;
 	uint8_t spi_LSB;
+	HAL_SPI_Receive_DMA(&hspi2, (uint8_t*) erpa_spi_raw_data, 1);
 
-	HAL_SPI_Receive(&hspi2, (uint8_t*) spi_raw_data, 1, 100);
+	spi_LSB = ((erpa_spi_raw_data[0] & 0xFF00) >> 8);
+	spi_MSB = (erpa_spi_raw_data[0] & 0xFF);
 
-	spi_LSB = ((spi_raw_data[0] & 0xFF00) >> 8);
-	spi_MSB = (spi_raw_data[1] & 0xFF);
 
-	hspi2.Instance->CR1 |= 1 << 10;
-
-	buffer[0] = spi_MSB;
-	buffer[1] = spi_LSB;
+	buffer[0] = spi_LSB;
+	buffer[1] = spi_MSB;
 }
+
+
+
 
 void sample_erpa_adc(uint16_t *buffer) {
 	uint16_t PC4 = ADC1_raw_data[1];
