@@ -15,6 +15,9 @@ static const uint8_t ADT7410_4 = 0x4B << 1;
 
 ALIGN_32BYTES(static uint16_t ADC1_raw_data[ADC1_NUM_CHANNELS]);
 ALIGN_32BYTES(static uint16_t ADC3_raw_data[ADC3_NUM_CHANNELS]);
+static uint16_t erpa_spi_raw_data[1];
+static uint16_t pmt_spi_raw_data[1];
+static uint8_t raw_i2c[2];
 
 // Public Functions
 uint8_t init_adc_dma() {
@@ -39,42 +42,51 @@ uint8_t init_adc_dma() {
 	ADC3_NUM_CHANNELS) != HAL_OK) {
 		Error_Handler();
 	}
+	hspi2.Instance->CR1 |= 1 << 10;
+	hspi1.Instance->CR1 |= 1 << 10;
+
+
 	status = 1;
 
 	return status;
 }
 
+//void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef * hspi)
+//{
+//	HAL_SPI_Receive_IT(&hspi2, (uint8_t*) erpa_spi_raw_data, 1);
+//
+//}
+
 void sample_pmt_spi(uint8_t *buffer) {
-	uint8_t spi_raw_data[2];
 	uint8_t spi_MSB;
 	uint8_t spi_LSB;
 
-	HAL_SPI_Receive(&hspi1, (uint8_t*) spi_raw_data, 1, 1);
+	HAL_SPI_Receive_DMA(&hspi1, (uint8_t*) pmt_spi_raw_data, 1);
 
-	spi_LSB = ((spi_raw_data[0] & 0xFF00) >> 8);
-	spi_MSB = (spi_raw_data[1] & 0xFF);
+	spi_LSB = ((pmt_spi_raw_data[0] & 0xFF00) >> 8);
+	spi_MSB = (pmt_spi_raw_data[0] & 0xFF);
 
-	hspi1.Instance->CR1 |= 1 << 10;
 
-	buffer[0] = spi_MSB;
-	buffer[1] = spi_LSB;
+	buffer[0] = spi_LSB;
+	buffer[1] = spi_MSB;
 }
+
 
 void sample_erpa_spi(uint8_t *buffer) {
-	uint8_t spi_raw_data[2];
 	uint8_t spi_MSB;
 	uint8_t spi_LSB;
+	HAL_SPI_Receive_DMA(&hspi2, (uint8_t*) erpa_spi_raw_data, 1);
 
-	HAL_SPI_Receive(&hspi2, (uint8_t*) spi_raw_data, 1, 100);
+	spi_LSB = ((erpa_spi_raw_data[0] & 0xFF00) >> 8);
+	spi_MSB = (erpa_spi_raw_data[0] & 0xFF);
 
-	spi_LSB = ((spi_raw_data[0] & 0xFF00) >> 8);
-	spi_MSB = (spi_raw_data[1] & 0xFF);
 
-	hspi2.Instance->CR1 |= 1 << 10;
-
-	buffer[0] = spi_MSB;
-	buffer[1] = spi_LSB;
+	buffer[0] = spi_LSB;
+	buffer[1] = spi_MSB;
 }
+
+
+
 
 void sample_erpa_adc(uint16_t *buffer) {
 	uint16_t PC4 = ADC1_raw_data[1];
@@ -130,22 +142,26 @@ void sample_hk_adc3(uint16_t *buffer) {
 	buffer[3] = PC3;
 }
 
+
 int16_t poll_i2c_sensor(const uint8_t TEMP_ADDR) {
 	int16_t output;
-	uint8_t buf[2];
 	HAL_StatusTypeDef ret;
-	buf[0] = REG_TEMP;
-	ret = HAL_I2C_Master_Transmit(&hi2c1, TEMP_ADDR, buf, 1, 1000);
+	raw_i2c[0] = REG_TEMP;
+
+
+	ret = HAL_I2C_Master_Transmit_DMA(&hi2c1, TEMP_ADDR, (uint8_t*) raw_i2c, 1);
 	if (ret != HAL_OK) {
 		printf("I2C TX Error\n");
 	} else {
 		/* Read 2 bytes from the temperature register */
-		ret = HAL_I2C_Master_Receive(&hi2c1, TEMP_ADDR, buf, 2, 1000);
+		while (HAL_I2C_GetState(&hi2c1) != HAL_I2C_STATE_READY) {};
+		ret = HAL_I2C_Master_Receive_DMA(&hi2c1, TEMP_ADDR, (uint8_t*) raw_i2c, 2);
 		if (ret != HAL_OK) {
 			printf("I2C RX Error\n");
 		} else {
-			output = (int16_t) (buf[0] << 8);
-			output = (output | buf[1]) >> 3;
+			while (HAL_I2C_GetState(&hi2c1) != HAL_I2C_STATE_READY) {};
+			output = (int16_t) (raw_i2c[0] << 8);
+			output = (output | raw_i2c[1]) >> 3;
 		}
 	}
 	return output;

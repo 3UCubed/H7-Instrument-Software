@@ -13,7 +13,7 @@
 #include <adc.h>
 #include "spi.h"
 #include "i2c.h"
-
+#include "shared_types.h"
 #define ADC1_NUM_CHANNELS 11
 #define ADC3_NUM_CHANNELS 4
 

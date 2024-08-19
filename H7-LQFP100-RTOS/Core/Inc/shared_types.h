@@ -8,6 +8,9 @@
 #ifndef INC_SHARED_TYPES_H_
 #define INC_SHARED_TYPES_H_
 
+#include <stdio.h>				// For uint data types
+
+
 typedef enum {
 	RAIL_vsense,	// 0
 	RAIL_vrefint,	// 1
@@ -28,5 +31,6 @@ typedef enum {
 	RAIL_n800v,		// 16
 	RAIL_TMP1		// 17
 } VOLTAGE_RAIL_NAME;
+
 
 #endif /* INC_SHARED_TYPES_H_ */
