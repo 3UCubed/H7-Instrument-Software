@@ -18,8 +18,6 @@ ALIGN_32BYTES(static uint16_t ADC3_raw_data[ADC3_NUM_CHANNELS]);
 static uint16_t erpa_spi_raw_data[1];
 static uint16_t pmt_spi_raw_data[1];
 static uint8_t raw_i2c[2];
-volatile uint8_t RXcmplt = 0;
-volatile uint8_t TXcmplt = 0;
 
 // Public Functions
 uint8_t init_adc_dma() {
@@ -144,16 +142,6 @@ void sample_hk_adc3(uint16_t *buffer) {
 	buffer[3] = PC3;
 }
 
-void HAL_I2C_MasterTxCpltCallback(I2C_HandleTypeDef *hi2c) {
-	TXcmplt = 1;
-}
-
-void HAL_I2C_MasterRxCpltCallback(I2C_HandleTypeDef *hi2c) {
-	RXcmplt = 1;
-}
-
-
-
 
 int16_t poll_i2c_sensor(const uint8_t TEMP_ADDR) {
 	int16_t output;
@@ -166,14 +154,12 @@ int16_t poll_i2c_sensor(const uint8_t TEMP_ADDR) {
 		printf("I2C TX Error\n");
 	} else {
 		/* Read 2 bytes from the temperature register */
-		while (!TXcmplt){};
-		TXcmplt = 0;
+		while (HAL_I2C_GetState(&hi2c1) != HAL_I2C_STATE_READY) {};
 		ret = HAL_I2C_Master_Receive_DMA(&hi2c1, TEMP_ADDR, (uint8_t*) raw_i2c, 2);
 		if (ret != HAL_OK) {
 			printf("I2C RX Error\n");
 		} else {
-			while (!RXcmplt) {};
-			RXcmplt = 0;
+			while (HAL_I2C_GetState(&hi2c1) != HAL_I2C_STATE_READY) {};
 			output = (int16_t) (raw_i2c[0] << 8);
 			output = (output | raw_i2c[1]) >> 3;
 		}
