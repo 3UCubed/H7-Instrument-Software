@@ -15,8 +15,8 @@ static const uint8_t ADT7410_4 = 0x4B << 1;
 
 ALIGN_32BYTES(static uint16_t ADC1_raw_data[ADC1_NUM_CHANNELS]);
 ALIGN_32BYTES(static uint16_t ADC3_raw_data[ADC3_NUM_CHANNELS]);
-ALIGN_32BYTES(static uint16_t erpa_spi_raw_data[2]);
-ALIGN_32BYTES(static uint16_t pmt_spi_raw_data[2]);
+static uint16_t erpa_spi_raw_data[1];
+static uint16_t pmt_spi_raw_data[1];
 
 // Public Functions
 uint8_t init_adc_dma() {
@@ -57,7 +57,6 @@ uint8_t init_adc_dma() {
 //}
 
 void sample_pmt_spi(uint8_t *buffer) {
-	uint8_t spi_raw_data[2];
 	uint8_t spi_MSB;
 	uint8_t spi_LSB;
 
