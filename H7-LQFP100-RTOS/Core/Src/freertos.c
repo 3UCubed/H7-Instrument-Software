@@ -484,9 +484,10 @@ void Science_init(void *argument)
 
 		HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, DAC_OUT, 32, DAC_ALIGN_12B_R);	// Enable auto sweep (doesn't start until ERPA timer is started)
 		HK_ENABLED = 1;
+		ERPA_ENABLED = 1;
 		uptime_millis = 0;
 		reset_packet_sequence_numbers();
-		HAL_TIM_OC_Start_IT(&htim2, TIM_CHANNEL_4);			// ERPA packet on
+		TIM2->CCR4 = 312;
 		HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_1);			// PMT packet on
 
 		__enable_irq();
@@ -514,8 +515,8 @@ void Idle_init(void *argument)
   {
 		osEventFlagsWait(mode_event_flags, IDLE_FLAG, osFlagsWaitAny, osWaitForever);
 
-
-		HAL_TIM_OC_Stop_IT(&htim2, TIM_CHANNEL_4);			// ERPA packet off
+		ERPA_ENABLED = 0;
+		TIM2->CCR4 = 0;
 		HAL_TIM_OC_Stop_IT(&htim1, TIM_CHANNEL_1);			// PMT packet off
 		HK_ENABLED = 0;
 		HAL_DAC_Stop_DMA(&hdac1, DAC_CHANNEL_1);			// Disable auto sweep

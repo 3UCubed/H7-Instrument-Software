@@ -81,6 +81,7 @@ osEventFlagsId_t mode_event_flags;
 
 unsigned char UART_RX_BUFFER[UART_RX_BUFFER_SIZE];
 volatile uint8_t HK_ENABLED = 0;
+volatile uint8_t ERPA_ENABLED = 0;
 volatile uint8_t step = 0;
 volatile uint32_t cadence = 3125;
 volatile uint32_t uptime_millis = 0;
@@ -112,8 +113,9 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim) {
 		osEventFlagsSet(packet_event_flags, PMT_FLAG_ID);
 	}
 	else if (htim == &htim2) {
-		osEventFlagsSet(packet_event_flags, ERPA_FLAG_ID);
-
+		if (ERPA_ENABLED) {
+			osEventFlagsSet(packet_event_flags, ERPA_FLAG_ID);
+		}
 		if (HK_100_ms_counter == 32) {
 			osEventFlagsSet(utility_event_flags, VOLTAGE_MONITOR_FLAG_ID);
 
@@ -268,14 +270,16 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	}
 	case 0x1A: {
 		printf("ERPA ON\n");
-		HAL_TIM_OC_Start_IT(&htim2, TIM_CHANNEL_4);
 		osEventFlagsSet(packet_event_flags, ERPA_FLAG_ID);
+		TIM2->CCR4 = 312;
+		ERPA_ENABLED = 1;
 
 		break;
 	}
 	case 0x0A: {
 		printf("ERPA OFF\n");
-		HAL_TIM_OC_Stop_IT(&htim2, TIM_CHANNEL_4);
+		ERPA_ENABLED = 0;
+		TIM2->CCR4 = 0;
 		break;
 	}
 	case 0x1B: {
@@ -534,7 +538,6 @@ void system_setup() {
 	// 7 -- Start UART receive interrupts
 
 
-	// ---- 1 ---- //
 	packet_event_flags = osEventFlagsNew(NULL);
     if (packet_event_flags == NULL) {
         while (1);
@@ -550,23 +553,20 @@ void system_setup() {
         while (1);
     }
 
+    TIM2->CCR4 = 0;
+	HAL_TIM_OC_Start_IT(&htim2, TIM_CHANNEL_4);
 
-
-	// ---- 3 ---- //
 	if (!voltage_monitor_init()) {
 		while (1);
 	}
 
 
-	// ---- 5 ---- //
-	TIM2->CCR4 = 312;
 
-	// ---- 6 ---- //
+
 	if (!init_adc_dma()) {
 		while (1);
 	}
 
-	// ---- 7 ---- //
 	HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
 
 }
