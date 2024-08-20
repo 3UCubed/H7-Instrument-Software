@@ -52,9 +52,9 @@ Core/Src/sample_data.o: ../Core/Src/sample_data.c \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h \
- ../Core/Inc/packet_creation.h ../Core/Inc/shared_types.h \
- ../Core/Inc/time_tagging.h ../Core/Inc/rtc.h ../Core/Inc/usart.h \
- ../Core/Inc/voltage_monitor.h ../Core/Inc/sample_data.h \
+ ../Core/Inc/packet_creation.h ../Core/Inc/time_tagging.h \
+ ../Core/Inc/rtc.h ../Core/Inc/usart.h ../Core/Inc/voltage_monitor.h \
+ ../Core/Inc/sample_data.h ../Core/Inc/error_packet_handler.h \
  ../Core/Inc/spi.h ../Core/Inc/i2c.h
 ../Core/Inc/sample_data.h:
 ../Core/Inc/adc.h:
@@ -112,11 +112,11 @@ Core/Src/sample_data.o: ../Core/Src/sample_data.c \
 ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h:
 ../Core/Inc/packet_creation.h:
-../Core/Inc/shared_types.h:
 ../Core/Inc/time_tagging.h:
 ../Core/Inc/rtc.h:
 ../Core/Inc/usart.h:
 ../Core/Inc/voltage_monitor.h:
 ../Core/Inc/sample_data.h:
+../Core/Inc/error_packet_handler.h:
 ../Core/Inc/spi.h:
 ../Core/Inc/i2c.h:

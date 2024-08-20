@@ -158,9 +158,6 @@ uint8_t set_rail_monitor_enable(VOLTAGE_RAIL_NAME rail_name, uint8_t enable_valu
 	return status;
 }
 
-VOLTAGE_RAIL* get_rail_monitor() {
-	return rail_monitor;
-}
 
 uint8_t set_rail_monitor() {
 	uint8_t status = 0;
@@ -196,6 +193,9 @@ uint8_t set_rail_monitor() {
 	return status;
 }
 
+VOLTAGE_RAIL* get_rail_monitor() {
+	return rail_monitor;
+}
 
 uint8_t in_range(uint16_t raw, int min, int max) {
 	if (raw <= max && raw >= min) {
@@ -203,6 +203,80 @@ uint8_t in_range(uint16_t raw, int min, int max) {
 	}
 	return 0;
 }
+
+
+void monitor_rails() {
+	// Iterate through all voltage rails
+	for (int i = 0; i < NUM_VOLTAGE_RAILS; i++){
+		if (rail_monitor[i].is_enabled){
+			// If current rail is not in range...
+			if (!in_range(rail_monitor[i].data, rail_monitor[i].min_voltage, rail_monitor[i].max_voltage)){
+				// Increase that rails error count
+				rail_monitor[i].error_count++;
+				// If that rails' error count is at 3, proceed with error protocol for that rail
+				if (rail_monitor[i].error_count == 3) {
+					uint8_t error_code;
+					error_code = get_rail_name_code(rail_monitor[i].name);
+					handle_error(error_code);
+				}
+			}
+		}
+	}
+}
+
+uint8_t get_rail_name_code(VOLTAGE_RAIL_NAME rail_name) {
+	switch (rail_name) {
+	case RAIL_vsense:
+		return 0x00;
+	case RAIL_vrefint:
+		return 0x01;
+	case RAIL_TEMP1:
+		return 0x02;
+	case RAIL_TEMP2:
+		return 0x03;
+	case RAIL_TEMP3:
+		return 0x04;
+	case RAIL_TEMP4:
+		return 0x05;
+	case RAIL_busvmon:
+		return 0x06;
+	case RAIL_busimon:
+		return 0x07;
+	case RAIL_2v5:
+		return 0x08;
+	case RAIL_3v3:
+		return 0x09;
+	case RAIL_5v:
+		return 0x0A;
+	case RAIL_n3v3:
+		return 0x0B;
+	case RAIL_n5v:
+		return 0x0C;
+	case RAIL_15v:
+		return 0x0D;
+	case RAIL_5vref:
+		return 0x0E;
+	case RAIL_n200v:
+		return 0x0F;
+	case RAIL_n800v:
+		return 0x10;
+	case RAIL_TMP1:
+		return 0x11;
+	default:
+		return 0xFF;
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
 

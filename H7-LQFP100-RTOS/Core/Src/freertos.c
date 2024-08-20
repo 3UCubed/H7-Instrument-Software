@@ -30,7 +30,6 @@
 #include "packet_creation.h"	// For creating packets
 #include "dac.h"				// For Science/Idle modes
 #include "tim.h"				// For Science/Idle modes
-#include "error_packet_handler.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -403,7 +402,6 @@ void AUTODEINIT_init(void *argument)
 void Voltage_Monitor_init(void *argument)
 {
   /* USER CODE BEGIN Voltage_Monitor_init */
-	VOLTAGE_RAIL *rail_monitor_ptr;
   /* Infinite loop */
   for(;;)
   {
@@ -411,23 +409,7 @@ void Voltage_Monitor_init(void *argument)
 	  		osWaitForever);
 
 	  set_rail_monitor();
-
-	  rail_monitor_ptr = get_rail_monitor();
-
-		// Iterate through all voltage rails
-		for (int i = 0; i < NUM_VOLTAGE_RAILS; i++){
-			if (rail_monitor_ptr[i].is_enabled){
-				// If current rail is not in range...
-				if (!in_range(rail_monitor_ptr[i].data, rail_monitor_ptr[i].min_voltage, rail_monitor_ptr[i].max_voltage)){
-					// Increase that rails error count
-					rail_monitor_ptr[i].error_count++;
-					// If that rails' error count is at 3, proceed with error protocol for that rail
-					if (rail_monitor_ptr[i].error_count == 3) {
-						//error_protocol(rail_monitor_ptr[i].name);
-					}
-				}
-			}
-		}
+	  monitor_rails();
   }
   /* USER CODE END Voltage_Monitor_init */
 }

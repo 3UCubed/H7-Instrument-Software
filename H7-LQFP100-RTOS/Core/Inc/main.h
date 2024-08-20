@@ -39,7 +39,6 @@ extern "C" {
 #include "voltage_monitor.h"	// For initializing voltage monitor in system_setup
 #include "sample_data.h"		// For initializing adc dma in system_setup
 #include "time_tagging.h"		// For letting sync calibrate RTC
-#include "shared_types.h"
 
 #define UART_RX_BUFFER_SIZE 64
 

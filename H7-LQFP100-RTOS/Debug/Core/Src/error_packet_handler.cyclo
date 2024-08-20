@@ -1,2 +1,1 @@
-core_cm7.h:2156:34:__NVIC_SystemReset	1
-error_packet_handler.c:11:6:error_protocol	0
+error_packet_handler.c:10:6:handle_error	1
