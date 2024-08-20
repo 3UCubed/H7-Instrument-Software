@@ -50,5 +50,5 @@ uint8_t set_rail_monitor();
 VOLTAGE_RAIL* get_rail_monitor();
 uint8_t in_range(uint16_t raw, int min, int max);
 void monitor_rails();
-uint8_t get_rail_name_code(VOLTAGE_RAIL_NAME rail_name);
+ERROR_CODE get_rail_name_code(VOLTAGE_RAIL_NAME rail_name);
 #endif /* INC_VOLTAGE_MONITOR_H_ */

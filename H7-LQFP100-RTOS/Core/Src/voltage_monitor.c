@@ -215,7 +215,7 @@ void monitor_rails() {
 				rail_monitor[i].error_count++;
 				// If that rails' error count is at 3, proceed with error protocol for that rail
 				if (rail_monitor[i].error_count == 3) {
-					uint8_t error_code;
+					ERROR_CODE error_code;
 					error_code = get_rail_name_code(rail_monitor[i].name);
 					handle_error(error_code);
 				}
@@ -224,46 +224,64 @@ void monitor_rails() {
 	}
 }
 
-uint8_t get_rail_name_code(VOLTAGE_RAIL_NAME rail_name) {
+ERROR_CODE get_rail_name_code(VOLTAGE_RAIL_NAME rail_name) {
 	switch (rail_name) {
 	case RAIL_vsense:
-		return 0x00;
+		return EC_vsense;
+
 	case RAIL_vrefint:
-		return 0x01;
+		return EC_vrefint;
+
 	case RAIL_TEMP1:
-		return 0x02;
+		return EC_TEMP1;
+
 	case RAIL_TEMP2:
-		return 0x03;
+		return EC_TEMP2;
+
 	case RAIL_TEMP3:
-		return 0x04;
+		return EC_TEMP3;
+
 	case RAIL_TEMP4:
-		return 0x05;
+		return EC_TEMP4;
+
 	case RAIL_busvmon:
-		return 0x06;
+		return EC_busvmon;
+
 	case RAIL_busimon:
-		return 0x07;
+		return EC_busimon;
+
 	case RAIL_2v5:
-		return 0x08;
+		return EC_2v5;
+
 	case RAIL_3v3:
-		return 0x09;
+		return EC_3v3;
+
 	case RAIL_5v:
-		return 0x0A;
+		return EC_5v;
+
 	case RAIL_n3v3:
-		return 0x0B;
+		return EC_n3v3;
+
 	case RAIL_n5v:
-		return 0x0C;
+		return EC_n5v;
+
 	case RAIL_15v:
-		return 0x0D;
+		return EC_15v;
+
 	case RAIL_5vref:
-		return 0x0E;
+		return EC_5vref;
+
 	case RAIL_n200v:
-		return 0x0F;
+		return EC_n200v;
+
 	case RAIL_n800v:
-		return 0x10;
+		return EC_n800v;
+
 	case RAIL_TMP1:
-		return 0x11;
+		return EC_TMP1;
+
 	default:
-		return 0xFF;
+		return EC_UNKNOWN;
 	}
 }
 

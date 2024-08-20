@@ -4,4 +4,4 @@ voltage_monitor.c:162:9:set_rail_monitor	1
 voltage_monitor.c:196:15:get_rail_monitor	1
 voltage_monitor.c:200:9:in_range	3
 voltage_monitor.c:208:6:monitor_rails	5
-voltage_monitor.c:227:9:get_rail_name_code	19
+voltage_monitor.c:227:12:get_rail_name_code	19

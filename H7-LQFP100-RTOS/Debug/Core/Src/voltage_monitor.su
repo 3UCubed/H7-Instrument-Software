@@ -4,4 +4,4 @@
 ../Core/Src/voltage_monitor.c:196:15:get_rail_monitor	4	static
 ../Core/Src/voltage_monitor.c:200:9:in_range	24	static
 ../Core/Src/voltage_monitor.c:208:6:monitor_rails	24	static
-../Core/Src/voltage_monitor.c:227:9:get_rail_name_code	16	static
+../Core/Src/voltage_monitor.c:227:12:get_rail_name_code	16	static
