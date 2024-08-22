@@ -368,6 +368,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		osEventFlagsSet(mode_event_flags, IDLE_FLAG);
 		break;
 	}
+	case 0xDF: {
+		reset_eeprom_error_counters();
+		break;
+	}
 	default: {
 		printf("Unknown Command\n");
 		break;

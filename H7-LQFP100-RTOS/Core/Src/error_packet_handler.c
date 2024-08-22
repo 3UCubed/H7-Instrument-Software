@@ -77,6 +77,22 @@ void set_eeprom_error_counter(ERROR_CATEGORY category, uint16_t new_counter_valu
 	}
 }
 
+
+void reset_eeprom_error_counters() {
+	for (int i = 0; i < NB_OF_VAR; i++) {
+		if ((EE_WriteVariable(VirtAddVarTab[i], 0))
+				!= HAL_OK) {
+			Error_Handler();
+		}
+	}
+}
+
+
+
+
+
+
+
 void send_error_packet(ERROR_STRUCT error) {
 	uint8_t buffer[ERROR_PACKET_SIZE];
 
