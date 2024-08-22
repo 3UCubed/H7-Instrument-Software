@@ -35,11 +35,11 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  15 .debug_line   0003d874  00000000  00000000  000be119  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_str    0019529f  00000000  00000000  000fb98d  2**0
+ 16 .debug_str    001952a9  00000000  00000000  000fb98d  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .comment      00000050  00000000  00000000  00290c2c  2**0
+ 17 .comment      00000050  00000000  00000000  00290c36  2**0
                   CONTENTS, READONLY
- 18 .debug_frame  0000b370  00000000  00000000  00290c7c  2**2
+ 18 .debug_frame  0000b370  00000000  00000000  00290c88  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -1596,13 +1596,13 @@ void MX_DMA_Init(void)
 #include <stdio.h>				// For uint data types
 
 
-void handle_error(ERROR_CODE error_code){
+void handle_error(ERROR_DETAIL error_detail){
  8000d98:	b580      	push	{r7, lr}
  8000d9a:	b082      	sub	sp, #8
  8000d9c:	af00      	add	r7, sp, #0
  8000d9e:	4603      	mov	r3, r0
  8000da0:	71fb      	strb	r3, [r7, #7]
-	switch (error_code) {
+	switch (error_detail) {
  8000da2:	79fb      	ldrb	r3, [r7, #7]
  8000da4:	2b14      	cmp	r3, #20
  8000da6:	dc31      	bgt.n	8000e0c <handle_error+0x74>
@@ -1637,37 +1637,37 @@ void handle_error(ERROR_CODE error_code){
  8000e0c:	2bff      	cmp	r3, #255	; 0xff
  8000e0e:	d014      	beq.n	8000e3a <handle_error+0xa2>
 		break;
-	case EC_UNKNOWN:
-		send_error_packet(error_code);
+	case ED_UNKNOWN:
+		send_error_packet(error_detail);
 		break;
 	default:
 		break;
  8000e10:	e018      	b.n	8000e44 <handle_error+0xac>
-		send_error_packet(error_code);
+		send_error_packet(error_detail);
  8000e12:	79fb      	ldrb	r3, [r7, #7]
  8000e14:	4618      	mov	r0, r3
  8000e16:	f000 f81b 	bl	8000e50 <send_error_packet>
 		break;
  8000e1a:	e014      	b.n	8000e46 <handle_error+0xae>
-		send_error_packet(error_code);
+		send_error_packet(error_detail);
  8000e1c:	79fb      	ldrb	r3, [r7, #7]
  8000e1e:	4618      	mov	r0, r3
  8000e20:	f000 f816 	bl	8000e50 <send_error_packet>
 		break;
  8000e24:	e00f      	b.n	8000e46 <handle_error+0xae>
-		send_error_packet(error_code);
+		send_error_packet(error_detail);
  8000e26:	79fb      	ldrb	r3, [r7, #7]
  8000e28:	4618      	mov	r0, r3
  8000e2a:	f000 f811 	bl	8000e50 <send_error_packet>
 		break;
  8000e2e:	e00a      	b.n	8000e46 <handle_error+0xae>
-		send_error_packet(error_code);
+		send_error_packet(error_detail);
  8000e30:	79fb      	ldrb	r3, [r7, #7]
  8000e32:	4618      	mov	r0, r3
  8000e34:	f000 f80c 	bl	8000e50 <send_error_packet>
 		break;
  8000e38:	e005      	b.n	8000e46 <handle_error+0xae>
-		send_error_packet(error_code);
+		send_error_packet(error_detail);
  8000e3a:	79fb      	ldrb	r3, [r7, #7]
  8000e3c:	4618      	mov	r0, r3
  8000e3e:	f000 f807 	bl	8000e50 <send_error_packet>
@@ -1685,7 +1685,7 @@ void handle_error(ERROR_CODE error_code){
 
 08000e50 <send_error_packet>:
 
-void send_error_packet(ERROR_CODE error_code) {
+void send_error_packet(ERROR_DETAIL error_detail) {
  8000e50:	b580      	push	{r7, lr}
  8000e52:	b084      	sub	sp, #16
  8000e54:	af00      	add	r7, sp, #0
@@ -1699,7 +1699,7 @@ void send_error_packet(ERROR_CODE error_code) {
 	buffer[1] = ERROR_PACKET_SYNC;
  8000e5e:	23dd      	movs	r3, #221	; 0xdd
  8000e60:	737b      	strb	r3, [r7, #13]
-	buffer[2] = error_code;
+	buffer[2] = error_detail;
  8000e62:	79fb      	ldrb	r3, [r7, #7]
  8000e64:	73bb      	strb	r3, [r7, #14]
 
@@ -9637,8 +9637,8 @@ void monitor_rails() {
  80041f2:	781b      	ldrb	r3, [r3, #0]
  80041f4:	2b03      	cmp	r3, #3
  80041f6:	d110      	bne.n	800421a <monitor_rails+0xca>
-					ERROR_CODE error_code;
-					error_code = get_rail_name_code(rail_monitor[i].name);
+					ERROR_DETAIL error_detail;
+					error_detail = get_rail_name_error_detail(rail_monitor[i].name);
  80041f8:	490d      	ldr	r1, [pc, #52]	; (8004230 <monitor_rails+0xe0>)
  80041fa:	687a      	ldr	r2, [r7, #4]
  80041fc:	4613      	mov	r3, r2
@@ -9648,10 +9648,10 @@ void monitor_rails() {
  8004204:	440b      	add	r3, r1
  8004206:	781b      	ldrb	r3, [r3, #0]
  8004208:	4618      	mov	r0, r3
- 800420a:	f000 f813 	bl	8004234 <get_rail_name_code>
+ 800420a:	f000 f813 	bl	8004234 <get_rail_name_error_detail>
  800420e:	4603      	mov	r3, r0
  8004210:	70fb      	strb	r3, [r7, #3]
-					handle_error(error_code);
+					handle_error(error_detail);
  8004212:	78fb      	ldrb	r3, [r7, #3]
  8004214:	4618      	mov	r0, r3
  8004216:	f7fc fdbf 	bl	8000d98 <handle_error>
@@ -9674,9 +9674,9 @@ void monitor_rails() {
  800422e:	bd90      	pop	{r4, r7, pc}
  8004230:	24001ec8 	.word	0x24001ec8
 
-08004234 <get_rail_name_code>:
+08004234 <get_rail_name_error_detail>:
 
-ERROR_CODE get_rail_name_code(VOLTAGE_RAIL_NAME rail_name) {
+ERROR_DETAIL get_rail_name_error_detail(VOLTAGE_RAIL_NAME rail_name) {
  8004234:	b480      	push	{r7}
  8004236:	b083      	sub	sp, #12
  8004238:	af00      	add	r7, sp, #0
@@ -9685,8 +9685,8 @@ ERROR_CODE get_rail_name_code(VOLTAGE_RAIL_NAME rail_name) {
 	switch (rail_name) {
  800423e:	79fb      	ldrb	r3, [r7, #7]
  8004240:	2b11      	cmp	r3, #17
- 8004242:	d84b      	bhi.n	80042dc <get_rail_name_code+0xa8>
- 8004244:	a201      	add	r2, pc, #4	; (adr r2, 800424c <get_rail_name_code+0x18>)
+ 8004242:	d84b      	bhi.n	80042dc <get_rail_name_error_detail+0xa8>
+ 8004244:	a201      	add	r2, pc, #4	; (adr r2, 800424c <get_rail_name_error_detail+0x18>)
  8004246:	f852 f023 	ldr.w	pc, [r2, r3, lsl #2]
  800424a:	bf00      	nop
  800424c:	08004295 	.word	0x08004295
@@ -9708,97 +9708,97 @@ ERROR_CODE get_rail_name_code(VOLTAGE_RAIL_NAME rail_name) {
  800428c:	080042d5 	.word	0x080042d5
  8004290:	080042d9 	.word	0x080042d9
 	case RAIL_vsense:
-		return EC_vsense;
+		return ED_vsense;
  8004294:	2300      	movs	r3, #0
- 8004296:	e022      	b.n	80042de <get_rail_name_code+0xaa>
+ 8004296:	e022      	b.n	80042de <get_rail_name_error_detail+0xaa>
 
 	case RAIL_vrefint:
-		return EC_vrefint;
+		return ED_vrefint;
  8004298:	2301      	movs	r3, #1
- 800429a:	e020      	b.n	80042de <get_rail_name_code+0xaa>
+ 800429a:	e020      	b.n	80042de <get_rail_name_error_detail+0xaa>
 
 	case RAIL_TEMP1:
-		return EC_TEMP1;
+		return ED_TEMP1;
  800429c:	2302      	movs	r3, #2
- 800429e:	e01e      	b.n	80042de <get_rail_name_code+0xaa>
+ 800429e:	e01e      	b.n	80042de <get_rail_name_error_detail+0xaa>
 
 	case RAIL_TEMP2:
-		return EC_TEMP2;
+		return ED_TEMP2;
  80042a0:	2303      	movs	r3, #3
- 80042a2:	e01c      	b.n	80042de <get_rail_name_code+0xaa>
+ 80042a2:	e01c      	b.n	80042de <get_rail_name_error_detail+0xaa>
 
 	case RAIL_TEMP3:
-		return EC_TEMP3;
+		return ED_TEMP3;
  80042a4:	2304      	movs	r3, #4
- 80042a6:	e01a      	b.n	80042de <get_rail_name_code+0xaa>
+ 80042a6:	e01a      	b.n	80042de <get_rail_name_error_detail+0xaa>
 
 	case RAIL_TEMP4:
-		return EC_TEMP4;
+		return ED_TEMP4;
  80042a8:	2305      	movs	r3, #5
- 80042aa:	e018      	b.n	80042de <get_rail_name_code+0xaa>
+ 80042aa:	e018      	b.n	80042de <get_rail_name_error_detail+0xaa>
 
 	case RAIL_busvmon:
-		return EC_busvmon;
+		return ED_busvmon;
  80042ac:	2306      	movs	r3, #6
- 80042ae:	e016      	b.n	80042de <get_rail_name_code+0xaa>
+ 80042ae:	e016      	b.n	80042de <get_rail_name_error_detail+0xaa>
 
 	case RAIL_busimon:
-		return EC_busimon;
+		return ED_busimon;
  80042b0:	2307      	movs	r3, #7
- 80042b2:	e014      	b.n	80042de <get_rail_name_code+0xaa>
+ 80042b2:	e014      	b.n	80042de <get_rail_name_error_detail+0xaa>
 
 	case RAIL_2v5:
-		return EC_2v5;
+		return ED_2v5;
  80042b4:	2308      	movs	r3, #8
- 80042b6:	e012      	b.n	80042de <get_rail_name_code+0xaa>
+ 80042b6:	e012      	b.n	80042de <get_rail_name_error_detail+0xaa>
 
 	case RAIL_3v3:
-		return EC_3v3;
+		return ED_3v3;
  80042b8:	2309      	movs	r3, #9
- 80042ba:	e010      	b.n	80042de <get_rail_name_code+0xaa>
+ 80042ba:	e010      	b.n	80042de <get_rail_name_error_detail+0xaa>
 
 	case RAIL_5v:
-		return EC_5v;
+		return ED_5v;
  80042bc:	230a      	movs	r3, #10
- 80042be:	e00e      	b.n	80042de <get_rail_name_code+0xaa>
+ 80042be:	e00e      	b.n	80042de <get_rail_name_error_detail+0xaa>
 
 	case RAIL_n3v3:
-		return EC_n3v3;
+		return ED_n3v3;
  80042c0:	230b      	movs	r3, #11
- 80042c2:	e00c      	b.n	80042de <get_rail_name_code+0xaa>
+ 80042c2:	e00c      	b.n	80042de <get_rail_name_error_detail+0xaa>
 
 	case RAIL_n5v:
-		return EC_n5v;
+		return ED_n5v;
  80042c4:	230c      	movs	r3, #12
- 80042c6:	e00a      	b.n	80042de <get_rail_name_code+0xaa>
+ 80042c6:	e00a      	b.n	80042de <get_rail_name_error_detail+0xaa>
 
 	case RAIL_15v:
-		return EC_15v;
+		return ED_15v;
  80042c8:	230d      	movs	r3, #13
- 80042ca:	e008      	b.n	80042de <get_rail_name_code+0xaa>
+ 80042ca:	e008      	b.n	80042de <get_rail_name_error_detail+0xaa>
 
 	case RAIL_5vref:
-		return EC_5vref;
+		return ED_5vref;
  80042cc:	230e      	movs	r3, #14
- 80042ce:	e006      	b.n	80042de <get_rail_name_code+0xaa>
+ 80042ce:	e006      	b.n	80042de <get_rail_name_error_detail+0xaa>
 
 	case RAIL_n200v:
-		return EC_n200v;
+		return ED_n200v;
  80042d0:	230f      	movs	r3, #15
- 80042d2:	e004      	b.n	80042de <get_rail_name_code+0xaa>
+ 80042d2:	e004      	b.n	80042de <get_rail_name_error_detail+0xaa>
 
 	case RAIL_n800v:
-		return EC_n800v;
+		return ED_n800v;
  80042d4:	2310      	movs	r3, #16
- 80042d6:	e002      	b.n	80042de <get_rail_name_code+0xaa>
+ 80042d6:	e002      	b.n	80042de <get_rail_name_error_detail+0xaa>
 
 	case RAIL_TMP1:
-		return EC_TMP1;
+		return ED_TMP1;
  80042d8:	2311      	movs	r3, #17
- 80042da:	e000      	b.n	80042de <get_rail_name_code+0xaa>
+ 80042da:	e000      	b.n	80042de <get_rail_name_error_detail+0xaa>
 
 	default:
-		return EC_UNKNOWN;
+		return ED_UNKNOWN;
  80042dc:	23ff      	movs	r3, #255	; 0xff
 	}
 }

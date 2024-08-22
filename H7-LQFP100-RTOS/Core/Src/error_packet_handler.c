@@ -10,55 +10,55 @@
 #include <stdio.h>				// For uint data types
 
 
-void handle_error(ERROR_CODE error_code){
-	switch (error_code) {
-	case EC_vsense:
-	case EC_vrefint:
-	case EC_TEMP1:
-	case EC_TEMP2:
-	case EC_TEMP3:
-	case EC_TEMP4:
-	case EC_busvmon:
-	case EC_busimon:
-	case EC_2v5:
-	case EC_3v3:
-	case EC_5v:
-	case EC_n3v3:
-	case EC_n5v:
-	case EC_15v:
-	case EC_5vref:
-	case EC_n200v:
-	case EC_n800v:
-	case EC_TMP1:
+void handle_error(ERROR_DETAIL error_detail){
+	switch (error_detail) {
+	case ED_vsense:
+	case ED_vrefint:
+	case ED_TEMP1:
+	case ED_TEMP2:
+	case ED_TEMP3:
+	case ED_TEMP4:
+	case ED_busvmon:
+	case ED_busimon:
+	case ED_2v5:
+	case ED_3v3:
+	case ED_5v:
+	case ED_n3v3:
+	case ED_n5v:
+	case ED_15v:
+	case ED_5vref:
+	case ED_n200v:
+	case ED_n800v:
+	case ED_TMP1:
 		// TODO: system reset?
-		send_error_packet(error_code);
+		send_error_packet(error_detail);
 		break;
-	case EC_single_bit_error:
+	case ED_single_bit_error:
 		// TODO: figure out what steps we want to take for SBE
-		send_error_packet(error_code);
+		send_error_packet(error_detail);
 		break;
-	case EC_double_bit_error:
+	case ED_double_bit_error:
 		// TODO: figure out what steps we want to take for DBE
-		send_error_packet(error_code);
+		send_error_packet(error_detail);
 		break;
-	case EC_peripheral_error:
+	case ED_peripheral_error:
 		// TODO: system reset?
-		send_error_packet(error_code);
+		send_error_packet(error_detail);
 		break;
-	case EC_UNKNOWN:
-		send_error_packet(error_code);
+	case ED_UNKNOWN:
+		send_error_packet(error_detail);
 		break;
 	default:
 		break;
 	}
 }
 
-void send_error_packet(ERROR_CODE error_code) {
+void send_error_packet(ERROR_DETAIL error_detail) {
 	uint8_t buffer[ERROR_PACKET_SIZE];
 
 	buffer[0] = ERROR_PACKET_SYNC;
 	buffer[1] = ERROR_PACKET_SYNC;
-	buffer[2] = error_code;
+	buffer[2] = error_detail;
 
 	HAL_UART_Transmit(&huart1, buffer, ERROR_PACKET_SIZE, 100);
 	send_junk_packet();
