@@ -215,9 +215,9 @@ void monitor_rails() {
 				rail_monitor[i].error_count++;
 				// If that rails' error count is at 3, proceed with error protocol for that rail
 				if (rail_monitor[i].error_count == 3) {
-					ERROR_DETAIL error_detail;
-					error_detail = get_rail_name_error_detail(rail_monitor[i].name);
-					handle_error(error_detail);
+					ERROR_STRUCT error;
+					error.detail = get_rail_name_error_detail(rail_monitor[i].name);
+					handle_error(error);
 				}
 			}
 		}
@@ -281,7 +281,7 @@ ERROR_DETAIL get_rail_name_error_detail(VOLTAGE_RAIL_NAME rail_name) {
 		return ED_TMP1;
 
 	default:
-		return ED_UNKNOWN;
+		return ED_UNDEFINED;
 	}
 }
 

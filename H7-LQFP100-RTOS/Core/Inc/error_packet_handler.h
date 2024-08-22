@@ -31,16 +31,26 @@ typedef enum {
 	ED_n200v = 0x0F,
 	ED_n800v = 0x10,
 	ED_TMP1 = 0x11,
-
 	ED_single_bit_error = 0x12,
 	ED_double_bit_error = 0x13,
-	ED_peripheral_error = 0x14,
-
-	ED_UNKNOWN = 0xFF
+	ED_UNDEFINED = 0x14
 }ERROR_DETAIL;
 
-void handle_error(ERROR_DETAIL error_detail);
-void send_error_packet(ERROR_DETAIL error_detail);
+typedef enum {
+	EC_power_supply_rail = 0x00,
+	EC_seu = 0x01,
+	EC_peripheral = 0x02,
+	EC_brownout = 0x03,
+	EC_manual_reset = 0x04
+}ERROR_CATEGORY;
+
+typedef struct {
+	ERROR_CATEGORY category;
+	ERROR_DETAIL detail;
+}ERROR_STRUCT;
+
+void handle_error(ERROR_STRUCT error);
+void send_error_packet(ERROR_STRUCT error);
 void send_junk_packet();
 
 #endif /* INC_ERROR_PACKET_HANDLER_H_ */

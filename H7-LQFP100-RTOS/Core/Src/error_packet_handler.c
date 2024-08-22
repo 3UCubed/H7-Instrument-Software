@@ -10,8 +10,8 @@
 #include <stdio.h>				// For uint data types
 
 
-void handle_error(ERROR_DETAIL error_detail){
-	switch (error_detail) {
+void handle_error(ERROR_STRUCT error){
+	switch (error.detail) {
 	case ED_vsense:
 	case ED_vrefint:
 	case ED_TEMP1:
@@ -31,34 +31,30 @@ void handle_error(ERROR_DETAIL error_detail){
 	case ED_n800v:
 	case ED_TMP1:
 		// TODO: system reset?
-		send_error_packet(error_detail);
+		send_error_packet(error);
 		break;
 	case ED_single_bit_error:
 		// TODO: figure out what steps we want to take for SBE
-		send_error_packet(error_detail);
+		send_error_packet(error);
 		break;
 	case ED_double_bit_error:
 		// TODO: figure out what steps we want to take for DBE
-		send_error_packet(error_detail);
+		send_error_packet(error);
 		break;
-	case ED_peripheral_error:
-		// TODO: system reset?
-		send_error_packet(error_detail);
-		break;
-	case ED_UNKNOWN:
-		send_error_packet(error_detail);
+	case ED_UNDEFINED:
+		send_error_packet(error);
 		break;
 	default:
 		break;
 	}
 }
 
-void send_error_packet(ERROR_DETAIL error_detail) {
+void send_error_packet(ERROR_STRUCT error) {
 	uint8_t buffer[ERROR_PACKET_SIZE];
 
 	buffer[0] = ERROR_PACKET_SYNC;
 	buffer[1] = ERROR_PACKET_SYNC;
-	buffer[2] = error_detail;
+	buffer[2] = error.detail;
 
 	HAL_UART_Transmit(&huart1, buffer, ERROR_PACKET_SIZE, 100);
 	send_junk_packet();
