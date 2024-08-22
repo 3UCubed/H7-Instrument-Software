@@ -435,6 +435,7 @@ int main(void)
   MX_SPI1_Init();
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
+
   system_setup();
 
   /* USER CODE END 2 */
@@ -550,6 +551,7 @@ void system_setup() {
 	// 5 -- Set timer 2 PWM
 	// 6 -- Init ADC DMA
 	// 7 -- Start UART receive interrupts
+  	error_counter_init();
 
 
 	packet_event_flags = osEventFlagsNew(NULL);

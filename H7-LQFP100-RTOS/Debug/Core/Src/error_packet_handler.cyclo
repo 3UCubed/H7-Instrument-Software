@@ -1,7 +1,8 @@
 error_packet_handler.c:16:6:handle_error	2
-error_packet_handler.c:53:6:increment_error_counter	1
-error_packet_handler.c:61:10:get_eeprom_error_counter	3
-error_packet_handler.c:73:6:set_eeprom_error_counter	2
-error_packet_handler.c:81:6:reset_eeprom_error_counters	3
-error_packet_handler.c:96:6:send_error_packet	1
-error_packet_handler.c:107:6:send_junk_packet	2
+error_packet_handler.c:53:6:error_counter_init	2
+error_packet_handler.c:61:6:increment_error_counter	1
+error_packet_handler.c:69:10:get_eeprom_error_counter	2
+error_packet_handler.c:77:6:set_eeprom_error_counter	2
+error_packet_handler.c:86:6:reset_eeprom_error_counters	3
+error_packet_handler.c:101:6:send_error_packet	1
+error_packet_handler.c:112:6:send_junk_packet	2

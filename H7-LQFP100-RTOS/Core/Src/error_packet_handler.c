@@ -50,6 +50,14 @@ void handle_error(ERROR_STRUCT error) {
 	}
 }
 
+void error_counter_init() {
+	HAL_FLASH_Unlock();
+	  if( EE_Init() != EE_OK)
+	  {
+		Error_Handler();
+	  }
+}
+
 void increment_error_counter(ERROR_CATEGORY category) {
 	uint16_t counter_value;
 	counter_value = get_eeprom_error_counter(category);
@@ -60,10 +68,6 @@ void increment_error_counter(ERROR_CATEGORY category) {
 
 uint16_t get_eeprom_error_counter(ERROR_CATEGORY category) {
 	uint16_t retval = 0;
-	HAL_FLASH_Unlock();
-	if (EE_Init() != EE_OK) {
-		Error_Handler();
-	}
 	if ((EE_ReadVariable(VirtAddVarTab[category], &retval)) != HAL_OK) {
 		Error_Handler();
 	}
@@ -71,7 +75,8 @@ uint16_t get_eeprom_error_counter(ERROR_CATEGORY category) {
 }
 
 void set_eeprom_error_counter(ERROR_CATEGORY category, uint16_t new_counter_value) {
-	if ((EE_WriteVariable(VirtAddVarTab[category], new_counter_value))
+	VarDataTab[category] = new_counter_value;
+	if ((EE_WriteVariable(VirtAddVarTab[category], VarDataTab[category]))
 			!= HAL_OK) {
 		Error_Handler();
 	}
@@ -80,17 +85,12 @@ void set_eeprom_error_counter(ERROR_CATEGORY category, uint16_t new_counter_valu
 
 void reset_eeprom_error_counters() {
 	for (int i = 0; i < NB_OF_VAR; i++) {
-		if ((EE_WriteVariable(VirtAddVarTab[i], 0))
+		if ((EE_WriteVariable(VirtAddVarTab[i], 0x00))
 				!= HAL_OK) {
 			Error_Handler();
 		}
 	}
 }
-
-
-
-
-
 
 
 void send_error_packet(ERROR_STRUCT error) {

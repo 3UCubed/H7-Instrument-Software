@@ -59,5 +59,6 @@ void increment_error_counter(ERROR_CATEGORY category);
 uint16_t get_eeprom_error_counter(ERROR_CATEGORY category);
 void set_eeprom_error_counter(ERROR_CATEGORY category, uint16_t new_counter_value);
 void reset_eeprom_error_counters();
+void error_counter_init();
 
 #endif /* INC_ERROR_PACKET_HANDLER_H_ */
