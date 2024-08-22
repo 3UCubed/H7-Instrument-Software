@@ -7,10 +7,13 @@
 
 #include "error_packet_handler.h"
 #include "usart.h"
-#include <stdio.h>				// For uint data types
+#include "main.h"
+#include "eeprom.h"
 
+uint16_t VirtAddVarTab[NB_OF_VAR] = { 0x5555, 0x6666, 0x7777, 0x8888, 0x9999 };
+uint16_t VarDataTab[NB_OF_VAR] = { 0, 0, 0, 0, 0 };
 
-void handle_error(ERROR_STRUCT error){
+void handle_error(ERROR_STRUCT error) {
 	switch (error.detail) {
 	case ED_vsense:
 	case ED_vrefint:
@@ -31,21 +34,46 @@ void handle_error(ERROR_STRUCT error){
 	case ED_n800v:
 	case ED_TMP1:
 		// TODO: system reset?
-		send_error_packet(error);
+		increment_error_counter(error.category);
 		break;
 	case ED_single_bit_error:
 		// TODO: figure out what steps we want to take for SBE
-		send_error_packet(error);
 		break;
 	case ED_double_bit_error:
 		// TODO: figure out what steps we want to take for DBE
-		send_error_packet(error);
 		break;
 	case ED_UNDEFINED:
-		send_error_packet(error);
+		// TODO: send error packet?
 		break;
 	default:
 		break;
+	}
+}
+
+void increment_error_counter(ERROR_CATEGORY category) {
+	uint16_t counter_value;
+	counter_value = get_eeprom_error_counter(category);
+	counter_value++;
+	set_eeprom_error_counter(category, counter_value);
+
+}
+
+uint16_t get_eeprom_error_counter(ERROR_CATEGORY category) {
+	uint16_t retval = 0;
+	HAL_FLASH_Unlock();
+	if (EE_Init() != EE_OK) {
+		Error_Handler();
+	}
+	if ((EE_ReadVariable(VirtAddVarTab[category], &retval)) != HAL_OK) {
+		Error_Handler();
+	}
+	return retval;
+}
+
+void set_eeprom_error_counter(ERROR_CATEGORY category, uint16_t new_counter_value) {
+	if ((EE_WriteVariable(VirtAddVarTab[category], new_counter_value))
+			!= HAL_OK) {
+		Error_Handler();
 	}
 }
 
@@ -68,10 +96,4 @@ void send_junk_packet() {
 	}
 	HAL_UART_Transmit(&huart1, buffer, JUNK_PACKET_SIZE, 100);
 }
-
-
-
-
-
-
 

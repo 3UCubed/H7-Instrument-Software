@@ -1,6 +1,5 @@
-Core/Src/error_packet_handler.o: ../Core/Src/error_packet_handler.c \
- ../Core/Inc/error_packet_handler.h ../Core/Inc/usart.h \
- ../Core/Inc/main.h ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h \
+Core/Src/eeprom.o: ../Core/Src/eeprom.c ../Core/Inc/eeprom.h \
+ ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h \
  ../Core/Inc/stm32h7xx_hal_conf.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_rcc.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_def.h \
@@ -41,6 +40,7 @@ Core/Src/error_packet_handler.o: ../Core/Src/error_packet_handler.c \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_tim_ex.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart_ex.h \
+ ../Core/Inc/main.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h \
  ../Core/Inc/FreeRTOSConfig.h \
@@ -55,11 +55,8 @@ Core/Src/error_packet_handler.o: ../Core/Src/error_packet_handler.c \
  ../Core/Inc/packet_creation.h ../Core/Inc/time_tagging.h \
  ../Core/Inc/rtc.h ../Core/Inc/usart.h ../Core/Inc/voltage_monitor.h \
  ../Core/Inc/sample_data.h ../Core/Inc/adc.h ../Core/Inc/spi.h \
- ../Core/Inc/i2c.h ../Core/Inc/error_packet_handler.h ../Core/Inc/main.h \
- ../Core/Inc/eeprom.h
-../Core/Inc/error_packet_handler.h:
-../Core/Inc/usart.h:
-../Core/Inc/main.h:
+ ../Core/Inc/i2c.h ../Core/Inc/error_packet_handler.h
+../Core/Inc/eeprom.h:
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h:
 ../Core/Inc/stm32h7xx_hal_conf.h:
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_rcc.h:
@@ -101,6 +98,7 @@ Core/Src/error_packet_handler.o: ../Core/Src/error_packet_handler.c \
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_tim_ex.h:
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart.h:
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart_ex.h:
+../Core/Inc/main.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h:
 ../Core/Inc/FreeRTOSConfig.h:
@@ -122,5 +120,3 @@ Core/Src/error_packet_handler.o: ../Core/Src/error_packet_handler.c \
 ../Core/Inc/spi.h:
 ../Core/Inc/i2c.h:
 ../Core/Inc/error_packet_handler.h:
-../Core/Inc/main.h:
-../Core/Inc/eeprom.h:

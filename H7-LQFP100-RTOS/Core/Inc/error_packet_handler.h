@@ -8,6 +8,9 @@
 #ifndef INC_ERROR_PACKET_HANDLER_H_
 #define INC_ERROR_PACKET_HANDLER_H_
 
+#include <stdio.h>				// For uint data types
+
+
 #define ERROR_PACKET_SIZE 3
 #define JUNK_PACKET_SIZE 256
 #define ERROR_PACKET_SYNC 0xDD
@@ -52,5 +55,7 @@ typedef struct {
 void handle_error(ERROR_STRUCT error);
 void send_error_packet(ERROR_STRUCT error);
 void send_junk_packet();
-
+void increment_error_counter(ERROR_CATEGORY category);
+uint16_t get_eeprom_error_counter(ERROR_CATEGORY category);
+void set_eeprom_error_counter(ERROR_CATEGORY category, uint16_t new_counter_value);
 #endif /* INC_ERROR_PACKET_HANDLER_H_ */
