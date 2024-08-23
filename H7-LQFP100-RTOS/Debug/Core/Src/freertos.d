@@ -39,6 +39,7 @@ Core/Src/freertos.o: ../Core/Src/freertos.c \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_hsem.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_i2c.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_i2c_ex.h \
+ ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_iwdg.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_pwr.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_pwr_ex.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_rtc.h \
@@ -57,7 +58,7 @@ Core/Src/freertos.o: ../Core/Src/freertos.c \
  ../Core/Inc/adc.h ../Core/Inc/spi.h ../Core/Inc/i2c.h \
  ../Core/Inc/error_packet_handler.h ../Core/Inc/usart.h \
  ../Core/Inc/voltage_monitor.h ../Core/Inc/packet_creation.h \
- ../Core/Inc/dac.h ../Core/Inc/tim.h
+ ../Core/Inc/dac.h ../Core/Inc/tim.h ../Core/Inc/iwdg.h
 ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h:
 ../Core/Inc/FreeRTOSConfig.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h:
@@ -99,6 +100,7 @@ Core/Src/freertos.o: ../Core/Src/freertos.c \
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_hsem.h:
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_i2c.h:
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_i2c_ex.h:
+../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_iwdg.h:
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_pwr.h:
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_pwr_ex.h:
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_rtc.h:
@@ -127,3 +129,4 @@ Core/Src/freertos.o: ../Core/Src/freertos.c \
 ../Core/Inc/packet_creation.h:
 ../Core/Inc/dac.h:
 ../Core/Inc/tim.h:
+../Core/Inc/iwdg.h:

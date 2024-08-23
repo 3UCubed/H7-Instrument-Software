@@ -10,42 +10,38 @@
 #include "main.h"
 #include "eeprom.h"
 
-uint16_t VirtAddVarTab[NB_OF_VAR] = { 0x5555, 0x6666, 0x7777, 0x8888, 0x9999 };
-uint16_t VarDataTab[NB_OF_VAR] = { 0, 0, 0, 0, 0 };
+uint16_t VirtAddVarTab[NB_OF_VAR] = { 0x5555, 0x6666, 0x7777, 0x8888, 0x9999, 0xAAAA };
+uint16_t VarDataTab[NB_OF_VAR] = { 0, 0, 0, 0, 0, 0 };
 
 void handle_error(ERROR_STRUCT error) {
-	switch (error.detail) {
-	case ED_vsense:
-	case ED_vrefint:
-	case ED_TEMP1:
-	case ED_TEMP2:
-	case ED_TEMP3:
-	case ED_TEMP4:
-	case ED_busvmon:
-	case ED_busimon:
-	case ED_2v5:
-	case ED_3v3:
-	case ED_5v:
-	case ED_n3v3:
-	case ED_n5v:
-	case ED_15v:
-	case ED_5vref:
-	case ED_n200v:
-	case ED_n800v:
-	case ED_TMP1:
-		// TODO: system reset?
+
+
+	switch (error.category) {
+	case EC_power_supply_rail:
+		osEventFlagsSet(mode_event_flags, IDLE_FLAG);
+		increment_error_counter(error.category);
+		send_error_packet(error);
+		NVIC_SystemReset();
+		break;
+	case EC_seu:
+		increment_error_counter(error.category);
+		NVIC_SystemReset();
+		break;
+	case EC_peripheral:
+		increment_error_counter(error.category);
+		NVIC_SystemReset();
+		break;
+	case EC_brownout:
 		increment_error_counter(error.category);
 		break;
-	case ED_single_bit_error:
-		// TODO: figure out what steps we want to take for SBE
+	case EC_software_reset:
+		increment_error_counter(error.category);
 		break;
-	case ED_double_bit_error:
-		// TODO: figure out what steps we want to take for DBE
-		break;
-	case ED_UNDEFINED:
-		// TODO: send error packet?
+	case EC_watchdog:
+		increment_error_counter(error.category);
 		break;
 	default:
+		send_error_packet(error);
 		break;
 	}
 }
@@ -98,7 +94,8 @@ void send_error_packet(ERROR_STRUCT error) {
 
 	buffer[0] = ERROR_PACKET_SYNC;
 	buffer[1] = ERROR_PACKET_SYNC;
-	buffer[2] = error.detail;
+	buffer[2] = error.category;
+	buffer[3] = error.detail;
 
 	HAL_UART_Transmit(&huart1, buffer, ERROR_PACKET_SIZE, 100);
 	send_junk_packet();

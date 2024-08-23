@@ -25,6 +25,7 @@
 #include "dac.h"
 #include "dma.h"
 #include "i2c.h"
+#include "iwdg.h"
 #include "rtc.h"
 #include "spi.h"
 #include "tim.h"
@@ -100,6 +101,7 @@ void PeriphCommonClock_Config(void);
 static void MPU_Config(void);
 void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
+void get_reset_cause();
 void system_setup();
 void send_ACK();
 void send_NACK();
@@ -379,7 +381,38 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	}
 }
 
+void get_reset_cause()
+{
+	ERROR_STRUCT error;
 
+	if (__HAL_RCC_GET_FLAG(RCC_FLAG_IWDG1RST))
+    {
+        error.category = EC_watchdog;
+        error.detail = ED_UNDEFINED;
+        handle_error(error);
+    }
+	else if (__HAL_RCC_GET_FLAG(RCC_FLAG_SFTRST))
+    {
+        // This reset is induced by calling the ARM CMSIS
+        // `NVIC_SystemReset()` function!
+        error.category = EC_software_reset;
+        error.detail = ED_UNDEFINED;
+        handle_error(error);
+    }
+    // Needs to come *after* checking the `RCC_FLAG_PORRST` flag in order to
+    // ensure first that the reset cause is NOT a POR/PDR reset. See note
+    // below.
+    else if (__HAL_RCC_GET_FLAG(RCC_FLAG_BORRST))
+    {
+        error.category = EC_brownout;
+        error.detail = ED_UNDEFINED;
+        handle_error(error);
+    }
+
+    // Clear all the reset flags or else they will remain set during future
+    // resets until system power is fully removed.
+    __HAL_RCC_CLEAR_RESET_FLAGS();
+}
 
 /* USER CODE END 0 */
 
@@ -434,8 +467,9 @@ int main(void)
   MX_DAC1_Init();
   MX_SPI1_Init();
   MX_RTC_Init();
+  MX_IWDG1_Init();
   /* USER CODE BEGIN 2 */
-
+  get_reset_cause();
   system_setup();
 
   /* USER CODE END 2 */
@@ -479,10 +513,12 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_LSI
+                              |RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.HSIState = RCC_HSI_DIV2;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 4;

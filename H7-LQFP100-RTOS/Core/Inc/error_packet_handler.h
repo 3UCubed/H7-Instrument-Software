@@ -11,8 +11,8 @@
 #include <stdio.h>				// For uint data types
 
 
-#define ERROR_PACKET_SIZE 3
-#define JUNK_PACKET_SIZE 256
+#define ERROR_PACKET_SIZE 4
+#define JUNK_PACKET_SIZE 1024
 #define ERROR_PACKET_SYNC 0xDD
 
 typedef enum {
@@ -44,7 +44,9 @@ typedef enum {
 	EC_seu = 0x01,
 	EC_peripheral = 0x02,
 	EC_brownout = 0x03,
-	EC_manual_reset = 0x04
+	EC_software_reset = 0x04,
+	EC_watchdog = 0x05,
+	EC_UNDEFINED = 0x06
 }ERROR_CATEGORY;
 
 typedef struct {
