@@ -44,9 +44,8 @@ typedef enum {
 	EC_seu = 0x01,
 	EC_peripheral = 0x02,
 	EC_brownout = 0x03,
-	EC_software_reset = 0x04,
-	EC_watchdog = 0x05,
-	EC_UNDEFINED = 0x06
+	EC_watchdog = 0x04,
+	EC_UNDEFINED = 0x05
 }ERROR_CATEGORY;
 
 typedef struct {

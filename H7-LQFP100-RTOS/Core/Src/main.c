@@ -391,14 +391,6 @@ void get_reset_cause()
         error.detail = ED_UNDEFINED;
         handle_error(error);
     }
-	else if (__HAL_RCC_GET_FLAG(RCC_FLAG_SFTRST))
-    {
-        // This reset is induced by calling the ARM CMSIS
-        // `NVIC_SystemReset()` function!
-        error.category = EC_software_reset;
-        error.detail = ED_UNDEFINED;
-        handle_error(error);
-    }
     // Needs to come *after* checking the `RCC_FLAG_PORRST` flag in order to
     // ensure first that the reset cause is NOT a POR/PDR reset. See note
     // below.
@@ -612,9 +604,6 @@ void system_setup() {
 		while (1);
 	}
 
-
-
-
 	if (!init_adc_dma()) {
 		while (1);
 	}
@@ -771,9 +760,10 @@ void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
 	/* User can add his own implementation to report the HAL error return state */
-	__disable_irq();
-	while (1) {
-	}
+	ERROR_STRUCT error;
+	error.category = EC_peripheral;
+	error.detail = ED_UNDEFINED;
+	handle_error(error);
   /* USER CODE END Error_Handler_Debug */
 }
 

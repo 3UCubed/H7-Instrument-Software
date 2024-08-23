@@ -10,11 +10,10 @@
 #include "main.h"
 #include "eeprom.h"
 
-uint16_t VirtAddVarTab[NB_OF_VAR] = { 0x5555, 0x6666, 0x7777, 0x8888, 0x9999, 0xAAAA };
-uint16_t VarDataTab[NB_OF_VAR] = { 0, 0, 0, 0, 0, 0 };
+uint16_t VirtAddVarTab[NB_OF_VAR] = { 0x5555, 0x6666, 0x7777, 0x8888, 0x9999 };
+uint16_t VarDataTab[NB_OF_VAR] = { 0, 0, 0, 0, 0 };
 
 void handle_error(ERROR_STRUCT error) {
-
 
 	switch (error.category) {
 	case EC_power_supply_rail:
@@ -25,20 +24,21 @@ void handle_error(ERROR_STRUCT error) {
 		break;
 	case EC_seu:
 		increment_error_counter(error.category);
+		send_error_packet(error);
 		NVIC_SystemReset();
 		break;
 	case EC_peripheral:
 		increment_error_counter(error.category);
+		send_error_packet(error);
 		NVIC_SystemReset();
 		break;
 	case EC_brownout:
 		increment_error_counter(error.category);
-		break;
-	case EC_software_reset:
-		increment_error_counter(error.category);
+		send_error_packet(error);
 		break;
 	case EC_watchdog:
 		increment_error_counter(error.category);
+		send_error_packet(error);
 		break;
 	default:
 		send_error_packet(error);
@@ -48,10 +48,9 @@ void handle_error(ERROR_STRUCT error) {
 
 void error_counter_init() {
 	HAL_FLASH_Unlock();
-	  if( EE_Init() != EE_OK)
-	  {
+	if (EE_Init() != EE_OK) {
 		Error_Handler();
-	  }
+	}
 }
 
 void increment_error_counter(ERROR_CATEGORY category) {
@@ -70,7 +69,8 @@ uint16_t get_eeprom_error_counter(ERROR_CATEGORY category) {
 	return retval;
 }
 
-void set_eeprom_error_counter(ERROR_CATEGORY category, uint16_t new_counter_value) {
+void set_eeprom_error_counter(ERROR_CATEGORY category,
+		uint16_t new_counter_value) {
 	VarDataTab[category] = new_counter_value;
 	if ((EE_WriteVariable(VirtAddVarTab[category], VarDataTab[category]))
 			!= HAL_OK) {
@@ -78,16 +78,13 @@ void set_eeprom_error_counter(ERROR_CATEGORY category, uint16_t new_counter_valu
 	}
 }
 
-
 void reset_eeprom_error_counters() {
 	for (int i = 0; i < NB_OF_VAR; i++) {
-		if ((EE_WriteVariable(VirtAddVarTab[i], 0x00))
-				!= HAL_OK) {
+		if ((EE_WriteVariable(VirtAddVarTab[i], 0x00)) != HAL_OK) {
 			Error_Handler();
 		}
 	}
 }
-
 
 void send_error_packet(ERROR_STRUCT error) {
 	uint8_t buffer[ERROR_PACKET_SIZE];
