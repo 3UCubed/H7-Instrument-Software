@@ -371,7 +371,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		break;
 	}
 	case 0xDF: {
-		reset_eeprom_error_counters();
+		reset_error_counters();
 		break;
 	}
 	default: {

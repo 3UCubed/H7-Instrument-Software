@@ -1,9 +1,8 @@
-core_cm7.h:2156:34:__NVIC_SystemReset	1
-error_packet_handler.c:16:6:handle_error	4
-error_packet_handler.c:53:6:error_counter_init	2
-error_packet_handler.c:60:6:increment_error_counter	1
-error_packet_handler.c:68:10:get_eeprom_error_counter	2
-error_packet_handler.c:76:6:set_eeprom_error_counter	2
-error_packet_handler.c:85:6:reset_eeprom_error_counters	3
-error_packet_handler.c:93:6:send_error_packet	1
-error_packet_handler.c:105:6:send_junk_packet	2
+error_packet_handler.c:18:6:handle_error	1
+error_packet_handler.c:51:6:error_counter_init	4
+error_packet_handler.c:69:6:increment_error_category_counter	1
+error_packet_handler.c:74:6:increment_error_detail_counter	1
+error_packet_handler.c:81:6:update_error_counter	3
+error_packet_handler.c:91:6:reset_error_counters	3
+error_packet_handler.c:100:6:send_previous_error_packet	1
+error_packet_handler.c:165:6:send_junk_packet	2
