@@ -54,8 +54,7 @@ typedef struct {
 }ERROR_STRUCT;
 
 void error_counter_init();
-void increment_error_category_counter(ERROR_CATEGORY category);
-void increment_error_detail_counter(ERROR_DETAIL detail);
+void increment_error_counter(ERROR_STRUCT error);
 void update_error_counter();
 void reset_error_counters();
 

@@ -1,8 +1,7 @@
 ../Core/Src/error_packet_handler.c:18:6:handle_error	16	static
-../Core/Src/error_packet_handler.c:51:6:error_counter_init	16	static
-../Core/Src/error_packet_handler.c:69:6:increment_error_category_counter	16	static
-../Core/Src/error_packet_handler.c:74:6:increment_error_detail_counter	16	static
-../Core/Src/error_packet_handler.c:81:6:update_error_counter	16	static
-../Core/Src/error_packet_handler.c:91:6:reset_error_counters	16	static
-../Core/Src/error_packet_handler.c:100:6:send_previous_error_packet	16	static
-../Core/Src/error_packet_handler.c:165:6:send_junk_packet	1040	static
+../Core/Src/error_packet_handler.c:50:6:error_counter_init	16	static
+../Core/Src/error_packet_handler.c:68:6:increment_error_counter	16	static
+../Core/Src/error_packet_handler.c:77:6:update_error_counter	16	static
+../Core/Src/error_packet_handler.c:87:6:reset_error_counters	16	static
+../Core/Src/error_packet_handler.c:96:6:send_previous_error_packet	64	static
+../Core/Src/error_packet_handler.c:161:6:send_junk_packet	1040	static

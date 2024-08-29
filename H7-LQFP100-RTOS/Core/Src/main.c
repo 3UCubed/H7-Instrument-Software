@@ -462,6 +462,7 @@ int main(void)
   MX_IWDG1_Init();
   /* USER CODE BEGIN 2 */
   get_reset_cause();
+  send_previous_error_packet();
   system_setup();
 
   /* USER CODE END 2 */

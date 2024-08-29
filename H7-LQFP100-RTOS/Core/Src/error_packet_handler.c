@@ -17,35 +17,34 @@ uint16_t local_cpy[NB_OF_VAR];
 
 void handle_error(ERROR_STRUCT error) {
 
-//	switch (error.category) {
-//	case EC_power_supply_rail:
-//		osEventFlagsSet(mode_event_flags, IDLE_FLAG);
-//		increment_error_counter(error.category);
-//		send_error_packet(error);
-//		NVIC_SystemReset();
-//		break;
-//	case EC_seu:
-//		increment_error_counter(error.category);
-//		send_error_packet(error);
-//		NVIC_SystemReset();
-//		break;
-//	case EC_peripheral:
-//		increment_error_counter(error.category);
-//		send_error_packet(error);
-//		NVIC_SystemReset();
-//		break;
-//	case EC_brownout:
-//		increment_error_counter(error.category);
-//		send_error_packet(error);
-//		break;
-//	case EC_watchdog:
-//		increment_error_counter(error.category);
-//		send_error_packet(error);
-//		break;
-//	default:
-//		send_error_packet(error);
-//		break;
-//	}
+	switch (error.category) {
+	case EC_power_supply_rail:
+		osEventFlagsSet(mode_event_flags, IDLE_FLAG);
+		increment_error_counter(error);
+
+		//send_error_packet(error);
+		//NVIC_SystemReset();
+		break;
+	case EC_seu:
+		increment_error_counter(error);
+		//send_error_packet(error);
+		//NVIC_SystemReset();
+		break;
+	case EC_peripheral:
+		increment_error_counter(error);
+		//send_error_packet(error);
+		//NVIC_SystemReset();
+		break;
+	case EC_brownout:
+		increment_error_counter(error);
+		break;
+	case EC_watchdog:
+		increment_error_counter(error);
+		break;
+	default:
+		//send_error_packet(error);
+		break;
+	}
 }
 
 void error_counter_init() {
@@ -66,22 +65,19 @@ void error_counter_init() {
 }
 
 
-void increment_error_category_counter(ERROR_CATEGORY category) {
-	// Increments error counter for a given category
-	local_cpy[category]++;
+void increment_error_counter(ERROR_STRUCT error) {
+	local_cpy[error.category]++;
+	local_cpy[error.detail]++;
+	//update_error_counter();
 }
 
-void increment_error_detail_counter(ERROR_DETAIL detail) {
-	// Increments error counter for a given detail
-	local_cpy[detail]++;
-}
 
 
 
 void update_error_counter(){
 	// Writes our local copy of the error counters to EE
 	for (int i = 0; i < NB_OF_VAR; i++) {
-		if ((EE_WriteVariable(VirtAddVarTab[i], local_cpy[i])) != HAL_OK) {
+		if ((EE_WriteVariable(VirtAddVarTab[i], 5)) != HAL_OK) {
 			Error_Handler();
 		}
 	}
