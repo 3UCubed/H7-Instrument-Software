@@ -17,9 +17,9 @@
 #define UPTIME_SIZE 4
 #define TIMESTAMP_SIZE 10
 
-#define PMT_SYNC 0xBB
-#define ERPA_SYNC 0xAA
-#define HK_SYNC 0xCC
+#define PMT_SYNC 0xFF
+#define ERPA_SYNC 0xEE
+#define HK_SYNC 0xDD
 
 void create_pmt_packet();
 void create_erpa_packet();

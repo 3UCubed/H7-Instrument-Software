@@ -11,9 +11,9 @@
 #include <stdio.h>				// For uint data types
 
 
-#define ERROR_PACKET_SIZE 56
+#define PREVIOUS_ERROR_PACKET_SIZE 56
 #define JUNK_PACKET_SIZE 1024
-#define ERROR_PACKET_SYNC 0xDD
+#define ERROR_PACKET_SYNC 0xCC
 
 typedef enum {
 	EC_power_supply_rail = 0x00,

@@ -94,7 +94,7 @@ void reset_error_counters() {
 }
 
 void send_previous_error_packet() {
-	uint8_t buffer[ERROR_PACKET_SIZE];
+	uint8_t buffer[PREVIOUS_ERROR_PACKET_SIZE];
 
 	buffer[0] = ERROR_PACKET_SYNC;
 	buffer[1] = ERROR_PACKET_SYNC;
@@ -154,7 +154,7 @@ void send_previous_error_packet() {
 	buffer[55] = (local_cpy[26] & 0xFF);
 
 
-	HAL_UART_Transmit(&huart1, buffer, ERROR_PACKET_SIZE, 100);
+	HAL_UART_Transmit(&huart1, buffer, PREVIOUS_ERROR_PACKET_SIZE, 100);
 }
 
 void send_junk_packet() {
