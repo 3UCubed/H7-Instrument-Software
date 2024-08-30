@@ -459,10 +459,9 @@ int main(void)
   MX_DAC1_Init();
   MX_SPI1_Init();
   MX_RTC_Init();
-  MX_IWDG1_Init();
+//  MX_IWDG1_Init();
   /* USER CODE BEGIN 2 */
-  get_reset_cause();
-  send_previous_error_packet();
+  //get_reset_cause();
   system_setup();
 
   /* USER CODE END 2 */
@@ -580,7 +579,7 @@ void system_setup() {
 	// 5 -- Set timer 2 PWM
 	// 6 -- Init ADC DMA
 	// 7 -- Start UART receive interrupts
-  	error_counter_init();
+  	//error_counter_init();
 
 
 	packet_event_flags = osEventFlagsNew(NULL);
@@ -627,8 +626,7 @@ void sync() {
 
 	//calibrateRTC(UART_RX_BUFFER); // TODO: calibrate rtc
 	HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
-
-	send_ACK();
+	send_previous_error_packet();
 }
 
 void send_ACK() {

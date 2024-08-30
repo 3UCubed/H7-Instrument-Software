@@ -155,7 +155,6 @@ void send_previous_error_packet() {
 
 
 	HAL_UART_Transmit(&huart1, buffer, ERROR_PACKET_SIZE, 100);
-	//send_junk_packet();
 }
 
 void send_junk_packet() {

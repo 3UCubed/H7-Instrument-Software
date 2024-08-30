@@ -4,4 +4,4 @@ error_packet_handler.c:68:6:increment_error_counter	1
 error_packet_handler.c:77:6:update_error_counter	3
 error_packet_handler.c:87:6:reset_error_counters	3
 error_packet_handler.c:96:6:send_previous_error_packet	1
-error_packet_handler.c:161:6:send_junk_packet	2
+error_packet_handler.c:162:6:send_junk_packet	2

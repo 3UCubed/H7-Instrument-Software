@@ -4,4 +4,4 @@
 ../Core/Src/error_packet_handler.c:77:6:update_error_counter	16	static
 ../Core/Src/error_packet_handler.c:87:6:reset_error_counters	16	static
 ../Core/Src/error_packet_handler.c:96:6:send_previous_error_packet	64	static
-../Core/Src/error_packet_handler.c:161:6:send_junk_packet	1040	static
+../Core/Src/error_packet_handler.c:162:6:send_junk_packet	1040	static
