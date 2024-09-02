@@ -421,12 +421,6 @@ int main(void)
   /* MPU Configuration--------------------------------------------------------*/
   MPU_Config();
 
-  /* Enable I-Cache---------------------------------------------------------*/
-  SCB_EnableICache();
-
-  /* Enable D-Cache---------------------------------------------------------*/
-  SCB_EnableDCache();
-
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
@@ -459,10 +453,11 @@ int main(void)
   MX_DAC1_Init();
   MX_SPI1_Init();
   MX_RTC_Init();
-//  MX_IWDG1_Init();
+ // MX_IWDG1_Init();
   /* USER CODE BEGIN 2 */
   //get_reset_cause();
   system_setup();
+
 
   /* USER CODE END 2 */
 
@@ -624,7 +619,7 @@ void sync() {
 		key = UART_RX_BUFFER[0];
 	} while (key != 0xFF);
 
-	//calibrateRTC(UART_RX_BUFFER); // TODO: calibrate rtc
+	calibrateRTC(UART_RX_BUFFER); // TODO: calibrate rtc
 	HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
 	send_previous_error_packet();
 }

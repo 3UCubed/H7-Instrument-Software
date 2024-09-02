@@ -470,6 +470,7 @@ void Science_init(void *argument)
 		ERPA_ENABLED = 1;
 		uptime_millis = 0;
 		reset_packet_sequence_numbers();
+		osEventFlagsSet(packet_event_flags, HK_FLAG_ID);
 		TIM2->CCR4 = 312;
 		HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_1);			// PMT packet on
 

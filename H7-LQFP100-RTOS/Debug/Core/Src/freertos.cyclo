@@ -9,4 +9,4 @@ freertos.c:371:6:AUTODEINIT_init	3
 freertos.c:403:6:Voltage_Monitor_init	1
 freertos.c:425:6:STOP_init	1
 freertos.c:446:6:Science_init	3
-freertos.c:492:6:Idle_init	3
+freertos.c:493:6:Idle_init	3
