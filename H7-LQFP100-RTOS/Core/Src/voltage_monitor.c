@@ -90,7 +90,8 @@ uint8_t voltage_monitor_init() {
 	rail_monitor[RAIL_5v].is_enabled = 0;
 	rail_monitor[RAIL_5v].data = 0;
 	rail_monitor[RAIL_5v].max_voltage = 3909;
-	rail_monitor[RAIL_5v].min_voltage = 3537;
+	rail_monitor[RAIL_5v].min_voltage = 3909;
+//	rail_monitor[RAIL_5v].min_voltage = 3537;
 
 	rail_monitor[RAIL_n3v3].name = RAIL_n3v3;
 	rail_monitor[RAIL_n3v3].error_count = 0;

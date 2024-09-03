@@ -17,34 +17,35 @@ uint16_t local_cpy[NB_OF_VAR];
 
 void handle_error(ERROR_STRUCT error) {
 
-//	switch (error.category) {
-//	case EC_power_supply_rail:
+	switch (error.category) {
+	case EC_power_supply_rail:
+		osEventFlagsSet(mode_event_flags, IDLE_FLAG);
+		increment_error_counter(error);
 //		osEventFlagsSet(mode_event_flags, IDLE_FLAG);
-//		increment_error_counter(error);
-//
-//		//send_error_packet(error);
-//		//NVIC_SystemReset();
-//		break;
-//	case EC_seu:
-//		increment_error_counter(error);
-//		//send_error_packet(error);
-//		//NVIC_SystemReset();
-//		break;
-//	case EC_peripheral:
-//		increment_error_counter(error);
-//		//send_error_packet(error);
-//		//NVIC_SystemReset();
-//		break;
-//	case EC_brownout:
-//		increment_error_counter(error);
-//		break;
-//	case EC_watchdog:
-//		increment_error_counter(error);
-//		break;
-//	default:
-//		//send_error_packet(error);
-//		break;
-//	}
+
+		//send_error_packet(error);
+		//NVIC_SystemReset();
+		break;
+	case EC_seu:
+		increment_error_counter(error);
+		//send_error_packet(error);
+		//NVIC_SystemReset();
+		break;
+	case EC_peripheral:
+		increment_error_counter(error);
+		//send_error_packet(error);
+		//NVIC_SystemReset();
+		break;
+	case EC_brownout:
+		increment_error_counter(error);
+		break;
+	case EC_watchdog:
+		increment_error_counter(error);
+		break;
+	default:
+		//send_error_packet(error);
+		break;
+	}
 }
 
 void error_counter_init() {
@@ -63,8 +64,6 @@ void error_counter_init() {
 		tmp = local_cpy[i];
 		tmp++;
 	}
-
-
 }
 
 
