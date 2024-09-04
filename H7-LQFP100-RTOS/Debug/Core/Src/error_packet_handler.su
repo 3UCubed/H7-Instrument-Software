@@ -8,4 +8,5 @@
 ../Core/Src/error_packet_handler.c:112:14:get_previous_error	24	static
 ../Core/Src/error_packet_handler.c:129:6:send_error_counter_packet	64	static
 ../Core/Src/error_packet_handler.c:193:6:send_previous_error_packet	16	static
-../Core/Src/error_packet_handler.c:208:6:send_junk_packet	1040	static
+../Core/Src/error_packet_handler.c:208:6:send_current_error_packet	24	static
+../Core/Src/error_packet_handler.c:219:6:send_junk_packet	1040	static

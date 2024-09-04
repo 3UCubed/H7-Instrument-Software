@@ -19,7 +19,7 @@ void handle_error(ERROR_STRUCT error) {
 
 	increment_error_counter(error);
 	set_previous_error(error);
-
+	send_current_error_packet(error);
 
 //	switch (error.category) {
 //	case EC_power_supply_rail:
@@ -203,6 +203,17 @@ void send_previous_error_packet() {
 
 	HAL_UART_Transmit(&huart1, buffer, PREV_ERROR_PACKET_SIZE, 100);
 
+}
+
+void send_current_error_packet(ERROR_STRUCT error) {
+	uint8_t buffer[CURRENT_ERROR_PACKET_SIZE];
+
+	buffer[0] = CURRENT_ERROR_PACKET_SYNC;
+	buffer[1] = CURRENT_ERROR_PACKET_SYNC;
+	buffer[2] = error.category;
+	buffer[3] = error.detail;
+
+	HAL_UART_Transmit(&huart1, buffer, PREV_ERROR_PACKET_SIZE, 100);
 }
 
 void send_junk_packet() {

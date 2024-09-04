@@ -12,9 +12,11 @@
 
 #define ERROR_COUNTER_PACKET_SIZE 56
 #define PREV_ERROR_PACKET_SIZE 4
+#define CURRENT_ERROR_PACKET_SIZE 4
 #define JUNK_PACKET_SIZE 1024
 #define ERROR_COUNTER_PACKET_SYNC 0xCC
 #define PREV_ERROR_PACKET_SYNC 0xAA
+#define CURRENT_ERROR_PACKET_SYNC 0xBB
 #define NUM_ERROR_COUNTERS 27
 #define PREV_ERROR_CATEGORY_INDEX 27
 #define PREV_ERROR_DETAIL_INDEX 28
@@ -67,6 +69,7 @@ ERROR_STRUCT get_previous_error();
 void handle_error(ERROR_STRUCT error);
 void send_error_counter_packet();
 void send_previous_error_packet();
+void send_current_error_packet(ERROR_STRUCT error);
 void send_junk_packet();
 
 
