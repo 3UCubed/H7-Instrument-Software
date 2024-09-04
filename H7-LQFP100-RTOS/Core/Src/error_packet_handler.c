@@ -10,42 +10,41 @@
 #include "main.h"
 #include "eeprom.h"
 
-uint16_t VirtAddVarTab[NB_OF_VAR] = {0x5550, 0x5551, 0x5552, 0x5553, 0x5554, 0x5555, 0x5556, 0x5557, 0x5558, 0x5559, 0x555A, 0x555B, 0x555C, 0x555D, 0x555E, 0x555F, 0x6660, 0x6661, 0x6662, 0x6663, 0x6664, 0x6665, 0x6666, 0x6667, 0x6668, 0x6669, 0x666A};
-uint16_t VarDataTab[NB_OF_VAR] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+uint16_t VirtAddVarTab[NB_OF_VAR] = {0x5550, 0x5551, 0x5552, 0x5553, 0x5554, 0x5555, 0x5556, 0x5557, 0x5558, 0x5559, 0x555A, 0x555B, 0x555C, 0x555D, 0x555E, 0x555F, 0x6660, 0x6661, 0x6662, 0x6663, 0x6664, 0x6665, 0x6666, 0x6667, 0x6668, 0x6669, 0x666A, 0x666B, 0x666C};
+uint16_t VarDataTab[NB_OF_VAR] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-uint16_t local_cpy[NB_OF_VAR];
+uint16_t local_cpy[NUM_ERROR_COUNTERS];
 
 void handle_error(ERROR_STRUCT error) {
 
-	switch (error.category) {
-	case EC_power_supply_rail:
-		osEventFlagsSet(mode_event_flags, IDLE_FLAG);
-		increment_error_counter(error);
-//		osEventFlagsSet(mode_event_flags, IDLE_FLAG);
+	increment_error_counter(error);
+	set_previous_error(error);
 
-		//send_error_packet(error);
-		//NVIC_SystemReset();
-		break;
-	case EC_seu:
-		increment_error_counter(error);
-		//send_error_packet(error);
-		//NVIC_SystemReset();
-		break;
-	case EC_peripheral:
-		increment_error_counter(error);
-		//send_error_packet(error);
-		//NVIC_SystemReset();
-		break;
-	case EC_brownout:
-		increment_error_counter(error);
-		break;
-	case EC_watchdog:
-		increment_error_counter(error);
-		break;
-	default:
-		//send_error_packet(error);
-		break;
-	}
+
+//	switch (error.category) {
+//	case EC_power_supply_rail:
+//		osEventFlagsSet(mode_event_flags, IDLE_FLAG);
+//		increment_error_counter(error);
+////		osEventFlagsSet(mode_event_flags, IDLE_FLAG);
+//
+//		break;
+//	case EC_seu:
+//		increment_error_counter(error);
+//
+//		break;
+//	case EC_peripheral:
+//		increment_error_counter(error);
+//
+//		break;
+//	case EC_brownout:
+//		increment_error_counter(error);
+//		break;
+//	case EC_watchdog:
+//		increment_error_counter(error);
+//		break;
+//	default:
+//		break;
+//	}
 }
 
 void error_counter_init() {
@@ -56,13 +55,10 @@ void error_counter_init() {
 	}
 
 	// Updating our local copy of error counters from EE
-	for (int i = 0; i < NB_OF_VAR; i++) {
-		uint16_t tmp = 7;
+	for (int i = 0; i < NUM_ERROR_COUNTERS; i++) {
 		if ((EE_ReadVariable(VirtAddVarTab[i], &local_cpy[i])) != HAL_OK) {
 			Error_Handler();
 		}
-		tmp = local_cpy[i];
-		tmp++;
 	}
 }
 
@@ -78,7 +74,7 @@ void increment_error_counter(ERROR_STRUCT error) {
 
 void update_error_counter(){
 	// Writes our local copy of the error counters to EE
-	for (int i = 0; i < NB_OF_VAR; i++) {
+	for (int i = 0; i < NUM_ERROR_COUNTERS; i++) {
 		if ((EE_WriteVariable(VirtAddVarTab[i], local_cpy[i])) != HAL_OK) {
 			Error_Handler();
 		}
@@ -88,18 +84,53 @@ void update_error_counter(){
 
 void reset_error_counters() {
 	// Resets all error counters to 0
-	for (int i = 0; i < NB_OF_VAR; i++) {
+	for (int i = 0; i < NUM_ERROR_COUNTERS; i++) {
 		if ((EE_WriteVariable(VirtAddVarTab[i], 0)) != HAL_OK) {
 			Error_Handler();
 		}
 	}
 }
 
-void send_previous_error_packet() {
-	uint8_t buffer[PREVIOUS_ERROR_PACKET_SIZE];
+void reset_previous_error() {
+	if ((EE_WriteVariable(VirtAddVarTab[PREV_ERROR_CATEGORY_INDEX], 0xFF)) != HAL_OK) {
+		Error_Handler();
+	}
+	if ((EE_WriteVariable(VirtAddVarTab[PREV_ERROR_DETAIL_INDEX], 0xFF)) != HAL_OK) {
+		Error_Handler();
+	}
+}
 
-	buffer[0] = ERROR_PACKET_SYNC;
-	buffer[1] = ERROR_PACKET_SYNC;
+void set_previous_error(ERROR_STRUCT error) {
+	if ((EE_WriteVariable(VirtAddVarTab[PREV_ERROR_CATEGORY_INDEX], error.category)) != HAL_OK) {
+		Error_Handler();
+	}
+	if ((EE_WriteVariable(VirtAddVarTab[PREV_ERROR_DETAIL_INDEX], error.detail)) != HAL_OK) {
+		Error_Handler();
+	}
+}
+
+ERROR_STRUCT get_previous_error() {
+	ERROR_STRUCT prev_error;
+	uint16_t category;
+	uint16_t detail;
+
+	if ((EE_ReadVariable(VirtAddVarTab[PREV_ERROR_CATEGORY_INDEX], &category)) != HAL_OK) {
+		Error_Handler();
+	}
+	if ((EE_ReadVariable(VirtAddVarTab[PREV_ERROR_DETAIL_INDEX], &detail)) != HAL_OK) {
+		Error_Handler();
+	}
+	prev_error.category = category;
+	prev_error.detail = detail;
+
+	return prev_error;
+}
+
+void send_error_counter_packet() {
+	uint8_t buffer[ERROR_COUNTER_PACKET_SIZE];
+
+	buffer[0] = ERROR_COUNTER_PACKET_SYNC;
+	buffer[1] = ERROR_COUNTER_PACKET_SYNC;
 	buffer[2] = ((local_cpy[0] & 0xFF00) >> 8);
 	buffer[3] = (local_cpy[0] & 0xFF);
 	buffer[4] = ((local_cpy[1] & 0xFF00) >> 8);
@@ -156,7 +187,22 @@ void send_previous_error_packet() {
 	buffer[55] = (local_cpy[26] & 0xFF);
 
 
-	HAL_UART_Transmit(&huart1, buffer, PREVIOUS_ERROR_PACKET_SIZE, 100);
+	HAL_UART_Transmit(&huart1, buffer, ERROR_COUNTER_PACKET_SIZE, 100);
+}
+
+void send_previous_error_packet() {
+	ERROR_STRUCT prev_error;
+	uint8_t buffer[PREV_ERROR_PACKET_SIZE];
+
+	prev_error = get_previous_error();
+
+	buffer[0] = PREV_ERROR_PACKET_SYNC;
+	buffer[1] = PREV_ERROR_PACKET_SYNC;
+	buffer[2] = prev_error.category;
+	buffer[3] = prev_error.detail;
+
+	HAL_UART_Transmit(&huart1, buffer, PREV_ERROR_PACKET_SIZE, 100);
+
 }
 
 void send_junk_packet() {

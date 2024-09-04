@@ -1,7 +1,11 @@
 ../Core/Src/error_packet_handler.c:18:6:handle_error	16	static
-../Core/Src/error_packet_handler.c:51:6:error_counter_init	16	static
-../Core/Src/error_packet_handler.c:72:6:increment_error_counter	16	static
-../Core/Src/error_packet_handler.c:81:6:update_error_counter	16	static
-../Core/Src/error_packet_handler.c:91:6:reset_error_counters	16	static
-../Core/Src/error_packet_handler.c:100:6:send_previous_error_packet	64	static
-../Core/Src/error_packet_handler.c:164:6:send_junk_packet	1040	static
+../Core/Src/error_packet_handler.c:50:6:error_counter_init	16	static
+../Core/Src/error_packet_handler.c:66:6:increment_error_counter	16	static
+../Core/Src/error_packet_handler.c:75:6:update_error_counter	16	static
+../Core/Src/error_packet_handler.c:85:6:reset_error_counters	16	static
+../Core/Src/error_packet_handler.c:94:6:reset_previous_error	8	static
+../Core/Src/error_packet_handler.c:103:6:set_previous_error	16	static
+../Core/Src/error_packet_handler.c:112:14:get_previous_error	24	static
+../Core/Src/error_packet_handler.c:129:6:send_error_counter_packet	64	static
+../Core/Src/error_packet_handler.c:193:6:send_previous_error_packet	16	static
+../Core/Src/error_packet_handler.c:208:6:send_junk_packet	1040	static

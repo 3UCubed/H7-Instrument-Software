@@ -373,6 +373,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		reset_error_counters();
 		break;
 	}
+	case 0xEF: {
+		send_previous_error_packet();
+		break;
+	}
 	default: {
 		printf("Unknown Command\n");
 		break;
@@ -454,10 +458,10 @@ int main(void)
   //get_reset_cause();
   system_setup();
 
-  ERROR_STRUCT error;
-  error.category = EC_watchdog;
-  error.detail = ED_UNDEFINED;
-  handle_error(error);
+//  ERROR_STRUCT error;
+//  error.category = EC_watchdog;
+//  error.detail = ED_UNDEFINED;
+//  handle_error(error);
 
   /* USER CODE END 2 */
 
@@ -621,7 +625,7 @@ void sync() {
 
 	calibrateRTC(UART_RX_BUFFER); // TODO: calibrate rtc
 	HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
-	send_previous_error_packet();
+	send_error_counter_packet();
 }
 
 void send_ACK() {
