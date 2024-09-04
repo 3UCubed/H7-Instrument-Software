@@ -374,7 +374,9 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		break;
 	}
 	case 0xEF: {
+#ifdef ERROR_HANDLING_ENABLED
 		send_previous_error_packet();
+#endif
 		break;
 	}
 	default: {
@@ -453,9 +455,14 @@ int main(void)
   MX_DAC1_Init();
   MX_SPI1_Init();
   MX_RTC_Init();
- // MX_IWDG1_Init();
+  MX_IWDG1_Init();
   /* USER CODE BEGIN 2 */
-  //get_reset_cause();
+
+#ifdef ERROR_HANDLING_ENABLED
+  	error_counter_init();
+  	get_reset_cause();
+#endif
+
   system_setup();
 
 //  ERROR_STRUCT error;
@@ -578,7 +585,7 @@ void system_setup() {
 	// 5 -- Set timer 2 PWM
 	// 6 -- Init ADC DMA
 	// 7 -- Start UART receive interrupts
-  	error_counter_init();
+
 
 
 	packet_event_flags = osEventFlagsNew(NULL);

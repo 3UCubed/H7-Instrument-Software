@@ -1,7 +1,7 @@
 voltage_monitor.c:12:9:voltage_monitor_init	1
-voltage_monitor.c:154:9:set_rail_monitor_enable	1
-voltage_monitor.c:163:9:set_rail_monitor	1
-voltage_monitor.c:197:15:get_rail_monitor	1
-voltage_monitor.c:201:9:in_range	3
-voltage_monitor.c:209:6:monitor_rails	5
-voltage_monitor.c:229:14:get_rail_name_error_detail	19
+voltage_monitor.c:153:9:set_rail_monitor_enable	1
+voltage_monitor.c:162:9:set_rail_monitor	1
+voltage_monitor.c:196:15:get_rail_monitor	1
+voltage_monitor.c:200:9:in_range	3
+voltage_monitor.c:208:6:monitor_rails	5
+voltage_monitor.c:228:14:get_rail_name_error_detail	19

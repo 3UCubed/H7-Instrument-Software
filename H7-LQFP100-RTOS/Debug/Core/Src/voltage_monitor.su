@@ -1,7 +1,7 @@
 ../Core/Src/voltage_monitor.c:12:9:voltage_monitor_init	16	static
-../Core/Src/voltage_monitor.c:154:9:set_rail_monitor_enable	24	static
-../Core/Src/voltage_monitor.c:163:9:set_rail_monitor	48	static
-../Core/Src/voltage_monitor.c:197:15:get_rail_monitor	4	static
-../Core/Src/voltage_monitor.c:201:9:in_range	24	static
-../Core/Src/voltage_monitor.c:209:6:monitor_rails	24	static
-../Core/Src/voltage_monitor.c:229:14:get_rail_name_error_detail	16	static
+../Core/Src/voltage_monitor.c:153:9:set_rail_monitor_enable	24	static
+../Core/Src/voltage_monitor.c:162:9:set_rail_monitor	48	static
+../Core/Src/voltage_monitor.c:196:15:get_rail_monitor	4	static
+../Core/Src/voltage_monitor.c:200:9:in_range	24	static
+../Core/Src/voltage_monitor.c:208:6:monitor_rails	24	static
+../Core/Src/voltage_monitor.c:228:14:get_rail_name_error_detail	16	static

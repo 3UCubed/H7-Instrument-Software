@@ -16,35 +16,31 @@ uint16_t VarDataTab[NB_OF_VAR] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 uint16_t local_cpy[NUM_ERROR_COUNTERS];
 
 void handle_error(ERROR_STRUCT error) {
-
+#ifdef ERROR_HANDLING_ENABLED
 	increment_error_counter(error);
 	set_previous_error(error);
 	send_current_error_packet(error);
+	osEventFlagsSet(mode_event_flags, IDLE_FLAG);
 
-//	switch (error.category) {
-//	case EC_power_supply_rail:
-//		osEventFlagsSet(mode_event_flags, IDLE_FLAG);
-//		increment_error_counter(error);
-////		osEventFlagsSet(mode_event_flags, IDLE_FLAG);
-//
-//		break;
-//	case EC_seu:
-//		increment_error_counter(error);
-//
-//		break;
-//	case EC_peripheral:
-//		increment_error_counter(error);
-//
-//		break;
-//	case EC_brownout:
-//		increment_error_counter(error);
-//		break;
-//	case EC_watchdog:
-//		increment_error_counter(error);
-//		break;
-//	default:
-//		break;
-//	}
+	switch (error.category) {
+
+	case EC_power_supply_rail:
+		NVIC_SystemReset();
+		break;
+
+	case EC_seu:
+		// TODO: Waiting on ECC to be completed
+		break;
+
+	case EC_peripheral:
+		NVIC_SystemReset();
+		break;
+
+	default:
+		// Should not be possible to get here
+		break;
+	}
+#endif
 }
 
 void error_counter_init() {

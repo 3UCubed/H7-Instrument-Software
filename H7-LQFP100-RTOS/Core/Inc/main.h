@@ -40,8 +40,9 @@ extern "C" {
 #include "sample_data.h"		// For initializing adc dma in system_setup
 #include "time_tagging.h"		// For letting sync calibrate RTC
 
-#define UART_RX_BUFFER_SIZE 64
+//#define ERROR_HANDLING_ENABLED
 
+#define UART_RX_BUFFER_SIZE 64
 
 #define PMT_FLAG_ID 0x0001
 #define ERPA_FLAG_ID 0x0002
