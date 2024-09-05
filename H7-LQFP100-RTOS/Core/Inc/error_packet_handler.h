@@ -1,5 +1,4 @@
 /**
-/**
  * @file error_packet_handler.h
  * @brief Contains all function prototypes for error_packet_handler.c
  *
