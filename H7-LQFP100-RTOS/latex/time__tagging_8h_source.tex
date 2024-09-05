@@ -1,0 +1,24 @@
+\doxysection{time\+\_\+tagging.\+h}
+\hypertarget{time__tagging_8h_source}{}\label{time__tagging_8h_source}\index{Core/inc/time\_tagging.h@{Core/inc/time\_tagging.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ time\_tagging.h}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ \ Created\ on:\ Aug\ 6,\ 2024}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *\ \ \ \ \ \ Author:\ 3ucubed}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00007\ }
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#ifndef\ INC\_TIME\_TAGGING\_H\_}}
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#define\ INC\_TIME\_TAGGING\_H\_}}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{rtc_8h}{rtc.h}}"{}}}
+\DoxyCodeLine{00012\ \textcolor{preprocessor}{\#include\ <stdio.h>}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ For\ uint\ data\ types}}
+\DoxyCodeLine{00013\ }
+\DoxyCodeLine{00014\ \textcolor{keywordtype}{void}\ get\_uptime(uint8\_t\ *buffer);}
+\DoxyCodeLine{00015\ \textcolor{keywordtype}{void}\ get\_timestamp(uint8\_t\ *buffer);}
+\DoxyCodeLine{00016\ \textcolor{keywordtype}{void}\ calibrateRTC(uint8\_t\ *buffer);}
+\DoxyCodeLine{00017\ HAL\_StatusTypeDef\ RTC\_SetTime(RTC\_HandleTypeDef\ *hrtc,\ RTC\_TimeTypeDef\ *sTime,\ uint32\_t\ Format);}
+\DoxyCodeLine{00018\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ INC\_TIME\_TAGGING\_H\_\ */}\textcolor{preprocessor}{}}
+
+\end{DoxyCode}

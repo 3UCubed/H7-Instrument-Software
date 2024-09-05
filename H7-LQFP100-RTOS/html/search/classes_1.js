@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['packet_5ft_0',['packet_t',['../structpacket__t.html',1,'']]]
+  ['gpio_5fpins_0',['gpio_pins',['../structgpio__pins.html',1,'']]]
 ];

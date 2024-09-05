@@ -1,8 +1,11 @@
-/*
- * error_packet_handler.c
+/**
+ * @file error_packet_handler.c
+ * @brief Implementation of error packet handling
  *
- *  Created on: Aug 6, 2024
- *      Author: 3ucubed
+ * Handles all errors in the system. If the built in HAL error handler is called by a peripheral, it redirects here.
+ *
+ * @author Jared Morrison
+ * @date September 4, 2024
  */
 
 #include "error_packet_handler.h"
@@ -10,11 +13,49 @@
 #include "main.h"
 #include "eeprom.h"
 
+/**
+ * @brief Array storing virtual addresses for EEPROM emulation variables.
+ *
+ * This array holds the virtual addresses of the variables stored in the emulated EEPROM.
+ * The addresses are defined to start from `0x5550` and continue sequentially.
+ * The size of the array is determined by the `NB_OF_VAR` constant.
+ */
 uint16_t VirtAddVarTab[NB_OF_VAR] = {0x5550, 0x5551, 0x5552, 0x5553, 0x5554, 0x5555, 0x5556, 0x5557, 0x5558, 0x5559, 0x555A, 0x555B, 0x555C, 0x555D, 0x555E, 0x555F, 0x6660, 0x6661, 0x6662, 0x6663, 0x6664, 0x6665, 0x6666, 0x6667, 0x6668, 0x6669, 0x666A, 0x666B, 0x666C};
-uint16_t VarDataTab[NB_OF_VAR] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
+/**
+ * @brief Array storing the data values for EEPROM emulation variables.
+ *
+ * This array holds the data associated with each virtual address in the
+ * `VirtAddVarTab` array. Initially, all values are set to `0`, and they
+ * can be updated as needed during program execution.
+ * The size of the array is determined by the `NB_OF_VAR` constant.
+ */
+uint16_t VarDataTab[NB_OF_VAR] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // TODO: I think this can be removed, I don't think it is used anywhere anymore.
+
+/**
+ * @brief Array used to store the error counters.
+ *
+ * The reason this array is of size NUM_ERROR_COUNTERS instead of NB_OF_VAR is because
+ * there are two extra variables stored in the EE used for keeping track of the last
+ * error that occurred. There are a total of 29 variables that we keep track of in the
+ * EE. The first 27 are the error counters, and the last two are the error codes for the
+ * last error that occurred.
+ */
 uint16_t local_cpy[NUM_ERROR_COUNTERS];
 
+/**
+ * @brief Handles all errors in the system.
+ *
+ * Built in error handler calls this function instead of entering an infinite while loop.
+ * Before calling this function, the caller will create a new variable of type ERROR_STRUCT
+ * and populate the error_category and error_detail attributes with the respective codes.
+ * Given and error category and detail, this error handler proceeds with the appropriate actions.
+ * Regardless of what caused the error, this error handler will always increment the error counter,
+ * set the previous error to whatever error we are currently handling, send an error packet,
+ * and enter IDLE mode. Additional actions are taken depending on the error category.
+ *
+ * @param error Error given by the caller.
+ */
 void handle_error(ERROR_STRUCT error) {
 #ifdef ERROR_HANDLING_ENABLED
 	increment_error_counter(error);
@@ -23,19 +64,15 @@ void handle_error(ERROR_STRUCT error) {
 	osEventFlagsSet(mode_event_flags, IDLE_FLAG);
 
 	switch (error.category) {
-
 	case EC_power_supply_rail:
 		NVIC_SystemReset();
 		break;
-
 	case EC_seu:
 		// TODO: Waiting on ECC to be completed
 		break;
-
 	case EC_peripheral:
 		NVIC_SystemReset();
 		break;
-
 	default:
 		// Should not be possible to get here
 		break;
@@ -43,14 +80,15 @@ void handle_error(ERROR_STRUCT error) {
 #endif
 }
 
+/**
+ * @breif Initializes the EE, reads the error counters from the EE, and stores them in local_cpy.
+ */
 void error_counter_init() {
-	// Starting up EEPROM Emulator
 	HAL_FLASH_Unlock();
 	if (EE_Init() != EE_OK) {
 		Error_Handler();
 	}
 
-	// Updating our local copy of error counters from EE
 	for (int i = 0; i < NUM_ERROR_COUNTERS; i++) {
 		if ((EE_ReadVariable(VirtAddVarTab[i], &local_cpy[i])) != HAL_OK) {
 			Error_Handler();
@@ -58,18 +96,25 @@ void error_counter_init() {
 	}
 }
 
-
+/**
+ * @brief Increments the error counter for a given error, and updates the variable in the EE.
+ *
+ * I designed the error categories and codes such that they correspond to an index in our
+ * local_cpy array. To see what index a particular error is stored in, just check the value
+ * each category or detail is assigned in the header file.
+ *
+ * @param error Error given by the caller.
+ */
 void increment_error_counter(ERROR_STRUCT error) {
 	local_cpy[error.category]++;
 	local_cpy[error.detail]++;
 	update_error_counter();
 }
 
-
-
-
+/**
+ * @brief Writes the contents of local_cpy to the EE, excluding the previous error codes.
+ */
 void update_error_counter(){
-	// Writes our local copy of the error counters to EE
 	for (int i = 0; i < NUM_ERROR_COUNTERS; i++) {
 		if ((EE_WriteVariable(VirtAddVarTab[i], local_cpy[i])) != HAL_OK) {
 			Error_Handler();
@@ -77,9 +122,10 @@ void update_error_counter(){
 	}
 }
 
-
+/**
+ * @brief Resets all error counters in the EE to 0.
+ */
 void reset_error_counters() {
-	// Resets all error counters to 0
 	for (int i = 0; i < NUM_ERROR_COUNTERS; i++) {
 		if ((EE_WriteVariable(VirtAddVarTab[i], 0)) != HAL_OK) {
 			Error_Handler();
@@ -87,6 +133,9 @@ void reset_error_counters() {
 	}
 }
 
+/**
+ * @brief Resets the previous error codes to 0xFF. 0xFF was chose because it doesn't correspond to any error code.
+ */
 void reset_previous_error() {
 	if ((EE_WriteVariable(VirtAddVarTab[PREV_ERROR_CATEGORY_INDEX], 0xFF)) != HAL_OK) {
 		Error_Handler();
@@ -96,6 +145,11 @@ void reset_previous_error() {
 	}
 }
 
+/**
+ * @brief Sets previous error code in the EE.
+ *
+ * @param error Previous error code in EE is set to this.
+ */
 void set_previous_error(ERROR_STRUCT error) {
 	if ((EE_WriteVariable(VirtAddVarTab[PREV_ERROR_CATEGORY_INDEX], error.category)) != HAL_OK) {
 		Error_Handler();
@@ -105,6 +159,11 @@ void set_previous_error(ERROR_STRUCT error) {
 	}
 }
 
+/**
+ * @brief Reads the previous error codes from EE
+ *
+ * @return Error populated with retrieved category and detail.
+ */
 ERROR_STRUCT get_previous_error() {
 	ERROR_STRUCT prev_error;
 	uint16_t category;
@@ -116,12 +175,19 @@ ERROR_STRUCT get_previous_error() {
 	if ((EE_ReadVariable(VirtAddVarTab[PREV_ERROR_DETAIL_INDEX], &detail)) != HAL_OK) {
 		Error_Handler();
 	}
+
 	prev_error.category = category;
 	prev_error.detail = detail;
 
 	return prev_error;
 }
 
+/**
+ * @brief Creates and sends a packet containing all 27 error counters.
+ *
+ * There is an error counter for every single category and detail.
+ * This type of packet is only sent during sync.
+ */
 void send_error_counter_packet() {
 	uint8_t buffer[ERROR_COUNTER_PACKET_SIZE];
 
@@ -182,10 +248,14 @@ void send_error_counter_packet() {
 	buffer[54] = ((local_cpy[26] & 0xFF00) >> 8);
 	buffer[55] = (local_cpy[26] & 0xFF);
 
-
 	HAL_UART_Transmit(&huart1, buffer, ERROR_COUNTER_PACKET_SIZE, 100);
 }
 
+/**
+ * @brief Creates and sends a packet containing the error codes for the previous error.
+ *
+ * This type of packet is only sent on request.
+ */
 void send_previous_error_packet() {
 	ERROR_STRUCT prev_error;
 	uint8_t buffer[PREV_ERROR_PACKET_SIZE];
@@ -198,9 +268,13 @@ void send_previous_error_packet() {
 	buffer[3] = prev_error.detail;
 
 	HAL_UART_Transmit(&huart1, buffer, PREV_ERROR_PACKET_SIZE, 100);
-
 }
 
+/**
+ * @brief Creates and sends a packet containing the error codes for the current error.
+ *
+ * This type of packet is only sent when handle_error() is called.
+ */
 void send_current_error_packet(ERROR_STRUCT error) {
 	uint8_t buffer[CURRENT_ERROR_PACKET_SIZE];
 
@@ -212,12 +286,18 @@ void send_current_error_packet(ERROR_STRUCT error) {
 	HAL_UART_Transmit(&huart1, buffer, PREV_ERROR_PACKET_SIZE, 100);
 }
 
-void send_junk_packet() {
+/**
+ * @brief Creates and sends a junk packet containing all 0xCE.
+ *
+ * Used to clear out the buffer on the OBC.
+ */
+void send_junk_packet() {	// TODO: Figure out if we still need this.
 	uint8_t buffer[JUNK_PACKET_SIZE];
 
 	for (int i = 0; i < JUNK_PACKET_SIZE; i++) {
-		buffer[i] = 0xEE;
+		buffer[i] = 0xCE;
 	}
+
 	HAL_UART_Transmit(&huart1, buffer, JUNK_PACKET_SIZE, 100);
 }
 

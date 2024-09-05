@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['gpio_5fpins_0',['gpio_pins',['../structgpio__pins.html',1,'']]]
+  ['error_5fstruct_0',['ERROR_STRUCT',['../struct_e_r_r_o_r___s_t_r_u_c_t.html',1,'']]]
 ];

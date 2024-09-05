@@ -1,0 +1,60 @@
+\doxysection{voltage\+\_\+monitor.\+h}
+\hypertarget{voltage__monitor_8h_source}{}\label{voltage__monitor_8h_source}\index{Core/inc/voltage\_monitor.h@{Core/inc/voltage\_monitor.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ voltage\_monitor.h}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ \ Created\ on:\ Aug\ 6,\ 2024}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *\ \ \ \ \ \ Author:\ 3ucubed}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00007\ }
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#ifndef\ INC\_VOLTAGE\_MONITOR\_H\_}}
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#define\ INC\_VOLTAGE\_MONITOR\_H\_}}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \textcolor{preprocessor}{\#define\ NUM\_VOLTAGE\_RAILS\ 18}}
+\DoxyCodeLine{00012\ }
+\DoxyCodeLine{00013\ \textcolor{preprocessor}{\#include\ <stdio.h>}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ For\ uint\ data\ types}}
+\DoxyCodeLine{00014\ \textcolor{preprocessor}{\#include\ "{}sample\_data.h"{}}\ \ \ \ \ \ \ \ \textcolor{comment}{//\ For\ setting\ rail\ data}}
+\DoxyCodeLine{00015\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{error__packet__handler_8h}{error\_packet\_handler.h}}"{}}}
+\DoxyCodeLine{00016\ }
+\DoxyCodeLine{00017\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\ \{}
+\DoxyCodeLine{00018\ \ \ \ \ RAIL\_vsense,\ \ \ \ \textcolor{comment}{//\ 0}}
+\DoxyCodeLine{00019\ \ \ \ \ RAIL\_vrefint,\ \ \ \textcolor{comment}{//\ 1}}
+\DoxyCodeLine{00020\ \ \ \ \ RAIL\_TEMP1,\ \ \ \ \ \textcolor{comment}{//\ 2}}
+\DoxyCodeLine{00021\ \ \ \ \ RAIL\_TEMP2,\ \ \ \ \ \textcolor{comment}{//\ 3}}
+\DoxyCodeLine{00022\ \ \ \ \ RAIL\_TEMP3,\ \ \ \ \ \textcolor{comment}{//\ 4}}
+\DoxyCodeLine{00023\ \ \ \ \ RAIL\_TEMP4,\ \ \ \ \ \textcolor{comment}{//\ 5}}
+\DoxyCodeLine{00024\ \ \ \ \ RAIL\_busvmon,\ \ \ \textcolor{comment}{//\ 6}}
+\DoxyCodeLine{00025\ \ \ \ \ RAIL\_busimon,\ \ \ \textcolor{comment}{//\ 7}}
+\DoxyCodeLine{00026\ \ \ \ \ RAIL\_2v5,\ \ \ \ \ \ \ \textcolor{comment}{//\ 8}}
+\DoxyCodeLine{00027\ \ \ \ \ RAIL\_3v3,\ \ \ \ \ \ \ \textcolor{comment}{//\ 9}}
+\DoxyCodeLine{00028\ \ \ \ \ RAIL\_5v,\ \ \ \ \ \ \ \ \textcolor{comment}{//\ 10}}
+\DoxyCodeLine{00029\ \ \ \ \ RAIL\_n3v3,\ \ \ \ \ \ \textcolor{comment}{//\ 11}}
+\DoxyCodeLine{00030\ \ \ \ \ RAIL\_n5v,\ \ \ \ \ \ \ \textcolor{comment}{//\ 12}}
+\DoxyCodeLine{00031\ \ \ \ \ RAIL\_15v,\ \ \ \ \ \ \ \textcolor{comment}{//\ 13}}
+\DoxyCodeLine{00032\ \ \ \ \ RAIL\_5vref,\ \ \ \ \ \textcolor{comment}{//\ 14}}
+\DoxyCodeLine{00033\ \ \ \ \ RAIL\_n200v,\ \ \ \ \ \textcolor{comment}{//\ 15}}
+\DoxyCodeLine{00034\ \ \ \ \ RAIL\_n800v,\ \ \ \ \ \textcolor{comment}{//\ 16}}
+\DoxyCodeLine{00035\ \ \ \ \ RAIL\_TMP1\ \ \ \ \ \ \ \textcolor{comment}{//\ 17}}
+\DoxyCodeLine{00036\ \}\ VOLTAGE\_RAIL\_NAME;}
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00038\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\{}
+\DoxyCodeLine{00039\ \ \ \ \ VOLTAGE\_RAIL\_NAME\ name;}
+\DoxyCodeLine{00040\ \ \ \ \ uint8\_t\ error\_count;}
+\DoxyCodeLine{00041\ \ \ \ \ uint8\_t\ is\_enabled;}
+\DoxyCodeLine{00042\ \ \ \ \ uint16\_t\ data;}
+\DoxyCodeLine{00043\ \ \ \ \ uint16\_t\ max\_voltage;}
+\DoxyCodeLine{00044\ \ \ \ \ uint16\_t\ min\_voltage;}
+\DoxyCodeLine{00045\ \}\ \mbox{\hyperlink{struct_v_o_l_t_a_g_e___r_a_i_l}{VOLTAGE\_RAIL}};}
+\DoxyCodeLine{00046\ }
+\DoxyCodeLine{00047\ uint8\_t\ voltage\_monitor\_init();}
+\DoxyCodeLine{00048\ uint8\_t\ set\_rail\_monitor\_enable(VOLTAGE\_RAIL\_NAME\ rail\_name,\ uint8\_t\ enable\_value);}
+\DoxyCodeLine{00049\ uint8\_t\ set\_rail\_monitor();}
+\DoxyCodeLine{00050\ \mbox{\hyperlink{struct_v_o_l_t_a_g_e___r_a_i_l}{VOLTAGE\_RAIL}}*\ get\_rail\_monitor();}
+\DoxyCodeLine{00051\ uint8\_t\ in\_range(uint16\_t\ raw,\ \textcolor{keywordtype}{int}\ min,\ \textcolor{keywordtype}{int}\ max);}
+\DoxyCodeLine{00052\ \textcolor{keywordtype}{void}\ monitor\_rails();}
+\DoxyCodeLine{00053\ ERROR\_DETAIL\ get\_rail\_name\_error\_detail(VOLTAGE\_RAIL\_NAME\ rail\_name);}
+\DoxyCodeLine{00054\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ INC\_VOLTAGE\_MONITOR\_H\_\ */}\textcolor{preprocessor}{}}
+
+\end{DoxyCode}

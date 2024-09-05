@@ -1,8 +1,16 @@
-/*
- * error_packet_handler.h
+/**
+/**
+ * @file error_packet_handler.h
+ * @brief Contains all function prototypes for error_packet_handler.c
  *
- *  Created on: Aug 6, 2024
- *      Author: 3ucubed
+ * ERROR_STRUCT is made up of ERROR_CATEGORY and ERROR_DETAIL. An error category has details associated with it.
+ * For instance, if there is an error on a power supply rail, the error category will be EC_power_supply_rail with the
+ * detail being whatever specific rail caused the error. However, some categories do not have associated details. For example,
+ * EC_watchdog does not have any details associated with it, and the error packet that is sent for a watchdog error will have
+ * the detail ED_UNDEFINED.
+ *
+ * @author Jared Morrison
+ * @date September 4, 2024
  */
 
 #ifndef INC_ERROR_PACKET_HANDLER_H_

@@ -1,0 +1,60 @@
+\doxysection{Core/src/dac.c File Reference}
+\hypertarget{dac_8c}{}\label{dac_8c}\index{Core/src/dac.c@{Core/src/dac.c}}
+
+
+This file provides code for the configuration of the DAC instances.  
+
+
+{\ttfamily \#include "{}dac.\+h"{}}\newline
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{dac_8c_a412c7f55d05196232830230c74d702b2}{MX\+\_\+\+DAC1\+\_\+\+Init}} (void)
+\item 
+void \mbox{\hyperlink{dac_8c_a8e4797900d3cb9171a484f2b955aba87}{HAL\+\_\+\+DAC\+\_\+\+Msp\+Init}} (DAC\+\_\+\+Handle\+Type\+Def \texorpdfstring{$\ast$}{*}dac\+Handle)
+\item 
+void \mbox{\hyperlink{dac_8c_a13b8fa4f908f78040536cc8cfc99231e}{HAL\+\_\+\+DAC\+\_\+\+Msp\+De\+Init}} (DAC\+\_\+\+Handle\+Type\+Def \texorpdfstring{$\ast$}{*}dac\+Handle)
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{dac_8c_aa25a57382819e79fbde3687939c0fd0b}\label{dac_8c_aa25a57382819e79fbde3687939c0fd0b} 
+DAC\+\_\+\+Handle\+Type\+Def {\bfseries hdac1}
+\item 
+\Hypertarget{dac_8c_a25415b774b85bdc41b3fd661ceae8a1c}\label{dac_8c_a25415b774b85bdc41b3fd661ceae8a1c} 
+DMA\+\_\+\+Handle\+Type\+Def {\bfseries hdma\+\_\+dac1\+\_\+ch1}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+This file provides code for the configuration of the DAC instances. 
+
+\begin{DoxyAttention}{Attention}
+
+\end{DoxyAttention}
+Copyright (c) 2024 STMicroelectronics. All rights reserved.
+
+This software is licensed under terms that can be found in the LICENSE file in the root directory of this software component. If no LICENSE file comes with this software, it is provided AS-\/\+IS. 
+
+\doxysubsection{Function Documentation}
+\Hypertarget{dac_8c_a13b8fa4f908f78040536cc8cfc99231e}\index{dac.c@{dac.c}!HAL\_DAC\_MspDeInit@{HAL\_DAC\_MspDeInit}}
+\index{HAL\_DAC\_MspDeInit@{HAL\_DAC\_MspDeInit}!dac.c@{dac.c}}
+\doxysubsubsection{\texorpdfstring{HAL\_DAC\_MspDeInit()}{HAL\_DAC\_MspDeInit()}}
+{\footnotesize\ttfamily \label{dac_8c_a13b8fa4f908f78040536cc8cfc99231e} 
+void HAL\+\_\+\+DAC\+\_\+\+Msp\+De\+Init (\begin{DoxyParamCaption}\item[{DAC\+\_\+\+Handle\+Type\+Def \texorpdfstring{$\ast$}{*}}]{dac\+Handle}{}\end{DoxyParamCaption})}
+
+DAC1 GPIO Configuration PA4 -\/-\/-\/-\/-\/-\/\texorpdfstring{$>$}{>} DAC1\+\_\+\+OUT1\Hypertarget{dac_8c_a8e4797900d3cb9171a484f2b955aba87}\index{dac.c@{dac.c}!HAL\_DAC\_MspInit@{HAL\_DAC\_MspInit}}
+\index{HAL\_DAC\_MspInit@{HAL\_DAC\_MspInit}!dac.c@{dac.c}}
+\doxysubsubsection{\texorpdfstring{HAL\_DAC\_MspInit()}{HAL\_DAC\_MspInit()}}
+{\footnotesize\ttfamily \label{dac_8c_a8e4797900d3cb9171a484f2b955aba87} 
+void HAL\+\_\+\+DAC\+\_\+\+Msp\+Init (\begin{DoxyParamCaption}\item[{DAC\+\_\+\+Handle\+Type\+Def \texorpdfstring{$\ast$}{*}}]{dac\+Handle}{}\end{DoxyParamCaption})}
+
+DAC1 GPIO Configuration PA4 -\/-\/-\/-\/-\/-\/\texorpdfstring{$>$}{>} DAC1\+\_\+\+OUT1\Hypertarget{dac_8c_a412c7f55d05196232830230c74d702b2}\index{dac.c@{dac.c}!MX\_DAC1\_Init@{MX\_DAC1\_Init}}
+\index{MX\_DAC1\_Init@{MX\_DAC1\_Init}!dac.c@{dac.c}}
+\doxysubsubsection{\texorpdfstring{MX\_DAC1\_Init()}{MX\_DAC1\_Init()}}
+{\footnotesize\ttfamily \label{dac_8c_a412c7f55d05196232830230c74d702b2} 
+void MX\+\_\+\+DAC1\+\_\+\+Init (\begin{DoxyParamCaption}\item[{void}]{}{}\end{DoxyParamCaption})}
+
+DAC Initialization
+
+DAC channel OUT1 config
