@@ -1,4 +1,4 @@
 time_tagging.c:10:6:get_uptime	3
-time_tagging.c:32:6:get_timestamp	1
-time_tagging.c:52:6:calibrateRTC	2
-time_tagging.c:85:19:RTC_SetTime	4
+time_tagging.c:32:6:get_unix_time	2
+time_tagging.c:83:6:calibrateRTC	2
+time_tagging.c:116:19:RTC_SetTime	4

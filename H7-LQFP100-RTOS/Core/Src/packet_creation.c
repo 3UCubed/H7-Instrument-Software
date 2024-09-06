@@ -84,7 +84,7 @@ void create_hk_packet() {
 	uint8_t uptime[UPTIME_SIZE];
 
 	get_uptime(uptime);
-	get_timestamp(timestamp);
+	get_unix_time(timestamp);
 	rail_monitor_ptr = get_rail_monitor();
 
 
@@ -134,14 +134,7 @@ void create_hk_packet() {
 	buffer[43] = timestamp[3];
 	buffer[44] = timestamp[4];
 	buffer[45] = timestamp[5];
-	buffer[46] = timestamp[6];
-	buffer[47] = timestamp[7];
-	buffer[48] = timestamp[8];
-	buffer[49] = timestamp[9];
-	buffer[50] = uptime[0];
-	buffer[51] = uptime[1];
-	buffer[52] = uptime[2];
-	buffer[53] = uptime[3];
+
 
 	HAL_UART_Transmit(&huart1, buffer, HK_DATA_SIZE, 100);
 

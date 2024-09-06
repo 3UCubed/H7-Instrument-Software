@@ -615,7 +615,7 @@ void system_setup() {
 
 	HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
 
-	MX_IWDG1_Init();
+	//MX_IWDG1_Init();
 
 }
 
