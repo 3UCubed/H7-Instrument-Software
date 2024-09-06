@@ -13,7 +13,7 @@
 
 #define PMT_DATA_SIZE 10
 #define ERPA_DATA_SIZE 14
-#define HK_DATA_SIZE 46
+#define HK_DATA_SIZE 50
 #define UPTIME_SIZE 4
 #define TIMESTAMP_SIZE 6
 

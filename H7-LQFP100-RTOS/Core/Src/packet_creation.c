@@ -134,7 +134,10 @@ void create_hk_packet() {
 	buffer[43] = timestamp[3];
 	buffer[44] = timestamp[4];
 	buffer[45] = timestamp[5];
-
+	buffer[46] = uptime[0];
+	buffer[47] = uptime[1];
+	buffer[48] = uptime[2];
+	buffer[49] = uptime[3];
 
 	HAL_UART_Transmit(&huart1, buffer, HK_DATA_SIZE, 100);
 
