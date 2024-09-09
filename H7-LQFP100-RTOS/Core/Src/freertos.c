@@ -451,7 +451,7 @@ void Science_init(void *argument)
   for(;;)
   {
 		osEventFlagsWait(mode_event_flags, SCIENCE_FLAG, osFlagsWaitAny, osWaitForever);
-
+		osThreadSuspend(Voltage_MonitorHandle);
 		// Enabling all voltages
 		for (int i = 0; i < 9; i++) {
 			HAL_GPIO_WritePin(gpios[i].gpio, gpios[i].pin, GPIO_PIN_SET);
@@ -459,9 +459,10 @@ void Science_init(void *argument)
 		}
 
 		// Telling rail monitor which voltages are now enabled
-		for (int i = RAIL_2v5; i <= RAIL_n800v; i++) {
+		for (int i = RAIL_busvmon; i <= RAIL_n800v; i++) {
 			set_rail_monitor_enable(i, 1);
 		}
+		osThreadResume(Voltage_MonitorHandle);
 
 		__disable_irq();
 
@@ -506,7 +507,7 @@ void Idle_init(void *argument)
 		HAL_DAC_Stop_DMA(&hdac1, DAC_CHANNEL_1);			// Disable auto sweep
 
 		// Telling rail monitor which voltages are now disabled
-		for (int i = RAIL_n800v; i >= RAIL_2v5; i--) {
+		for (int i = RAIL_n800v; i >= RAIL_busvmon; i--) {
 			set_rail_monitor_enable(i, 0);
 		}
 

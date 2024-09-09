@@ -56,14 +56,14 @@ uint8_t voltage_monitor_init() {
 
 	rail_monitor[RAIL_busvmon].name = RAIL_busvmon;
 	rail_monitor[RAIL_busvmon].error_count = 0;
-	rail_monitor[RAIL_busvmon].is_enabled = 1;
+	rail_monitor[RAIL_busvmon].is_enabled = 0;
 	rail_monitor[RAIL_busvmon].data = 0;
 	rail_monitor[RAIL_busvmon].max_voltage = 10000; // TODO: Get actual range from Sanj
-	rail_monitor[RAIL_busvmon].min_voltage = 0;
+	rail_monitor[RAIL_busvmon].min_voltage = 10000;
 
 	rail_monitor[RAIL_busimon].name = RAIL_busimon;
 	rail_monitor[RAIL_busimon].error_count = 0;
-	rail_monitor[RAIL_busimon].is_enabled = 1;
+	rail_monitor[RAIL_busimon].is_enabled = 0;
 	rail_monitor[RAIL_busimon].data = 0;
 	rail_monitor[RAIL_busimon].max_voltage = 10000; // TODO: Get actual range from Sanj
 	rail_monitor[RAIL_busimon].min_voltage = 0;
@@ -211,6 +211,24 @@ void monitor_rails() {
 		if (rail_monitor[i].is_enabled){
 			// If current rail is not in range...
 			if (!in_range(rail_monitor[i].data, rail_monitor[i].min_voltage, rail_monitor[i].max_voltage)){
+				// Increase that rails error count
+				rail_monitor[i].error_count++;
+				// If that rails' error count is at 3, proceed with error protocol for that rail
+				if (rail_monitor[i].error_count == 3) {
+					ERROR_STRUCT error;
+					error.detail = get_rail_name_error_detail(rail_monitor[i].name);
+					error.category = EC_power_supply_rail;
+					handle_error(error);
+				}
+			}
+		}
+		// If the rail monitor isn't enabled...
+		else {
+			uint16_t tolerance;
+			tolerance = rail_monitor[i].max_voltage * 0.1;
+
+			// If it isn't within +10% of its max voltage from 0...
+			if (!in_range(rail_monitor[i].data, 0, tolerance)) {
 				// Increase that rails error count
 				rail_monitor[i].error_count++;
 				// If that rails' error count is at 3, proceed with error protocol for that rail
