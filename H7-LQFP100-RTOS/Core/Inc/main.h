@@ -83,6 +83,7 @@ extern volatile uint32_t uptime_millis;
 extern uint32_t DAC_OUT[32];
 extern volatile uint8_t HK_ENABLED;
 extern volatile uint8_t ERPA_ENABLED;
+extern volatile uint8_t IDLING;
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/

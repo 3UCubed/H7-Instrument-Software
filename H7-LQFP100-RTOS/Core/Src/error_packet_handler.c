@@ -59,6 +59,7 @@ uint16_t local_cpy[NUM_ERROR_COUNTERS];
 void handle_error(ERROR_STRUCT error) {
 #ifdef ERROR_HANDLING_ENABLED
 	osEventFlagsSet(mode_event_flags, IDLE_FLAG);
+	while (!IDLING) {};
 	increment_error_counter(error);
 	set_previous_error(error);
 	send_current_error_packet(error);

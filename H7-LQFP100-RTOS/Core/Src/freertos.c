@@ -159,7 +159,7 @@ const osThreadAttr_t Idle_task_attributes = {
   .cb_size = sizeof(Idle_taskControlBlock),
   .stack_mem = &Idle_taskBuffer[0],
   .stack_size = sizeof(Idle_taskBuffer),
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityRealtime7,
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -452,6 +452,7 @@ void Science_init(void *argument)
   {
 		osEventFlagsWait(mode_event_flags, SCIENCE_FLAG, osFlagsWaitAny, osWaitForever);
 		osThreadSuspend(Voltage_MonitorHandle);
+		IDLING = 0;
 		// Enabling all voltages
 		for (int i = 0; i < 9; i++) {
 			HAL_GPIO_WritePin(gpios[i].gpio, gpios[i].pin, GPIO_PIN_SET);
@@ -518,6 +519,7 @@ void Idle_init(void *argument)
 			osDelay(200);
 		}
 		osDelay(3500);		// TODO: Reduce to 1000 for assembled instrument
+		IDLING = 1;
 		osThreadResume(Voltage_MonitorHandle);
 
 		// Yield thread control

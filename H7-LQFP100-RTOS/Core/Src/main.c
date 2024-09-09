@@ -91,7 +91,7 @@ volatile uint8_t HK_10_second_counter = 0;
 
 volatile uint8_t HK_100_ms_counter = 0;
 
-
+volatile uint8_t IDLING = 0;
 
 /* USER CODE END PV */
 
