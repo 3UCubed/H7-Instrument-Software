@@ -91,7 +91,7 @@ volatile uint8_t HK_10_second_counter = 0;
 
 volatile uint8_t HK_100_ms_counter = 0;
 
-volatile uint8_t IDLING = 0;
+volatile uint8_t IDLING = 1;
 
 /* USER CODE END PV */
 
@@ -463,7 +463,6 @@ int main(void)
 #endif
 
   system_setup();
-
 //  ERROR_STRUCT error;
 //  error.category = EC_watchdog;
 //  error.detail = ED_UNDEFINED;

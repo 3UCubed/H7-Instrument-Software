@@ -40,7 +40,7 @@ void get_unix_time(uint8_t* buffer) {
 
 	HAL_RTC_GetTime(&hrtc, &current_time, RTC_FORMAT_BIN);
 	HAL_RTC_GetDate(&hrtc, &current_date, RTC_FORMAT_BIN);
-	uint32_t milliseconds = (10000 - (current_time.SubSeconds)) / 10;
+	uint16_t milliseconds = (10000 - (current_time.SubSeconds)) / 10;
 
 	uint16_t y;
 	uint8_t m;
@@ -67,17 +67,13 @@ void get_unix_time(uint8_t* buffer) {
 	unix_tm_val *= DAYS_IN_SECONDS;
 	//Add hours, minutes and seconds
 	unix_tm_val += (SECONDS_IN_1_HOUR * current_time.Hours) + (SECONDS_IN_1_MIN * current_time.Minutes) + current_time.Seconds;
-	// Convert to milliseconds
-	unix_tm_val *= 1000;
-	// Add milliseconds
-	unix_tm_val += milliseconds;
 
-	buffer[0] = ((unix_tm_val >> 40) & 0xFF);
-	buffer[1] = ((unix_tm_val >> 32) & 0xFF);
-	buffer[2] = ((unix_tm_val >> 24) & 0xFF);
-	buffer[3] = ((unix_tm_val >> 16) & 0xFF);
-	buffer[4] = ((unix_tm_val >> 8) & 0xFF);
-	buffer[5] = unix_tm_val & 0xFF;
+	buffer[0] = ((unix_tm_val >> 24) & 0xFF);
+	buffer[1] = ((unix_tm_val >> 16) & 0xFF);
+	buffer[2] = ((unix_tm_val >> 8) & 0xFF);
+	buffer[3] = unix_tm_val & 0xFF;
+	buffer[4] = ((milliseconds >> 8) & 0xFF);
+	buffer[5] = milliseconds & 0xFF;
 }
 
 void calibrateRTC(uint8_t *buffer) {
