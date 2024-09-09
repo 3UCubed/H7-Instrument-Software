@@ -505,6 +505,7 @@ void Idle_init(void *argument)
 		HAL_TIM_OC_Stop_IT(&htim1, TIM_CHANNEL_1);			// PMT packet off
 		HK_ENABLED = 0;
 		HAL_DAC_Stop_DMA(&hdac1, DAC_CHANNEL_1);			// Disable auto sweep
+		osThreadSuspend(Voltage_MonitorHandle);
 
 		// Telling rail monitor which voltages are now disabled
 		for (int i = RAIL_n800v; i >= RAIL_busvmon; i--) {
@@ -516,6 +517,8 @@ void Idle_init(void *argument)
 			HAL_GPIO_WritePin(gpios[i].gpio, gpios[i].pin, GPIO_PIN_RESET);
 			osDelay(200);
 		}
+		osDelay(3500);		// TODO: Reduce to 1000 for assembled instrument
+		osThreadResume(Voltage_MonitorHandle);
 
 		// Yield thread control
 		osThreadYield();

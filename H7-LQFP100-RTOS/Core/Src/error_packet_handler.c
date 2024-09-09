@@ -63,6 +63,7 @@ void handle_error(ERROR_STRUCT error) {
 	set_previous_error(error);
 	send_current_error_packet(error);
 	send_junk_packet();
+
 	switch (error.category) {
 	case EC_power_supply_rail:
 		NVIC_SystemReset();

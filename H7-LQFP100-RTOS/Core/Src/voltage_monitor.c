@@ -59,7 +59,7 @@ uint8_t voltage_monitor_init() {
 	rail_monitor[RAIL_busvmon].is_enabled = 0;
 	rail_monitor[RAIL_busvmon].data = 0;
 	rail_monitor[RAIL_busvmon].max_voltage = 10000; // TODO: Get actual range from Sanj
-	rail_monitor[RAIL_busvmon].min_voltage = 10000;
+	rail_monitor[RAIL_busvmon].min_voltage = 0;
 
 	rail_monitor[RAIL_busimon].name = RAIL_busimon;
 	rail_monitor[RAIL_busimon].error_count = 0;
