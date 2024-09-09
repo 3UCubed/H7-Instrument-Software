@@ -12200,20 +12200,21 @@ LOAD /Applications/STM32CubeIDE.app/Contents/Eclipse/plugins/com.st.stm32cube.id
                 0x0000000008005644      0x144 ./Core/Src/usart.o
                 0x0000000008005644                HAL_UART_MspInit
  .text.voltage_monitor_init
-                0x0000000008005788      0x380 ./Core/Src/voltage_monitor.o
+                0x0000000008005788      0x37c ./Core/Src/voltage_monitor.o
                 0x0000000008005788                voltage_monitor_init
  .text.set_rail_monitor_enable
-                0x0000000008005b08       0x40 ./Core/Src/voltage_monitor.o
-                0x0000000008005b08                set_rail_monitor_enable
+                0x0000000008005b04       0x40 ./Core/Src/voltage_monitor.o
+                0x0000000008005b04                set_rail_monitor_enable
  .text.set_rail_monitor
-                0x0000000008005b48       0xc4 ./Core/Src/voltage_monitor.o
-                0x0000000008005b48                set_rail_monitor
+                0x0000000008005b44       0xc4 ./Core/Src/voltage_monitor.o
+                0x0000000008005b44                set_rail_monitor
  .text.get_rail_monitor
-                0x0000000008005c0c       0x14 ./Core/Src/voltage_monitor.o
-                0x0000000008005c0c                get_rail_monitor
+                0x0000000008005c08       0x14 ./Core/Src/voltage_monitor.o
+                0x0000000008005c08                get_rail_monitor
  .text.in_range
-                0x0000000008005c20       0x30 ./Core/Src/voltage_monitor.o
-                0x0000000008005c20                in_range
+                0x0000000008005c1c       0x30 ./Core/Src/voltage_monitor.o
+                0x0000000008005c1c                in_range
+ *fill*         0x0000000008005c4c        0x4 
  .text.monitor_rails
                 0x0000000008005c50      0x1ac ./Core/Src/voltage_monitor.o
                 0x0000000008005c50                monitor_rails

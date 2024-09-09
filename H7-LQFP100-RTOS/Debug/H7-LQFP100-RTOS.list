@@ -5696,7 +5696,7 @@ void AUTOINIT_init(void *argument)
  80026ce:	b2db      	uxtb	r3, r3
  80026d0:	2101      	movs	r1, #1
  80026d2:	4618      	mov	r0, r3
- 80026d4:	f003 fa18 	bl	8005b08 <set_rail_monitor_enable>
+ 80026d4:	f003 fa16 	bl	8005b04 <set_rail_monitor_enable>
 		for (int i = RAIL_2v5; i <= RAIL_15v; i++){
  80026d8:	68bb      	ldr	r3, [r7, #8]
  80026da:	3301      	adds	r3, #1
@@ -5746,7 +5746,7 @@ void AUTODEINIT_init(void *argument)
  8002714:	b2db      	uxtb	r3, r3
  8002716:	2100      	movs	r1, #0
  8002718:	4618      	mov	r0, r3
- 800271a:	f003 f9f5 	bl	8005b08 <set_rail_monitor_enable>
+ 800271a:	f003 f9f3 	bl	8005b04 <set_rail_monitor_enable>
 		for (int i = RAIL_15v; i >= RAIL_2v5; i--){
  800271e:	68fb      	ldr	r3, [r7, #12]
  8002720:	3b01      	subs	r3, #1
@@ -5821,7 +5821,7 @@ void Voltage_Monitor_init(void *argument)
  8002784:	4804      	ldr	r0, [pc, #16]	; (8002798 <Voltage_Monitor_init+0x2c>)
  8002786:	f00b fbad 	bl	800dee4 <HAL_IWDG_Refresh>
 	  set_rail_monitor();
- 800278a:	f003 f9dd 	bl	8005b48 <set_rail_monitor>
+ 800278a:	f003 f9db 	bl	8005b44 <set_rail_monitor>
 	  monitor_rails();
  800278e:	f003 fa5f 	bl	8005c50 <monitor_rails>
 	  osEventFlagsWait(utility_event_flags, VOLTAGE_MONITOR_FLAG_ID, osFlagsWaitAny,
@@ -5936,7 +5936,7 @@ void Science_init(void *argument)
  800282e:	b2db      	uxtb	r3, r3
  8002830:	2101      	movs	r1, #1
  8002832:	4618      	mov	r0, r3
- 8002834:	f003 f968 	bl	8005b08 <set_rail_monitor_enable>
+ 8002834:	f003 f966 	bl	8005b04 <set_rail_monitor_enable>
 		for (int i = RAIL_busvmon; i <= RAIL_n800v; i++) {
  8002838:	68bb      	ldr	r3, [r7, #8]
  800283a:	3301      	adds	r3, #1
@@ -6077,7 +6077,7 @@ void Idle_init(void *argument)
  800291a:	b2db      	uxtb	r3, r3
  800291c:	2100      	movs	r1, #0
  800291e:	4618      	mov	r0, r3
- 8002920:	f003 f8f2 	bl	8005b08 <set_rail_monitor_enable>
+ 8002920:	f003 f8f0 	bl	8005b04 <set_rail_monitor_enable>
 		for (int i = RAIL_n800v; i >= RAIL_busvmon; i--) {
  8002924:	68fb      	ldr	r3, [r7, #12]
  8002926:	3b01      	subs	r3, #1
@@ -7069,7 +7069,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		set_rail_monitor_enable(RAIL_2v5, 1);
  80031d6:	2101      	movs	r1, #1
  80031d8:	2008      	movs	r0, #8
- 80031da:	f002 fc95 	bl	8005b08 <set_rail_monitor_enable>
+ 80031da:	f002 fc93 	bl	8005b04 <set_rail_monitor_enable>
 		break;
  80031de:	e23e      	b.n	800365e <HAL_UART_RxCpltCallback+0x8b2>
 	}
@@ -7113,7 +7113,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
  800321a:	b2db      	uxtb	r3, r3
  800321c:	2100      	movs	r1, #0
  800321e:	4618      	mov	r0, r3
- 8003220:	f002 fc72 	bl	8005b08 <set_rail_monitor_enable>
+ 8003220:	f002 fc70 	bl	8005b04 <set_rail_monitor_enable>
 		for (int i = RAIL_n800v; i >= RAIL_2v5; i--) {
  8003224:	693b      	ldr	r3, [r7, #16]
  8003226:	3b01      	subs	r3, #1
@@ -7139,7 +7139,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		set_rail_monitor_enable(RAIL_3v3, 1);
  8003246:	2101      	movs	r1, #1
  8003248:	2009      	movs	r0, #9
- 800324a:	f002 fc5d 	bl	8005b08 <set_rail_monitor_enable>
+ 800324a:	f002 fc5b 	bl	8005b04 <set_rail_monitor_enable>
 
 		break;
  800324e:	e206      	b.n	800365e <HAL_UART_RxCpltCallback+0x8b2>
@@ -7157,7 +7157,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		set_rail_monitor_enable(RAIL_3v3, 0);
  8003264:	2100      	movs	r1, #0
  8003266:	2009      	movs	r0, #9
- 8003268:	f002 fc4e 	bl	8005b08 <set_rail_monitor_enable>
+ 8003268:	f002 fc4c 	bl	8005b04 <set_rail_monitor_enable>
 		break;
  800326c:	e1f7      	b.n	800365e <HAL_UART_RxCpltCallback+0x8b2>
 	}
@@ -7174,7 +7174,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		set_rail_monitor_enable(RAIL_5v, 1);
  8003280:	2101      	movs	r1, #1
  8003282:	200a      	movs	r0, #10
- 8003284:	f002 fc40 	bl	8005b08 <set_rail_monitor_enable>
+ 8003284:	f002 fc3e 	bl	8005b04 <set_rail_monitor_enable>
 
 		break;
  8003288:	e1e9      	b.n	800365e <HAL_UART_RxCpltCallback+0x8b2>
@@ -7192,7 +7192,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		set_rail_monitor_enable(RAIL_5v, 0);
  800329c:	2100      	movs	r1, #0
  800329e:	200a      	movs	r0, #10
- 80032a0:	f002 fc32 	bl	8005b08 <set_rail_monitor_enable>
+ 80032a0:	f002 fc30 	bl	8005b04 <set_rail_monitor_enable>
 		break;
  80032a4:	e1db      	b.n	800365e <HAL_UART_RxCpltCallback+0x8b2>
 	}
@@ -7209,7 +7209,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		set_rail_monitor_enable(RAIL_n3v3, 1);
  80032b8:	2101      	movs	r1, #1
  80032ba:	200b      	movs	r0, #11
- 80032bc:	f002 fc24 	bl	8005b08 <set_rail_monitor_enable>
+ 80032bc:	f002 fc22 	bl	8005b04 <set_rail_monitor_enable>
 
 		break;
  80032c0:	e1cd      	b.n	800365e <HAL_UART_RxCpltCallback+0x8b2>
@@ -7227,7 +7227,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		set_rail_monitor_enable(RAIL_n3v3, 0);
  80032d4:	2100      	movs	r1, #0
  80032d6:	200b      	movs	r0, #11
- 80032d8:	f002 fc16 	bl	8005b08 <set_rail_monitor_enable>
+ 80032d8:	f002 fc14 	bl	8005b04 <set_rail_monitor_enable>
 		break;
  80032dc:	e1bf      	b.n	800365e <HAL_UART_RxCpltCallback+0x8b2>
 	}
@@ -7244,7 +7244,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		set_rail_monitor_enable(RAIL_n5v, 1);
  80032f2:	2101      	movs	r1, #1
  80032f4:	200c      	movs	r0, #12
- 80032f6:	f002 fc07 	bl	8005b08 <set_rail_monitor_enable>
+ 80032f6:	f002 fc05 	bl	8005b04 <set_rail_monitor_enable>
 
 		break;
  80032fa:	e1b0      	b.n	800365e <HAL_UART_RxCpltCallback+0x8b2>
@@ -7262,7 +7262,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		set_rail_monitor_enable(RAIL_n5v, 0);
  8003310:	2100      	movs	r1, #0
  8003312:	200c      	movs	r0, #12
- 8003314:	f002 fbf8 	bl	8005b08 <set_rail_monitor_enable>
+ 8003314:	f002 fbf6 	bl	8005b04 <set_rail_monitor_enable>
 		break;
  8003318:	e1a1      	b.n	800365e <HAL_UART_RxCpltCallback+0x8b2>
 	}
@@ -7279,7 +7279,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		set_rail_monitor_enable(RAIL_15v, 1);
  800332e:	2101      	movs	r1, #1
  8003330:	200d      	movs	r0, #13
- 8003332:	f002 fbe9 	bl	8005b08 <set_rail_monitor_enable>
+ 8003332:	f002 fbe7 	bl	8005b04 <set_rail_monitor_enable>
 
 		break;
  8003336:	e192      	b.n	800365e <HAL_UART_RxCpltCallback+0x8b2>
@@ -7297,7 +7297,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		set_rail_monitor_enable(RAIL_15v, 0);
  800334c:	2100      	movs	r1, #0
  800334e:	200d      	movs	r0, #13
- 8003350:	f002 fbda 	bl	8005b08 <set_rail_monitor_enable>
+ 8003350:	f002 fbd8 	bl	8005b04 <set_rail_monitor_enable>
 		break;
  8003354:	e183      	b.n	800365e <HAL_UART_RxCpltCallback+0x8b2>
 	}
@@ -7314,7 +7314,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		set_rail_monitor_enable(RAIL_n200v, 1);
  800336a:	2101      	movs	r1, #1
  800336c:	200f      	movs	r0, #15
- 800336e:	f002 fbcb 	bl	8005b08 <set_rail_monitor_enable>
+ 800336e:	f002 fbc9 	bl	8005b04 <set_rail_monitor_enable>
 
 		break;
  8003372:	e174      	b.n	800365e <HAL_UART_RxCpltCallback+0x8b2>
@@ -7332,7 +7332,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		set_rail_monitor_enable(RAIL_n200v, 0);
  8003388:	2100      	movs	r1, #0
  800338a:	200f      	movs	r0, #15
- 800338c:	f002 fbbc 	bl	8005b08 <set_rail_monitor_enable>
+ 800338c:	f002 fbba 	bl	8005b04 <set_rail_monitor_enable>
 		break;
  8003390:	e165      	b.n	800365e <HAL_UART_RxCpltCallback+0x8b2>
 	}
@@ -7349,7 +7349,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		set_rail_monitor_enable(RAIL_n800v, 1);
  80033a4:	2101      	movs	r1, #1
  80033a6:	2010      	movs	r0, #16
- 80033a8:	f002 fbae 	bl	8005b08 <set_rail_monitor_enable>
+ 80033a8:	f002 fbac 	bl	8005b04 <set_rail_monitor_enable>
 
 		break;
  80033ac:	e157      	b.n	800365e <HAL_UART_RxCpltCallback+0x8b2>
@@ -7367,7 +7367,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		set_rail_monitor_enable(RAIL_n800v, 0);
  80033c0:	2100      	movs	r1, #0
  80033c2:	2010      	movs	r0, #16
- 80033c4:	f002 fba0 	bl	8005b08 <set_rail_monitor_enable>
+ 80033c4:	f002 fb9e 	bl	8005b04 <set_rail_monitor_enable>
 		break;
  80033c8:	e149      	b.n	800365e <HAL_UART_RxCpltCallback+0x8b2>
 	}
@@ -8769,7 +8769,7 @@ void create_hk_packet() {
  8003c36:	4618      	mov	r0, r3
  8003c38:	f001 fa48 	bl	80050cc <get_unix_time>
 	rail_monitor_ptr = get_rail_monitor();
- 8003c3c:	f001 ffe6 	bl	8005c0c <get_rail_monitor>
+ 8003c3c:	f001 ffe4 	bl	8005c08 <get_rail_monitor>
  8003c40:	6478      	str	r0, [r7, #68]	; 0x44
 
 
@@ -13315,678 +13315,679 @@ uint8_t voltage_monitor_init() {
  8005790:	71fb      	strb	r3, [r7, #7]
 
 	rail_monitor[RAIL_vsense].name = RAIL_vsense;
- 8005792:	4bc3      	ldr	r3, [pc, #780]	; (8005aa0 <voltage_monitor_init+0x318>)
+ 8005792:	4bc2      	ldr	r3, [pc, #776]	; (8005a9c <voltage_monitor_init+0x314>)
  8005794:	2200      	movs	r2, #0
  8005796:	701a      	strb	r2, [r3, #0]
 	rail_monitor[RAIL_vsense].error_count = 0;
- 8005798:	4bc1      	ldr	r3, [pc, #772]	; (8005aa0 <voltage_monitor_init+0x318>)
+ 8005798:	4bc0      	ldr	r3, [pc, #768]	; (8005a9c <voltage_monitor_init+0x314>)
  800579a:	2200      	movs	r2, #0
  800579c:	705a      	strb	r2, [r3, #1]
 	rail_monitor[RAIL_vsense].is_enabled = 1;
- 800579e:	4bc0      	ldr	r3, [pc, #768]	; (8005aa0 <voltage_monitor_init+0x318>)
+ 800579e:	4bbf      	ldr	r3, [pc, #764]	; (8005a9c <voltage_monitor_init+0x314>)
  80057a0:	2201      	movs	r2, #1
  80057a2:	709a      	strb	r2, [r3, #2]
 	rail_monitor[RAIL_vsense].data = 0;
- 80057a4:	4bbe      	ldr	r3, [pc, #760]	; (8005aa0 <voltage_monitor_init+0x318>)
+ 80057a4:	4bbd      	ldr	r3, [pc, #756]	; (8005a9c <voltage_monitor_init+0x314>)
  80057a6:	2200      	movs	r2, #0
  80057a8:	809a      	strh	r2, [r3, #4]
 	rail_monitor[RAIL_vsense].max_voltage = 10000; // TODO: Get actual range from Sanj
- 80057aa:	4bbd      	ldr	r3, [pc, #756]	; (8005aa0 <voltage_monitor_init+0x318>)
+ 80057aa:	4bbc      	ldr	r3, [pc, #752]	; (8005a9c <voltage_monitor_init+0x314>)
  80057ac:	f242 7210 	movw	r2, #10000	; 0x2710
  80057b0:	80da      	strh	r2, [r3, #6]
 	rail_monitor[RAIL_vsense].min_voltage = 0;
- 80057b2:	4bbb      	ldr	r3, [pc, #748]	; (8005aa0 <voltage_monitor_init+0x318>)
+ 80057b2:	4bba      	ldr	r3, [pc, #744]	; (8005a9c <voltage_monitor_init+0x314>)
  80057b4:	2200      	movs	r2, #0
  80057b6:	811a      	strh	r2, [r3, #8]
 
 	rail_monitor[RAIL_vrefint].name = RAIL_vrefint;
- 80057b8:	4bb9      	ldr	r3, [pc, #740]	; (8005aa0 <voltage_monitor_init+0x318>)
+ 80057b8:	4bb8      	ldr	r3, [pc, #736]	; (8005a9c <voltage_monitor_init+0x314>)
  80057ba:	2201      	movs	r2, #1
  80057bc:	729a      	strb	r2, [r3, #10]
 	rail_monitor[RAIL_vrefint].error_count = 0;
- 80057be:	4bb8      	ldr	r3, [pc, #736]	; (8005aa0 <voltage_monitor_init+0x318>)
+ 80057be:	4bb7      	ldr	r3, [pc, #732]	; (8005a9c <voltage_monitor_init+0x314>)
  80057c0:	2200      	movs	r2, #0
  80057c2:	72da      	strb	r2, [r3, #11]
 	rail_monitor[RAIL_vrefint].is_enabled = 1;
- 80057c4:	4bb6      	ldr	r3, [pc, #728]	; (8005aa0 <voltage_monitor_init+0x318>)
+ 80057c4:	4bb5      	ldr	r3, [pc, #724]	; (8005a9c <voltage_monitor_init+0x314>)
  80057c6:	2201      	movs	r2, #1
  80057c8:	731a      	strb	r2, [r3, #12]
 	rail_monitor[RAIL_vrefint].data = 0;
- 80057ca:	4bb5      	ldr	r3, [pc, #724]	; (8005aa0 <voltage_monitor_init+0x318>)
+ 80057ca:	4bb4      	ldr	r3, [pc, #720]	; (8005a9c <voltage_monitor_init+0x314>)
  80057cc:	2200      	movs	r2, #0
  80057ce:	81da      	strh	r2, [r3, #14]
 	rail_monitor[RAIL_vrefint].max_voltage = 10000; // TODO: Get actual range from Sanj
- 80057d0:	4bb3      	ldr	r3, [pc, #716]	; (8005aa0 <voltage_monitor_init+0x318>)
+ 80057d0:	4bb2      	ldr	r3, [pc, #712]	; (8005a9c <voltage_monitor_init+0x314>)
  80057d2:	f242 7210 	movw	r2, #10000	; 0x2710
  80057d6:	821a      	strh	r2, [r3, #16]
 	rail_monitor[RAIL_vrefint].min_voltage = 0;
- 80057d8:	4bb1      	ldr	r3, [pc, #708]	; (8005aa0 <voltage_monitor_init+0x318>)
+ 80057d8:	4bb0      	ldr	r3, [pc, #704]	; (8005a9c <voltage_monitor_init+0x314>)
  80057da:	2200      	movs	r2, #0
  80057dc:	825a      	strh	r2, [r3, #18]
 
 	rail_monitor[RAIL_TEMP1].name = RAIL_TEMP1;
- 80057de:	4bb0      	ldr	r3, [pc, #704]	; (8005aa0 <voltage_monitor_init+0x318>)
+ 80057de:	4baf      	ldr	r3, [pc, #700]	; (8005a9c <voltage_monitor_init+0x314>)
  80057e0:	2202      	movs	r2, #2
  80057e2:	751a      	strb	r2, [r3, #20]
 	rail_monitor[RAIL_TEMP1].error_count = 0;
- 80057e4:	4bae      	ldr	r3, [pc, #696]	; (8005aa0 <voltage_monitor_init+0x318>)
+ 80057e4:	4bad      	ldr	r3, [pc, #692]	; (8005a9c <voltage_monitor_init+0x314>)
  80057e6:	2200      	movs	r2, #0
  80057e8:	755a      	strb	r2, [r3, #21]
 	rail_monitor[RAIL_TEMP1].is_enabled = 1;
- 80057ea:	4bad      	ldr	r3, [pc, #692]	; (8005aa0 <voltage_monitor_init+0x318>)
+ 80057ea:	4bac      	ldr	r3, [pc, #688]	; (8005a9c <voltage_monitor_init+0x314>)
  80057ec:	2201      	movs	r2, #1
  80057ee:	759a      	strb	r2, [r3, #22]
 	rail_monitor[RAIL_TEMP1].data = 0;
- 80057f0:	4bab      	ldr	r3, [pc, #684]	; (8005aa0 <voltage_monitor_init+0x318>)
+ 80057f0:	4baa      	ldr	r3, [pc, #680]	; (8005a9c <voltage_monitor_init+0x314>)
  80057f2:	2200      	movs	r2, #0
  80057f4:	831a      	strh	r2, [r3, #24]
 	rail_monitor[RAIL_TEMP1].max_voltage = 10000; // TODO: Get actual range from Sanj
- 80057f6:	4baa      	ldr	r3, [pc, #680]	; (8005aa0 <voltage_monitor_init+0x318>)
+ 80057f6:	4ba9      	ldr	r3, [pc, #676]	; (8005a9c <voltage_monitor_init+0x314>)
  80057f8:	f242 7210 	movw	r2, #10000	; 0x2710
  80057fc:	835a      	strh	r2, [r3, #26]
 	rail_monitor[RAIL_TEMP1].min_voltage = 0;
- 80057fe:	4ba8      	ldr	r3, [pc, #672]	; (8005aa0 <voltage_monitor_init+0x318>)
+ 80057fe:	4ba7      	ldr	r3, [pc, #668]	; (8005a9c <voltage_monitor_init+0x314>)
  8005800:	2200      	movs	r2, #0
  8005802:	839a      	strh	r2, [r3, #28]
 
 	rail_monitor[RAIL_TEMP2].name = RAIL_TEMP2;
- 8005804:	4ba6      	ldr	r3, [pc, #664]	; (8005aa0 <voltage_monitor_init+0x318>)
+ 8005804:	4ba5      	ldr	r3, [pc, #660]	; (8005a9c <voltage_monitor_init+0x314>)
  8005806:	2203      	movs	r2, #3
  8005808:	779a      	strb	r2, [r3, #30]
 	rail_monitor[RAIL_TEMP2].error_count = 0;
- 800580a:	4ba5      	ldr	r3, [pc, #660]	; (8005aa0 <voltage_monitor_init+0x318>)
+ 800580a:	4ba4      	ldr	r3, [pc, #656]	; (8005a9c <voltage_monitor_init+0x314>)
  800580c:	2200      	movs	r2, #0
  800580e:	77da      	strb	r2, [r3, #31]
 	rail_monitor[RAIL_TEMP2].is_enabled = 1;
- 8005810:	4ba3      	ldr	r3, [pc, #652]	; (8005aa0 <voltage_monitor_init+0x318>)
+ 8005810:	4ba2      	ldr	r3, [pc, #648]	; (8005a9c <voltage_monitor_init+0x314>)
  8005812:	2201      	movs	r2, #1
  8005814:	f883 2020 	strb.w	r2, [r3, #32]
 	rail_monitor[RAIL_TEMP2].data = 0;
- 8005818:	4ba1      	ldr	r3, [pc, #644]	; (8005aa0 <voltage_monitor_init+0x318>)
+ 8005818:	4ba0      	ldr	r3, [pc, #640]	; (8005a9c <voltage_monitor_init+0x314>)
  800581a:	2200      	movs	r2, #0
  800581c:	845a      	strh	r2, [r3, #34]	; 0x22
 	rail_monitor[RAIL_TEMP2].max_voltage = 10000; // TODO: Get actual range from Sanj
- 800581e:	4ba0      	ldr	r3, [pc, #640]	; (8005aa0 <voltage_monitor_init+0x318>)
+ 800581e:	4b9f      	ldr	r3, [pc, #636]	; (8005a9c <voltage_monitor_init+0x314>)
  8005820:	f242 7210 	movw	r2, #10000	; 0x2710
  8005824:	849a      	strh	r2, [r3, #36]	; 0x24
 	rail_monitor[RAIL_TEMP2].min_voltage = 0;
- 8005826:	4b9e      	ldr	r3, [pc, #632]	; (8005aa0 <voltage_monitor_init+0x318>)
+ 8005826:	4b9d      	ldr	r3, [pc, #628]	; (8005a9c <voltage_monitor_init+0x314>)
  8005828:	2200      	movs	r2, #0
  800582a:	84da      	strh	r2, [r3, #38]	; 0x26
 
 	rail_monitor[RAIL_TEMP3].name = RAIL_TEMP3;
- 800582c:	4b9c      	ldr	r3, [pc, #624]	; (8005aa0 <voltage_monitor_init+0x318>)
+ 800582c:	4b9b      	ldr	r3, [pc, #620]	; (8005a9c <voltage_monitor_init+0x314>)
  800582e:	2204      	movs	r2, #4
  8005830:	f883 2028 	strb.w	r2, [r3, #40]	; 0x28
 	rail_monitor[RAIL_TEMP3].error_count = 0;
- 8005834:	4b9a      	ldr	r3, [pc, #616]	; (8005aa0 <voltage_monitor_init+0x318>)
+ 8005834:	4b99      	ldr	r3, [pc, #612]	; (8005a9c <voltage_monitor_init+0x314>)
  8005836:	2200      	movs	r2, #0
  8005838:	f883 2029 	strb.w	r2, [r3, #41]	; 0x29
 	rail_monitor[RAIL_TEMP3].is_enabled = 1;
- 800583c:	4b98      	ldr	r3, [pc, #608]	; (8005aa0 <voltage_monitor_init+0x318>)
+ 800583c:	4b97      	ldr	r3, [pc, #604]	; (8005a9c <voltage_monitor_init+0x314>)
  800583e:	2201      	movs	r2, #1
  8005840:	f883 202a 	strb.w	r2, [r3, #42]	; 0x2a
 	rail_monitor[RAIL_TEMP3].data = 0;
- 8005844:	4b96      	ldr	r3, [pc, #600]	; (8005aa0 <voltage_monitor_init+0x318>)
+ 8005844:	4b95      	ldr	r3, [pc, #596]	; (8005a9c <voltage_monitor_init+0x314>)
  8005846:	2200      	movs	r2, #0
  8005848:	859a      	strh	r2, [r3, #44]	; 0x2c
 	rail_monitor[RAIL_TEMP3].max_voltage = 10000; // TODO: Get actual range from Sanj
- 800584a:	4b95      	ldr	r3, [pc, #596]	; (8005aa0 <voltage_monitor_init+0x318>)
+ 800584a:	4b94      	ldr	r3, [pc, #592]	; (8005a9c <voltage_monitor_init+0x314>)
  800584c:	f242 7210 	movw	r2, #10000	; 0x2710
  8005850:	85da      	strh	r2, [r3, #46]	; 0x2e
-	rail_monitor[RAIL_TEMP3].min_voltage = 10000;
- 8005852:	4b93      	ldr	r3, [pc, #588]	; (8005aa0 <voltage_monitor_init+0x318>)
- 8005854:	f242 7210 	movw	r2, #10000	; 0x2710
- 8005858:	861a      	strh	r2, [r3, #48]	; 0x30
+	rail_monitor[RAIL_TEMP3].min_voltage = 0;
+ 8005852:	4b92      	ldr	r3, [pc, #584]	; (8005a9c <voltage_monitor_init+0x314>)
+ 8005854:	2200      	movs	r2, #0
+ 8005856:	861a      	strh	r2, [r3, #48]	; 0x30
 
 	rail_monitor[RAIL_TEMP4].name = RAIL_TEMP4;
- 800585a:	4b91      	ldr	r3, [pc, #580]	; (8005aa0 <voltage_monitor_init+0x318>)
- 800585c:	2205      	movs	r2, #5
- 800585e:	f883 2032 	strb.w	r2, [r3, #50]	; 0x32
+ 8005858:	4b90      	ldr	r3, [pc, #576]	; (8005a9c <voltage_monitor_init+0x314>)
+ 800585a:	2205      	movs	r2, #5
+ 800585c:	f883 2032 	strb.w	r2, [r3, #50]	; 0x32
 	rail_monitor[RAIL_TEMP4].error_count = 0;
- 8005862:	4b8f      	ldr	r3, [pc, #572]	; (8005aa0 <voltage_monitor_init+0x318>)
- 8005864:	2200      	movs	r2, #0
- 8005866:	f883 2033 	strb.w	r2, [r3, #51]	; 0x33
+ 8005860:	4b8e      	ldr	r3, [pc, #568]	; (8005a9c <voltage_monitor_init+0x314>)
+ 8005862:	2200      	movs	r2, #0
+ 8005864:	f883 2033 	strb.w	r2, [r3, #51]	; 0x33
 	rail_monitor[RAIL_TEMP4].is_enabled = 1;
- 800586a:	4b8d      	ldr	r3, [pc, #564]	; (8005aa0 <voltage_monitor_init+0x318>)
- 800586c:	2201      	movs	r2, #1
- 800586e:	f883 2034 	strb.w	r2, [r3, #52]	; 0x34
+ 8005868:	4b8c      	ldr	r3, [pc, #560]	; (8005a9c <voltage_monitor_init+0x314>)
+ 800586a:	2201      	movs	r2, #1
+ 800586c:	f883 2034 	strb.w	r2, [r3, #52]	; 0x34
 	rail_monitor[RAIL_TEMP4].data = 0;
- 8005872:	4b8b      	ldr	r3, [pc, #556]	; (8005aa0 <voltage_monitor_init+0x318>)
- 8005874:	2200      	movs	r2, #0
- 8005876:	86da      	strh	r2, [r3, #54]	; 0x36
+ 8005870:	4b8a      	ldr	r3, [pc, #552]	; (8005a9c <voltage_monitor_init+0x314>)
+ 8005872:	2200      	movs	r2, #0
+ 8005874:	86da      	strh	r2, [r3, #54]	; 0x36
 	rail_monitor[RAIL_TEMP4].max_voltage = 10000; // TODO: Get actual range from Sanj
- 8005878:	4b89      	ldr	r3, [pc, #548]	; (8005aa0 <voltage_monitor_init+0x318>)
- 800587a:	f242 7210 	movw	r2, #10000	; 0x2710
- 800587e:	871a      	strh	r2, [r3, #56]	; 0x38
+ 8005876:	4b89      	ldr	r3, [pc, #548]	; (8005a9c <voltage_monitor_init+0x314>)
+ 8005878:	f242 7210 	movw	r2, #10000	; 0x2710
+ 800587c:	871a      	strh	r2, [r3, #56]	; 0x38
 	rail_monitor[RAIL_TEMP4].min_voltage = 0;
- 8005880:	4b87      	ldr	r3, [pc, #540]	; (8005aa0 <voltage_monitor_init+0x318>)
- 8005882:	2200      	movs	r2, #0
- 8005884:	875a      	strh	r2, [r3, #58]	; 0x3a
+ 800587e:	4b87      	ldr	r3, [pc, #540]	; (8005a9c <voltage_monitor_init+0x314>)
+ 8005880:	2200      	movs	r2, #0
+ 8005882:	875a      	strh	r2, [r3, #58]	; 0x3a
 
 	rail_monitor[RAIL_busvmon].name = RAIL_busvmon;
- 8005886:	4b86      	ldr	r3, [pc, #536]	; (8005aa0 <voltage_monitor_init+0x318>)
- 8005888:	2206      	movs	r2, #6
- 800588a:	f883 203c 	strb.w	r2, [r3, #60]	; 0x3c
+ 8005884:	4b85      	ldr	r3, [pc, #532]	; (8005a9c <voltage_monitor_init+0x314>)
+ 8005886:	2206      	movs	r2, #6
+ 8005888:	f883 203c 	strb.w	r2, [r3, #60]	; 0x3c
 	rail_monitor[RAIL_busvmon].error_count = 0;
- 800588e:	4b84      	ldr	r3, [pc, #528]	; (8005aa0 <voltage_monitor_init+0x318>)
- 8005890:	2200      	movs	r2, #0
- 8005892:	f883 203d 	strb.w	r2, [r3, #61]	; 0x3d
+ 800588c:	4b83      	ldr	r3, [pc, #524]	; (8005a9c <voltage_monitor_init+0x314>)
+ 800588e:	2200      	movs	r2, #0
+ 8005890:	f883 203d 	strb.w	r2, [r3, #61]	; 0x3d
 	rail_monitor[RAIL_busvmon].is_enabled = 0;
- 8005896:	4b82      	ldr	r3, [pc, #520]	; (8005aa0 <voltage_monitor_init+0x318>)
- 8005898:	2200      	movs	r2, #0
- 800589a:	f883 203e 	strb.w	r2, [r3, #62]	; 0x3e
+ 8005894:	4b81      	ldr	r3, [pc, #516]	; (8005a9c <voltage_monitor_init+0x314>)
+ 8005896:	2200      	movs	r2, #0
+ 8005898:	f883 203e 	strb.w	r2, [r3, #62]	; 0x3e
 	rail_monitor[RAIL_busvmon].data = 0;
- 800589e:	4b80      	ldr	r3, [pc, #512]	; (8005aa0 <voltage_monitor_init+0x318>)
- 80058a0:	2200      	movs	r2, #0
- 80058a2:	f8a3 2040 	strh.w	r2, [r3, #64]	; 0x40
+ 800589c:	4b7f      	ldr	r3, [pc, #508]	; (8005a9c <voltage_monitor_init+0x314>)
+ 800589e:	2200      	movs	r2, #0
+ 80058a0:	f8a3 2040 	strh.w	r2, [r3, #64]	; 0x40
 	rail_monitor[RAIL_busvmon].max_voltage = 10000; // TODO: Get actual range from Sanj
- 80058a6:	4b7e      	ldr	r3, [pc, #504]	; (8005aa0 <voltage_monitor_init+0x318>)
- 80058a8:	f242 7210 	movw	r2, #10000	; 0x2710
- 80058ac:	f8a3 2042 	strh.w	r2, [r3, #66]	; 0x42
+ 80058a4:	4b7d      	ldr	r3, [pc, #500]	; (8005a9c <voltage_monitor_init+0x314>)
+ 80058a6:	f242 7210 	movw	r2, #10000	; 0x2710
+ 80058aa:	f8a3 2042 	strh.w	r2, [r3, #66]	; 0x42
 	rail_monitor[RAIL_busvmon].min_voltage = 0;
- 80058b0:	4b7b      	ldr	r3, [pc, #492]	; (8005aa0 <voltage_monitor_init+0x318>)
- 80058b2:	2200      	movs	r2, #0
- 80058b4:	f8a3 2044 	strh.w	r2, [r3, #68]	; 0x44
+ 80058ae:	4b7b      	ldr	r3, [pc, #492]	; (8005a9c <voltage_monitor_init+0x314>)
+ 80058b0:	2200      	movs	r2, #0
+ 80058b2:	f8a3 2044 	strh.w	r2, [r3, #68]	; 0x44
 
 	rail_monitor[RAIL_busimon].name = RAIL_busimon;
- 80058b8:	4b79      	ldr	r3, [pc, #484]	; (8005aa0 <voltage_monitor_init+0x318>)
- 80058ba:	2207      	movs	r2, #7
- 80058bc:	f883 2046 	strb.w	r2, [r3, #70]	; 0x46
+ 80058b6:	4b79      	ldr	r3, [pc, #484]	; (8005a9c <voltage_monitor_init+0x314>)
+ 80058b8:	2207      	movs	r2, #7
+ 80058ba:	f883 2046 	strb.w	r2, [r3, #70]	; 0x46
 	rail_monitor[RAIL_busimon].error_count = 0;
- 80058c0:	4b77      	ldr	r3, [pc, #476]	; (8005aa0 <voltage_monitor_init+0x318>)
- 80058c2:	2200      	movs	r2, #0
- 80058c4:	f883 2047 	strb.w	r2, [r3, #71]	; 0x47
+ 80058be:	4b77      	ldr	r3, [pc, #476]	; (8005a9c <voltage_monitor_init+0x314>)
+ 80058c0:	2200      	movs	r2, #0
+ 80058c2:	f883 2047 	strb.w	r2, [r3, #71]	; 0x47
 	rail_monitor[RAIL_busimon].is_enabled = 0;
- 80058c8:	4b75      	ldr	r3, [pc, #468]	; (8005aa0 <voltage_monitor_init+0x318>)
- 80058ca:	2200      	movs	r2, #0
- 80058cc:	f883 2048 	strb.w	r2, [r3, #72]	; 0x48
+ 80058c6:	4b75      	ldr	r3, [pc, #468]	; (8005a9c <voltage_monitor_init+0x314>)
+ 80058c8:	2200      	movs	r2, #0
+ 80058ca:	f883 2048 	strb.w	r2, [r3, #72]	; 0x48
 	rail_monitor[RAIL_busimon].data = 0;
- 80058d0:	4b73      	ldr	r3, [pc, #460]	; (8005aa0 <voltage_monitor_init+0x318>)
- 80058d2:	2200      	movs	r2, #0
- 80058d4:	f8a3 204a 	strh.w	r2, [r3, #74]	; 0x4a
+ 80058ce:	4b73      	ldr	r3, [pc, #460]	; (8005a9c <voltage_monitor_init+0x314>)
+ 80058d0:	2200      	movs	r2, #0
+ 80058d2:	f8a3 204a 	strh.w	r2, [r3, #74]	; 0x4a
 	rail_monitor[RAIL_busimon].max_voltage = 10000; // TODO: Get actual range from Sanj
- 80058d8:	4b71      	ldr	r3, [pc, #452]	; (8005aa0 <voltage_monitor_init+0x318>)
- 80058da:	f242 7210 	movw	r2, #10000	; 0x2710
- 80058de:	f8a3 204c 	strh.w	r2, [r3, #76]	; 0x4c
+ 80058d6:	4b71      	ldr	r3, [pc, #452]	; (8005a9c <voltage_monitor_init+0x314>)
+ 80058d8:	f242 7210 	movw	r2, #10000	; 0x2710
+ 80058dc:	f8a3 204c 	strh.w	r2, [r3, #76]	; 0x4c
 	rail_monitor[RAIL_busimon].min_voltage = 0;
- 80058e2:	4b6f      	ldr	r3, [pc, #444]	; (8005aa0 <voltage_monitor_init+0x318>)
- 80058e4:	2200      	movs	r2, #0
- 80058e6:	f8a3 204e 	strh.w	r2, [r3, #78]	; 0x4e
+ 80058e0:	4b6e      	ldr	r3, [pc, #440]	; (8005a9c <voltage_monitor_init+0x314>)
+ 80058e2:	2200      	movs	r2, #0
+ 80058e4:	f8a3 204e 	strh.w	r2, [r3, #78]	; 0x4e
 
 	rail_monitor[RAIL_2v5].name = RAIL_2v5;
- 80058ea:	4b6d      	ldr	r3, [pc, #436]	; (8005aa0 <voltage_monitor_init+0x318>)
- 80058ec:	2208      	movs	r2, #8
- 80058ee:	f883 2050 	strb.w	r2, [r3, #80]	; 0x50
+ 80058e8:	4b6c      	ldr	r3, [pc, #432]	; (8005a9c <voltage_monitor_init+0x314>)
+ 80058ea:	2208      	movs	r2, #8
+ 80058ec:	f883 2050 	strb.w	r2, [r3, #80]	; 0x50
 	rail_monitor[RAIL_2v5].error_count = 0;
- 80058f2:	4b6b      	ldr	r3, [pc, #428]	; (8005aa0 <voltage_monitor_init+0x318>)
- 80058f4:	2200      	movs	r2, #0
- 80058f6:	f883 2051 	strb.w	r2, [r3, #81]	; 0x51
+ 80058f0:	4b6a      	ldr	r3, [pc, #424]	; (8005a9c <voltage_monitor_init+0x314>)
+ 80058f2:	2200      	movs	r2, #0
+ 80058f4:	f883 2051 	strb.w	r2, [r3, #81]	; 0x51
 	rail_monitor[RAIL_2v5].is_enabled = 0;
- 80058fa:	4b69      	ldr	r3, [pc, #420]	; (8005aa0 <voltage_monitor_init+0x318>)
- 80058fc:	2200      	movs	r2, #0
- 80058fe:	f883 2052 	strb.w	r2, [r3, #82]	; 0x52
+ 80058f8:	4b68      	ldr	r3, [pc, #416]	; (8005a9c <voltage_monitor_init+0x314>)
+ 80058fa:	2200      	movs	r2, #0
+ 80058fc:	f883 2052 	strb.w	r2, [r3, #82]	; 0x52
 	rail_monitor[RAIL_2v5].data = 0;
- 8005902:	4b67      	ldr	r3, [pc, #412]	; (8005aa0 <voltage_monitor_init+0x318>)
- 8005904:	2200      	movs	r2, #0
- 8005906:	f8a3 2054 	strh.w	r2, [r3, #84]	; 0x54
+ 8005900:	4b66      	ldr	r3, [pc, #408]	; (8005a9c <voltage_monitor_init+0x314>)
+ 8005902:	2200      	movs	r2, #0
+ 8005904:	f8a3 2054 	strh.w	r2, [r3, #84]	; 0x54
 	rail_monitor[RAIL_2v5].max_voltage = 3257;
- 800590a:	4b65      	ldr	r3, [pc, #404]	; (8005aa0 <voltage_monitor_init+0x318>)
- 800590c:	f640 42b9 	movw	r2, #3257	; 0xcb9
- 8005910:	f8a3 2056 	strh.w	r2, [r3, #86]	; 0x56
+ 8005908:	4b64      	ldr	r3, [pc, #400]	; (8005a9c <voltage_monitor_init+0x314>)
+ 800590a:	f640 42b9 	movw	r2, #3257	; 0xcb9
+ 800590e:	f8a3 2056 	strh.w	r2, [r3, #86]	; 0x56
 	rail_monitor[RAIL_2v5].min_voltage = 2947;
- 8005914:	4b62      	ldr	r3, [pc, #392]	; (8005aa0 <voltage_monitor_init+0x318>)
- 8005916:	f640 3283 	movw	r2, #2947	; 0xb83
- 800591a:	f8a3 2058 	strh.w	r2, [r3, #88]	; 0x58
+ 8005912:	4b62      	ldr	r3, [pc, #392]	; (8005a9c <voltage_monitor_init+0x314>)
+ 8005914:	f640 3283 	movw	r2, #2947	; 0xb83
+ 8005918:	f8a3 2058 	strh.w	r2, [r3, #88]	; 0x58
 
 
 	rail_monitor[RAIL_3v3].name = RAIL_3v3;
- 800591e:	4b60      	ldr	r3, [pc, #384]	; (8005aa0 <voltage_monitor_init+0x318>)
- 8005920:	2209      	movs	r2, #9
- 8005922:	f883 205a 	strb.w	r2, [r3, #90]	; 0x5a
+ 800591c:	4b5f      	ldr	r3, [pc, #380]	; (8005a9c <voltage_monitor_init+0x314>)
+ 800591e:	2209      	movs	r2, #9
+ 8005920:	f883 205a 	strb.w	r2, [r3, #90]	; 0x5a
 	rail_monitor[RAIL_3v3].error_count = 0;
- 8005926:	4b5e      	ldr	r3, [pc, #376]	; (8005aa0 <voltage_monitor_init+0x318>)
- 8005928:	2200      	movs	r2, #0
- 800592a:	f883 205b 	strb.w	r2, [r3, #91]	; 0x5b
+ 8005924:	4b5d      	ldr	r3, [pc, #372]	; (8005a9c <voltage_monitor_init+0x314>)
+ 8005926:	2200      	movs	r2, #0
+ 8005928:	f883 205b 	strb.w	r2, [r3, #91]	; 0x5b
 	rail_monitor[RAIL_3v3].is_enabled = 0;
- 800592e:	4b5c      	ldr	r3, [pc, #368]	; (8005aa0 <voltage_monitor_init+0x318>)
- 8005930:	2200      	movs	r2, #0
- 8005932:	f883 205c 	strb.w	r2, [r3, #92]	; 0x5c
+ 800592c:	4b5b      	ldr	r3, [pc, #364]	; (8005a9c <voltage_monitor_init+0x314>)
+ 800592e:	2200      	movs	r2, #0
+ 8005930:	f883 205c 	strb.w	r2, [r3, #92]	; 0x5c
 	rail_monitor[RAIL_3v3].data = 0;
- 8005936:	4b5a      	ldr	r3, [pc, #360]	; (8005aa0 <voltage_monitor_init+0x318>)
- 8005938:	2200      	movs	r2, #0
- 800593a:	f8a3 205e 	strh.w	r2, [r3, #94]	; 0x5e
+ 8005934:	4b59      	ldr	r3, [pc, #356]	; (8005a9c <voltage_monitor_init+0x314>)
+ 8005936:	2200      	movs	r2, #0
+ 8005938:	f8a3 205e 	strh.w	r2, [r3, #94]	; 0x5e
 	rail_monitor[RAIL_3v3].max_voltage = 3909;
- 800593e:	4b58      	ldr	r3, [pc, #352]	; (8005aa0 <voltage_monitor_init+0x318>)
- 8005940:	f640 7245 	movw	r2, #3909	; 0xf45
- 8005944:	f8a3 2060 	strh.w	r2, [r3, #96]	; 0x60
+ 800593c:	4b57      	ldr	r3, [pc, #348]	; (8005a9c <voltage_monitor_init+0x314>)
+ 800593e:	f640 7245 	movw	r2, #3909	; 0xf45
+ 8005942:	f8a3 2060 	strh.w	r2, [r3, #96]	; 0x60
 	//rail_monitor[RAIL_3v3].min_voltage = 3537;
 	rail_monitor[RAIL_3v3].min_voltage = 0;
- 8005948:	4b55      	ldr	r3, [pc, #340]	; (8005aa0 <voltage_monitor_init+0x318>)
- 800594a:	2200      	movs	r2, #0
- 800594c:	f8a3 2062 	strh.w	r2, [r3, #98]	; 0x62
+ 8005946:	4b55      	ldr	r3, [pc, #340]	; (8005a9c <voltage_monitor_init+0x314>)
+ 8005948:	2200      	movs	r2, #0
+ 800594a:	f8a3 2062 	strh.w	r2, [r3, #98]	; 0x62
 
 
 	rail_monitor[RAIL_5v].name = RAIL_5v;
- 8005950:	4b53      	ldr	r3, [pc, #332]	; (8005aa0 <voltage_monitor_init+0x318>)
- 8005952:	220a      	movs	r2, #10
- 8005954:	f883 2064 	strb.w	r2, [r3, #100]	; 0x64
+ 800594e:	4b53      	ldr	r3, [pc, #332]	; (8005a9c <voltage_monitor_init+0x314>)
+ 8005950:	220a      	movs	r2, #10
+ 8005952:	f883 2064 	strb.w	r2, [r3, #100]	; 0x64
 	rail_monitor[RAIL_5v].error_count = 0;
- 8005958:	4b51      	ldr	r3, [pc, #324]	; (8005aa0 <voltage_monitor_init+0x318>)
- 800595a:	2200      	movs	r2, #0
- 800595c:	f883 2065 	strb.w	r2, [r3, #101]	; 0x65
+ 8005956:	4b51      	ldr	r3, [pc, #324]	; (8005a9c <voltage_monitor_init+0x314>)
+ 8005958:	2200      	movs	r2, #0
+ 800595a:	f883 2065 	strb.w	r2, [r3, #101]	; 0x65
 	rail_monitor[RAIL_5v].is_enabled = 0;
- 8005960:	4b4f      	ldr	r3, [pc, #316]	; (8005aa0 <voltage_monitor_init+0x318>)
- 8005962:	2200      	movs	r2, #0
- 8005964:	f883 2066 	strb.w	r2, [r3, #102]	; 0x66
+ 800595e:	4b4f      	ldr	r3, [pc, #316]	; (8005a9c <voltage_monitor_init+0x314>)
+ 8005960:	2200      	movs	r2, #0
+ 8005962:	f883 2066 	strb.w	r2, [r3, #102]	; 0x66
 	rail_monitor[RAIL_5v].data = 0;
- 8005968:	4b4d      	ldr	r3, [pc, #308]	; (8005aa0 <voltage_monitor_init+0x318>)
- 800596a:	2200      	movs	r2, #0
- 800596c:	f8a3 2068 	strh.w	r2, [r3, #104]	; 0x68
+ 8005966:	4b4d      	ldr	r3, [pc, #308]	; (8005a9c <voltage_monitor_init+0x314>)
+ 8005968:	2200      	movs	r2, #0
+ 800596a:	f8a3 2068 	strh.w	r2, [r3, #104]	; 0x68
 	rail_monitor[RAIL_5v].max_voltage = 3909;
- 8005970:	4b4b      	ldr	r3, [pc, #300]	; (8005aa0 <voltage_monitor_init+0x318>)
- 8005972:	f640 7245 	movw	r2, #3909	; 0xf45
- 8005976:	f8a3 206a 	strh.w	r2, [r3, #106]	; 0x6a
+ 800596e:	4b4b      	ldr	r3, [pc, #300]	; (8005a9c <voltage_monitor_init+0x314>)
+ 8005970:	f640 7245 	movw	r2, #3909	; 0xf45
+ 8005974:	f8a3 206a 	strh.w	r2, [r3, #106]	; 0x6a
 	rail_monitor[RAIL_5v].min_voltage = 3537;
- 800597a:	4b49      	ldr	r3, [pc, #292]	; (8005aa0 <voltage_monitor_init+0x318>)
- 800597c:	f640 52d1 	movw	r2, #3537	; 0xdd1
- 8005980:	f8a3 206c 	strh.w	r2, [r3, #108]	; 0x6c
+ 8005978:	4b48      	ldr	r3, [pc, #288]	; (8005a9c <voltage_monitor_init+0x314>)
+ 800597a:	f640 52d1 	movw	r2, #3537	; 0xdd1
+ 800597e:	f8a3 206c 	strh.w	r2, [r3, #108]	; 0x6c
 
 	rail_monitor[RAIL_n3v3].name = RAIL_n3v3;
- 8005984:	4b46      	ldr	r3, [pc, #280]	; (8005aa0 <voltage_monitor_init+0x318>)
- 8005986:	220b      	movs	r2, #11
- 8005988:	f883 206e 	strb.w	r2, [r3, #110]	; 0x6e
+ 8005982:	4b46      	ldr	r3, [pc, #280]	; (8005a9c <voltage_monitor_init+0x314>)
+ 8005984:	220b      	movs	r2, #11
+ 8005986:	f883 206e 	strb.w	r2, [r3, #110]	; 0x6e
 	rail_monitor[RAIL_n3v3].error_count = 0;
- 800598c:	4b44      	ldr	r3, [pc, #272]	; (8005aa0 <voltage_monitor_init+0x318>)
- 800598e:	2200      	movs	r2, #0
- 8005990:	f883 206f 	strb.w	r2, [r3, #111]	; 0x6f
+ 800598a:	4b44      	ldr	r3, [pc, #272]	; (8005a9c <voltage_monitor_init+0x314>)
+ 800598c:	2200      	movs	r2, #0
+ 800598e:	f883 206f 	strb.w	r2, [r3, #111]	; 0x6f
 	rail_monitor[RAIL_n3v3].is_enabled = 0;
- 8005994:	4b42      	ldr	r3, [pc, #264]	; (8005aa0 <voltage_monitor_init+0x318>)
- 8005996:	2200      	movs	r2, #0
- 8005998:	f883 2070 	strb.w	r2, [r3, #112]	; 0x70
+ 8005992:	4b42      	ldr	r3, [pc, #264]	; (8005a9c <voltage_monitor_init+0x314>)
+ 8005994:	2200      	movs	r2, #0
+ 8005996:	f883 2070 	strb.w	r2, [r3, #112]	; 0x70
 	rail_monitor[RAIL_n3v3].data = 0;
- 800599c:	4b40      	ldr	r3, [pc, #256]	; (8005aa0 <voltage_monitor_init+0x318>)
- 800599e:	2200      	movs	r2, #0
- 80059a0:	f8a3 2072 	strh.w	r2, [r3, #114]	; 0x72
+ 800599a:	4b40      	ldr	r3, [pc, #256]	; (8005a9c <voltage_monitor_init+0x314>)
+ 800599c:	2200      	movs	r2, #0
+ 800599e:	f8a3 2072 	strh.w	r2, [r3, #114]	; 0x72
 	rail_monitor[RAIL_n3v3].max_voltage = 4091;
- 80059a4:	4b3e      	ldr	r3, [pc, #248]	; (8005aa0 <voltage_monitor_init+0x318>)
- 80059a6:	f640 72fb 	movw	r2, #4091	; 0xffb
- 80059aa:	f8a3 2074 	strh.w	r2, [r3, #116]	; 0x74
+ 80059a2:	4b3e      	ldr	r3, [pc, #248]	; (8005a9c <voltage_monitor_init+0x314>)
+ 80059a4:	f640 72fb 	movw	r2, #4091	; 0xffb
+ 80059a8:	f8a3 2074 	strh.w	r2, [r3, #116]	; 0x74
 	rail_monitor[RAIL_n3v3].min_voltage = 3702;
- 80059ae:	4b3c      	ldr	r3, [pc, #240]	; (8005aa0 <voltage_monitor_init+0x318>)
- 80059b0:	f640 6276 	movw	r2, #3702	; 0xe76
- 80059b4:	f8a3 2076 	strh.w	r2, [r3, #118]	; 0x76
+ 80059ac:	4b3b      	ldr	r3, [pc, #236]	; (8005a9c <voltage_monitor_init+0x314>)
+ 80059ae:	f640 6276 	movw	r2, #3702	; 0xe76
+ 80059b2:	f8a3 2076 	strh.w	r2, [r3, #118]	; 0x76
 
 	rail_monitor[RAIL_n5v].name = RAIL_n5v;
- 80059b8:	4b39      	ldr	r3, [pc, #228]	; (8005aa0 <voltage_monitor_init+0x318>)
- 80059ba:	220c      	movs	r2, #12
- 80059bc:	f883 2078 	strb.w	r2, [r3, #120]	; 0x78
+ 80059b6:	4b39      	ldr	r3, [pc, #228]	; (8005a9c <voltage_monitor_init+0x314>)
+ 80059b8:	220c      	movs	r2, #12
+ 80059ba:	f883 2078 	strb.w	r2, [r3, #120]	; 0x78
 	rail_monitor[RAIL_n5v].error_count = 0;
- 80059c0:	4b37      	ldr	r3, [pc, #220]	; (8005aa0 <voltage_monitor_init+0x318>)
- 80059c2:	2200      	movs	r2, #0
- 80059c4:	f883 2079 	strb.w	r2, [r3, #121]	; 0x79
+ 80059be:	4b37      	ldr	r3, [pc, #220]	; (8005a9c <voltage_monitor_init+0x314>)
+ 80059c0:	2200      	movs	r2, #0
+ 80059c2:	f883 2079 	strb.w	r2, [r3, #121]	; 0x79
 	rail_monitor[RAIL_n5v].is_enabled = 0;
- 80059c8:	4b35      	ldr	r3, [pc, #212]	; (8005aa0 <voltage_monitor_init+0x318>)
- 80059ca:	2200      	movs	r2, #0
- 80059cc:	f883 207a 	strb.w	r2, [r3, #122]	; 0x7a
+ 80059c6:	4b35      	ldr	r3, [pc, #212]	; (8005a9c <voltage_monitor_init+0x314>)
+ 80059c8:	2200      	movs	r2, #0
+ 80059ca:	f883 207a 	strb.w	r2, [r3, #122]	; 0x7a
 	rail_monitor[RAIL_n5v].data = 0;
- 80059d0:	4b33      	ldr	r3, [pc, #204]	; (8005aa0 <voltage_monitor_init+0x318>)
- 80059d2:	2200      	movs	r2, #0
- 80059d4:	f8a3 207c 	strh.w	r2, [r3, #124]	; 0x7c
+ 80059ce:	4b33      	ldr	r3, [pc, #204]	; (8005a9c <voltage_monitor_init+0x314>)
+ 80059d0:	2200      	movs	r2, #0
+ 80059d2:	f8a3 207c 	strh.w	r2, [r3, #124]	; 0x7c
 	rail_monitor[RAIL_n5v].max_voltage = 4000;
- 80059d8:	4b31      	ldr	r3, [pc, #196]	; (8005aa0 <voltage_monitor_init+0x318>)
- 80059da:	f44f 627a 	mov.w	r2, #4000	; 0xfa0
- 80059de:	f8a3 207e 	strh.w	r2, [r3, #126]	; 0x7e
+ 80059d6:	4b31      	ldr	r3, [pc, #196]	; (8005a9c <voltage_monitor_init+0x314>)
+ 80059d8:	f44f 627a 	mov.w	r2, #4000	; 0xfa0
+ 80059dc:	f8a3 207e 	strh.w	r2, [r3, #126]	; 0x7e
 	//rail_monitor[RAIL_n5v].min_voltage = 3619;
 	rail_monitor[RAIL_n5v].min_voltage = 0;
- 80059e2:	4b2f      	ldr	r3, [pc, #188]	; (8005aa0 <voltage_monitor_init+0x318>)
- 80059e4:	2200      	movs	r2, #0
- 80059e6:	f8a3 2080 	strh.w	r2, [r3, #128]	; 0x80
+ 80059e0:	4b2e      	ldr	r3, [pc, #184]	; (8005a9c <voltage_monitor_init+0x314>)
+ 80059e2:	2200      	movs	r2, #0
+ 80059e4:	f8a3 2080 	strh.w	r2, [r3, #128]	; 0x80
 
 	rail_monitor[RAIL_15v].name = RAIL_15v;
- 80059ea:	4b2d      	ldr	r3, [pc, #180]	; (8005aa0 <voltage_monitor_init+0x318>)
- 80059ec:	220d      	movs	r2, #13
- 80059ee:	f883 2082 	strb.w	r2, [r3, #130]	; 0x82
+ 80059e8:	4b2c      	ldr	r3, [pc, #176]	; (8005a9c <voltage_monitor_init+0x314>)
+ 80059ea:	220d      	movs	r2, #13
+ 80059ec:	f883 2082 	strb.w	r2, [r3, #130]	; 0x82
 	rail_monitor[RAIL_15v].error_count = 0;
- 80059f2:	4b2b      	ldr	r3, [pc, #172]	; (8005aa0 <voltage_monitor_init+0x318>)
- 80059f4:	2200      	movs	r2, #0
- 80059f6:	f883 2083 	strb.w	r2, [r3, #131]	; 0x83
+ 80059f0:	4b2a      	ldr	r3, [pc, #168]	; (8005a9c <voltage_monitor_init+0x314>)
+ 80059f2:	2200      	movs	r2, #0
+ 80059f4:	f883 2083 	strb.w	r2, [r3, #131]	; 0x83
 	rail_monitor[RAIL_15v].is_enabled = 0;
- 80059fa:	4b29      	ldr	r3, [pc, #164]	; (8005aa0 <voltage_monitor_init+0x318>)
- 80059fc:	2200      	movs	r2, #0
- 80059fe:	f883 2084 	strb.w	r2, [r3, #132]	; 0x84
+ 80059f8:	4b28      	ldr	r3, [pc, #160]	; (8005a9c <voltage_monitor_init+0x314>)
+ 80059fa:	2200      	movs	r2, #0
+ 80059fc:	f883 2084 	strb.w	r2, [r3, #132]	; 0x84
 	rail_monitor[RAIL_15v].data = 0;
- 8005a02:	4b27      	ldr	r3, [pc, #156]	; (8005aa0 <voltage_monitor_init+0x318>)
- 8005a04:	2200      	movs	r2, #0
- 8005a06:	f8a3 2086 	strh.w	r2, [r3, #134]	; 0x86
+ 8005a00:	4b26      	ldr	r3, [pc, #152]	; (8005a9c <voltage_monitor_init+0x314>)
+ 8005a02:	2200      	movs	r2, #0
+ 8005a04:	f8a3 2086 	strh.w	r2, [r3, #134]	; 0x86
 	rail_monitor[RAIL_15v].max_voltage = 3896;
- 8005a0a:	4b25      	ldr	r3, [pc, #148]	; (8005aa0 <voltage_monitor_init+0x318>)
- 8005a0c:	f640 7238 	movw	r2, #3896	; 0xf38
- 8005a10:	f8a3 2088 	strh.w	r2, [r3, #136]	; 0x88
+ 8005a08:	4b24      	ldr	r3, [pc, #144]	; (8005a9c <voltage_monitor_init+0x314>)
+ 8005a0a:	f640 7238 	movw	r2, #3896	; 0xf38
+ 8005a0e:	f8a3 2088 	strh.w	r2, [r3, #136]	; 0x88
 	rail_monitor[RAIL_15v].min_voltage = 3525;
- 8005a14:	4b22      	ldr	r3, [pc, #136]	; (8005aa0 <voltage_monitor_init+0x318>)
- 8005a16:	f640 52c5 	movw	r2, #3525	; 0xdc5
- 8005a1a:	f8a3 208a 	strh.w	r2, [r3, #138]	; 0x8a
+ 8005a12:	4b22      	ldr	r3, [pc, #136]	; (8005a9c <voltage_monitor_init+0x314>)
+ 8005a14:	f640 52c5 	movw	r2, #3525	; 0xdc5
+ 8005a18:	f8a3 208a 	strh.w	r2, [r3, #138]	; 0x8a
 
 	rail_monitor[RAIL_5vref].name = RAIL_5vref;
- 8005a1e:	4b20      	ldr	r3, [pc, #128]	; (8005aa0 <voltage_monitor_init+0x318>)
- 8005a20:	220e      	movs	r2, #14
- 8005a22:	f883 208c 	strb.w	r2, [r3, #140]	; 0x8c
+ 8005a1c:	4b1f      	ldr	r3, [pc, #124]	; (8005a9c <voltage_monitor_init+0x314>)
+ 8005a1e:	220e      	movs	r2, #14
+ 8005a20:	f883 208c 	strb.w	r2, [r3, #140]	; 0x8c
 	rail_monitor[RAIL_5vref].error_count = 0;
- 8005a26:	4b1e      	ldr	r3, [pc, #120]	; (8005aa0 <voltage_monitor_init+0x318>)
- 8005a28:	2200      	movs	r2, #0
- 8005a2a:	f883 208d 	strb.w	r2, [r3, #141]	; 0x8d
+ 8005a24:	4b1d      	ldr	r3, [pc, #116]	; (8005a9c <voltage_monitor_init+0x314>)
+ 8005a26:	2200      	movs	r2, #0
+ 8005a28:	f883 208d 	strb.w	r2, [r3, #141]	; 0x8d
 	rail_monitor[RAIL_5vref].is_enabled = 0;
- 8005a2e:	4b1c      	ldr	r3, [pc, #112]	; (8005aa0 <voltage_monitor_init+0x318>)
- 8005a30:	2200      	movs	r2, #0
- 8005a32:	f883 208e 	strb.w	r2, [r3, #142]	; 0x8e
+ 8005a2c:	4b1b      	ldr	r3, [pc, #108]	; (8005a9c <voltage_monitor_init+0x314>)
+ 8005a2e:	2200      	movs	r2, #0
+ 8005a30:	f883 208e 	strb.w	r2, [r3, #142]	; 0x8e
 	rail_monitor[RAIL_5vref].data = 0;
- 8005a36:	4b1a      	ldr	r3, [pc, #104]	; (8005aa0 <voltage_monitor_init+0x318>)
- 8005a38:	2200      	movs	r2, #0
- 8005a3a:	f8a3 2090 	strh.w	r2, [r3, #144]	; 0x90
+ 8005a34:	4b19      	ldr	r3, [pc, #100]	; (8005a9c <voltage_monitor_init+0x314>)
+ 8005a36:	2200      	movs	r2, #0
+ 8005a38:	f8a3 2090 	strh.w	r2, [r3, #144]	; 0x90
 	rail_monitor[RAIL_5vref].max_voltage = 3909;
- 8005a3e:	4b18      	ldr	r3, [pc, #96]	; (8005aa0 <voltage_monitor_init+0x318>)
- 8005a40:	f640 7245 	movw	r2, #3909	; 0xf45
- 8005a44:	f8a3 2092 	strh.w	r2, [r3, #146]	; 0x92
+ 8005a3c:	4b17      	ldr	r3, [pc, #92]	; (8005a9c <voltage_monitor_init+0x314>)
+ 8005a3e:	f640 7245 	movw	r2, #3909	; 0xf45
+ 8005a42:	f8a3 2092 	strh.w	r2, [r3, #146]	; 0x92
 	rail_monitor[RAIL_5vref].min_voltage = 3537;
- 8005a48:	4b15      	ldr	r3, [pc, #84]	; (8005aa0 <voltage_monitor_init+0x318>)
- 8005a4a:	f640 52d1 	movw	r2, #3537	; 0xdd1
- 8005a4e:	f8a3 2094 	strh.w	r2, [r3, #148]	; 0x94
+ 8005a46:	4b15      	ldr	r3, [pc, #84]	; (8005a9c <voltage_monitor_init+0x314>)
+ 8005a48:	f640 52d1 	movw	r2, #3537	; 0xdd1
+ 8005a4c:	f8a3 2094 	strh.w	r2, [r3, #148]	; 0x94
 
 	rail_monitor[RAIL_n200v].name = RAIL_n200v;
- 8005a52:	4b13      	ldr	r3, [pc, #76]	; (8005aa0 <voltage_monitor_init+0x318>)
- 8005a54:	220f      	movs	r2, #15
- 8005a56:	f883 2096 	strb.w	r2, [r3, #150]	; 0x96
+ 8005a50:	4b12      	ldr	r3, [pc, #72]	; (8005a9c <voltage_monitor_init+0x314>)
+ 8005a52:	220f      	movs	r2, #15
+ 8005a54:	f883 2096 	strb.w	r2, [r3, #150]	; 0x96
 	rail_monitor[RAIL_n200v].error_count = 0;
- 8005a5a:	4b11      	ldr	r3, [pc, #68]	; (8005aa0 <voltage_monitor_init+0x318>)
- 8005a5c:	2200      	movs	r2, #0
- 8005a5e:	f883 2097 	strb.w	r2, [r3, #151]	; 0x97
+ 8005a58:	4b10      	ldr	r3, [pc, #64]	; (8005a9c <voltage_monitor_init+0x314>)
+ 8005a5a:	2200      	movs	r2, #0
+ 8005a5c:	f883 2097 	strb.w	r2, [r3, #151]	; 0x97
 	rail_monitor[RAIL_n200v].is_enabled = 0;
- 8005a62:	4b0f      	ldr	r3, [pc, #60]	; (8005aa0 <voltage_monitor_init+0x318>)
- 8005a64:	2200      	movs	r2, #0
- 8005a66:	f883 2098 	strb.w	r2, [r3, #152]	; 0x98
+ 8005a60:	4b0e      	ldr	r3, [pc, #56]	; (8005a9c <voltage_monitor_init+0x314>)
+ 8005a62:	2200      	movs	r2, #0
+ 8005a64:	f883 2098 	strb.w	r2, [r3, #152]	; 0x98
 	rail_monitor[RAIL_n200v].data = 0;
- 8005a6a:	4b0d      	ldr	r3, [pc, #52]	; (8005aa0 <voltage_monitor_init+0x318>)
- 8005a6c:	2200      	movs	r2, #0
- 8005a6e:	f8a3 209a 	strh.w	r2, [r3, #154]	; 0x9a
+ 8005a68:	4b0c      	ldr	r3, [pc, #48]	; (8005a9c <voltage_monitor_init+0x314>)
+ 8005a6a:	2200      	movs	r2, #0
+ 8005a6c:	f8a3 209a 	strh.w	r2, [r3, #154]	; 0x9a
 	rail_monitor[RAIL_n200v].max_voltage = 4196;
- 8005a72:	4b0b      	ldr	r3, [pc, #44]	; (8005aa0 <voltage_monitor_init+0x318>)
- 8005a74:	f241 0264 	movw	r2, #4196	; 0x1064
- 8005a78:	f8a3 209c 	strh.w	r2, [r3, #156]	; 0x9c
+ 8005a70:	4b0a      	ldr	r3, [pc, #40]	; (8005a9c <voltage_monitor_init+0x314>)
+ 8005a72:	f241 0264 	movw	r2, #4196	; 0x1064
+ 8005a76:	f8a3 209c 	strh.w	r2, [r3, #156]	; 0x9c
 	//rail_monitor[RAIL_n200v].min_voltage = 3796;
 	rail_monitor[RAIL_n200v].min_voltage = 0;		// TODO: Currently set to 0, kept triggering because it has been reading ~3351
- 8005a7c:	4b08      	ldr	r3, [pc, #32]	; (8005aa0 <voltage_monitor_init+0x318>)
- 8005a7e:	2200      	movs	r2, #0
- 8005a80:	f8a3 209e 	strh.w	r2, [r3, #158]	; 0x9e
+ 8005a7a:	4b08      	ldr	r3, [pc, #32]	; (8005a9c <voltage_monitor_init+0x314>)
+ 8005a7c:	2200      	movs	r2, #0
+ 8005a7e:	f8a3 209e 	strh.w	r2, [r3, #158]	; 0x9e
 
 
 	rail_monitor[RAIL_n800v].name = RAIL_n800v;
- 8005a84:	4b06      	ldr	r3, [pc, #24]	; (8005aa0 <voltage_monitor_init+0x318>)
- 8005a86:	2210      	movs	r2, #16
- 8005a88:	f883 20a0 	strb.w	r2, [r3, #160]	; 0xa0
+ 8005a82:	4b06      	ldr	r3, [pc, #24]	; (8005a9c <voltage_monitor_init+0x314>)
+ 8005a84:	2210      	movs	r2, #16
+ 8005a86:	f883 20a0 	strb.w	r2, [r3, #160]	; 0xa0
 	rail_monitor[RAIL_n800v].error_count = 0;
- 8005a8c:	4b04      	ldr	r3, [pc, #16]	; (8005aa0 <voltage_monitor_init+0x318>)
- 8005a8e:	2200      	movs	r2, #0
- 8005a90:	f883 20a1 	strb.w	r2, [r3, #161]	; 0xa1
+ 8005a8a:	4b04      	ldr	r3, [pc, #16]	; (8005a9c <voltage_monitor_init+0x314>)
+ 8005a8c:	2200      	movs	r2, #0
+ 8005a8e:	f883 20a1 	strb.w	r2, [r3, #161]	; 0xa1
 	rail_monitor[RAIL_n800v].is_enabled = 0;
- 8005a94:	4b02      	ldr	r3, [pc, #8]	; (8005aa0 <voltage_monitor_init+0x318>)
- 8005a96:	2200      	movs	r2, #0
- 8005a98:	f883 20a2 	strb.w	r2, [r3, #162]	; 0xa2
- 8005a9c:	e002      	b.n	8005aa4 <voltage_monitor_init+0x31c>
- 8005a9e:	bf00      	nop
- 8005aa0:	24001f48 	.word	0x24001f48
+ 8005a92:	4b02      	ldr	r3, [pc, #8]	; (8005a9c <voltage_monitor_init+0x314>)
+ 8005a94:	2200      	movs	r2, #0
+ 8005a96:	f883 20a2 	strb.w	r2, [r3, #162]	; 0xa2
+ 8005a9a:	e001      	b.n	8005aa0 <voltage_monitor_init+0x318>
+ 8005a9c:	24001f48 	.word	0x24001f48
 	rail_monitor[RAIL_n800v].data = 0;
- 8005aa4:	4b17      	ldr	r3, [pc, #92]	; (8005b04 <voltage_monitor_init+0x37c>)
- 8005aa6:	2200      	movs	r2, #0
- 8005aa8:	f8a3 20a4 	strh.w	r2, [r3, #164]	; 0xa4
+ 8005aa0:	4b17      	ldr	r3, [pc, #92]	; (8005b00 <voltage_monitor_init+0x378>)
+ 8005aa2:	2200      	movs	r2, #0
+ 8005aa4:	f8a3 20a4 	strh.w	r2, [r3, #164]	; 0xa4
 	rail_monitor[RAIL_n800v].max_voltage = 3336;
- 8005aac:	4b15      	ldr	r3, [pc, #84]	; (8005b04 <voltage_monitor_init+0x37c>)
- 8005aae:	f640 5208 	movw	r2, #3336	; 0xd08
- 8005ab2:	f8a3 20a6 	strh.w	r2, [r3, #166]	; 0xa6
+ 8005aa8:	4b15      	ldr	r3, [pc, #84]	; (8005b00 <voltage_monitor_init+0x378>)
+ 8005aaa:	f640 5208 	movw	r2, #3336	; 0xd08
+ 8005aae:	f8a3 20a6 	strh.w	r2, [r3, #166]	; 0xa6
 	rail_monitor[RAIL_n800v].min_voltage = 3018;
- 8005ab6:	4b13      	ldr	r3, [pc, #76]	; (8005b04 <voltage_monitor_init+0x37c>)
- 8005ab8:	f640 32ca 	movw	r2, #3018	; 0xbca
- 8005abc:	f8a3 20a8 	strh.w	r2, [r3, #168]	; 0xa8
+ 8005ab2:	4b13      	ldr	r3, [pc, #76]	; (8005b00 <voltage_monitor_init+0x378>)
+ 8005ab4:	f640 32ca 	movw	r2, #3018	; 0xbca
+ 8005ab8:	f8a3 20a8 	strh.w	r2, [r3, #168]	; 0xa8
 
 	rail_monitor[RAIL_TMP1].name = RAIL_TMP1;
- 8005ac0:	4b10      	ldr	r3, [pc, #64]	; (8005b04 <voltage_monitor_init+0x37c>)
- 8005ac2:	2211      	movs	r2, #17
- 8005ac4:	f883 20aa 	strb.w	r2, [r3, #170]	; 0xaa
+ 8005abc:	4b10      	ldr	r3, [pc, #64]	; (8005b00 <voltage_monitor_init+0x378>)
+ 8005abe:	2211      	movs	r2, #17
+ 8005ac0:	f883 20aa 	strb.w	r2, [r3, #170]	; 0xaa
 	rail_monitor[RAIL_TMP1].error_count = 0;
- 8005ac8:	4b0e      	ldr	r3, [pc, #56]	; (8005b04 <voltage_monitor_init+0x37c>)
- 8005aca:	2200      	movs	r2, #0
- 8005acc:	f883 20ab 	strb.w	r2, [r3, #171]	; 0xab
+ 8005ac4:	4b0e      	ldr	r3, [pc, #56]	; (8005b00 <voltage_monitor_init+0x378>)
+ 8005ac6:	2200      	movs	r2, #0
+ 8005ac8:	f883 20ab 	strb.w	r2, [r3, #171]	; 0xab
 	rail_monitor[RAIL_TMP1].is_enabled = 1;
- 8005ad0:	4b0c      	ldr	r3, [pc, #48]	; (8005b04 <voltage_monitor_init+0x37c>)
- 8005ad2:	2201      	movs	r2, #1
- 8005ad4:	f883 20ac 	strb.w	r2, [r3, #172]	; 0xac
+ 8005acc:	4b0c      	ldr	r3, [pc, #48]	; (8005b00 <voltage_monitor_init+0x378>)
+ 8005ace:	2201      	movs	r2, #1
+ 8005ad0:	f883 20ac 	strb.w	r2, [r3, #172]	; 0xac
 	rail_monitor[RAIL_TMP1].data = 0;
- 8005ad8:	4b0a      	ldr	r3, [pc, #40]	; (8005b04 <voltage_monitor_init+0x37c>)
- 8005ada:	2200      	movs	r2, #0
- 8005adc:	f8a3 20ae 	strh.w	r2, [r3, #174]	; 0xae
+ 8005ad4:	4b0a      	ldr	r3, [pc, #40]	; (8005b00 <voltage_monitor_init+0x378>)
+ 8005ad6:	2200      	movs	r2, #0
+ 8005ad8:	f8a3 20ae 	strh.w	r2, [r3, #174]	; 0xae
 	rail_monitor[RAIL_TMP1].max_voltage = 10000; // TODO: Get actual range from Sanj
- 8005ae0:	4b08      	ldr	r3, [pc, #32]	; (8005b04 <voltage_monitor_init+0x37c>)
- 8005ae2:	f242 7210 	movw	r2, #10000	; 0x2710
- 8005ae6:	f8a3 20b0 	strh.w	r2, [r3, #176]	; 0xb0
+ 8005adc:	4b08      	ldr	r3, [pc, #32]	; (8005b00 <voltage_monitor_init+0x378>)
+ 8005ade:	f242 7210 	movw	r2, #10000	; 0x2710
+ 8005ae2:	f8a3 20b0 	strh.w	r2, [r3, #176]	; 0xb0
 	rail_monitor[RAIL_TMP1].min_voltage = 0;
- 8005aea:	4b06      	ldr	r3, [pc, #24]	; (8005b04 <voltage_monitor_init+0x37c>)
- 8005aec:	2200      	movs	r2, #0
- 8005aee:	f8a3 20b2 	strh.w	r2, [r3, #178]	; 0xb2
+ 8005ae6:	4b06      	ldr	r3, [pc, #24]	; (8005b00 <voltage_monitor_init+0x378>)
+ 8005ae8:	2200      	movs	r2, #0
+ 8005aea:	f8a3 20b2 	strh.w	r2, [r3, #178]	; 0xb2
 
 	status = 1;
- 8005af2:	2301      	movs	r3, #1
- 8005af4:	71fb      	strb	r3, [r7, #7]
+ 8005aee:	2301      	movs	r3, #1
+ 8005af0:	71fb      	strb	r3, [r7, #7]
 
 	return status;
- 8005af6:	79fb      	ldrb	r3, [r7, #7]
+ 8005af2:	79fb      	ldrb	r3, [r7, #7]
 }
- 8005af8:	4618      	mov	r0, r3
- 8005afa:	370c      	adds	r7, #12
- 8005afc:	46bd      	mov	sp, r7
- 8005afe:	f85d 7b04 	ldr.w	r7, [sp], #4
- 8005b02:	4770      	bx	lr
- 8005b04:	24001f48 	.word	0x24001f48
+ 8005af4:	4618      	mov	r0, r3
+ 8005af6:	370c      	adds	r7, #12
+ 8005af8:	46bd      	mov	sp, r7
+ 8005afa:	f85d 7b04 	ldr.w	r7, [sp], #4
+ 8005afe:	4770      	bx	lr
+ 8005b00:	24001f48 	.word	0x24001f48
 
-08005b08 <set_rail_monitor_enable>:
+08005b04 <set_rail_monitor_enable>:
 
 
 uint8_t set_rail_monitor_enable(VOLTAGE_RAIL_NAME rail_name, uint8_t enable_value) {
- 8005b08:	b480      	push	{r7}
- 8005b0a:	b085      	sub	sp, #20
- 8005b0c:	af00      	add	r7, sp, #0
- 8005b0e:	4603      	mov	r3, r0
- 8005b10:	460a      	mov	r2, r1
- 8005b12:	71fb      	strb	r3, [r7, #7]
- 8005b14:	4613      	mov	r3, r2
- 8005b16:	71bb      	strb	r3, [r7, #6]
+ 8005b04:	b480      	push	{r7}
+ 8005b06:	b085      	sub	sp, #20
+ 8005b08:	af00      	add	r7, sp, #0
+ 8005b0a:	4603      	mov	r3, r0
+ 8005b0c:	460a      	mov	r2, r1
+ 8005b0e:	71fb      	strb	r3, [r7, #7]
+ 8005b10:	4613      	mov	r3, r2
+ 8005b12:	71bb      	strb	r3, [r7, #6]
 	uint8_t status = 0;
- 8005b18:	2300      	movs	r3, #0
- 8005b1a:	73fb      	strb	r3, [r7, #15]
+ 8005b14:	2300      	movs	r3, #0
+ 8005b16:	73fb      	strb	r3, [r7, #15]
 	rail_monitor[rail_name].is_enabled = enable_value;
- 8005b1c:	79fa      	ldrb	r2, [r7, #7]
- 8005b1e:	4909      	ldr	r1, [pc, #36]	; (8005b44 <set_rail_monitor_enable+0x3c>)
- 8005b20:	4613      	mov	r3, r2
- 8005b22:	009b      	lsls	r3, r3, #2
- 8005b24:	4413      	add	r3, r2
- 8005b26:	005b      	lsls	r3, r3, #1
- 8005b28:	440b      	add	r3, r1
- 8005b2a:	3302      	adds	r3, #2
- 8005b2c:	79ba      	ldrb	r2, [r7, #6]
- 8005b2e:	701a      	strb	r2, [r3, #0]
+ 8005b18:	79fa      	ldrb	r2, [r7, #7]
+ 8005b1a:	4909      	ldr	r1, [pc, #36]	; (8005b40 <set_rail_monitor_enable+0x3c>)
+ 8005b1c:	4613      	mov	r3, r2
+ 8005b1e:	009b      	lsls	r3, r3, #2
+ 8005b20:	4413      	add	r3, r2
+ 8005b22:	005b      	lsls	r3, r3, #1
+ 8005b24:	440b      	add	r3, r1
+ 8005b26:	3302      	adds	r3, #2
+ 8005b28:	79ba      	ldrb	r2, [r7, #6]
+ 8005b2a:	701a      	strb	r2, [r3, #0]
 	status = 1;
- 8005b30:	2301      	movs	r3, #1
- 8005b32:	73fb      	strb	r3, [r7, #15]
+ 8005b2c:	2301      	movs	r3, #1
+ 8005b2e:	73fb      	strb	r3, [r7, #15]
 
 	return status;
- 8005b34:	7bfb      	ldrb	r3, [r7, #15]
+ 8005b30:	7bfb      	ldrb	r3, [r7, #15]
 }
- 8005b36:	4618      	mov	r0, r3
- 8005b38:	3714      	adds	r7, #20
- 8005b3a:	46bd      	mov	sp, r7
- 8005b3c:	f85d 7b04 	ldr.w	r7, [sp], #4
- 8005b40:	4770      	bx	lr
- 8005b42:	bf00      	nop
- 8005b44:	24001f48 	.word	0x24001f48
+ 8005b32:	4618      	mov	r0, r3
+ 8005b34:	3714      	adds	r7, #20
+ 8005b36:	46bd      	mov	sp, r7
+ 8005b38:	f85d 7b04 	ldr.w	r7, [sp], #4
+ 8005b3c:	4770      	bx	lr
+ 8005b3e:	bf00      	nop
+ 8005b40:	24001f48 	.word	0x24001f48
 
-08005b48 <set_rail_monitor>:
+08005b44 <set_rail_monitor>:
 
 
 uint8_t set_rail_monitor() {
- 8005b48:	b580      	push	{r7, lr}
- 8005b4a:	b08a      	sub	sp, #40	; 0x28
- 8005b4c:	af00      	add	r7, sp, #0
+ 8005b44:	b580      	push	{r7, lr}
+ 8005b46:	b08a      	sub	sp, #40	; 0x28
+ 8005b48:	af00      	add	r7, sp, #0
 	uint8_t status = 0;
- 8005b4e:	2300      	movs	r3, #0
- 8005b50:	f887 3027 	strb.w	r3, [r7, #39]	; 0x27
+ 8005b4a:	2300      	movs	r3, #0
+ 8005b4c:	f887 3027 	strb.w	r3, [r7, #39]	; 0x27
 	uint16_t hk_adc1[10];
 	uint16_t hk_adc3[4];
 	int16_t hk_i2c[4];
 
 	sample_hk_i2c(hk_i2c);
- 8005b54:	463b      	mov	r3, r7
- 8005b56:	4618      	mov	r0, r3
- 8005b58:	f7fe faf0 	bl	800413c <sample_hk_i2c>
+ 8005b50:	463b      	mov	r3, r7
+ 8005b52:	4618      	mov	r0, r3
+ 8005b54:	f7fe faf2 	bl	800413c <sample_hk_i2c>
 	sample_hk_adc1(hk_adc1);
- 8005b5c:	f107 0310 	add.w	r3, r7, #16
- 8005b60:	4618      	mov	r0, r3
- 8005b62:	f7fe fb1b 	bl	800419c <sample_hk_adc1>
+ 8005b58:	f107 0310 	add.w	r3, r7, #16
+ 8005b5c:	4618      	mov	r0, r3
+ 8005b5e:	f7fe fb1d 	bl	800419c <sample_hk_adc1>
 	sample_hk_adc3(hk_adc3);
- 8005b66:	f107 0308 	add.w	r3, r7, #8
- 8005b6a:	4618      	mov	r0, r3
- 8005b6c:	f7fe fb68 	bl	8004240 <sample_hk_adc3>
- 8005b70:	897a      	ldrh	r2, [r7, #10]
+ 8005b62:	f107 0308 	add.w	r3, r7, #8
+ 8005b66:	4618      	mov	r0, r3
+ 8005b68:	f7fe fb6a 	bl	8004240 <sample_hk_adc3>
+ 8005b6c:	897a      	ldrh	r2, [r7, #10]
 
 	memcpy(&rail_monitor[RAIL_vsense].data, &hk_adc3[1], sizeof(uint16_t));
- 8005b72:	4b25      	ldr	r3, [pc, #148]	; (8005c08 <set_rail_monitor+0xc0>)
- 8005b74:	809a      	strh	r2, [r3, #4]
- 8005b76:	893a      	ldrh	r2, [r7, #8]
+ 8005b6e:	4b25      	ldr	r3, [pc, #148]	; (8005c04 <set_rail_monitor+0xc0>)
+ 8005b70:	809a      	strh	r2, [r3, #4]
+ 8005b72:	893a      	ldrh	r2, [r7, #8]
 	memcpy(&rail_monitor[RAIL_vrefint].data, &hk_adc3[0], sizeof(uint16_t));
- 8005b78:	4b23      	ldr	r3, [pc, #140]	; (8005c08 <set_rail_monitor+0xc0>)
- 8005b7a:	81da      	strh	r2, [r3, #14]
- 8005b7c:	883a      	ldrh	r2, [r7, #0]
+ 8005b74:	4b23      	ldr	r3, [pc, #140]	; (8005c04 <set_rail_monitor+0xc0>)
+ 8005b76:	81da      	strh	r2, [r3, #14]
+ 8005b78:	883a      	ldrh	r2, [r7, #0]
 	memcpy(&rail_monitor[RAIL_TEMP1].data, &hk_i2c[0], sizeof(uint16_t));
- 8005b7e:	4b22      	ldr	r3, [pc, #136]	; (8005c08 <set_rail_monitor+0xc0>)
- 8005b80:	831a      	strh	r2, [r3, #24]
- 8005b82:	887a      	ldrh	r2, [r7, #2]
+ 8005b7a:	4b22      	ldr	r3, [pc, #136]	; (8005c04 <set_rail_monitor+0xc0>)
+ 8005b7c:	831a      	strh	r2, [r3, #24]
+ 8005b7e:	887a      	ldrh	r2, [r7, #2]
 	memcpy(&rail_monitor[RAIL_TEMP2].data, &hk_i2c[1], sizeof(uint16_t));
- 8005b84:	4b20      	ldr	r3, [pc, #128]	; (8005c08 <set_rail_monitor+0xc0>)
- 8005b86:	845a      	strh	r2, [r3, #34]	; 0x22
- 8005b88:	88ba      	ldrh	r2, [r7, #4]
+ 8005b80:	4b20      	ldr	r3, [pc, #128]	; (8005c04 <set_rail_monitor+0xc0>)
+ 8005b82:	845a      	strh	r2, [r3, #34]	; 0x22
+ 8005b84:	88ba      	ldrh	r2, [r7, #4]
 	memcpy(&rail_monitor[RAIL_TEMP3].data, &hk_i2c[2], sizeof(uint16_t));
- 8005b8a:	4b1f      	ldr	r3, [pc, #124]	; (8005c08 <set_rail_monitor+0xc0>)
- 8005b8c:	859a      	strh	r2, [r3, #44]	; 0x2c
- 8005b8e:	88fa      	ldrh	r2, [r7, #6]
+ 8005b86:	4b1f      	ldr	r3, [pc, #124]	; (8005c04 <set_rail_monitor+0xc0>)
+ 8005b88:	859a      	strh	r2, [r3, #44]	; 0x2c
+ 8005b8a:	88fa      	ldrh	r2, [r7, #6]
 	memcpy(&rail_monitor[RAIL_TEMP4].data, &hk_i2c[3], sizeof(uint16_t));
- 8005b90:	4b1d      	ldr	r3, [pc, #116]	; (8005c08 <set_rail_monitor+0xc0>)
- 8005b92:	86da      	strh	r2, [r3, #54]	; 0x36
- 8005b94:	8a3a      	ldrh	r2, [r7, #16]
+ 8005b8c:	4b1d      	ldr	r3, [pc, #116]	; (8005c04 <set_rail_monitor+0xc0>)
+ 8005b8e:	86da      	strh	r2, [r3, #54]	; 0x36
+ 8005b90:	8a3a      	ldrh	r2, [r7, #16]
 	memcpy(&rail_monitor[RAIL_busvmon].data, &hk_adc1[0], sizeof(uint16_t));
- 8005b96:	4b1c      	ldr	r3, [pc, #112]	; (8005c08 <set_rail_monitor+0xc0>)
- 8005b98:	f8a3 2040 	strh.w	r2, [r3, #64]	; 0x40
- 8005b9c:	8a7a      	ldrh	r2, [r7, #18]
+ 8005b92:	4b1c      	ldr	r3, [pc, #112]	; (8005c04 <set_rail_monitor+0xc0>)
+ 8005b94:	f8a3 2040 	strh.w	r2, [r3, #64]	; 0x40
+ 8005b98:	8a7a      	ldrh	r2, [r7, #18]
 	memcpy(&rail_monitor[RAIL_busimon].data, &hk_adc1[1], sizeof(uint16_t));
- 8005b9e:	4b1a      	ldr	r3, [pc, #104]	; (8005c08 <set_rail_monitor+0xc0>)
- 8005ba0:	f8a3 204a 	strh.w	r2, [r3, #74]	; 0x4a
- 8005ba4:	8aba      	ldrh	r2, [r7, #20]
+ 8005b9a:	4b1a      	ldr	r3, [pc, #104]	; (8005c04 <set_rail_monitor+0xc0>)
+ 8005b9c:	f8a3 204a 	strh.w	r2, [r3, #74]	; 0x4a
+ 8005ba0:	8aba      	ldrh	r2, [r7, #20]
 	memcpy(&rail_monitor[RAIL_2v5].data, &hk_adc1[2], sizeof(uint16_t));
- 8005ba6:	4b18      	ldr	r3, [pc, #96]	; (8005c08 <set_rail_monitor+0xc0>)
- 8005ba8:	f8a3 2054 	strh.w	r2, [r3, #84]	; 0x54
- 8005bac:	89fa      	ldrh	r2, [r7, #14]
+ 8005ba2:	4b18      	ldr	r3, [pc, #96]	; (8005c04 <set_rail_monitor+0xc0>)
+ 8005ba4:	f8a3 2054 	strh.w	r2, [r3, #84]	; 0x54
+ 8005ba8:	89fa      	ldrh	r2, [r7, #14]
 	memcpy(&rail_monitor[RAIL_3v3].data, &hk_adc3[3], sizeof(uint16_t));
- 8005bae:	4b16      	ldr	r3, [pc, #88]	; (8005c08 <set_rail_monitor+0xc0>)
- 8005bb0:	f8a3 205e 	strh.w	r2, [r3, #94]	; 0x5e
- 8005bb4:	8bba      	ldrh	r2, [r7, #28]
+ 8005baa:	4b16      	ldr	r3, [pc, #88]	; (8005c04 <set_rail_monitor+0xc0>)
+ 8005bac:	f8a3 205e 	strh.w	r2, [r3, #94]	; 0x5e
+ 8005bb0:	8bba      	ldrh	r2, [r7, #28]
 	memcpy(&rail_monitor[RAIL_5v].data, &hk_adc1[6], sizeof(uint16_t));
- 8005bb6:	4b14      	ldr	r3, [pc, #80]	; (8005c08 <set_rail_monitor+0xc0>)
- 8005bb8:	f8a3 2068 	strh.w	r2, [r3, #104]	; 0x68
- 8005bbc:	8afa      	ldrh	r2, [r7, #22]
+ 8005bb2:	4b14      	ldr	r3, [pc, #80]	; (8005c04 <set_rail_monitor+0xc0>)
+ 8005bb4:	f8a3 2068 	strh.w	r2, [r3, #104]	; 0x68
+ 8005bb8:	8afa      	ldrh	r2, [r7, #22]
 	memcpy(&rail_monitor[RAIL_n3v3].data, &hk_adc1[3], sizeof(uint16_t));
- 8005bbe:	4b12      	ldr	r3, [pc, #72]	; (8005c08 <set_rail_monitor+0xc0>)
- 8005bc0:	f8a3 2072 	strh.w	r2, [r3, #114]	; 0x72
- 8005bc4:	89ba      	ldrh	r2, [r7, #12]
+ 8005bba:	4b12      	ldr	r3, [pc, #72]	; (8005c04 <set_rail_monitor+0xc0>)
+ 8005bbc:	f8a3 2072 	strh.w	r2, [r3, #114]	; 0x72
+ 8005bc0:	89ba      	ldrh	r2, [r7, #12]
 	memcpy(&rail_monitor[RAIL_n5v].data, &hk_adc3[2], sizeof(uint16_t));
- 8005bc6:	4b10      	ldr	r3, [pc, #64]	; (8005c08 <set_rail_monitor+0xc0>)
- 8005bc8:	f8a3 207c 	strh.w	r2, [r3, #124]	; 0x7c
- 8005bcc:	8bfa      	ldrh	r2, [r7, #30]
+ 8005bc2:	4b10      	ldr	r3, [pc, #64]	; (8005c04 <set_rail_monitor+0xc0>)
+ 8005bc4:	f8a3 207c 	strh.w	r2, [r3, #124]	; 0x7c
+ 8005bc8:	8bfa      	ldrh	r2, [r7, #30]
 	memcpy(&rail_monitor[RAIL_15v].data, &hk_adc1[7], sizeof(uint16_t));
- 8005bce:	4b0e      	ldr	r3, [pc, #56]	; (8005c08 <set_rail_monitor+0xc0>)
- 8005bd0:	f8a3 2086 	strh.w	r2, [r3, #134]	; 0x86
- 8005bd4:	8c3a      	ldrh	r2, [r7, #32]
+ 8005bca:	4b0e      	ldr	r3, [pc, #56]	; (8005c04 <set_rail_monitor+0xc0>)
+ 8005bcc:	f8a3 2086 	strh.w	r2, [r3, #134]	; 0x86
+ 8005bd0:	8c3a      	ldrh	r2, [r7, #32]
 	memcpy(&rail_monitor[RAIL_5vref].data, &hk_adc1[8], sizeof(uint16_t));
- 8005bd6:	4b0c      	ldr	r3, [pc, #48]	; (8005c08 <set_rail_monitor+0xc0>)
- 8005bd8:	f8a3 2090 	strh.w	r2, [r3, #144]	; 0x90
- 8005bdc:	8b3a      	ldrh	r2, [r7, #24]
+ 8005bd2:	4b0c      	ldr	r3, [pc, #48]	; (8005c04 <set_rail_monitor+0xc0>)
+ 8005bd4:	f8a3 2090 	strh.w	r2, [r3, #144]	; 0x90
+ 8005bd8:	8b3a      	ldrh	r2, [r7, #24]
 	memcpy(&rail_monitor[RAIL_n200v].data, &hk_adc1[4], sizeof(uint16_t));
- 8005bde:	4b0a      	ldr	r3, [pc, #40]	; (8005c08 <set_rail_monitor+0xc0>)
- 8005be0:	f8a3 209a 	strh.w	r2, [r3, #154]	; 0x9a
- 8005be4:	8b7a      	ldrh	r2, [r7, #26]
+ 8005bda:	4b0a      	ldr	r3, [pc, #40]	; (8005c04 <set_rail_monitor+0xc0>)
+ 8005bdc:	f8a3 209a 	strh.w	r2, [r3, #154]	; 0x9a
+ 8005be0:	8b7a      	ldrh	r2, [r7, #26]
 	memcpy(&rail_monitor[RAIL_n800v].data, &hk_adc1[5], sizeof(uint16_t));
- 8005be6:	4b08      	ldr	r3, [pc, #32]	; (8005c08 <set_rail_monitor+0xc0>)
- 8005be8:	f8a3 20a4 	strh.w	r2, [r3, #164]	; 0xa4
- 8005bec:	8c7a      	ldrh	r2, [r7, #34]	; 0x22
+ 8005be2:	4b08      	ldr	r3, [pc, #32]	; (8005c04 <set_rail_monitor+0xc0>)
+ 8005be4:	f8a3 20a4 	strh.w	r2, [r3, #164]	; 0xa4
+ 8005be8:	8c7a      	ldrh	r2, [r7, #34]	; 0x22
 	memcpy(&rail_monitor[RAIL_TMP1].data, &hk_adc1[9], sizeof(uint16_t));
- 8005bee:	4b06      	ldr	r3, [pc, #24]	; (8005c08 <set_rail_monitor+0xc0>)
- 8005bf0:	f8a3 20ae 	strh.w	r2, [r3, #174]	; 0xae
+ 8005bea:	4b06      	ldr	r3, [pc, #24]	; (8005c04 <set_rail_monitor+0xc0>)
+ 8005bec:	f8a3 20ae 	strh.w	r2, [r3, #174]	; 0xae
 
 	status = 1;
- 8005bf4:	2301      	movs	r3, #1
- 8005bf6:	f887 3027 	strb.w	r3, [r7, #39]	; 0x27
+ 8005bf0:	2301      	movs	r3, #1
+ 8005bf2:	f887 3027 	strb.w	r3, [r7, #39]	; 0x27
 
 	return status;
- 8005bfa:	f897 3027 	ldrb.w	r3, [r7, #39]	; 0x27
+ 8005bf6:	f897 3027 	ldrb.w	r3, [r7, #39]	; 0x27
 }
- 8005bfe:	4618      	mov	r0, r3
- 8005c00:	3728      	adds	r7, #40	; 0x28
- 8005c02:	46bd      	mov	sp, r7
- 8005c04:	bd80      	pop	{r7, pc}
- 8005c06:	bf00      	nop
- 8005c08:	24001f48 	.word	0x24001f48
+ 8005bfa:	4618      	mov	r0, r3
+ 8005bfc:	3728      	adds	r7, #40	; 0x28
+ 8005bfe:	46bd      	mov	sp, r7
+ 8005c00:	bd80      	pop	{r7, pc}
+ 8005c02:	bf00      	nop
+ 8005c04:	24001f48 	.word	0x24001f48
 
-08005c0c <get_rail_monitor>:
+08005c08 <get_rail_monitor>:
 
 VOLTAGE_RAIL* get_rail_monitor() {
- 8005c0c:	b480      	push	{r7}
- 8005c0e:	af00      	add	r7, sp, #0
+ 8005c08:	b480      	push	{r7}
+ 8005c0a:	af00      	add	r7, sp, #0
 	return rail_monitor;
- 8005c10:	4b02      	ldr	r3, [pc, #8]	; (8005c1c <get_rail_monitor+0x10>)
+ 8005c0c:	4b02      	ldr	r3, [pc, #8]	; (8005c18 <get_rail_monitor+0x10>)
 }
- 8005c12:	4618      	mov	r0, r3
- 8005c14:	46bd      	mov	sp, r7
- 8005c16:	f85d 7b04 	ldr.w	r7, [sp], #4
- 8005c1a:	4770      	bx	lr
- 8005c1c:	24001f48 	.word	0x24001f48
+ 8005c0e:	4618      	mov	r0, r3
+ 8005c10:	46bd      	mov	sp, r7
+ 8005c12:	f85d 7b04 	ldr.w	r7, [sp], #4
+ 8005c16:	4770      	bx	lr
+ 8005c18:	24001f48 	.word	0x24001f48
 
-08005c20 <in_range>:
+08005c1c <in_range>:
 
 uint8_t in_range(uint16_t raw, int min, int max) {
- 8005c20:	b480      	push	{r7}
- 8005c22:	b085      	sub	sp, #20
- 8005c24:	af00      	add	r7, sp, #0
- 8005c26:	4603      	mov	r3, r0
- 8005c28:	60b9      	str	r1, [r7, #8]
- 8005c2a:	607a      	str	r2, [r7, #4]
- 8005c2c:	81fb      	strh	r3, [r7, #14]
+ 8005c1c:	b480      	push	{r7}
+ 8005c1e:	b085      	sub	sp, #20
+ 8005c20:	af00      	add	r7, sp, #0
+ 8005c22:	4603      	mov	r3, r0
+ 8005c24:	60b9      	str	r1, [r7, #8]
+ 8005c26:	607a      	str	r2, [r7, #4]
+ 8005c28:	81fb      	strh	r3, [r7, #14]
 	if (raw <= max && raw >= min) {
- 8005c2e:	89fb      	ldrh	r3, [r7, #14]
- 8005c30:	687a      	ldr	r2, [r7, #4]
- 8005c32:	429a      	cmp	r2, r3
- 8005c34:	db05      	blt.n	8005c42 <in_range+0x22>
- 8005c36:	89fb      	ldrh	r3, [r7, #14]
- 8005c38:	68ba      	ldr	r2, [r7, #8]
- 8005c3a:	429a      	cmp	r2, r3
- 8005c3c:	dc01      	bgt.n	8005c42 <in_range+0x22>
+ 8005c2a:	89fb      	ldrh	r3, [r7, #14]
+ 8005c2c:	687a      	ldr	r2, [r7, #4]
+ 8005c2e:	429a      	cmp	r2, r3
+ 8005c30:	db05      	blt.n	8005c3e <in_range+0x22>
+ 8005c32:	89fb      	ldrh	r3, [r7, #14]
+ 8005c34:	68ba      	ldr	r2, [r7, #8]
+ 8005c36:	429a      	cmp	r2, r3
+ 8005c38:	dc01      	bgt.n	8005c3e <in_range+0x22>
 		return 1;
- 8005c3e:	2301      	movs	r3, #1
- 8005c40:	e000      	b.n	8005c44 <in_range+0x24>
+ 8005c3a:	2301      	movs	r3, #1
+ 8005c3c:	e000      	b.n	8005c40 <in_range+0x24>
 	}
 	return 0;
- 8005c42:	2300      	movs	r3, #0
+ 8005c3e:	2300      	movs	r3, #0
 }
- 8005c44:	4618      	mov	r0, r3
- 8005c46:	3714      	adds	r7, #20
- 8005c48:	46bd      	mov	sp, r7
- 8005c4a:	f85d 7b04 	ldr.w	r7, [sp], #4
- 8005c4e:	4770      	bx	lr
+ 8005c40:	4618      	mov	r0, r3
+ 8005c42:	3714      	adds	r7, #20
+ 8005c44:	46bd      	mov	sp, r7
+ 8005c46:	f85d 7b04 	ldr.w	r7, [sp], #4
+ 8005c4a:	4770      	bx	lr
+ 8005c4c:	0000      	movs	r0, r0
+	...
 
 08005c50 <monitor_rails>:
 
@@ -14044,7 +14045,7 @@ void monitor_rails() {
  8005ca8:	881b      	ldrh	r3, [r3, #0]
  8005caa:	461a      	mov	r2, r3
  8005cac:	4621      	mov	r1, r4
- 8005cae:	f7ff ffb7 	bl	8005c20 <in_range>
+ 8005cae:	f7ff ffb5 	bl	8005c1c <in_range>
  8005cb2:	4603      	mov	r3, r0
  8005cb4:	2b00      	cmp	r3, #0
  8005cb6:	f040 808c 	bne.w	8005dd2 <monitor_rails+0x182>
@@ -14142,7 +14143,7 @@ void monitor_rails() {
  8005d5e:	897a      	ldrh	r2, [r7, #10]
  8005d60:	2100      	movs	r1, #0
  8005d62:	4618      	mov	r0, r3
- 8005d64:	f7ff ff5c 	bl	8005c20 <in_range>
+ 8005d64:	f7ff ff5a 	bl	8005c1c <in_range>
  8005d68:	4603      	mov	r3, r0
  8005d6a:	2b00      	cmp	r3, #0
  8005d6c:	d131      	bne.n	8005dd2 <monitor_rails+0x182>

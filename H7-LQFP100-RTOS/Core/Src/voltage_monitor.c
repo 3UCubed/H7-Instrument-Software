@@ -45,7 +45,7 @@ uint8_t voltage_monitor_init() {
 	rail_monitor[RAIL_TEMP3].is_enabled = 1;
 	rail_monitor[RAIL_TEMP3].data = 0;
 	rail_monitor[RAIL_TEMP3].max_voltage = 10000; // TODO: Get actual range from Sanj
-	rail_monitor[RAIL_TEMP3].min_voltage = 10000;
+	rail_monitor[RAIL_TEMP3].min_voltage = 0;
 
 	rail_monitor[RAIL_TEMP4].name = RAIL_TEMP4;
 	rail_monitor[RAIL_TEMP4].error_count = 0;
