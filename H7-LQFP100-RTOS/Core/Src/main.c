@@ -127,6 +127,8 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim) {
 			HK_100_ms_counter = 0;
 		}
 		HK_100_ms_counter++;
+		HAL_IWDG_Refresh(&hiwdg1);
+
 
 	} else {
 		printf("Unknown Timer Interrupt\n");
@@ -455,6 +457,8 @@ int main(void)
   MX_DAC1_Init();
   MX_SPI1_Init();
   MX_RTC_Init();
+  MX_IWDG1_Init();
+
   /* USER CODE BEGIN 2 */
 
 #ifdef ERROR_HANDLING_ENABLED
@@ -614,7 +618,6 @@ void system_setup() {
 
 	HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
 
-	//MX_IWDG1_Init();
 
 }
 

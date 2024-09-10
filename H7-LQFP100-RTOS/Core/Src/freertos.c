@@ -408,7 +408,6 @@ void Voltage_Monitor_init(void *argument)
   {
 	  osEventFlagsWait(utility_event_flags, VOLTAGE_MONITOR_FLAG_ID, osFlagsWaitAny,
 	  		osWaitForever);
-	  HAL_IWDG_Refresh(&hiwdg1);
 	  set_rail_monitor();
 	  monitor_rails();
   }
