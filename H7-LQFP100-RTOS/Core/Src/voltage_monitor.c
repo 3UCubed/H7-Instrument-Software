@@ -289,6 +289,10 @@ void monitor_rails() {
 					ERROR_STRUCT error;
 					error.detail = get_rail_name_error_detail(rail_monitor[i].name);
 					error.category = EC_power_supply_rail;
+					error.OOB_1 = rail_monitor[i].OOB_1;
+					error.OOB_2 = rail_monitor[i].OOB_2;
+					error.OOB_3 = rail_monitor[i].OOB_3;
+
 					handle_error(error);
 				}
 			}
@@ -323,6 +327,9 @@ void monitor_rails() {
 					ERROR_STRUCT error;
 					error.detail = get_rail_name_error_detail(rail_monitor[i].name);
 					error.category = EC_power_supply_rail;
+					error.OOB_1 = rail_monitor[i].OOB_1;
+					error.OOB_2 = rail_monitor[i].OOB_2;
+					error.OOB_3 = rail_monitor[i].OOB_3;
 					handle_error(error);
 				}
 			}
