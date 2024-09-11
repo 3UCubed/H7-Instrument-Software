@@ -6,8 +6,8 @@
 ../Core/Src/error_packet_handler.c:130:6:reset_error_counters	16	static
 ../Core/Src/error_packet_handler.c:141:6:reset_previous_error	8	static
 ../Core/Src/error_packet_handler.c:155:6:set_previous_error	16	static
-../Core/Src/error_packet_handler.c:169:14:get_previous_error	24	static
+../Core/Src/error_packet_handler.c:169:14:get_previous_error	32	static
 ../Core/Src/error_packet_handler.c:193:6:send_error_counter_packet	64	static
-../Core/Src/error_packet_handler.c:261:6:send_previous_error_packet	16	static
-../Core/Src/error_packet_handler.c:280:6:send_current_error_packet	24	static
-../Core/Src/error_packet_handler.c:296:6:send_junk_packet	1040	static
+../Core/Src/error_packet_handler.c:261:6:send_previous_error_packet	24	static
+../Core/Src/error_packet_handler.c:280:6:send_current_error_packet	32	static
+../Core/Src/error_packet_handler.c:309:6:send_junk_packet	1040	static

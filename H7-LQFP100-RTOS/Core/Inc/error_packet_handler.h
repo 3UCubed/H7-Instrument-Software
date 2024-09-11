@@ -19,7 +19,7 @@
 
 #define ERROR_COUNTER_PACKET_SIZE 56
 #define PREV_ERROR_PACKET_SIZE 4
-#define CURRENT_ERROR_PACKET_SIZE 4
+#define CURRENT_ERROR_PACKET_SIZE 10
 #define JUNK_PACKET_SIZE 1024
 
 #define ERROR_COUNTER_PACKET_SYNC 0xCC
@@ -67,6 +67,10 @@ typedef enum {
 typedef struct {
 	ERROR_CATEGORY category;
 	ERROR_DETAIL detail;
+	uint16_t OOB_1;
+	uint16_t OOB_2;
+	uint16_t OOB_3;
+
 }ERROR_STRUCT;
 
 void error_counter_init();

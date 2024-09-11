@@ -42,6 +42,9 @@ typedef struct {
 	uint16_t data;
 	uint16_t max_voltage;
 	uint16_t min_voltage;
+	uint16_t OOB_1;
+	uint16_t OOB_2;
+	uint16_t OOB_3;
 } VOLTAGE_RAIL;
 
 uint8_t voltage_monitor_init();

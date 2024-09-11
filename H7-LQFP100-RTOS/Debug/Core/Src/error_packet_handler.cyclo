@@ -9,5 +9,5 @@ error_packet_handler.c:155:6:set_previous_error	3
 error_packet_handler.c:169:14:get_previous_error	3
 error_packet_handler.c:193:6:send_error_counter_packet	1
 error_packet_handler.c:261:6:send_previous_error_packet	1
-error_packet_handler.c:280:6:send_current_error_packet	1
-error_packet_handler.c:296:6:send_junk_packet	2
+error_packet_handler.c:280:6:send_current_error_packet	2
+error_packet_handler.c:309:6:send_junk_packet	2

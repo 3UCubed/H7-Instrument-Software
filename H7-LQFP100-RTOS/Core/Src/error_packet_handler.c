@@ -280,10 +280,23 @@ void send_previous_error_packet() {
 void send_current_error_packet(ERROR_STRUCT error) {
 	uint8_t buffer[CURRENT_ERROR_PACKET_SIZE];
 
+	// If the error isn't a power supply rail, set the out of bounds values to 0
+	if (error.category != EC_power_supply_rail) {
+		error.OOB_1 = 0;
+		error.OOB_2 = 0;
+		error.OOB_3 = 0;
+	}
+
 	buffer[0] = CURRENT_ERROR_PACKET_SYNC;
 	buffer[1] = CURRENT_ERROR_PACKET_SYNC;
 	buffer[2] = error.category;
 	buffer[3] = error.detail;
+	buffer[4] = ((error.OOB_1 & 0xFF00) >> 8);
+	buffer[5] = (error.OOB_1 & 0xFF);
+	buffer[6] = ((error.OOB_2 & 0xFF00) >> 8);
+	buffer[7] = (error.OOB_2 & 0xFF);
+	buffer[8] = ((error.OOB_3 & 0xFF00) >> 8);
+	buffer[9] = (error.OOB_3 & 0xFF);
 
 	HAL_UART_Transmit(&huart1, buffer, PREV_ERROR_PACKET_SIZE, 100);
 }
