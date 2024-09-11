@@ -430,6 +430,9 @@ void STOP_init(void *argument)
 	  osEventFlagsWait(utility_event_flags, STOP_FLAG, osFlagsWaitAny,osWaitForever);
 	  osEventFlagsClear(utility_event_flags, STOP_FLAG);
 
+	  osEventFlagsSet(mode_event_flags, IDLE_FLAG);
+	  while (!IDLING) {};
+
 	  enter_stop();
   }
   /* USER CODE END STOP_init */

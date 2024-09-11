@@ -8,5 +8,5 @@
 ../Core/Src/freertos.c:371:6:AUTODEINIT_init	24	static
 ../Core/Src/freertos.c:403:6:Voltage_Monitor_init	16	static
 ../Core/Src/freertos.c:424:6:STOP_init	16	static
-../Core/Src/freertos.c:445:6:Science_init	32	static,ignoring_inline_asm
-../Core/Src/freertos.c:494:6:Idle_init	24	static
+../Core/Src/freertos.c:448:6:Science_init	32	static,ignoring_inline_asm
+../Core/Src/freertos.c:497:6:Idle_init	24	static
