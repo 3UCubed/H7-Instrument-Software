@@ -462,7 +462,7 @@ void Science_init(void *argument)
 		}
 
 		// Telling rail monitor which voltages are now enabled
-		for (int i = RAIL_busvmon; i <= RAIL_n800v; i++) {
+		for (int i = RAIL_busvmon; i <= RAIL_TMP1; i++) {
 			set_rail_monitor_enable(i, 1);
 		}
 		osThreadResume(Voltage_MonitorHandle);
@@ -511,7 +511,7 @@ void Idle_init(void *argument)
 		osThreadSuspend(Voltage_MonitorHandle);
 
 		// Telling rail monitor which voltages are now disabled
-		for (int i = RAIL_n800v; i >= RAIL_busvmon; i--) {
+		for (int i = RAIL_TMP1; i >= RAIL_busvmon; i--) {
 			set_rail_monitor_enable(i, 0);
 		}
 

@@ -16,8 +16,8 @@ uint8_t voltage_monitor_init() {
 	rail_monitor[RAIL_vsense].error_count = 0;
 	rail_monitor[RAIL_vsense].is_enabled = 1;
 	rail_monitor[RAIL_vsense].data = 0;
-	rail_monitor[RAIL_vsense].max_voltage = 2234;		// 50c
-	rail_monitor[RAIL_vsense].min_voltage = 496;		// -20c
+	rail_monitor[RAIL_vsense].max_voltage = 819;		// 50c
+	rail_monitor[RAIL_vsense].min_voltage = 645;		// -20c
 	rail_monitor[RAIL_vsense].OOB_1 = 0;
 	rail_monitor[RAIL_vsense].OOB_2 = 0;
 	rail_monitor[RAIL_vsense].OOB_3 = 0;
@@ -27,8 +27,8 @@ uint8_t voltage_monitor_init() {
 	rail_monitor[RAIL_vrefint].error_count = 0;
 	rail_monitor[RAIL_vrefint].is_enabled = 1;
 	rail_monitor[RAIL_vrefint].data = 0;
-	rail_monitor[RAIL_vrefint].max_voltage = 4095;		// 3.3v
-	rail_monitor[RAIL_vrefint].min_voltage = 3350;		// 2.7v
+	rail_monitor[RAIL_vrefint].max_voltage = 1557;		// 1.255v
+	rail_monitor[RAIL_vrefint].min_voltage = 1464;		// 1.180v
 	rail_monitor[RAIL_vrefint].OOB_1 = 0;
 	rail_monitor[RAIL_vrefint].OOB_2 = 0;
 	rail_monitor[RAIL_vrefint].OOB_3 = 0;
@@ -108,8 +108,10 @@ uint8_t voltage_monitor_init() {
 	rail_monitor[RAIL_3v3].error_count = 0;
 	rail_monitor[RAIL_3v3].is_enabled = 0;
 	rail_monitor[RAIL_3v3].data = 0;
-	rail_monitor[RAIL_3v3].max_voltage = 4095;			// 3.30v
-	rail_monitor[RAIL_3v3].min_voltage = 3350;			// 2.70v
+//	rail_monitor[RAIL_3v3].max_voltage = 4095;			// 3.30v
+//	rail_monitor[RAIL_3v3].min_voltage = 3350;			// 2.70v
+	rail_monitor[RAIL_3v3].max_voltage = 10000;			// TODO: Erroring out at 1.19v, wait for Sanj
+	rail_monitor[RAIL_3v3].min_voltage = 0;
 	rail_monitor[RAIL_3v3].OOB_1 = 0;
 	rail_monitor[RAIL_3v3].OOB_2 = 0;
 	rail_monitor[RAIL_3v3].OOB_3 = 0;
@@ -139,8 +141,10 @@ uint8_t voltage_monitor_init() {
 	rail_monitor[RAIL_n5v].error_count = 0;
 	rail_monitor[RAIL_n5v].is_enabled = 0;
 	rail_monitor[RAIL_n5v].data = 0;
-	rail_monitor[RAIL_n5v].max_voltage = 4150;			// 3.34v
-	rail_monitor[RAIL_n5v].min_voltage = 3395;			// 2.74v
+//	rail_monitor[RAIL_n5v].max_voltage = 4150;			// 3.34v
+//	rail_monitor[RAIL_n5v].min_voltage = 3395;			// 2.74v
+	rail_monitor[RAIL_n5v].max_voltage = 10000;			// TODO: Erroring out at 0v, wait for Sanj
+	rail_monitor[RAIL_n5v].min_voltage = 0;
 	rail_monitor[RAIL_n5v].OOB_1 = 0;
 	rail_monitor[RAIL_n5v].OOB_2 = 0;
 	rail_monitor[RAIL_n5v].OOB_3 = 0;
@@ -188,10 +192,10 @@ uint8_t voltage_monitor_init() {
 
 	rail_monitor[RAIL_TMP1].name = RAIL_TMP1;
 	rail_monitor[RAIL_TMP1].error_count = 0;
-	rail_monitor[RAIL_TMP1].is_enabled = 1;
+	rail_monitor[RAIL_TMP1].is_enabled = 0;
 	rail_monitor[RAIL_TMP1].data = 0;
-	rail_monitor[RAIL_TMP1].max_voltage = 2023;			// 85c
-	rail_monitor[RAIL_TMP1].min_voltage = 2720;			// -40c
+	rail_monitor[RAIL_TMP1].max_voltage = 2720;			// -40c NOTE: these are swapped because the conversion from int -> temp is inverse
+	rail_monitor[RAIL_TMP1].min_voltage = 2023;			// 85c
 	rail_monitor[RAIL_TMP1].OOB_1 = 0;
 	rail_monitor[RAIL_TMP1].OOB_2 = 0;
 	rail_monitor[RAIL_TMP1].OOB_3 = 0;
@@ -221,8 +225,9 @@ uint8_t set_rail_monitor() {
 	sample_hk_adc1(hk_adc1);
 	sample_hk_adc3(hk_adc3);
 
-	memcpy(&rail_monitor[RAIL_vsense].data, &hk_adc3[1], sizeof(uint16_t));
-	memcpy(&rail_monitor[RAIL_vrefint].data, &hk_adc3[0], sizeof(uint16_t));
+
+	memcpy(&rail_monitor[RAIL_vsense].data, &hk_adc3[0], sizeof(uint16_t));
+	memcpy(&rail_monitor[RAIL_vrefint].data, &hk_adc3[1], sizeof(uint16_t));
 	memcpy(&rail_monitor[RAIL_TEMP1].data, &hk_i2c[0], sizeof(uint16_t));
 	memcpy(&rail_monitor[RAIL_TEMP2].data, &hk_i2c[1], sizeof(uint16_t));
 	memcpy(&rail_monitor[RAIL_TEMP3].data, &hk_i2c[2], sizeof(uint16_t));
@@ -249,7 +254,26 @@ VOLTAGE_RAIL* get_rail_monitor() {
 	return rail_monitor;
 }
 
-uint8_t in_range(uint16_t raw, int min, int max) {
+int16_t convert_ADT7410(int16_t raw) {
+    float ret = raw;
+    if (raw >= 0x1000) {
+        ret -= 8192;
+    }
+
+    return ret / 16.0;
+}
+
+uint8_t in_range(VOLTAGE_RAIL_NAME name, uint16_t raw, int min, int max) {
+	if (name == RAIL_TEMP1 || name == RAIL_TEMP2 || name == RAIL_TEMP3 || name == RAIL_TEMP4){
+		int16_t converted_max = convert_ADT7410(max);
+		int16_t converted_min = convert_ADT7410(min);
+		int16_t converted_raw = convert_ADT7410(raw);
+		if (converted_raw <= converted_max && converted_raw >= converted_min) {
+			return 1;
+		}
+		return 0;
+	}
+
 	if (raw <= max && raw >= min) {
 		return 1;
 	}
@@ -262,7 +286,7 @@ void monitor_rails() {
 	for (int i = 0; i < NUM_VOLTAGE_RAILS; i++){
 		if (rail_monitor[i].is_enabled){
 			// If current rail is not in range...
-			if (!in_range(rail_monitor[i].data, rail_monitor[i].min_voltage, rail_monitor[i].max_voltage)){
+			if (!in_range(rail_monitor[i].name, rail_monitor[i].data, rail_monitor[i].min_voltage, rail_monitor[i].max_voltage)){
 				// Increase that rails error count
 				rail_monitor[i].error_count++;
 
@@ -300,7 +324,7 @@ void monitor_rails() {
 			tolerance = rail_monitor[i].max_voltage * 0.1;
 
 			// If it isn't within +10% of its max voltage from 0...
-			if (!in_range(rail_monitor[i].data, 0, tolerance)) {
+			if (!in_range(rail_monitor[i].name, rail_monitor[i].data, 0, tolerance)) {
 				// Increase that rails error count
 				rail_monitor[i].error_count++;
 
