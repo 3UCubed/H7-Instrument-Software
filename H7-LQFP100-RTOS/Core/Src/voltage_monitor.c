@@ -108,10 +108,8 @@ uint8_t voltage_monitor_init() {
 	rail_monitor[RAIL_3v3].error_count = 0;
 	rail_monitor[RAIL_3v3].is_enabled = 0;
 	rail_monitor[RAIL_3v3].data = 0;
-//	rail_monitor[RAIL_3v3].max_voltage = 4095;			// 3.30v
-//	rail_monitor[RAIL_3v3].min_voltage = 3350;			// 2.70v
-	rail_monitor[RAIL_3v3].max_voltage = 10000;			// TODO: Erroring out at 1.19v, wait for Sanj
-	rail_monitor[RAIL_3v3].min_voltage = 0;
+	rail_monitor[RAIL_3v3].max_voltage = 1596;			// 1.29
+	rail_monitor[RAIL_3v3].min_voltage = 1306;			// 1.05
 	rail_monitor[RAIL_3v3].OOB_1 = 0;
 	rail_monitor[RAIL_3v3].OOB_2 = 0;
 	rail_monitor[RAIL_3v3].OOB_3 = 0;
