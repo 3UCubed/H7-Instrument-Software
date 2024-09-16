@@ -456,7 +456,9 @@ int main(void)
   MX_DAC1_Init();
   MX_SPI1_Init();
   MX_RTC_Init();
+#ifdef ERROR_HANDLING_ENABLED
   MX_IWDG1_Init();
+#endif
 
   /* USER CODE BEGIN 2 */
 
@@ -607,9 +609,11 @@ void system_setup() {
     TIM2->CCR4 = 0;
 	HAL_TIM_OC_Start_IT(&htim2, TIM_CHANNEL_4);
 
+#ifdef ERROR_HANDLING_ENABLED
 	if (!voltage_monitor_init()) {
 		while (1);
 	}
+#endif
 
 	if (!init_adc_dma()) {
 		while (1);
