@@ -1,8 +1,0 @@
-voltage_monitor.c:12:9:voltage_monitor_init	1
-voltage_monitor.c:209:9:set_rail_monitor_enable	1
-voltage_monitor.c:218:9:set_rail_monitor	1
-voltage_monitor.c:253:15:get_rail_monitor	1
-voltage_monitor.c:257:9:convert_ADT7410	2
-voltage_monitor.c:266:9:in_range	9
-voltage_monitor.c:284:6:monitor_rails	15
-voltage_monitor.c:361:14:get_rail_name_error_detail	19

@@ -59,9 +59,11 @@ typedef enum {
 	ED_n200v = 0x15,
 	ED_n800v = 0x16,
 	ED_TMP1 = 0x17,
-	ED_single_bit_error = 0x18,
-	ED_double_bit_error = 0x19,
-	ED_UNDEFINED = 0x1A
+	ED_single_bit_error_flash = 0x18,
+	ED_double_bit_error_flash = 0x19,
+	ED_single_bit_error_ram = 0x1A,
+	ED_double_bit_error_ram = 0x1B,
+	ED_UNDEFINED = 0x1C
 }ERROR_DETAIL;
 
 typedef struct {
