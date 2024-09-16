@@ -20,17 +20,7 @@
  * The addresses are defined to start from `0x5550` and continue sequentially.
  * The size of the array is determined by the `NB_OF_VAR` constant.
  */
-uint16_t VirtAddVarTab[NB_OF_VAR] = {0x5550, 0x5551, 0x5552, 0x5553, 0x5554, 0x5555, 0x5556, 0x5557, 0x5558, 0x5559, 0x555A, 0x555B, 0x555C, 0x555D, 0x555E, 0x555F, 0x6660, 0x6661, 0x6662, 0x6663, 0x6664, 0x6665, 0x6666, 0x6667, 0x6668, 0x6669, 0x666A, 0x666B, 0x666C};
-
-/**
- * @brief Array storing the data values for EEPROM emulation variables.
- *
- * This array holds the data associated with each virtual address in the
- * `VirtAddVarTab` array. Initially, all values are set to `0`, and they
- * can be updated as needed during program execution.
- * The size of the array is determined by the `NB_OF_VAR` constant.
- */
-uint16_t VarDataTab[NB_OF_VAR] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // TODO: I think this can be removed, I don't think it is used anywhere anymore.
+uint16_t VirtAddVarTab[NB_OF_VAR] = {0x5550, 0x5551, 0x5552, 0x5553, 0x5554, 0x5555, 0x5556, 0x5557, 0x5558, 0x5559, 0x555A, 0x555B, 0x555C, 0x555D, 0x555E, 0x555F, 0x6660, 0x6661, 0x6662, 0x6663, 0x6664, 0x6665, 0x6666, 0x6667, 0x6668, 0x6669, 0x666A, 0x666B, 0x666C, 0x666D, 0x666E};
 
 /**
  * @brief Array used to store the error counters.
@@ -195,60 +185,64 @@ void send_error_counter_packet() {
 
 	buffer[0] = ERROR_COUNTER_PACKET_SYNC;
 	buffer[1] = ERROR_COUNTER_PACKET_SYNC;
-	buffer[2] = ((local_cpy[0] & 0xFF00) >> 8);
-	buffer[3] = (local_cpy[0] & 0xFF);
-	buffer[4] = ((local_cpy[1] & 0xFF00) >> 8);
-	buffer[5] = (local_cpy[1] & 0xFF);
-	buffer[6] = ((local_cpy[2] & 0xFF00) >> 8);
-	buffer[7] = (local_cpy[2] & 0xFF);
-	buffer[8] = ((local_cpy[3] & 0xFF00) >> 8);
-	buffer[9] = (local_cpy[3] & 0xFF);
-	buffer[10] = ((local_cpy[4] & 0xFF00) >> 8);
-	buffer[11] = (local_cpy[4] & 0xFF);
-	buffer[12] = ((local_cpy[5] & 0xFF00) >> 8);
-	buffer[13] = (local_cpy[5] & 0xFF);
-	buffer[14] = ((local_cpy[6] & 0xFF00) >> 8);
-	buffer[15] = (local_cpy[6] & 0xFF);
-	buffer[16] = ((local_cpy[7] & 0xFF00) >> 8);
-	buffer[17] = (local_cpy[7] & 0xFF);
-	buffer[18] = ((local_cpy[8] & 0xFF00) >> 8);
-	buffer[19] = (local_cpy[8] & 0xFF);
-	buffer[20] = ((local_cpy[9] & 0xFF00) >> 8);
-	buffer[21] = (local_cpy[9] & 0xFF);
-	buffer[22] = ((local_cpy[10] & 0xFF00) >> 8);
-	buffer[23] = (local_cpy[10] & 0xFF);
-	buffer[24] = ((local_cpy[11] & 0xFF00) >> 8);
-	buffer[25] = (local_cpy[11] & 0xFF);
-	buffer[26] = ((local_cpy[12] & 0xFF00) >> 8);
-	buffer[27] = (local_cpy[12] & 0xFF);
-	buffer[28] = ((local_cpy[13] & 0xFF00) >> 8);
-	buffer[29] = (local_cpy[13] & 0xFF);
-	buffer[30] = ((local_cpy[14] & 0xFF00) >> 8);
-	buffer[31] = (local_cpy[14] & 0xFF);
-	buffer[32] = ((local_cpy[15] & 0xFF00) >> 8);
-	buffer[33] = (local_cpy[15] & 0xFF);
-	buffer[34] = ((local_cpy[16] & 0xFF00) >> 8);
-	buffer[35] = (local_cpy[16] & 0xFF);
-	buffer[36] = ((local_cpy[17] & 0xFF00) >> 8);
-	buffer[37] = (local_cpy[17] & 0xFF);
-	buffer[38] = ((local_cpy[18] & 0xFF00) >> 8);
-	buffer[39] = (local_cpy[18] & 0xFF);
-	buffer[40] = ((local_cpy[19] & 0xFF00) >> 8);
-	buffer[41] = (local_cpy[19] & 0xFF);
-	buffer[42] = ((local_cpy[20] & 0xFF00) >> 8);
-	buffer[43] = (local_cpy[20] & 0xFF);
-	buffer[44] = ((local_cpy[21] & 0xFF00) >> 8);
-	buffer[45] = (local_cpy[21] & 0xFF);
-	buffer[46] = ((local_cpy[22] & 0xFF00) >> 8);
-	buffer[47] = (local_cpy[22] & 0xFF);
-	buffer[48] = ((local_cpy[23] & 0xFF00) >> 8);
-	buffer[49] = (local_cpy[23] & 0xFF);
-	buffer[50] = ((local_cpy[24] & 0xFF00) >> 8);
-	buffer[51] = (local_cpy[24] & 0xFF);
-	buffer[52] = ((local_cpy[25] & 0xFF00) >> 8);
-	buffer[53] = (local_cpy[25] & 0xFF);
-	buffer[54] = ((local_cpy[26] & 0xFF00) >> 8);
-	buffer[55] = (local_cpy[26] & 0xFF);
+	buffer[2] = ((local_cpy[EC_power_supply_rail] & 0xFF00) >> 8);
+	buffer[3] = (local_cpy[EC_power_supply_rail] & 0xFF);
+	buffer[4] = ((local_cpy[EC_seu] & 0xFF00) >> 8);
+	buffer[5] = (local_cpy[EC_seu] & 0xFF);
+	buffer[6] = ((local_cpy[EC_peripheral] & 0xFF00) >> 8);
+	buffer[7] = (local_cpy[EC_peripheral] & 0xFF);
+	buffer[8] = ((local_cpy[EC_brownout] & 0xFF00) >> 8);
+	buffer[9] = (local_cpy[EC_brownout] & 0xFF);
+	buffer[10] = ((local_cpy[EC_watchdog] & 0xFF00) >> 8);
+	buffer[11] = (local_cpy[EC_watchdog] & 0xFF);
+	buffer[12] = ((local_cpy[EC_UNDEFINED] & 0xFF00) >> 8);
+	buffer[13] = (local_cpy[EC_UNDEFINED] & 0xFF);
+	buffer[14] = ((local_cpy[ED_vsense] & 0xFF00) >> 8);
+	buffer[15] = (local_cpy[ED_vsense] & 0xFF);
+	buffer[16] = ((local_cpy[ED_vrefint] & 0xFF00) >> 8);
+	buffer[17] = (local_cpy[ED_vrefint] & 0xFF);
+	buffer[18] = ((local_cpy[ED_TEMP1] & 0xFF00) >> 8);
+	buffer[19] = (local_cpy[ED_TEMP1] & 0xFF);
+	buffer[20] = ((local_cpy[ED_TEMP2] & 0xFF00) >> 8);
+	buffer[21] = (local_cpy[ED_TEMP2] & 0xFF);
+	buffer[22] = ((local_cpy[ED_TEMP3] & 0xFF00) >> 8);
+	buffer[23] = (local_cpy[ED_TEMP3] & 0xFF);
+	buffer[24] = ((local_cpy[ED_TEMP4] & 0xFF00) >> 8);
+	buffer[25] = (local_cpy[ED_TEMP4] & 0xFF);
+	buffer[26] = ((local_cpy[ED_busvmon] & 0xFF00) >> 8);
+	buffer[27] = (local_cpy[ED_busvmon] & 0xFF);
+	buffer[28] = ((local_cpy[ED_busimon] & 0xFF00) >> 8);
+	buffer[29] = (local_cpy[ED_busimon] & 0xFF);
+	buffer[30] = ((local_cpy[ED_2v5] & 0xFF00) >> 8);
+	buffer[31] = (local_cpy[ED_2v5] & 0xFF);
+	buffer[32] = ((local_cpy[ED_3v3] & 0xFF00) >> 8);
+	buffer[33] = (local_cpy[ED_3v3] & 0xFF);
+	buffer[34] = ((local_cpy[ED_5v] & 0xFF00) >> 8);
+	buffer[35] = (local_cpy[ED_5v] & 0xFF);
+	buffer[36] = ((local_cpy[ED_n3v3] & 0xFF00) >> 8);
+	buffer[37] = (local_cpy[ED_n3v3] & 0xFF);
+	buffer[38] = ((local_cpy[ED_n5v] & 0xFF00) >> 8);
+	buffer[39] = (local_cpy[ED_n5v] & 0xFF);
+	buffer[40] = ((local_cpy[ED_15v] & 0xFF00) >> 8);
+	buffer[41] = (local_cpy[ED_15v] & 0xFF);
+	buffer[42] = ((local_cpy[ED_5vref] & 0xFF00) >> 8);
+	buffer[43] = (local_cpy[ED_5vref] & 0xFF);
+	buffer[44] = ((local_cpy[ED_n200v] & 0xFF00) >> 8);
+	buffer[45] = (local_cpy[ED_n200v] & 0xFF);
+	buffer[46] = ((local_cpy[ED_n800v] & 0xFF00) >> 8);
+	buffer[47] = (local_cpy[ED_n800v] & 0xFF);
+	buffer[48] = ((local_cpy[ED_TMP1] & 0xFF00) >> 8);
+	buffer[49] = (local_cpy[ED_TMP1] & 0xFF);
+	buffer[50] = ((local_cpy[ED_single_bit_error_flash] & 0xFF00) >> 8);
+	buffer[51] = (local_cpy[ED_single_bit_error_flash] & 0xFF);
+	buffer[52] = ((local_cpy[ED_double_bit_error_flash] & 0xFF00) >> 8);
+	buffer[53] = (local_cpy[ED_double_bit_error_flash] & 0xFF);
+	buffer[54] = ((local_cpy[ED_single_bit_error_ram] & 0xFF00) >> 8);
+	buffer[55] = (local_cpy[ED_single_bit_error_ram] & 0xFF);
+	buffer[54] = ((local_cpy[ED_double_bit_error_ram] & 0xFF00) >> 8);
+	buffer[55] = (local_cpy[ED_double_bit_error_ram] & 0xFF);
+	buffer[54] = ((local_cpy[ED_UNDEFINED] & 0xFF00) >> 8);
+	buffer[55] = (local_cpy[ED_UNDEFINED] & 0xFF);
 
 	HAL_UART_Transmit(&huart1, buffer, ERROR_COUNTER_PACKET_SIZE, 100);
 }

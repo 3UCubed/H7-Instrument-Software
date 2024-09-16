@@ -1,0 +1,15 @@
+core_cm7.h:2156:34:__NVIC_SystemReset	1
+main.c:113:6:HAL_TIM_OC_DelayElapsedCallback	6
+main.c:139:6:HAL_UART_RxCpltCallback	45
+main.c:391:6:get_reset_cause	3
+main.c:422:5:main	1
+main.c:500:6:SystemClock_Config	4
+main.c:562:6:PeriphCommonClock_Config	2
+main.c:585:6:system_setup	6
+main.c:628:6:sync	2
+main.c:645:6:send_ACK	1
+main.c:652:6:send_NACK	1
+main.c:660:9:get_current_step	15
+main.c:687:6:enter_stop	0
+main.c:712:6:HAL_TIM_PeriodElapsedCallback	2
+main.c:729:6:Error_Handler	1
