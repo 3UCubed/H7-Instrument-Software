@@ -16,8 +16,8 @@ uint8_t voltage_monitor_init() {
 	rail_monitor[RAIL_vsense].error_count = 0;
 	rail_monitor[RAIL_vsense].is_enabled = 1;
 	rail_monitor[RAIL_vsense].data = 0;
-	rail_monitor[RAIL_vsense].max_voltage = 819;		// 50c
-	rail_monitor[RAIL_vsense].min_voltage = 645;		// -20c
+	rail_monitor[RAIL_vsense].max_voltage = 906;		// 85c
+	rail_monitor[RAIL_vsense].min_voltage = 596;		// -40c
 	rail_monitor[RAIL_vsense].OOB_1 = 0;
 	rail_monitor[RAIL_vsense].OOB_2 = 0;
 	rail_monitor[RAIL_vsense].OOB_3 = 0;
