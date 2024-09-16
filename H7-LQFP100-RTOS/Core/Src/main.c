@@ -457,7 +457,7 @@ int main(void)
   MX_SPI1_Init();
   MX_RTC_Init();
 #ifdef ERROR_HANDLING_ENABLED
-  //MX_IWDG1_Init();
+  MX_IWDG1_Init();
 #endif
 
   /* USER CODE BEGIN 2 */
@@ -469,10 +469,6 @@ int main(void)
 
   system_setup();
 
-//  ERROR_STRUCT error;
-//  error.category = EC_seu;
-//  error.detail = ED_single_bit_error_ram;
-//  handle_error(error);
 
   /* USER CODE END 2 */
 

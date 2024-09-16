@@ -239,10 +239,10 @@ void send_error_counter_packet() {
 	buffer[53] = (local_cpy[ED_double_bit_error_flash] & 0xFF);
 	buffer[54] = ((local_cpy[ED_single_bit_error_ram] & 0xFF00) >> 8);
 	buffer[55] = (local_cpy[ED_single_bit_error_ram] & 0xFF);
-	buffer[54] = ((local_cpy[ED_double_bit_error_ram] & 0xFF00) >> 8);
-	buffer[55] = (local_cpy[ED_double_bit_error_ram] & 0xFF);
-	buffer[54] = ((local_cpy[ED_UNDEFINED] & 0xFF00) >> 8);
-	buffer[55] = (local_cpy[ED_UNDEFINED] & 0xFF);
+	buffer[56] = ((local_cpy[ED_double_bit_error_ram] & 0xFF00) >> 8);
+	buffer[57] = (local_cpy[ED_double_bit_error_ram] & 0xFF);
+	buffer[58] = ((local_cpy[ED_UNDEFINED] & 0xFF00) >> 8);
+	buffer[59] = (local_cpy[ED_UNDEFINED] & 0xFF);
 
 	HAL_UART_Transmit(&huart1, buffer, ERROR_COUNTER_PACKET_SIZE, 100);
 }
