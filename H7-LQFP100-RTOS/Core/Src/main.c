@@ -26,6 +26,7 @@
 #include "dma.h"
 #include "i2c.h"
 #include "iwdg.h"
+#include "ramecc.h"
 #include "rtc.h"
 #include "spi.h"
 #include "tim.h"
@@ -429,6 +430,7 @@ int main(void)
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
+
   /* USER CODE BEGIN Init */
 
   /* USER CODE END Init */
@@ -456,10 +458,8 @@ int main(void)
   MX_DAC1_Init();
   MX_SPI1_Init();
   MX_RTC_Init();
-#ifdef ERROR_HANDLING_ENABLED
-  MX_IWDG1_Init();
-#endif
-
+  //MX_IWDG1_Init();
+  MX_RAMECC_Init();
   /* USER CODE BEGIN 2 */
 
 #ifdef ERROR_HANDLING_ENABLED

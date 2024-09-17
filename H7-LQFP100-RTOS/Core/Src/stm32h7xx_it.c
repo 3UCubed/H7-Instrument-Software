@@ -71,6 +71,7 @@ extern TIM_HandleTypeDef htim2;
 extern DMA_HandleTypeDef hdma_usart1_tx;
 extern UART_HandleTypeDef huart1;
 extern TIM_HandleTypeDef htim6;
+extern RAMECC_HandleTypeDef hramecc;
 
 /* USER CODE BEGIN EV */
 
@@ -443,5 +444,11 @@ void TIM6_DAC_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
-
+/**
+ * @brief This function handles RAMECC global interrupt
+ */
+void ECC_IRQHandler(void)
+{
+    HAL_RAMECC_IRQHandler(&hramecc);
+}
 /* USER CODE END 1 */

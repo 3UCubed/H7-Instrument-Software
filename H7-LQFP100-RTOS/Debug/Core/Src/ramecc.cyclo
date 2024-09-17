@@ -1,0 +1,3 @@
+ramecc.c:27:6:RAMECC_Init_Helper	3
+ramecc.c:55:6:MX_RAMECC_Init	13
+ramecc.c:189:6:HAL_RAMECC_DetectErrorCallback	3

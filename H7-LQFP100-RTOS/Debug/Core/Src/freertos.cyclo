@@ -1,0 +1,12 @@
+freertos.c:187:6:vApplicationTickHook	1
+freertos.c:199:6:vApplicationStackOverflowHook	1
+freertos.c:212:6:MX_FREERTOS_Init	1
+freertos.c:278:6:PMT_init	1
+freertos.c:299:6:ERPA_init	1
+freertos.c:320:6:HK_init	1
+freertos.c:341:6:AUTOINIT_init	3
+freertos.c:371:6:AUTODEINIT_init	3
+freertos.c:403:6:Voltage_Monitor_init	1
+freertos.c:424:6:STOP_init	2
+freertos.c:448:6:Science_init	3
+freertos.c:497:6:Idle_init	3
