@@ -1,3 +1,0 @@
-../Core/Src/ramecc.c:27:6:RAMECC_Init_Helper	16	static
-../Core/Src/ramecc.c:55:6:MX_RAMECC_Init	8	static
-../Core/Src/ramecc.c:189:6:HAL_RAMECC_DetectErrorCallback	16	static

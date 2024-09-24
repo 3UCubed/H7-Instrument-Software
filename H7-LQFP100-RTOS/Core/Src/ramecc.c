@@ -1,43 +1,55 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file    ramecc.c
-  * @brief   This file provides code for the configuration
-  *          of the RAMECC instances.
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2024 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file    ramecc.c
+ * @brief   This file provides code for the configuration
+ *          of the RAMECC instances.
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2024 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "ramecc.h"
 
 /* USER CODE BEGIN 0 */
-__IO uint32_t RAMECCSingleErrorDetected = 0U;
-__IO uint32_t RAMECCDoubleErrorDetected = 0U;
+#define ITCM_START_ADDRESS 0x00000000
+#define ITCM_END_ADDRESS   0x0000FFFF
 
-void RAMECC_Init_Helper(RAMECC_HandleTypeDef* hramecc) {
+#define DTCM_START_ADDRESS 0x20000000
+#define DTCM_END_ADDRESS 0x2001FFFF
 
-	if (HAL_RAMECC_EnableNotification(hramecc, (RAMECC_IT_MONITOR_SINGLEERR_R | RAMECC_IT_MONITOR_DOUBLEERR_R)) != HAL_OK)
-	{
-	  Error_Handler();
-	}
-	if (HAL_RAMECC_StartMonitor(hramecc) != HAL_OK)
-	{
-	  Error_Handler();
-	}
-}
+#define AXI_START_ADDRESS 0x24000000
+#define AXI_END_ADDRESS 0x2407FFFF
+
+#define SRAM1_START_ADDRESS 0x30000000
+#define SRAM1_END_ADDRESS 0x3001FFFF
+
+#define SRAM2_START_ADDRESS 0x30020000
+#define SRAM2_END_ADDRESS 0x3003FFFF
+
+#define SRAM3_START_ADDRESS 0x30040000
+#define SRAM3_END_ADDRESS 0x30047FFF
+
+#define SRAM4_START_ADDRESS 0x38000000
+#define SRAM4_END_ADDRESS 0x3800FFFF
+
+#define BACKUP_START_ADDRESS 0x38800000
+#define BACKUP_END_ADDRESS 0x38800FFF
+
+void init_ram();
+void write_ram(volatile uint32_t *start, volatile uint32_t *end);
+void enable_ramecc_monitor_notifications(RAMECC_HandleTypeDef *hramecc);
 /* USER CODE END 0 */
 
-RAMECC_HandleTypeDef hramecc;
 RAMECC_HandleTypeDef hramecc1_m1;
 RAMECC_HandleTypeDef hramecc1_m2;
 RAMECC_HandleTypeDef hramecc1_m3;
@@ -56,7 +68,7 @@ void MX_RAMECC_Init(void)
 {
 
   /* USER CODE BEGIN RAMECC_Init 0 */
-
+	init_ram();
   /* USER CODE END RAMECC_Init 0 */
 
   /* USER CODE BEGIN RAMECC_Init 1 */
@@ -159,46 +171,71 @@ void MX_RAMECC_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN RAMECC_Init 2 */
-  RAMECC_Init_Helper(&hramecc1_m1);
-  RAMECC_Init_Helper(&hramecc1_m2);
-  RAMECC_Init_Helper(&hramecc1_m3);
-  RAMECC_Init_Helper(&hramecc1_m4);
-  RAMECC_Init_Helper(&hramecc1_m5);
-  RAMECC_Init_Helper(&hramecc2_m1);
-  RAMECC_Init_Helper(&hramecc2_m2);
-  RAMECC_Init_Helper(&hramecc2_m3);
-  RAMECC_Init_Helper(&hramecc2_m4);
-  RAMECC_Init_Helper(&hramecc2_m5);
-  RAMECC_Init_Helper(&hramecc3_m1);
-  RAMECC_Init_Helper(&hramecc3_m2);
-  // Set the priority level
-  HAL_NVIC_SetPriority(ECC_IRQn, 0, 0);
-  // Enable the interrupt
-  HAL_NVIC_EnableIRQ(ECC_IRQn);
+	HAL_NVIC_SetPriority(ECC_IRQn, 0, 0);
+	HAL_NVIC_EnableIRQ(ECC_IRQn);
 
+	enable_ramecc_monitor_notifications(&hramecc1_m1);
+	enable_ramecc_monitor_notifications(&hramecc1_m2);
+	enable_ramecc_monitor_notifications(&hramecc1_m3);
+	enable_ramecc_monitor_notifications(&hramecc1_m4);
+	enable_ramecc_monitor_notifications(&hramecc1_m5);
+	enable_ramecc_monitor_notifications(&hramecc2_m1);
+	enable_ramecc_monitor_notifications(&hramecc2_m2);
+	enable_ramecc_monitor_notifications(&hramecc2_m3);
+	enable_ramecc_monitor_notifications(&hramecc2_m4);
+	enable_ramecc_monitor_notifications(&hramecc2_m5);
+	enable_ramecc_monitor_notifications(&hramecc3_m1);
+	enable_ramecc_monitor_notifications(&hramecc3_m2);
   /* USER CODE END RAMECC_Init 2 */
 
 }
 
 /* USER CODE BEGIN 1 */
-/**
-  * @brief  Single or double ECC error detected callback.
-  * @param  hramecc : RAMECC handle
-  * @retval None
-  */
-void HAL_RAMECC_DetectErrorCallback(RAMECC_HandleTypeDef *hramecc)
-{
-  if ((HAL_RAMECC_GetRAMECCError(hramecc) & HAL_RAMECC_SINGLEERROR_DETECTED)  != 0U)
-  {
-    RAMECCSingleErrorDetected ++;
-  }
+void init_ram() {
+	write_ram((volatile uint32_t*) ITCM_START_ADDRESS,
+			(volatile uint32_t*) ITCM_END_ADDRESS);
+	write_ram((volatile uint32_t*) DTCM_START_ADDRESS,
+			(volatile uint32_t*) DTCM_END_ADDRESS);
+	write_ram((volatile uint32_t*) AXI_START_ADDRESS,
+			(volatile uint32_t*) AXI_END_ADDRESS);
+	write_ram((volatile uint32_t*) SRAM1_START_ADDRESS,
+			(volatile uint32_t*) SRAM1_END_ADDRESS);
+	write_ram((volatile uint32_t*) SRAM2_START_ADDRESS,
+			(volatile uint32_t*) SRAM2_END_ADDRESS);
+	write_ram((volatile uint32_t*) SRAM3_START_ADDRESS,
+			(volatile uint32_t*) SRAM3_END_ADDRESS);
+	write_ram((volatile uint32_t*) SRAM4_START_ADDRESS,
+			(volatile uint32_t*) SRAM4_END_ADDRESS);
+	write_ram((volatile uint32_t*) BACKUP_START_ADDRESS,
+			(volatile uint32_t*) BACKUP_END_ADDRESS);
+}
 
-  if ((HAL_RAMECC_GetRAMECCError(hramecc) & HAL_RAMECC_DOUBLEERROR_DETECTED)  != 0U)
-  {
-    RAMECCDoubleErrorDetected ++;
-  }
+void write_ram(volatile uint32_t *start, volatile uint32_t *end) {
+	while (start <= end) {
+		*start = 0;
+		start++;
+	}
+}
 
-  hramecc->RAMECCErrorCode = HAL_RAMECC_NO_ERROR;
-  HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_1);
+void enable_ramecc_monitor_notifications(RAMECC_HandleTypeDef *hramecc) {
+	if (HAL_RAMECC_EnableNotification(hramecc, (RAMECC_IT_MONITOR_SINGLEERR_R | RAMECC_IT_MONITOR_DOUBLEERR_R)) != HAL_OK) {
+		Error_Handler();
+	}
+	if (HAL_RAMECC_StartMonitor(hramecc) != HAL_OK) {
+		Error_Handler();
+	}
+}
+
+void HAL_RAMECC_DetectErrorCallback(RAMECC_HandleTypeDef *hramecc) {
+	ERROR_STRUCT error;
+	error.category = EC_seu;
+	if ((HAL_RAMECC_GetRAMECCError(hramecc) & HAL_RAMECC_SINGLEERROR_DETECTED) != 0U) {
+		error.detail = ED_single_bit_error_ram;
+	}
+
+	if ((HAL_RAMECC_GetRAMECCError(hramecc) & HAL_RAMECC_DOUBLEERROR_DETECTED) != 0U) {
+		error.detail = ED_double_bit_error_ram;
+	}
+	handle_error(error);
 }
 /* USER CODE END 1 */

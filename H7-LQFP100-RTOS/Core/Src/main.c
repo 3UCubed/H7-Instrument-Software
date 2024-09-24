@@ -111,6 +111,20 @@ void sync();
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void HAL_FLASHEx_EccCorrectionCallback() {
+	ERROR_STRUCT error;
+	error.category = EC_seu;
+	error.detail = ED_single_bit_error_flash;
+	handle_error(error);
+}
+
+void HAL_FLASHEx_EccDetectionCallback() {
+	ERROR_STRUCT error;
+	error.category = EC_seu;
+	error.detail = ED_double_bit_error_flash;
+	handle_error(error);
+}
+
 void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim) {
 	if (htim == &htim1) {
 		osEventFlagsSet(packet_event_flags, PMT_FLAG_ID);
@@ -458,7 +472,7 @@ int main(void)
   MX_DAC1_Init();
   MX_SPI1_Init();
   MX_RTC_Init();
-  //MX_IWDG1_Init();
+  MX_IWDG1_Init();
   MX_RAMECC_Init();
   /* USER CODE BEGIN 2 */
 
@@ -694,6 +708,17 @@ void enter_stop() {
 	  SystemClock_Config();
 	  reset_packet_sequence_numbers();
 	  xTaskResumeAll();
+}
+
+void init_flash_ecc() {
+	HAL_FLASH_Unlock();
+
+	HAL_NVIC_SetPriority(FLASH_IRQn, 0, 0);
+	HAL_NVIC_EnableIRQ(FLASH_IRQn);
+	HAL_FLASHEx_EnableEccCorrectionInterrupt();
+	HAL_FLASHEx_EnableEccDetectionInterrupt();
+
+	HAL_FLASH_Lock();
 }
 /* USER CODE END 4 */
 
