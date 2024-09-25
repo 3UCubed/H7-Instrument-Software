@@ -713,12 +713,11 @@ void enter_stop() {
 void init_flash_ecc() {
 	HAL_FLASH_Unlock();
 
-	HAL_NVIC_SetPriority(FLASH_IRQn, 0, 0);
+	HAL_NVIC_SetPriority(FLASH_IRQn, 6, 0);
 	HAL_NVIC_EnableIRQ(FLASH_IRQn);
 	HAL_FLASHEx_EnableEccCorrectionInterrupt();
 	HAL_FLASHEx_EnableEccDetectionInterrupt();
 
-	HAL_FLASH_Lock();
 }
 /* USER CODE END 4 */
 
