@@ -106,7 +106,7 @@ void system_setup();
 void send_ACK();
 void send_NACK();
 void sync();
-
+void init_flash_ecc();
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -600,7 +600,7 @@ void system_setup() {
 	// 6 -- Init ADC DMA
 	// 7 -- Start UART receive interrupts
 
-
+	init_flash_ecc();
 
 	packet_event_flags = osEventFlagsNew(NULL);
     if (packet_event_flags == NULL) {
