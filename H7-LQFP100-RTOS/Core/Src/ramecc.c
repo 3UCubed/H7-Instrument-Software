@@ -45,8 +45,6 @@
 #define BACKUP_START_ADDRESS 0x38800000
 #define BACKUP_END_ADDRESS 0x38800FFF
 
-void init_ram();
-void write_ram(volatile uint32_t *start, volatile uint32_t *end);
 void enable_ramecc_monitor_notifications(RAMECC_HandleTypeDef *hramecc);
 /* USER CODE END 0 */
 
@@ -191,32 +189,6 @@ void MX_RAMECC_Init(void)
 }
 
 /* USER CODE BEGIN 1 */
-void init_ram() {
-	write_ram((volatile uint32_t*) ITCM_START_ADDRESS,
-			(volatile uint32_t*) ITCM_END_ADDRESS);
-	write_ram((volatile uint32_t*) DTCM_START_ADDRESS,
-			(volatile uint32_t*) DTCM_END_ADDRESS);
-	write_ram((volatile uint32_t*) AXI_START_ADDRESS,
-			(volatile uint32_t*) AXI_END_ADDRESS);
-	write_ram((volatile uint32_t*) SRAM1_START_ADDRESS,
-			(volatile uint32_t*) SRAM1_END_ADDRESS);
-	write_ram((volatile uint32_t*) SRAM2_START_ADDRESS,
-			(volatile uint32_t*) SRAM2_END_ADDRESS);
-	write_ram((volatile uint32_t*) SRAM3_START_ADDRESS,
-			(volatile uint32_t*) SRAM3_END_ADDRESS);
-	write_ram((volatile uint32_t*) SRAM4_START_ADDRESS,
-			(volatile uint32_t*) SRAM4_END_ADDRESS);
-	write_ram((volatile uint32_t*) BACKUP_START_ADDRESS,
-			(volatile uint32_t*) BACKUP_END_ADDRESS);
-}
-
-void write_ram(volatile uint32_t *start, volatile uint32_t *end) {
-	while (start <= end) {
-		*start = 0;
-		start++;
-	}
-}
-
 void enable_ramecc_monitor_notifications(RAMECC_HandleTypeDef *hramecc) {
 	if (HAL_RAMECC_EnableNotification(hramecc, (RAMECC_IT_MONITOR_SINGLEERR_R | RAMECC_IT_MONITOR_DOUBLEERR_R)) != HAL_OK) {
 		Error_Handler();
