@@ -66,7 +66,6 @@ void MX_RAMECC_Init(void)
 {
 
   /* USER CODE BEGIN RAMECC_Init 0 */
-	init_ram();
   /* USER CODE END RAMECC_Init 0 */
 
   /* USER CODE BEGIN RAMECC_Init 1 */
