@@ -12,6 +12,9 @@
 #include "usart.h"
 #include "main.h"
 #include "eeprom.h"
+#include "tim.h"
+#include "dac.h"
+void emergency_shutdown();
 
 /**
  * @brief Array storing virtual addresses for EEPROM emulation variables.
@@ -48,7 +51,8 @@ uint16_t local_cpy[NUM_ERROR_COUNTERS];
  */
 void handle_error(ERROR_STRUCT error) {
 #ifdef ERROR_HANDLING_ENABLED
-	osEventFlagsSet(mode_event_flags, IDLE_FLAG);
+	vTaskSuspendAll();
+	emergency_shutdown();
 	while (!IDLING) {};
 	increment_error_counter(error);
 	set_previous_error(error);
@@ -60,7 +64,7 @@ void handle_error(ERROR_STRUCT error) {
 		NVIC_SystemReset();
 		break;
 	case EC_seu:
-		// TODO: Waiting on ECC to be completed
+		NVIC_SystemReset();
 		break;
 	case EC_peripheral:
 		NVIC_SystemReset();
@@ -309,4 +313,33 @@ void send_junk_packet() {	// TODO: Figure out if we still need this.
 
 	HAL_UART_Transmit(&huart1, buffer, JUNK_PACKET_SIZE, 100);
 }
+
+
+void emergency_shutdown() {
+	ERPA_ENABLED = 0;
+	TIM2->CCR4 = 0;
+	HAL_TIM_OC_Stop_IT(&htim1, TIM_CHANNEL_1);			// PMT packet off
+	HK_ENABLED = 0;
+	HAL_DAC_Stop_DMA(&hdac1, DAC_CHANNEL_1);			// Disable auto sweep
+
+
+	// Telling rail monitor which voltages are now disabled
+	for (int i = RAIL_TMP1; i >= RAIL_busvmon; i--) {
+		set_rail_monitor_enable(i, 0);
+	}
+
+	// Disabling all voltages
+	for (int i = 8; i >= 0; i--) {
+		HAL_GPIO_WritePin(gpios[i].gpio, gpios[i].pin, GPIO_PIN_RESET);
+		HAL_Delay(200);
+	}
+	HAL_Delay(3000);
+	IDLING = 1;
+}
+
+
+
+
+
+
 

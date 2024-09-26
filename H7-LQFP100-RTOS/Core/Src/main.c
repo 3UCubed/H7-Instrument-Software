@@ -93,7 +93,6 @@ volatile uint8_t HK_10_second_counter = 0;
 volatile uint8_t HK_100_ms_counter = 0;
 
 volatile uint8_t IDLING = 1;
-
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -713,7 +712,7 @@ void enter_stop() {
 void init_flash_ecc() {
 	HAL_FLASH_Unlock();
 
-	HAL_NVIC_SetPriority(FLASH_IRQn, 6, 0);
+	HAL_NVIC_SetPriority(FLASH_IRQn, 15, 0);
 	HAL_NVIC_EnableIRQ(FLASH_IRQn);
 	HAL_FLASHEx_EnableEccCorrectionInterrupt();
 	HAL_FLASHEx_EnableEccDetectionInterrupt();
