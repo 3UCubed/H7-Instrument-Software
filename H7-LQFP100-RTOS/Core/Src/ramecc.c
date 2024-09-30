@@ -27,25 +27,8 @@
 #define DTCM_START_ADDRESS 0x20000000
 #define DTCM_END_ADDRESS 0x2001FFFF
 
-#define AXI_START_ADDRESS 0x24000000
-#define AXI_END_ADDRESS 0x2407FFFF
-
-#define SRAM1_START_ADDRESS 0x30000000
-#define SRAM1_END_ADDRESS 0x3001FFFF
-
-#define SRAM2_START_ADDRESS 0x30020000
-#define SRAM2_END_ADDRESS 0x3003FFFF
-
-#define SRAM3_START_ADDRESS 0x30040000
-#define SRAM3_END_ADDRESS 0x30047FFF
-
-#define SRAM4_START_ADDRESS 0x38000000
-#define SRAM4_END_ADDRESS 0x3800FFFF
-
-#define BACKUP_START_ADDRESS 0x38800000
-#define BACKUP_END_ADDRESS 0x38800FFF
-
 void enable_ramecc_monitor_notifications(RAMECC_HandleTypeDef *hramecc);
+void write_RAM(volatile uint32_t *start, volatile uint32_t *end);
 /* USER CODE END 0 */
 
 RAMECC_HandleTypeDef hramecc1_m1;
@@ -66,6 +49,8 @@ void MX_RAMECC_Init(void)
 {
 
   /* USER CODE BEGIN RAMECC_Init 0 */
+  write_RAM((volatile uint32_t *)ITCM_START_ADDRESS, (volatile uint32_t *)ITCM_END_ADDRESS);
+  write_RAM((volatile uint32_t *)DTCM_START_ADDRESS, (volatile uint32_t *)DTCM_END_ADDRESS);
   /* USER CODE END RAMECC_Init 0 */
 
   /* USER CODE BEGIN RAMECC_Init 1 */
@@ -188,11 +173,28 @@ void MX_RAMECC_Init(void)
 }
 
 /* USER CODE BEGIN 1 */
+void write_RAM(volatile uint32_t *start, volatile uint32_t *end)
+{
+	while (start <= end)
+	{
+		*start = 0;
+		start++;
+	}
+}
 void enable_ramecc_monitor_notifications(RAMECC_HandleTypeDef *hramecc) {
 	if (HAL_RAMECC_EnableNotification(hramecc, (RAMECC_IT_MONITOR_SINGLEERR_R | RAMECC_IT_MONITOR_DOUBLEERR_R)) != HAL_OK) {
 		Error_Handler();
 	}
 	if (HAL_RAMECC_StartMonitor(hramecc) != HAL_OK) {
+		Error_Handler();
+	}
+}
+
+void disable_ramecc_monitor_notifications(RAMECC_HandleTypeDef *hramecc) {
+	if (HAL_RAMECC_DisableNotification(hramecc, (RAMECC_IT_MONITOR_SINGLEERR_R | RAMECC_IT_MONITOR_DOUBLEERR_R)) != HAL_OK) {
+		Error_Handler();
+	}
+	if (HAL_RAMECC_StopMonitor(hramecc) != HAL_OK) {
 		Error_Handler();
 	}
 }
@@ -209,4 +211,5 @@ void HAL_RAMECC_DetectErrorCallback(RAMECC_HandleTypeDef *hramecc) {
 	}
 	handle_error(error);
 }
+
 /* USER CODE END 1 */

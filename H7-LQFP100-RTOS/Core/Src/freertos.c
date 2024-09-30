@@ -161,6 +161,18 @@ const osThreadAttr_t Idle_task_attributes = {
   .stack_size = sizeof(Idle_taskBuffer),
   .priority = (osPriority_t) osPriorityRealtime7,
 };
+/* Definitions for Sync_task */
+osThreadId_t Sync_taskHandle;
+uint32_t Sync_taskBuffer[ 128 ];
+osStaticThreadDef_t Sync_taskControlBlock;
+const osThreadAttr_t Sync_task_attributes = {
+  .name = "Sync_task",
+  .cb_mem = &Sync_taskControlBlock,
+  .cb_size = sizeof(Sync_taskControlBlock),
+  .stack_mem = &Sync_taskBuffer[0],
+  .stack_size = sizeof(Sync_taskBuffer),
+  .priority = (osPriority_t) osPriorityNormal,
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -176,6 +188,7 @@ void Voltage_Monitor_init(void *argument);
 void STOP_init(void *argument);
 void Science_init(void *argument);
 void Idle_init(void *argument);
+void Sync_init(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -257,6 +270,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of Idle_task */
   Idle_taskHandle = osThreadNew(Idle_init, NULL, &Idle_task_attributes);
+
+  /* creation of Sync_task */
+  Sync_taskHandle = osThreadNew(Sync_init, NULL, &Sync_task_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -529,6 +545,40 @@ void Idle_init(void *argument)
 
   }
   /* USER CODE END Idle_init */
+}
+
+/* USER CODE BEGIN Header_Sync_init */
+/**
+* @brief Function implementing the Sync_task thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_Sync_init */
+void Sync_init(void *argument)
+{
+  /* USER CODE BEGIN Sync_init */
+  /* Infinite loop */
+  for(;;)
+  {
+	  	osEventFlagsWait(mode_event_flags, SYNC_FLAG, osFlagsWaitAny, osWaitForever);
+	  	send_ACK();
+
+	  	uint8_t key;
+
+	  	// Wait for 0xFF to be received
+	  	HAL_UART_AbortReceive(&huart1);
+	  	do {
+	  		HAL_UART_Receive(&huart1, UART_RX_BUFFER, 9, 100);
+	  		key = UART_RX_BUFFER[0];
+	  	} while (key != 0xFF);
+	  	calibrateRTC(UART_RX_BUFFER);
+	  	osDelay(10);
+	  	HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
+	  	send_error_counter_packet();
+	    get_reset_cause();
+
+  }
+  /* USER CODE END Sync_init */
 }
 
 /* Private application code --------------------------------------------------*/

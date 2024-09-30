@@ -93,6 +93,18 @@ volatile uint8_t HK_10_second_counter = 0;
 volatile uint8_t HK_100_ms_counter = 0;
 
 volatile uint8_t IDLING = 1;
+
+uint64_t SingleErrorA[4] = { 0xCCCCCCCCCCCCCCCC,
+							 0xCCCCCCCCCCCCCCCC,
+							 0xCCCCCCCCCCCCCCCC,
+							 0xCCCCCCCCCCCCCCC0
+						   };
+
+uint64_t SingleErrorB[4] = { 0xCCCCCCCCCCCCCCCC,
+						     0xCCCCCCCCCCCCCCCC,
+							 0xCCCCCCCCCCCCCCCC,
+							 0xCCCCCCCCCCCCCCC1
+						   };
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -100,16 +112,31 @@ void SystemClock_Config(void);
 void PeriphCommonClock_Config(void);
 void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
-void get_reset_cause();
 void system_setup();
-void send_ACK();
-void send_NACK();
-void sync();
 void init_flash_ecc();
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void cause_flash_single_error() {
+	HAL_FLASH_Unlock();
+	uint32_t Address = 0x08040000;
+	if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, Address, ((uint32_t) SingleErrorB)) != HAL_OK) {
+		Error_Handler();
+	}
+
+	if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, Address, ((uint32_t) SingleErrorA)) != HAL_OK) {
+		Error_Handler();
+	}
+
+	uint64_t readData[4];
+	for (int i = 0; i < 4; i++) {
+		readData[i] = *((uint64_t*) (Address + i * 8)); // Read 64 bits at a time
+	}
+
+	HAL_FLASH_Lock();
+}
+
 void HAL_FLASHEx_EccCorrectionCallback() {
 	ERROR_STRUCT error;
 	error.category = EC_seu;
@@ -133,7 +160,9 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim) {
 			osEventFlagsSet(packet_event_flags, ERPA_FLAG_ID);
 		}
 		if (HK_100_ms_counter == 32) {
+#ifdef ERROR_HANDLING_ENABLED
 			osEventFlagsSet(utility_event_flags, VOLTAGE_MONITOR_FLAG_ID);
+#endif
 
 			if (HK_ENABLED){
 				osEventFlagsSet(packet_event_flags, HK_FLAG_ID);
@@ -291,7 +320,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		osEventFlagsSet(packet_event_flags, ERPA_FLAG_ID);
 		TIM2->CCR4 = 312;
 		ERPA_ENABLED = 1;
-
 		break;
 	}
 	case 0x0A: {
@@ -364,8 +392,15 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		break;
 	}
 	case 0xE0: {
-		printf("Auto Init\n");
-		osEventFlagsSet(utility_event_flags, AUTOINIT_FLAG);
+//		printf("Auto Init\n");
+//		osEventFlagsSet(utility_event_flags, AUTOINIT_FLAG);
+
+		cause_flash_single_error();
+
+//		ERROR_STRUCT error;
+//		error.category = EC_seu;
+//		error.detail = ED_double_bit_error_flash;
+//		handle_error(error);
 		break;
 	}
 	case 0xD0: {
@@ -374,7 +409,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		break;
 	}
 	case 0xAF: {
-		sync();
+		osEventFlagsSet(mode_event_flags, SYNC_FLAG);
 		break;
 	}
 	case 0xBF: {
@@ -421,7 +456,6 @@ void get_reset_cause()
         error.detail = ED_UNDEFINED;
         handle_error(error);
     }
-
     // Clear all the reset flags or else they will remain set during future
     // resets until system power is fully removed.
     __HAL_RCC_CLEAR_RESET_FLAGS();
@@ -471,13 +505,12 @@ int main(void)
   MX_DAC1_Init();
   MX_SPI1_Init();
   MX_RTC_Init();
-  MX_IWDG1_Init();
+//  MX_IWDG1_Init();
   MX_RAMECC_Init();
   /* USER CODE BEGIN 2 */
 
-#ifdef ERROR_HANDLING_ENABLED
+  #ifdef ERROR_HANDLING_ENABLED
   	error_counter_init();
-  	get_reset_cause();
 #endif
 
   system_setup();
@@ -632,23 +665,6 @@ void system_setup() {
 	HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
 
 
-}
-
-void sync() {
-	send_ACK();
-
-	uint8_t key;
-
-	// Wait for 0xFF to be received
-	HAL_UART_AbortReceive(&huart1);
-	do {
-		HAL_UART_Receive(&huart1, UART_RX_BUFFER, 9, 100);
-		key = UART_RX_BUFFER[0];
-	} while (key != 0xFF);
-
-	calibrateRTC(UART_RX_BUFFER); // TODO: calibrate rtc
-	HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
-	send_error_counter_packet();
 }
 
 void send_ACK() {

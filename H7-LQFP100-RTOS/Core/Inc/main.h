@@ -55,6 +55,7 @@ extern "C" {
 
 #define SCIENCE_FLAG 0x0001
 #define IDLE_FLAG 0x0002
+#define SYNC_FLAG 0x0004
 
 
 
@@ -97,6 +98,10 @@ void Error_Handler(void);
 /* USER CODE BEGIN EFP */
 uint8_t get_current_step();
 void enter_stop();
+void send_ACK();
+void send_NACK();
+void get_reset_cause();
+
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/

@@ -15,7 +15,7 @@
 #include "tim.h"
 #include "dac.h"
 void emergency_shutdown();
-
+void flash_mass_erase();
 /**
  * @brief Array storing virtual addresses for EEPROM emulation variables.
  *
@@ -53,27 +53,63 @@ void handle_error(ERROR_STRUCT error) {
 #ifdef ERROR_HANDLING_ENABLED
 	vTaskSuspendAll();
 	emergency_shutdown();
-	while (!IDLING) {};
-	increment_error_counter(error);
-	set_previous_error(error);
-	send_current_error_packet(error);
-	send_junk_packet();
+
+
 
 	switch (error.category) {
 	case EC_power_supply_rail:
-		NVIC_SystemReset();
+		increment_error_counter(error);
+		set_previous_error(error);
 		break;
 	case EC_seu:
-		NVIC_SystemReset();
+		if ((error.detail == ED_single_bit_error_flash) || (error.detail == ED_double_bit_error_flash)) {
+			local_cpy[error.category]++;
+			local_cpy[error.detail]++;
+			flash_mass_erase();
+			EE_Init();
+			reset_error_counters();
+			update_error_counter();
+		}
+		else {
+			increment_error_counter(error);
+			set_previous_error(error);
+		}
 		break;
 	case EC_peripheral:
-		NVIC_SystemReset();
+		increment_error_counter(error);
+		set_previous_error(error);
 		break;
 	default:
-		// Should not be possible to get here
+		// Brownout and Watchdog
+		increment_error_counter(error);
+		set_previous_error(error);
 		break;
 	}
+
+	while(!IDLING){};
+
+
+	send_current_error_packet(error);
+	send_junk_packet();
+	NVIC_SystemReset();
 #endif
+}
+
+void flash_mass_erase() {
+	HAL_FLASH_Unlock();
+
+	static FLASH_EraseInitTypeDef EraseInitStruct;
+	/* Fill EraseInit structure*/
+	uint32_t SECTORError = 0;
+	EraseInitStruct.TypeErase = FLASH_TYPEERASE_SECTORS;
+	EraseInitStruct.VoltageRange = FLASH_VOLTAGE_RANGE_3;
+	EraseInitStruct.Banks = FLASH_BANK_2;
+	EraseInitStruct.Sector = FLASH_SECTOR_0;
+	EraseInitStruct.NbSectors = FLASH_SECTOR_TOTAL;
+
+	if (HAL_FLASHEx_Erase(&EraseInitStruct, &SECTORError) != HAL_OK) {
+		Error_Handler();
+	}
 }
 
 /**
@@ -331,9 +367,7 @@ void emergency_shutdown() {
 	// Disabling all voltages
 	for (int i = 8; i >= 0; i--) {
 		HAL_GPIO_WritePin(gpios[i].gpio, gpios[i].pin, GPIO_PIN_RESET);
-		HAL_Delay(200);
 	}
-	HAL_Delay(3000);
 	IDLING = 1;
 }
 
