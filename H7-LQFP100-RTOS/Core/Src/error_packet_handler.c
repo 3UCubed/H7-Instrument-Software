@@ -69,6 +69,8 @@ void handle_error(ERROR_STRUCT error) {
 			EE_Init();
 			reset_error_counters();
 			update_error_counter();
+			set_previous_error(error);
+
 		}
 		else {
 			increment_error_counter(error);

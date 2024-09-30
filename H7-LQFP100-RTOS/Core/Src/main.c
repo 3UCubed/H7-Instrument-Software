@@ -105,6 +105,18 @@ uint64_t SingleErrorB[4] = { 0xCCCCCCCCCCCCCCCC,
 							 0xCCCCCCCCCCCCCCCC,
 							 0xCCCCCCCCCCCCCCC1
 						   };
+
+uint64_t DoubleErrorA[4] = { 0xCCCCCCCCCCCCCCCC,
+							 0xCCCCCCCCCCCCCCCC,
+							 0xCCCCCCCCCCCCCCCC,
+							 0xCCCCCCCCCCCCCCCB
+						   };
+
+uint64_t DoubleErrorB[4] = { 0xCCCCCCCCCCCCCCCC,
+							 0xCCCCCCCCCCCCCCCC,
+							 0xCCCCCCCCCCCCCCCC,
+							 0xCCCCCCCCCCCCCCCC
+						   };
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -126,6 +138,26 @@ void cause_flash_single_error() {
 	}
 
 	if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, Address, ((uint32_t) SingleErrorA)) != HAL_OK) {
+		Error_Handler();
+	}
+
+	uint64_t readData[4];
+	for (int i = 0; i < 4; i++) {
+		readData[i] = *((uint64_t*) (Address + i * 8)); // Read 64 bits at a time
+	}
+
+	HAL_FLASH_Lock();
+}
+
+void cause_flash_double_error() {
+	HAL_FLASH_Unlock();
+	uint32_t Address = 0x08040000;
+
+	if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, Address, ((uint32_t) DoubleErrorB)) != HAL_OK) {
+		Error_Handler();
+	}
+
+	if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, Address, ((uint32_t) DoubleErrorA)) != HAL_OK) {
 		Error_Handler();
 	}
 
@@ -397,15 +429,14 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 
 		cause_flash_single_error();
 
-//		ERROR_STRUCT error;
-//		error.category = EC_seu;
-//		error.detail = ED_double_bit_error_flash;
-//		handle_error(error);
 		break;
 	}
 	case 0xD0: {
-		printf("Auto Deinit\n");
-		osEventFlagsSet(utility_event_flags, AUTODEINIT_FLAG);
+//		printf("Auto Deinit\n");
+//		osEventFlagsSet(utility_event_flags, AUTODEINIT_FLAG);
+
+		cause_flash_double_error();
+
 		break;
 	}
 	case 0xAF: {
