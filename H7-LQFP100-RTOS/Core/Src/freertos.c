@@ -205,6 +205,7 @@ void vApplicationTickHook( void )
    code must not attempt to block, and only the interrupt safe FreeRTOS API
    functions can be used (those that end in FromISR()). */
 	uptime_millis++;
+
 }
 /* USER CODE END 3 */
 
@@ -474,7 +475,7 @@ void Science_init(void *argument)
 		// Enabling all voltages
 		for (int i = 0; i < 9; i++) {
 			HAL_GPIO_WritePin(gpios[i].gpio, gpios[i].pin, GPIO_PIN_SET);
-			osDelay(200);
+			osDelay(100);
 		}
 
 		// Telling rail monitor which voltages are now enabled
@@ -534,7 +535,7 @@ void Idle_init(void *argument)
 		// Disabling all voltages
 		for (int i = 8; i >= 0; i--) {
 			HAL_GPIO_WritePin(gpios[i].gpio, gpios[i].pin, GPIO_PIN_RESET);
-			osDelay(200);
+			osDelay(100);
 		}
 		osDelay(3500);		// TODO: Reduce to 1000 for assembled instrument
 		IDLING = 1;

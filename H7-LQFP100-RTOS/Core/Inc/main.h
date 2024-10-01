@@ -101,7 +101,7 @@ void enter_stop();
 void send_ACK();
 void send_NACK();
 void get_reset_cause();
-
+void delay(uint16_t ms);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/

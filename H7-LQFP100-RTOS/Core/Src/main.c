@@ -147,7 +147,6 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim) {
 	}
 }
 
-
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
 	unsigned char key = UART_RX_BUFFER[0];
@@ -409,6 +408,7 @@ void get_reset_cause()
     {
         error.category = EC_watchdog;
         error.detail = ED_UNDEFINED;
+        __HAL_RCC_CLEAR_RESET_FLAGS();
         handle_error(error);
     }
     // Needs to come *after* checking the `RCC_FLAG_PORRST` flag in order to
@@ -418,11 +418,9 @@ void get_reset_cause()
     {
         error.category = EC_brownout;
         error.detail = ED_UNDEFINED;
+        __HAL_RCC_CLEAR_RESET_FLAGS();
         handle_error(error);
     }
-    // Clear all the reset flags or else they will remain set during future
-    // resets until system power is fully removed.
-    __HAL_RCC_CLEAR_RESET_FLAGS();
 }
 
 /* USER CODE END 0 */
@@ -469,8 +467,9 @@ int main(void)
   MX_DAC1_Init();
   MX_SPI1_Init();
   MX_RTC_Init();
-  MX_IWDG1_Init();
+//  MX_IWDG1_Init();
   MX_RAMECC_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 
   #ifdef ERROR_HANDLING_ENABLED
@@ -698,6 +697,13 @@ void init_flash_ecc() {
 	HAL_FLASHEx_EnableEccDetectionInterrupt();
 
 }
+
+void delay(uint16_t ms) {
+	uint32_t start_val = ms * 1000;
+    while(start_val--) {
+        __NOP();  // Insert NOP to ensure compiler doesn't optimize this loop
+    }
+}
 /* USER CODE END 4 */
 
 /**
@@ -717,7 +723,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
-
+	if (htim == &htim3) {
+		NVIC_SystemReset();
+	}
   /* USER CODE END Callback 1 */
 }
 

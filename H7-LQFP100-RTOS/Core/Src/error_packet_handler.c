@@ -52,46 +52,36 @@ uint16_t local_cpy[NUM_ERROR_COUNTERS];
 void handle_error(ERROR_STRUCT error) {
 #ifdef ERROR_HANDLING_ENABLED
 	vTaskSuspendAll();
+	// Turn off all power supply rails
 	emergency_shutdown();
 
-	switch (error.category) {
-	case EC_power_supply_rail:
+	// If error was caused by flash ECC...
+	if ((error.detail == ED_single_bit_error_flash) || (error.detail == ED_double_bit_error_flash)) {
+		// Erase user flash, reinit EE, reset error counters, increment error counter, set previous error
+		local_cpy[error.category]++;
+		local_cpy[error.detail]++;
+		flash_mass_erase();
+		EE_Init();
+		reset_error_counters();
+		update_error_counter();
+		set_previous_error(error);
+	}
+	// Otherwise, just increment error counter and set previous error
+	else {
 		increment_error_counter(error);
 		set_previous_error(error);
-		break;
-	case EC_seu:
-		if ((error.detail == ED_single_bit_error_flash) || (error.detail == ED_double_bit_error_flash)) {
-			local_cpy[error.category]++;
-			local_cpy[error.detail]++;
-			flash_mass_erase();
-			EE_Init();
-			reset_error_counters();
-			update_error_counter();
-			set_previous_error(error);
-
-		}
-		else {
-			increment_error_counter(error);
-			set_previous_error(error);
-		}
-		break;
-	case EC_peripheral:
-		increment_error_counter(error);
-		set_previous_error(error);
-		break;
-	default:
-		// Brownout and Watchdog
-		increment_error_counter(error);
-		set_previous_error(error);
-		break;
 	}
 
+	// Wait until all power supply rails are off, then send current error packet + junk data
 	while(!IDLING){};
-
-
 	send_current_error_packet(error);
 	send_junk_packet();
-	NVIC_SystemReset();
+
+	// If error wasn't a brownout or watchdog, perform system reset
+	if ((error.category != EC_brownout) && (error.category != EC_watchdog)) {
+		// Start tim3, takes two seconds to trigger interrupt and cause system reset
+		HAL_TIM_Base_Start_IT(&htim3);
+	}
 #endif
 }
 
