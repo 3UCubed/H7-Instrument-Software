@@ -54,8 +54,6 @@ void handle_error(ERROR_STRUCT error) {
 	vTaskSuspendAll();
 	emergency_shutdown();
 
-
-
 	switch (error.category) {
 	case EC_power_supply_rail:
 		increment_error_counter(error);

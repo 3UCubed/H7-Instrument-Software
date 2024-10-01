@@ -181,20 +181,12 @@ void write_RAM(volatile uint32_t *start, volatile uint32_t *end)
 		start++;
 	}
 }
+
 void enable_ramecc_monitor_notifications(RAMECC_HandleTypeDef *hramecc) {
 	if (HAL_RAMECC_EnableNotification(hramecc, (RAMECC_IT_MONITOR_SINGLEERR_R | RAMECC_IT_MONITOR_DOUBLEERR_R)) != HAL_OK) {
 		Error_Handler();
 	}
 	if (HAL_RAMECC_StartMonitor(hramecc) != HAL_OK) {
-		Error_Handler();
-	}
-}
-
-void disable_ramecc_monitor_notifications(RAMECC_HandleTypeDef *hramecc) {
-	if (HAL_RAMECC_DisableNotification(hramecc, (RAMECC_IT_MONITOR_SINGLEERR_R | RAMECC_IT_MONITOR_DOUBLEERR_R)) != HAL_OK) {
-		Error_Handler();
-	}
-	if (HAL_RAMECC_StopMonitor(hramecc) != HAL_OK) {
 		Error_Handler();
 	}
 }

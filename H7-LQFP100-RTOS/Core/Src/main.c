@@ -89,34 +89,9 @@ volatile uint32_t cadence = 3125;
 volatile uint32_t uptime_millis = 0;
 volatile uint8_t tx_flag = 1;
 volatile uint8_t HK_10_second_counter = 0;
-
 volatile uint8_t HK_100_ms_counter = 0;
 
 volatile uint8_t IDLING = 1;
-
-uint64_t SingleErrorA[4] = { 0xCCCCCCCCCCCCCCCC,
-							 0xCCCCCCCCCCCCCCCC,
-							 0xCCCCCCCCCCCCCCCC,
-							 0xCCCCCCCCCCCCCCC0
-						   };
-
-uint64_t SingleErrorB[4] = { 0xCCCCCCCCCCCCCCCC,
-						     0xCCCCCCCCCCCCCCCC,
-							 0xCCCCCCCCCCCCCCCC,
-							 0xCCCCCCCCCCCCCCC1
-						   };
-
-uint64_t DoubleErrorA[4] = { 0xCCCCCCCCCCCCCCCC,
-							 0xCCCCCCCCCCCCCCCC,
-							 0xCCCCCCCCCCCCCCCC,
-							 0xCCCCCCCCCCCCCCCB
-						   };
-
-uint64_t DoubleErrorB[4] = { 0xCCCCCCCCCCCCCCCC,
-							 0xCCCCCCCCCCCCCCCC,
-							 0xCCCCCCCCCCCCCCCC,
-							 0xCCCCCCCCCCCCCCCC
-						   };
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -130,44 +105,6 @@ void init_flash_ecc();
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void cause_flash_single_error() {
-	HAL_FLASH_Unlock();
-	uint32_t Address = 0x08040000;
-	if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, Address, ((uint32_t) SingleErrorB)) != HAL_OK) {
-		Error_Handler();
-	}
-
-	if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, Address, ((uint32_t) SingleErrorA)) != HAL_OK) {
-		Error_Handler();
-	}
-
-	uint64_t readData[4];
-	for (int i = 0; i < 4; i++) {
-		readData[i] = *((uint64_t*) (Address + i * 8)); // Read 64 bits at a time
-	}
-
-	HAL_FLASH_Lock();
-}
-
-void cause_flash_double_error() {
-	HAL_FLASH_Unlock();
-	uint32_t Address = 0x08040000;
-
-	if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, Address, ((uint32_t) DoubleErrorB)) != HAL_OK) {
-		Error_Handler();
-	}
-
-	if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, Address, ((uint32_t) DoubleErrorA)) != HAL_OK) {
-		Error_Handler();
-	}
-
-	uint64_t readData[4];
-	for (int i = 0; i < 4; i++) {
-		readData[i] = *((uint64_t*) (Address + i * 8)); // Read 64 bits at a time
-	}
-
-	HAL_FLASH_Lock();
-}
 
 void HAL_FLASHEx_EccCorrectionCallback() {
 	ERROR_STRUCT error;
@@ -424,18 +361,14 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		break;
 	}
 	case 0xE0: {
-//		printf("Auto Init\n");
-//		osEventFlagsSet(utility_event_flags, AUTOINIT_FLAG);
-
-		cause_flash_single_error();
+		printf("Auto Init\n");
+		osEventFlagsSet(utility_event_flags, AUTOINIT_FLAG);
 
 		break;
 	}
 	case 0xD0: {
-//		printf("Auto Deinit\n");
-//		osEventFlagsSet(utility_event_flags, AUTODEINIT_FLAG);
-
-		cause_flash_double_error();
+		printf("Auto Deinit\n");
+		osEventFlagsSet(utility_event_flags, AUTODEINIT_FLAG);
 
 		break;
 	}
@@ -536,7 +469,7 @@ int main(void)
   MX_DAC1_Init();
   MX_SPI1_Init();
   MX_RTC_Init();
-//  MX_IWDG1_Init();
+  MX_IWDG1_Init();
   MX_RAMECC_Init();
   /* USER CODE BEGIN 2 */
 
