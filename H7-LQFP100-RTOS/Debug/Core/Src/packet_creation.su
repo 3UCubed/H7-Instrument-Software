@@ -1,4 +1,0 @@
-../Core/Src/packet_creation.c:16:6:create_pmt_packet	32	static
-../Core/Src/packet_creation.c:43:6:create_erpa_packet	40	static
-../Core/Src/packet_creation.c:80:6:create_hk_packet	80	static
-../Core/Src/packet_creation.c:147:6:reset_packet_sequence_numbers	4	static

@@ -1,4 +1,0 @@
-../Core/Src/ramecc.c:66:6:MX_RAMECC_Init	8	static
-../Core/Src/ramecc.c:200:6:write_RAM	16	static
-../Core/Src/ramecc.c:209:6:enable_ramecc_monitor_notifications	16	static
-../Core/Src/ramecc.c:218:6:HAL_RAMECC_DetectErrorCallback	24	static
