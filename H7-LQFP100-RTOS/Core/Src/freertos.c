@@ -420,13 +420,19 @@ void AUTODEINIT_init(void *argument)
 void Voltage_Monitor_init(void *argument)
 {
   /* USER CODE BEGIN Voltage_Monitor_init */
+	uint8_t rails_in_bound = 1;
   /* Infinite loop */
   for(;;)
   {
-	  osEventFlagsWait(utility_event_flags, VOLTAGE_MONITOR_FLAG_ID, osFlagsWaitAny,
-	  		osWaitForever);
+	  osEventFlagsWait(utility_event_flags, VOLTAGE_MONITOR_FLAG_ID, osFlagsWaitAny, osWaitForever);
 	  set_rail_monitor();
-	  monitor_rails();
+	  rails_in_bound = monitor_rails();
+	  if (!rails_in_bound && !IDLING) {
+		  osEventFlagsSet(mode_event_flags, IDLE_FLAG);
+		  while (!IDLING) {};
+		  osDelay(1000);
+		  osEventFlagsSet(mode_event_flags, SCIENCE_FLAG);
+	  }
   }
   /* USER CODE END Voltage_Monitor_init */
 }

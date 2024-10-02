@@ -261,7 +261,7 @@ int16_t convert_ADT7410(int16_t raw) {
     return ret / 16.0;
 }
 
-uint8_t in_range(VOLTAGE_RAIL_NAME name, uint16_t raw, int min, int max) {
+uint8_t check_bounds(VOLTAGE_RAIL_NAME name, uint16_t raw, int min, int max) {
 	if (name == RAIL_TEMP1 || name == RAIL_TEMP2 || name == RAIL_TEMP3 || name == RAIL_TEMP4){
 		int16_t converted_max = convert_ADT7410(max);
 		int16_t converted_min = convert_ADT7410(min);
@@ -278,82 +278,55 @@ uint8_t in_range(VOLTAGE_RAIL_NAME name, uint16_t raw, int min, int max) {
 	return 0;
 }
 
+// Returns 0 if a rail is out of bounds
+uint8_t monitor_rails() {
+	uint8_t within_bounds = 1;
+	uint16_t tolerance;
 
-void monitor_rails() {
 	// Iterate through all voltage rails
 	for (int i = 0; i < NUM_VOLTAGE_RAILS; i++){
+		// Range check is different depending on whether the rail is enabled or not
 		if (rail_monitor[i].is_enabled){
-			// If current rail is not in range...
-			if (!in_range(rail_monitor[i].name, rail_monitor[i].data, rail_monitor[i].min_voltage, rail_monitor[i].max_voltage)){
-				// Increase that rails error count
-				rail_monitor[i].error_count++;
-
-				// Store the voltage each time a rail goes out of bounds
-				switch (rail_monitor[i].error_count) {
-				case 1:
-					rail_monitor[i].OOB_1 = rail_monitor[i].data;
-					break;
-				case 2:
-					rail_monitor[i].OOB_2 = rail_monitor[i].data;
-					break;
-				case 3:
-					rail_monitor[i].OOB_3 = rail_monitor[i].data;
-					break;
-				default:
-					break;
-				}
-
-				// If that rails' error count is at 3, proceed with error protocol for that rail
-				if (rail_monitor[i].error_count == 3) {
-					ERROR_STRUCT error;
-					error.detail = get_rail_name_error_detail(rail_monitor[i].name);
-					error.category = EC_power_supply_rail;
-					error.OOB_1 = rail_monitor[i].OOB_1;
-					error.OOB_2 = rail_monitor[i].OOB_2;
-					error.OOB_3 = rail_monitor[i].OOB_3;
-
-					handle_error(error);
-				}
-			}
+			within_bounds = check_bounds(rail_monitor[i].name, rail_monitor[i].data, rail_monitor[i].min_voltage, rail_monitor[i].max_voltage);
 		}
-		// If the rail monitor isn't enabled...
 		else {
-			uint16_t tolerance;
 			tolerance = rail_monitor[i].max_voltage * 0.1;
+			within_bounds = check_bounds(rail_monitor[i].name, rail_monitor[i].data, 0, tolerance);
+		}
 
-			// If it isn't within +10% of its max voltage from 0...
-			if (!in_range(rail_monitor[i].name, rail_monitor[i].data, 0, tolerance)) {
-				// Increase that rails error count
-				rail_monitor[i].error_count++;
+		// If we aren't within range...
+		if (!within_bounds) {
 
-				// Store the voltage each time a rail goes out of bounds
-				switch (rail_monitor[i].error_count) {
-				case 1:
-					rail_monitor[i].OOB_1 = rail_monitor[i].data;
-					break;
-				case 2:
-					rail_monitor[i].OOB_2 = rail_monitor[i].data;
-					break;
-				case 3:
-					rail_monitor[i].OOB_3 = rail_monitor[i].data;
-					break;
-				default:
-					break;
-				}
+			// Increase that rails error count
+			rail_monitor[i].error_count++;
 
-				// If that rails' error count is at 3, proceed with error protocol for that rail
-				if (rail_monitor[i].error_count == 3) {
-					ERROR_STRUCT error;
-					error.detail = get_rail_name_error_detail(rail_monitor[i].name);
-					error.category = EC_power_supply_rail;
-					error.OOB_1 = rail_monitor[i].OOB_1;
-					error.OOB_2 = rail_monitor[i].OOB_2;
-					error.OOB_3 = rail_monitor[i].OOB_3;
-					handle_error(error);
-				}
+			// Store the voltage each time a rail goes out of bounds
+			switch (rail_monitor[i].error_count) {
+			case 1:
+				rail_monitor[i].OOB_1 = rail_monitor[i].data;
+				return 0;
+				break;
+			case 2:
+				rail_monitor[i].OOB_2 = rail_monitor[i].data;
+				return 0;
+				break;
+			case 3:
+				rail_monitor[i].OOB_3 = rail_monitor[i].data;
+				ERROR_STRUCT error;
+				error.detail = get_rail_name_error_detail(rail_monitor[i].name);
+				error.category = EC_power_supply_rail;
+				error.OOB_1 = rail_monitor[i].OOB_1;
+				error.OOB_2 = rail_monitor[i].OOB_2;
+				error.OOB_3 = rail_monitor[i].OOB_3;
+				handle_error(error);
+				break;
+			default:
+				break;
 			}
 		}
 	}
+	// No rails were out of bounds, so voltage_monitor task does not need to enter idle and delay
+	return 1;
 }
 
 ERROR_DETAIL get_rail_name_error_detail(VOLTAGE_RAIL_NAME rail_name) {

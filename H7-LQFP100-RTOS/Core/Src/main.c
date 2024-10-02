@@ -139,7 +139,6 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim) {
 			HK_100_ms_counter = 0;
 		}
 		HK_100_ms_counter++;
-		HAL_IWDG_Refresh(&hiwdg1);
 
 
 	} else {
@@ -362,7 +361,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	case 0xE0: {
 		printf("Auto Init\n");
 		osEventFlagsSet(utility_event_flags, AUTOINIT_FLAG);
-
 		break;
 	}
 	case 0xD0: {
@@ -421,6 +419,7 @@ void get_reset_cause()
         __HAL_RCC_CLEAR_RESET_FLAGS();
         handle_error(error);
     }
+
 }
 
 /* USER CODE END 0 */
@@ -467,7 +466,7 @@ int main(void)
   MX_DAC1_Init();
   MX_SPI1_Init();
   MX_RTC_Init();
-//  MX_IWDG1_Init();
+  MX_IWDG1_Init();
   MX_RAMECC_Init();
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
@@ -477,7 +476,6 @@ int main(void)
 #endif
 
   system_setup();
-
 
   /* USER CODE END 2 */
 
@@ -698,12 +696,6 @@ void init_flash_ecc() {
 
 }
 
-void delay(uint16_t ms) {
-	uint32_t start_val = ms * 1000;
-    while(start_val--) {
-        __NOP();  // Insert NOP to ensure compiler doesn't optimize this loop
-    }
-}
 /* USER CODE END 4 */
 
 /**
@@ -717,6 +709,7 @@ void delay(uint16_t ms) {
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   /* USER CODE BEGIN Callback 0 */
+	HAL_IWDG_Refresh(&hiwdg1);
 
   /* USER CODE END Callback 0 */
   if (htim->Instance == TIM6) {

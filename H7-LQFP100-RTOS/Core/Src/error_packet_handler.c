@@ -51,7 +51,6 @@ uint16_t local_cpy[NUM_ERROR_COUNTERS];
  */
 void handle_error(ERROR_STRUCT error) {
 #ifdef ERROR_HANDLING_ENABLED
-	vTaskSuspendAll();
 	// Turn off all power supply rails
 	emergency_shutdown();
 
@@ -77,11 +76,8 @@ void handle_error(ERROR_STRUCT error) {
 	send_current_error_packet(error);
 	send_junk_packet();
 
-	// If error wasn't a brownout or watchdog, perform system reset
-	if ((error.category != EC_brownout) && (error.category != EC_watchdog)) {
-		// Start tim3, takes two seconds to trigger interrupt and cause system reset
-		HAL_TIM_Base_Start_IT(&htim3);
-	}
+	HAL_TIM_Base_Start_IT(&htim3);
+
 #endif
 }
 
@@ -345,6 +341,8 @@ void emergency_shutdown() {
 	ERPA_ENABLED = 0;
 	TIM2->CCR4 = 0;
 	HAL_TIM_OC_Stop_IT(&htim1, TIM_CHANNEL_1);			// PMT packet off
+	HAL_TIM_OC_Stop_IT(&htim2, TIM_CHANNEL_4);
+
 	HK_ENABLED = 0;
 	HAL_DAC_Stop_DMA(&hdac1, DAC_CHANNEL_1);			// Disable auto sweep
 

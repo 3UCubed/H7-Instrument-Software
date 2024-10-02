@@ -52,7 +52,7 @@ uint8_t set_rail_monitor_enable(VOLTAGE_RAIL_NAME rail_name, uint8_t enable_valu
 uint8_t set_rail_monitor();
 VOLTAGE_RAIL* get_rail_monitor();
 int16_t convert_ADT7410(int16_t raw);
-uint8_t in_range(VOLTAGE_RAIL_NAME name, uint16_t raw, int min, int max);
-void monitor_rails();
+uint8_t check_bounds(VOLTAGE_RAIL_NAME name, uint16_t raw, int min, int max);
+uint8_t monitor_rails();
 ERROR_DETAIL get_rail_name_error_detail(VOLTAGE_RAIL_NAME rail_name);
 #endif /* INC_VOLTAGE_MONITOR_H_ */
