@@ -69,12 +69,6 @@ void MX_RAMECC_Init(void)
   /* USER CODE BEGIN RAMECC_Init 0 */
 	  write_RAM((volatile uint32_t *)ITCM_START_ADDRESS, (volatile uint32_t *)ITCM_END_ADDRESS);
 	  write_RAM((volatile uint32_t *)DTCM_START_ADDRESS, (volatile uint32_t *)DTCM_END_ADDRESS);
-	  //write_RAM((volatile uint32_t *)AXI_START_ADDRESS, (volatile uint32_t *)AXI_END_ADDRESS);
-	  //write_RAM((volatile uint32_t *)SRAM1_START_ADDRESS, (volatile uint32_t *)SRAM1_END_ADDRESS);
-	  write_RAM((volatile uint32_t *)SRAM2_START_ADDRESS, (volatile uint32_t *)SRAM2_END_ADDRESS);
-	  write_RAM((volatile uint32_t *)SRAM3_START_ADDRESS, (volatile uint32_t *)SRAM3_END_ADDRESS);
-	  write_RAM((volatile uint32_t *)SRAM4_START_ADDRESS, (volatile uint32_t *)SRAM4_END_ADDRESS);
-	  write_RAM((volatile uint32_t *)BACKUP_START_ADDRESS, (volatile uint32_t *)BACKUP_END_ADDRESS);
   /* USER CODE END RAMECC_Init 0 */
 
   /* USER CODE BEGIN RAMECC_Init 1 */
