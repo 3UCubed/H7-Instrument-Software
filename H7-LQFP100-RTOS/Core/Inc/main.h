@@ -39,10 +39,10 @@ extern "C" {
 #include "voltage_monitor.h"	// For initializing voltage monitor in system_setup
 #include "sample_data.h"		// For initializing adc dma in system_setup
 #include "time_tagging.h"		// For letting sync calibrate RTC
-#include "shared_types.h"
+
+#define ERROR_HANDLING_ENABLED
 
 #define UART_RX_BUFFER_SIZE 64
-
 
 #define PMT_FLAG_ID 0x0001
 #define ERPA_FLAG_ID 0x0002
@@ -55,6 +55,7 @@ extern "C" {
 
 #define SCIENCE_FLAG 0x0001
 #define IDLE_FLAG 0x0002
+#define SYNC_FLAG 0x0004
 
 
 
@@ -83,6 +84,7 @@ extern volatile uint32_t uptime_millis;
 extern uint32_t DAC_OUT[32];
 extern volatile uint8_t HK_ENABLED;
 extern volatile uint8_t ERPA_ENABLED;
+extern volatile uint8_t IDLING;
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
@@ -96,12 +98,36 @@ void Error_Handler(void);
 /* USER CODE BEGIN EFP */
 uint8_t get_current_step();
 void enter_stop();
+void send_ACK();
+void send_NACK();
+void get_reset_cause();
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
 
 /* USER CODE BEGIN Private defines */
+#define FLASH_BASE_ADDR      (uint32_t)(FLASH_BASE)
+#define FLASH_END_ADDR       (uint32_t)(0x081FFFFF)
 
+/* Base address of the Flash sectors Bank 1 */
+#define ADDR_FLASH_SECTOR_0_BANK1     ((uint32_t)0x08000000) /* Base @ of Sector 0, 128 Kbytes */
+#define ADDR_FLASH_SECTOR_1_BANK1     ((uint32_t)0x08020000) /* Base @ of Sector 1, 128 Kbytes */
+#define ADDR_FLASH_SECTOR_2_BANK1     ((uint32_t)0x08040000) /* Base @ of Sector 2, 128 Kbytes */
+#define ADDR_FLASH_SECTOR_3_BANK1     ((uint32_t)0x08060000) /* Base @ of Sector 3, 128 Kbytes */
+#define ADDR_FLASH_SECTOR_4_BANK1     ((uint32_t)0x08080000) /* Base @ of Sector 4, 128 Kbytes */
+#define ADDR_FLASH_SECTOR_5_BANK1     ((uint32_t)0x080A0000) /* Base @ of Sector 5, 128 Kbytes */
+#define ADDR_FLASH_SECTOR_6_BANK1     ((uint32_t)0x080C0000) /* Base @ of Sector 6, 128 Kbytes */
+#define ADDR_FLASH_SECTOR_7_BANK1     ((uint32_t)0x080E0000) /* Base @ of Sector 7, 128 Kbytes */
+
+/* Base address of the Flash sectors Bank 2 */
+#define ADDR_FLASH_SECTOR_0_BANK2     ((uint32_t)0x08100000) /* Base @ of Sector 0, 128 Kbytes */
+#define ADDR_FLASH_SECTOR_1_BANK2     ((uint32_t)0x08120000) /* Base @ of Sector 1, 128 Kbytes */
+#define ADDR_FLASH_SECTOR_2_BANK2     ((uint32_t)0x08140000) /* Base @ of Sector 2, 128 Kbytes */
+#define ADDR_FLASH_SECTOR_3_BANK2     ((uint32_t)0x08160000) /* Base @ of Sector 3, 128 Kbytes */
+#define ADDR_FLASH_SECTOR_4_BANK2     ((uint32_t)0x08180000) /* Base @ of Sector 4, 128 Kbytes */
+#define ADDR_FLASH_SECTOR_5_BANK2     ((uint32_t)0x081A0000) /* Base @ of Sector 5, 128 Kbytes */
+#define ADDR_FLASH_SECTOR_6_BANK2     ((uint32_t)0x081C0000) /* Base @ of Sector 6, 128 Kbytes */
+#define ADDR_FLASH_SECTOR_7_BANK2     ((uint32_t)0x081E0000) /* Base @ of Sector 7, 128 Kbytes */
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

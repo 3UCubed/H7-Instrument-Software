@@ -1,0 +1,35 @@
+\doxysection{packet\+\_\+creation.\+h}
+\hypertarget{packet__creation_8h_source}{}\label{packet__creation_8h_source}\index{Core/inc/packet\_creation.h@{Core/inc/packet\_creation.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ packet\_creation.h}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ \ Created\ on:\ Aug\ 6,\ 2024}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *\ \ \ \ \ \ Author:\ 3ucubed}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00007\ }
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#ifndef\ INC\_PACKET\_CREATION\_H\_}}
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#define\ INC\_PACKET\_CREATION\_H\_}}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \textcolor{preprocessor}{\#include\ "{}time\_tagging.h"{}}}
+\DoxyCodeLine{00012\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{usart_8h}{usart.h}}"{}}}
+\DoxyCodeLine{00013\ }
+\DoxyCodeLine{00014\ \textcolor{preprocessor}{\#define\ PMT\_DATA\_SIZE\ 10}}
+\DoxyCodeLine{00015\ \textcolor{preprocessor}{\#define\ ERPA\_DATA\_SIZE\ 14}}
+\DoxyCodeLine{00016\ \textcolor{preprocessor}{\#define\ HK\_DATA\_SIZE\ 54}}
+\DoxyCodeLine{00017\ \textcolor{preprocessor}{\#define\ UPTIME\_SIZE\ 4}}
+\DoxyCodeLine{00018\ \textcolor{preprocessor}{\#define\ TIMESTAMP\_SIZE\ 10}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00020\ \textcolor{preprocessor}{\#define\ PMT\_SYNC\ 0xFF}}
+\DoxyCodeLine{00021\ \textcolor{preprocessor}{\#define\ ERPA\_SYNC\ 0xEE}}
+\DoxyCodeLine{00022\ \textcolor{preprocessor}{\#define\ HK\_SYNC\ 0xDD}}
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ \textcolor{keywordtype}{void}\ create\_pmt\_packet();}
+\DoxyCodeLine{00025\ \textcolor{keywordtype}{void}\ create\_erpa\_packet();}
+\DoxyCodeLine{00026\ \textcolor{keywordtype}{void}\ create\_hk\_packet();}
+\DoxyCodeLine{00027\ \textcolor{keywordtype}{void}\ reset\_packet\_sequence\_numbers();}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ INC\_PACKET\_CREATION\_H\_\ */}\textcolor{preprocessor}{}}
+
+\end{DoxyCode}

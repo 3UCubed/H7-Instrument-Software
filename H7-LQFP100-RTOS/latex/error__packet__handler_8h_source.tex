@@ -1,0 +1,79 @@
+\doxysection{error\+\_\+packet\+\_\+handler.\+h}
+\hypertarget{error__packet__handler_8h_source}{}\label{error__packet__handler_8h_source}\index{Core/inc/error\_packet\_handler.h@{Core/inc/error\_packet\_handler.h}}
+\mbox{\hyperlink{error__packet__handler_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ }
+\DoxyCodeLine{00016\ \textcolor{preprocessor}{\#ifndef\ INC\_ERROR\_PACKET\_HANDLER\_H\_}}
+\DoxyCodeLine{00017\ \textcolor{preprocessor}{\#define\ INC\_ERROR\_PACKET\_HANDLER\_H\_}}
+\DoxyCodeLine{00018\ }
+\DoxyCodeLine{00019\ \textcolor{preprocessor}{\#include\ <stdio.h>}}
+\DoxyCodeLine{00020\ }
+\DoxyCodeLine{00021\ \textcolor{preprocessor}{\#define\ ERROR\_COUNTER\_PACKET\_SIZE\ 56}}
+\DoxyCodeLine{00022\ \textcolor{preprocessor}{\#define\ PREV\_ERROR\_PACKET\_SIZE\ 4}}
+\DoxyCodeLine{00023\ \textcolor{preprocessor}{\#define\ CURRENT\_ERROR\_PACKET\_SIZE\ 4}}
+\DoxyCodeLine{00024\ \textcolor{preprocessor}{\#define\ JUNK\_PACKET\_SIZE\ 1024}}
+\DoxyCodeLine{00025\ }
+\DoxyCodeLine{00026\ \textcolor{preprocessor}{\#define\ ERROR\_COUNTER\_PACKET\_SYNC\ 0xCC}}
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#define\ PREV\_ERROR\_PACKET\_SYNC\ 0xAA}}
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#define\ CURRENT\_ERROR\_PACKET\_SYNC\ 0xBB}}
+\DoxyCodeLine{00029\ }
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#define\ NUM\_ERROR\_COUNTERS\ 27}}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#define\ PREV\_ERROR\_CATEGORY\_INDEX\ 27}}
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#define\ PREV\_ERROR\_DETAIL\_INDEX\ 28}}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00035\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\ \{}
+\DoxyCodeLine{00036\ \ \ \ \ EC\_power\_supply\_rail\ =\ 0x00,}
+\DoxyCodeLine{00037\ \ \ \ \ EC\_seu\ =\ 0x01,}
+\DoxyCodeLine{00038\ \ \ \ \ EC\_peripheral\ =\ 0x02,}
+\DoxyCodeLine{00039\ \ \ \ \ EC\_brownout\ =\ 0x03,}
+\DoxyCodeLine{00040\ \ \ \ \ EC\_watchdog\ =\ 0x04,}
+\DoxyCodeLine{00041\ \ \ \ \ EC\_UNDEFINED\ =\ 0x05}
+\DoxyCodeLine{00042\ \}ERROR\_CATEGORY;}
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00044\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\ \{}
+\DoxyCodeLine{00045\ \ \ \ \ ED\_vsense\ =\ 0x06,}
+\DoxyCodeLine{00046\ \ \ \ \ ED\_vrefint\ =\ 0x07,}
+\DoxyCodeLine{00047\ \ \ \ \ ED\_TEMP1\ =\ 0x08,}
+\DoxyCodeLine{00048\ \ \ \ \ ED\_TEMP2\ =\ 0x09,}
+\DoxyCodeLine{00049\ \ \ \ \ ED\_TEMP3\ =\ 0x0A,}
+\DoxyCodeLine{00050\ \ \ \ \ ED\_TEMP4\ =\ 0x0B,}
+\DoxyCodeLine{00051\ \ \ \ \ ED\_busvmon\ =\ 0x0C,}
+\DoxyCodeLine{00052\ \ \ \ \ ED\_busimon\ =\ 0x0D,}
+\DoxyCodeLine{00053\ \ \ \ \ ED\_2v5\ =\ 0x0E,}
+\DoxyCodeLine{00054\ \ \ \ \ ED\_3v3\ =\ 0x0F,}
+\DoxyCodeLine{00055\ \ \ \ \ ED\_5v\ =\ 0x10,}
+\DoxyCodeLine{00056\ \ \ \ \ ED\_n3v3\ =\ 0x11,}
+\DoxyCodeLine{00057\ \ \ \ \ ED\_n5v\ =\ 0x12,}
+\DoxyCodeLine{00058\ \ \ \ \ ED\_15v\ =\ 0x13,}
+\DoxyCodeLine{00059\ \ \ \ \ ED\_5vref\ =\ 0x14,}
+\DoxyCodeLine{00060\ \ \ \ \ ED\_n200v\ =\ 0x15,}
+\DoxyCodeLine{00061\ \ \ \ \ ED\_n800v\ =\ 0x16,}
+\DoxyCodeLine{00062\ \ \ \ \ ED\_TMP1\ =\ 0x17,}
+\DoxyCodeLine{00063\ \ \ \ \ ED\_single\_bit\_error\ =\ 0x18,}
+\DoxyCodeLine{00064\ \ \ \ \ ED\_double\_bit\_error\ =\ 0x19,}
+\DoxyCodeLine{00065\ \ \ \ \ ED\_UNDEFINED\ =\ 0x1A}
+\DoxyCodeLine{00066\ \}ERROR\_DETAIL;}
+\DoxyCodeLine{00067\ }
+\DoxyCodeLine{00068\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\{}
+\DoxyCodeLine{00069\ \ \ \ \ ERROR\_CATEGORY\ category;}
+\DoxyCodeLine{00070\ \ \ \ \ ERROR\_DETAIL\ detail;}
+\DoxyCodeLine{00071\ \}\mbox{\hyperlink{struct_e_r_r_o_r___s_t_r_u_c_t}{ERROR\_STRUCT}};}
+\DoxyCodeLine{00072\ }
+\DoxyCodeLine{00073\ \textcolor{keywordtype}{void}\ error\_counter\_init();}
+\DoxyCodeLine{00074\ \textcolor{keywordtype}{void}\ increment\_error\_counter(\mbox{\hyperlink{struct_e_r_r_o_r___s_t_r_u_c_t}{ERROR\_STRUCT}}\ error);}
+\DoxyCodeLine{00075\ \textcolor{keywordtype}{void}\ update\_error\_counter();}
+\DoxyCodeLine{00076\ \textcolor{keywordtype}{void}\ reset\_error\_counters();}
+\DoxyCodeLine{00077\ \textcolor{keywordtype}{void}\ reset\_previous\_error();}
+\DoxyCodeLine{00078\ \textcolor{keywordtype}{void}\ set\_previous\_error(\mbox{\hyperlink{struct_e_r_r_o_r___s_t_r_u_c_t}{ERROR\_STRUCT}}\ error);}
+\DoxyCodeLine{00079\ \mbox{\hyperlink{struct_e_r_r_o_r___s_t_r_u_c_t}{ERROR\_STRUCT}}\ get\_previous\_error();}
+\DoxyCodeLine{00080\ \textcolor{keywordtype}{void}\ handle\_error(\mbox{\hyperlink{struct_e_r_r_o_r___s_t_r_u_c_t}{ERROR\_STRUCT}}\ error);}
+\DoxyCodeLine{00081\ \textcolor{keywordtype}{void}\ send\_error\_counter\_packet();}
+\DoxyCodeLine{00082\ \textcolor{keywordtype}{void}\ send\_previous\_error\_packet();}
+\DoxyCodeLine{00083\ \textcolor{keywordtype}{void}\ send\_current\_error\_packet(\mbox{\hyperlink{struct_e_r_r_o_r___s_t_r_u_c_t}{ERROR\_STRUCT}}\ error);}
+\DoxyCodeLine{00084\ \textcolor{keywordtype}{void}\ send\_junk\_packet();}
+\DoxyCodeLine{00085\ }
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00087\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ INC\_ERROR\_PACKET\_HANDLER\_H\_\ */}\textcolor{preprocessor}{}}
+
+\end{DoxyCode}

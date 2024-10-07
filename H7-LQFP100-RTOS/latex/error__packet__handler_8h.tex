@@ -1,0 +1,110 @@
+\doxysection{Core/inc/error\+\_\+packet\+\_\+handler.h File Reference}
+\hypertarget{error__packet__handler_8h}{}\label{error__packet__handler_8h}\index{Core/inc/error\_packet\_handler.h@{Core/inc/error\_packet\_handler.h}}
+
+
+Contains all function prototypes for error\+\_\+packet\+\_\+handler.\+c.  
+
+
+\doxysubsubsection*{Data Structures}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{struct_e_r_r_o_r___s_t_r_u_c_t}{ERROR\+\_\+\+STRUCT}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{error__packet__handler_8h_a8c3e77c0dbe3a1aff3a8bb81db636292}\label{error__packet__handler_8h_a8c3e77c0dbe3a1aff3a8bb81db636292} 
+enum {\bfseries ERROR\+\_\+\+CATEGORY} \{ \newline
+{\bfseries EC\+\_\+power\+\_\+supply\+\_\+rail} = 0x00
+, {\bfseries EC\+\_\+seu} = 0x01
+, {\bfseries EC\+\_\+peripheral} = 0x02
+, {\bfseries EC\+\_\+brownout} = 0x03
+, \newline
+{\bfseries EC\+\_\+watchdog} = 0x04
+, {\bfseries EC\+\_\+\+UNDEFINED} = 0x05
+ \}
+\item 
+\Hypertarget{error__packet__handler_8h_a855c8e1b8e3f8331f8d298a828a2a3aa}\label{error__packet__handler_8h_a855c8e1b8e3f8331f8d298a828a2a3aa} 
+enum {\bfseries ERROR\+\_\+\+DETAIL} \{ \newline
+{\bfseries ED\+\_\+vsense} = 0x06
+, {\bfseries ED\+\_\+vrefint} = 0x07
+, {\bfseries ED\+\_\+\+TEMP1} = 0x08
+, {\bfseries ED\+\_\+\+TEMP2} = 0x09
+, \newline
+{\bfseries ED\+\_\+\+TEMP3} = 0x0A
+, {\bfseries ED\+\_\+\+TEMP4} = 0x0B
+, {\bfseries ED\+\_\+busvmon} = 0x0C
+, {\bfseries ED\+\_\+busimon} = 0x0D
+, \newline
+{\bfseries ED\+\_\+2v5} = 0x0E
+, {\bfseries ED\+\_\+3v3} = 0x0F
+, {\bfseries ED\+\_\+5v} = 0x10
+, {\bfseries ED\+\_\+n3v3} = 0x11
+, \newline
+{\bfseries ED\+\_\+n5v} = 0x12
+, {\bfseries ED\+\_\+15v} = 0x13
+, {\bfseries ED\+\_\+5vref} = 0x14
+, {\bfseries ED\+\_\+n200v} = 0x15
+, \newline
+{\bfseries ED\+\_\+n800v} = 0x16
+, {\bfseries ED\+\_\+\+TMP1} = 0x17
+, {\bfseries ED\+\_\+single\+\_\+bit\+\_\+error} = 0x18
+, {\bfseries ED\+\_\+double\+\_\+bit\+\_\+error} = 0x19
+, \newline
+{\bfseries ED\+\_\+\+UNDEFINED} = 0x1A
+ \}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{error__packet__handler_8h_a2de3b1d11097ae22d07e6b96f3278cad}\label{error__packet__handler_8h_a2de3b1d11097ae22d07e6b96f3278cad} 
+void {\bfseries error\+\_\+counter\+\_\+init} ()
+\item 
+\Hypertarget{error__packet__handler_8h_a26dea563992120d994e008ed7b3afaeb}\label{error__packet__handler_8h_a26dea563992120d994e008ed7b3afaeb} 
+void {\bfseries increment\+\_\+error\+\_\+counter} (\mbox{\hyperlink{struct_e_r_r_o_r___s_t_r_u_c_t}{ERROR\+\_\+\+STRUCT}} error)
+\item 
+\Hypertarget{error__packet__handler_8h_a52864e5e29f01761e5f96f11018582cb}\label{error__packet__handler_8h_a52864e5e29f01761e5f96f11018582cb} 
+void {\bfseries update\+\_\+error\+\_\+counter} ()
+\item 
+\Hypertarget{error__packet__handler_8h_a19f04466415a2ecb349ba32fb4b81ee6}\label{error__packet__handler_8h_a19f04466415a2ecb349ba32fb4b81ee6} 
+void {\bfseries reset\+\_\+error\+\_\+counters} ()
+\item 
+\Hypertarget{error__packet__handler_8h_a19a647905636b18e6c21d342517792c6}\label{error__packet__handler_8h_a19a647905636b18e6c21d342517792c6} 
+void {\bfseries reset\+\_\+previous\+\_\+error} ()
+\item 
+\Hypertarget{error__packet__handler_8h_a84c1cad9d754d01d270ab474f2262842}\label{error__packet__handler_8h_a84c1cad9d754d01d270ab474f2262842} 
+void {\bfseries set\+\_\+previous\+\_\+error} (\mbox{\hyperlink{struct_e_r_r_o_r___s_t_r_u_c_t}{ERROR\+\_\+\+STRUCT}} error)
+\item 
+\Hypertarget{error__packet__handler_8h_abd725398ca96aa85e30a10c232038ae2}\label{error__packet__handler_8h_abd725398ca96aa85e30a10c232038ae2} 
+\mbox{\hyperlink{struct_e_r_r_o_r___s_t_r_u_c_t}{ERROR\+\_\+\+STRUCT}} {\bfseries get\+\_\+previous\+\_\+error} ()
+\item 
+\Hypertarget{error__packet__handler_8h_a8407dc8a2dc2749fc2a58460320c6195}\label{error__packet__handler_8h_a8407dc8a2dc2749fc2a58460320c6195} 
+void {\bfseries handle\+\_\+error} (\mbox{\hyperlink{struct_e_r_r_o_r___s_t_r_u_c_t}{ERROR\+\_\+\+STRUCT}} error)
+\item 
+\Hypertarget{error__packet__handler_8h_ad7a503293430e826fed773a9f2b0092a}\label{error__packet__handler_8h_ad7a503293430e826fed773a9f2b0092a} 
+void {\bfseries send\+\_\+error\+\_\+counter\+\_\+packet} ()
+\item 
+\Hypertarget{error__packet__handler_8h_aa574bf051be4df536870e04c700276dc}\label{error__packet__handler_8h_aa574bf051be4df536870e04c700276dc} 
+void {\bfseries send\+\_\+previous\+\_\+error\+\_\+packet} ()
+\item 
+\Hypertarget{error__packet__handler_8h_a3f1c92a52e81b3c48906860212263b2c}\label{error__packet__handler_8h_a3f1c92a52e81b3c48906860212263b2c} 
+void {\bfseries send\+\_\+current\+\_\+error\+\_\+packet} (\mbox{\hyperlink{struct_e_r_r_o_r___s_t_r_u_c_t}{ERROR\+\_\+\+STRUCT}} error)
+\item 
+\Hypertarget{error__packet__handler_8h_a34102ff7288e524a4491e6ddb8544a2a}\label{error__packet__handler_8h_a34102ff7288e524a4491e6ddb8544a2a} 
+void {\bfseries send\+\_\+junk\+\_\+packet} ()
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Contains all function prototypes for error\+\_\+packet\+\_\+handler.\+c. 
+
+/\texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}
+
+\doxylink{struct_e_r_r_o_r___s_t_r_u_c_t}{ERROR\+\_\+\+STRUCT} is made up of ERROR\+\_\+\+CATEGORY and ERROR\+\_\+\+DETAIL. An error category has details associated with it. For instance, if there is an error on a power supply rail, the error category will be EC\+\_\+power\+\_\+supply\+\_\+rail with the detail being whatever specific rail caused the error. However, some categories do not have associated details. For example, EC\+\_\+watchdog does not have any details associated with it, and the error packet that is sent for a watchdog error will have the detail ED\+\_\+\+UNDEFINED.
+
+\begin{DoxyAuthor}{Author}
+Jared Morrison 
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+September 4, 2024 
+\end{DoxyDate}

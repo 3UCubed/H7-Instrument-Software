@@ -1,0 +1,160 @@
+\doxysection{Core/inc/main.h File Reference}
+\hypertarget{main_8h}{}\label{main_8h}\index{Core/inc/main.h@{Core/inc/main.h}}
+
+
+\+: Header for main.\+c file. This file contains the common defines of the application.  
+
+
+{\ttfamily \#include "{}stm32h7xx\+\_\+hal.\+h"{}}\newline
+{\ttfamily \#include "{}cmsis\+\_\+os.\+h"{}}\newline
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include "{}string.\+h"{}}\newline
+{\ttfamily \#include "{}packet\+\_\+creation.\+h"{}}\newline
+{\ttfamily \#include "{}voltage\+\_\+monitor.\+h"{}}\newline
+{\ttfamily \#include "{}sample\+\_\+data.\+h"{}}\newline
+{\ttfamily \#include "{}time\+\_\+tagging.\+h"{}}\newline
+\doxysubsubsection*{Data Structures}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structgpio__pins}{gpio\+\_\+pins}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{main_8h_a5bdd6772c246436bb14377095de79b31}\label{main_8h_a5bdd6772c246436bb14377095de79b31} 
+\#define {\bfseries UART\+\_\+\+RX\+\_\+\+BUFFER\+\_\+\+SIZE}~64
+\item 
+\Hypertarget{main_8h_ad60277bfc7e45c8c1324f9389c6f84ff}\label{main_8h_ad60277bfc7e45c8c1324f9389c6f84ff} 
+\#define {\bfseries PMT\+\_\+\+FLAG\+\_\+\+ID}~0x0001
+\item 
+\Hypertarget{main_8h_affd3afc7e7c506db7bcb43368e6845f2}\label{main_8h_affd3afc7e7c506db7bcb43368e6845f2} 
+\#define {\bfseries ERPA\+\_\+\+FLAG\+\_\+\+ID}~0x0002
+\item 
+\Hypertarget{main_8h_aabed20853bb484058ba3dd8f0cb2c3e4}\label{main_8h_aabed20853bb484058ba3dd8f0cb2c3e4} 
+\#define {\bfseries HK\+\_\+\+FLAG\+\_\+\+ID}~0x0004
+\item 
+\Hypertarget{main_8h_a802b24dd69df6fa41b1b6b61f275df0b}\label{main_8h_a802b24dd69df6fa41b1b6b61f275df0b} 
+\#define {\bfseries VOLTAGE\+\_\+\+MONITOR\+\_\+\+FLAG\+\_\+\+ID}~0x0001
+\item 
+\Hypertarget{main_8h_ae58ade827ae6570e768a26165ba6dd90}\label{main_8h_ae58ade827ae6570e768a26165ba6dd90} 
+\#define {\bfseries STOP\+\_\+\+FLAG}~0x0002
+\item 
+\Hypertarget{main_8h_a18cf28d787e7ae7b31b20586b5d6ffd1}\label{main_8h_a18cf28d787e7ae7b31b20586b5d6ffd1} 
+\#define {\bfseries AUTOINIT\+\_\+\+FLAG}~0x0004
+\item 
+\Hypertarget{main_8h_a60c311eaab0799c72aa31061309a19a1}\label{main_8h_a60c311eaab0799c72aa31061309a19a1} 
+\#define {\bfseries AUTODEINIT\+\_\+\+FLAG}~0x0008
+\item 
+\Hypertarget{main_8h_a335c6669c68ff6587b1c9157bf7af71c}\label{main_8h_a335c6669c68ff6587b1c9157bf7af71c} 
+\#define {\bfseries SCIENCE\+\_\+\+FLAG}~0x0001
+\item 
+\Hypertarget{main_8h_a0ab8203918ed85ed3c7520ee471c638b}\label{main_8h_a0ab8203918ed85ed3c7520ee471c638b} 
+\#define {\bfseries IDLE\+\_\+\+FLAG}~0x0002
+\item 
+\Hypertarget{main_8h_a0571de796f539e5779da6a9203190645}\label{main_8h_a0571de796f539e5779da6a9203190645} 
+\#define {\bfseries FLASH\+\_\+\+BASE\+\_\+\+ADDR}~(uint32\+\_\+t)(FLASH\+\_\+\+BASE)
+\item 
+\Hypertarget{main_8h_a1e339943c02a0ed4f75d8decc76b2b2c}\label{main_8h_a1e339943c02a0ed4f75d8decc76b2b2c} 
+\#define {\bfseries FLASH\+\_\+\+END\+\_\+\+ADDR}~(uint32\+\_\+t)(0x081\+FFFFF)
+\item 
+\Hypertarget{main_8h_a8b089d69806a2c1b7af01e40d41e05b9}\label{main_8h_a8b089d69806a2c1b7af01e40d41e05b9} 
+\#define {\bfseries ADDR\+\_\+\+FLASH\+\_\+\+SECTOR\+\_\+0\+\_\+\+BANK1}~((uint32\+\_\+t)0x08000000) /\texorpdfstring{$\ast$}{*} Base @ of Sector 0, 128 Kbytes \texorpdfstring{$\ast$}{*}/
+\item 
+\Hypertarget{main_8h_a9c7099e05e47c21e4f9a7f6757da35c5}\label{main_8h_a9c7099e05e47c21e4f9a7f6757da35c5} 
+\#define {\bfseries ADDR\+\_\+\+FLASH\+\_\+\+SECTOR\+\_\+1\+\_\+\+BANK1}~((uint32\+\_\+t)0x08020000) /\texorpdfstring{$\ast$}{*} Base @ of Sector 1, 128 Kbytes \texorpdfstring{$\ast$}{*}/
+\item 
+\Hypertarget{main_8h_ac15b6bfdb371196c658201a8b17aa297}\label{main_8h_ac15b6bfdb371196c658201a8b17aa297} 
+\#define {\bfseries ADDR\+\_\+\+FLASH\+\_\+\+SECTOR\+\_\+2\+\_\+\+BANK1}~((uint32\+\_\+t)0x08040000) /\texorpdfstring{$\ast$}{*} Base @ of Sector 2, 128 Kbytes \texorpdfstring{$\ast$}{*}/
+\item 
+\Hypertarget{main_8h_ace94d072601fe760302c376499bbb3e7}\label{main_8h_ace94d072601fe760302c376499bbb3e7} 
+\#define {\bfseries ADDR\+\_\+\+FLASH\+\_\+\+SECTOR\+\_\+3\+\_\+\+BANK1}~((uint32\+\_\+t)0x08060000) /\texorpdfstring{$\ast$}{*} Base @ of Sector 3, 128 Kbytes \texorpdfstring{$\ast$}{*}/
+\item 
+\Hypertarget{main_8h_aa38c6b15ffc7335fd394b2ffeb1459c8}\label{main_8h_aa38c6b15ffc7335fd394b2ffeb1459c8} 
+\#define {\bfseries ADDR\+\_\+\+FLASH\+\_\+\+SECTOR\+\_\+4\+\_\+\+BANK1}~((uint32\+\_\+t)0x08080000) /\texorpdfstring{$\ast$}{*} Base @ of Sector 4, 128 Kbytes \texorpdfstring{$\ast$}{*}/
+\item 
+\Hypertarget{main_8h_ad5b77f462da13aa38f2aa3d7be853d22}\label{main_8h_ad5b77f462da13aa38f2aa3d7be853d22} 
+\#define {\bfseries ADDR\+\_\+\+FLASH\+\_\+\+SECTOR\+\_\+5\+\_\+\+BANK1}~((uint32\+\_\+t)0x080\+A0000) /\texorpdfstring{$\ast$}{*} Base @ of Sector 5, 128 Kbytes \texorpdfstring{$\ast$}{*}/
+\item 
+\Hypertarget{main_8h_a1bd60f2e00c763b59df286149b43aa0e}\label{main_8h_a1bd60f2e00c763b59df286149b43aa0e} 
+\#define {\bfseries ADDR\+\_\+\+FLASH\+\_\+\+SECTOR\+\_\+6\+\_\+\+BANK1}~((uint32\+\_\+t)0x080\+C0000) /\texorpdfstring{$\ast$}{*} Base @ of Sector 6, 128 Kbytes \texorpdfstring{$\ast$}{*}/
+\item 
+\Hypertarget{main_8h_a60b229302e0d41dc320253300b785ca0}\label{main_8h_a60b229302e0d41dc320253300b785ca0} 
+\#define {\bfseries ADDR\+\_\+\+FLASH\+\_\+\+SECTOR\+\_\+7\+\_\+\+BANK1}~((uint32\+\_\+t)0x080\+E0000) /\texorpdfstring{$\ast$}{*} Base @ of Sector 7, 128 Kbytes \texorpdfstring{$\ast$}{*}/
+\item 
+\Hypertarget{main_8h_af9a3ead9a1709ea155746152ad69f5f6}\label{main_8h_af9a3ead9a1709ea155746152ad69f5f6} 
+\#define {\bfseries ADDR\+\_\+\+FLASH\+\_\+\+SECTOR\+\_\+0\+\_\+\+BANK2}~((uint32\+\_\+t)0x08100000) /\texorpdfstring{$\ast$}{*} Base @ of Sector 0, 128 Kbytes \texorpdfstring{$\ast$}{*}/
+\item 
+\Hypertarget{main_8h_a69f296cebe026802c713934944e1b073}\label{main_8h_a69f296cebe026802c713934944e1b073} 
+\#define {\bfseries ADDR\+\_\+\+FLASH\+\_\+\+SECTOR\+\_\+1\+\_\+\+BANK2}~((uint32\+\_\+t)0x08120000) /\texorpdfstring{$\ast$}{*} Base @ of Sector 1, 128 Kbytes \texorpdfstring{$\ast$}{*}/
+\item 
+\Hypertarget{main_8h_ae79222b76ea74f91308a0301fcd96e89}\label{main_8h_ae79222b76ea74f91308a0301fcd96e89} 
+\#define {\bfseries ADDR\+\_\+\+FLASH\+\_\+\+SECTOR\+\_\+2\+\_\+\+BANK2}~((uint32\+\_\+t)0x08140000) /\texorpdfstring{$\ast$}{*} Base @ of Sector 2, 128 Kbytes \texorpdfstring{$\ast$}{*}/
+\item 
+\Hypertarget{main_8h_a94b98d5c2037d3fc57552d03bfb646ee}\label{main_8h_a94b98d5c2037d3fc57552d03bfb646ee} 
+\#define {\bfseries ADDR\+\_\+\+FLASH\+\_\+\+SECTOR\+\_\+3\+\_\+\+BANK2}~((uint32\+\_\+t)0x08160000) /\texorpdfstring{$\ast$}{*} Base @ of Sector 3, 128 Kbytes \texorpdfstring{$\ast$}{*}/
+\item 
+\Hypertarget{main_8h_a3e0efa32b3a1767cb02b5f123c959852}\label{main_8h_a3e0efa32b3a1767cb02b5f123c959852} 
+\#define {\bfseries ADDR\+\_\+\+FLASH\+\_\+\+SECTOR\+\_\+4\+\_\+\+BANK2}~((uint32\+\_\+t)0x08180000) /\texorpdfstring{$\ast$}{*} Base @ of Sector 4, 128 Kbytes \texorpdfstring{$\ast$}{*}/
+\item 
+\Hypertarget{main_8h_a4ae9f4032526d51bc7688badc0efd3a8}\label{main_8h_a4ae9f4032526d51bc7688badc0efd3a8} 
+\#define {\bfseries ADDR\+\_\+\+FLASH\+\_\+\+SECTOR\+\_\+5\+\_\+\+BANK2}~((uint32\+\_\+t)0x081\+A0000) /\texorpdfstring{$\ast$}{*} Base @ of Sector 5, 128 Kbytes \texorpdfstring{$\ast$}{*}/
+\item 
+\Hypertarget{main_8h_a6c612bda2be3e57d1713bc3ebe95bb1f}\label{main_8h_a6c612bda2be3e57d1713bc3ebe95bb1f} 
+\#define {\bfseries ADDR\+\_\+\+FLASH\+\_\+\+SECTOR\+\_\+6\+\_\+\+BANK2}~((uint32\+\_\+t)0x081\+C0000) /\texorpdfstring{$\ast$}{*} Base @ of Sector 6, 128 Kbytes \texorpdfstring{$\ast$}{*}/
+\item 
+\Hypertarget{main_8h_a07c6922397747c47c35edd3e06db681b}\label{main_8h_a07c6922397747c47c35edd3e06db681b} 
+\#define {\bfseries ADDR\+\_\+\+FLASH\+\_\+\+SECTOR\+\_\+7\+\_\+\+BANK2}~((uint32\+\_\+t)0x081\+E0000) /\texorpdfstring{$\ast$}{*} Base @ of Sector 7, 128 Kbytes \texorpdfstring{$\ast$}{*}/
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{main_8h_a1730ffe1e560465665eb47d9264826f9}\label{main_8h_a1730ffe1e560465665eb47d9264826f9} 
+void {\bfseries Error\+\_\+\+Handler} (void)
+\item 
+\Hypertarget{main_8h_ad6563de0a104b1b0a6af02e5793cf77e}\label{main_8h_ad6563de0a104b1b0a6af02e5793cf77e} 
+uint8\+\_\+t {\bfseries get\+\_\+current\+\_\+step} ()
+\item 
+\Hypertarget{main_8h_a0322b72ab110431a0425c2911346bb6a}\label{main_8h_a0322b72ab110431a0425c2911346bb6a} 
+void {\bfseries enter\+\_\+stop} ()
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{main_8h_a447eff76e65165627d5dbf5df180f5af}\label{main_8h_a447eff76e65165627d5dbf5df180f5af} 
+os\+Event\+Flags\+Id\+\_\+t {\bfseries packet\+\_\+event\+\_\+flags}
+\item 
+\Hypertarget{main_8h_a3ddea4ae6e6fd5a452fc37ff6f1fc4a2}\label{main_8h_a3ddea4ae6e6fd5a452fc37ff6f1fc4a2} 
+os\+Event\+Flags\+Id\+\_\+t {\bfseries utility\+\_\+event\+\_\+flags}
+\item 
+\Hypertarget{main_8h_a9598a9420b80a8bb1d15f8950a0c1441}\label{main_8h_a9598a9420b80a8bb1d15f8950a0c1441} 
+os\+Event\+Flags\+Id\+\_\+t {\bfseries mode\+\_\+event\+\_\+flags}
+\item 
+\Hypertarget{main_8h_aa6b1cbbc5d6619a4f1fb91264d2eb277}\label{main_8h_aa6b1cbbc5d6619a4f1fb91264d2eb277} 
+unsigned char {\bfseries UART\+\_\+\+RX\+\_\+\+BUFFER} \mbox{[}UART\+\_\+\+RX\+\_\+\+BUFFER\+\_\+\+SIZE\mbox{]}
+\item 
+\Hypertarget{main_8h_a9090902cad57b8863e80ab36ee3ddb5e}\label{main_8h_a9090902cad57b8863e80ab36ee3ddb5e} 
+const \mbox{\hyperlink{structgpio__pins}{gpio\+\_\+pins}} {\bfseries gpios} \mbox{[}$\,$\mbox{]}
+\item 
+\Hypertarget{main_8h_a6a1cef5f74698e4131fd59aa93db4fc1}\label{main_8h_a6a1cef5f74698e4131fd59aa93db4fc1} 
+volatile uint32\+\_\+t {\bfseries uptime\+\_\+millis}
+\item 
+\Hypertarget{main_8h_ad75232664858394289f7df39a1895028}\label{main_8h_ad75232664858394289f7df39a1895028} 
+uint32\+\_\+t {\bfseries DAC\+\_\+\+OUT} \mbox{[}32\mbox{]}
+\item 
+\Hypertarget{main_8h_ab688922a0d211179d4785883167fb150}\label{main_8h_ab688922a0d211179d4785883167fb150} 
+volatile uint8\+\_\+t {\bfseries HK\+\_\+\+ENABLED}
+\item 
+\Hypertarget{main_8h_acbaa7fb5b7d79a29be2a16c9d67226f7}\label{main_8h_acbaa7fb5b7d79a29be2a16c9d67226f7} 
+volatile uint8\+\_\+t {\bfseries ERPA\+\_\+\+ENABLED}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\+: Header for main.\+c file. This file contains the common defines of the application. 
+
+\begin{DoxyAttention}{Attention}
+
+\end{DoxyAttention}
+Copyright (c) 2024 STMicroelectronics. All rights reserved.
+
+This software is licensed under terms that can be found in the LICENSE file in the root directory of this software component. If no LICENSE file comes with this software, it is provided AS-\/\+IS. 

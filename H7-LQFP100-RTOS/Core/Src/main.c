@@ -25,6 +25,8 @@
 #include "dac.h"
 #include "dma.h"
 #include "i2c.h"
+#include "iwdg.h"
+#include "ramecc.h"
 #include "rtc.h"
 #include "spi.h"
 #include "tim.h"
@@ -87,11 +89,9 @@ volatile uint32_t cadence = 3125;
 volatile uint32_t uptime_millis = 0;
 volatile uint8_t tx_flag = 1;
 volatile uint8_t HK_10_second_counter = 0;
-
 volatile uint8_t HK_100_ms_counter = 0;
 
-
-
+volatile uint8_t IDLING = 1;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -100,14 +100,26 @@ void PeriphCommonClock_Config(void);
 void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
 void system_setup();
-void send_ACK();
-void send_NACK();
-void sync();
-
+void init_flash_ecc();
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+void HAL_FLASHEx_EccCorrectionCallback() {
+	ERROR_STRUCT error;
+	error.category = EC_seu;
+	error.detail = ED_single_bit_error_flash;
+	handle_error(error);
+}
+
+void HAL_FLASHEx_EccDetectionCallback() {
+	ERROR_STRUCT error;
+	error.category = EC_seu;
+	error.detail = ED_double_bit_error_flash;
+	handle_error(error);
+}
+
 void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim) {
 	if (htim == &htim1) {
 		osEventFlagsSet(packet_event_flags, PMT_FLAG_ID);
@@ -117,7 +129,9 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim) {
 			osEventFlagsSet(packet_event_flags, ERPA_FLAG_ID);
 		}
 		if (HK_100_ms_counter == 32) {
+#ifdef ERROR_HANDLING_ENABLED
 			osEventFlagsSet(utility_event_flags, VOLTAGE_MONITOR_FLAG_ID);
+#endif
 
 			if (HK_ENABLED){
 				osEventFlagsSet(packet_event_flags, HK_FLAG_ID);
@@ -126,11 +140,11 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim) {
 		}
 		HK_100_ms_counter++;
 
+
 	} else {
 		printf("Unknown Timer Interrupt\n");
 	}
 }
-
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
@@ -273,7 +287,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		osEventFlagsSet(packet_event_flags, ERPA_FLAG_ID);
 		TIM2->CCR4 = 312;
 		ERPA_ENABLED = 1;
-
 		break;
 	}
 	case 0x0A: {
@@ -353,10 +366,11 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	case 0xD0: {
 		printf("Auto Deinit\n");
 		osEventFlagsSet(utility_event_flags, AUTODEINIT_FLAG);
+
 		break;
 	}
 	case 0xAF: {
-		sync();
+		osEventFlagsSet(mode_event_flags, SYNC_FLAG);
 		break;
 	}
 	case 0xBF: {
@@ -367,6 +381,16 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		osEventFlagsSet(mode_event_flags, IDLE_FLAG);
 		break;
 	}
+	case 0xDF: {
+		reset_error_counters();
+		break;
+	}
+	case 0xEF: {
+#ifdef ERROR_HANDLING_ENABLED
+		send_previous_error_packet();
+#endif
+		break;
+	}
 	default: {
 		printf("Unknown Command\n");
 		break;
@@ -374,7 +398,29 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	}
 }
 
+void get_reset_cause()
+{
+	ERROR_STRUCT error;
 
+	if (__HAL_RCC_GET_FLAG(RCC_FLAG_IWDG1RST))
+    {
+        error.category = EC_watchdog;
+        error.detail = ED_UNDEFINED;
+        __HAL_RCC_CLEAR_RESET_FLAGS();
+        handle_error(error);
+    }
+    // Needs to come *after* checking the `RCC_FLAG_PORRST` flag in order to
+    // ensure first that the reset cause is NOT a POR/PDR reset. See note
+    // below.
+    else if (__HAL_RCC_GET_FLAG(RCC_FLAG_BORRST))
+    {
+        error.category = EC_brownout;
+        error.detail = ED_UNDEFINED;
+        __HAL_RCC_CLEAR_RESET_FLAGS();
+        handle_error(error);
+    }
+
+}
 
 /* USER CODE END 0 */
 
@@ -420,7 +466,15 @@ int main(void)
   MX_DAC1_Init();
   MX_SPI1_Init();
   MX_RTC_Init();
+  MX_IWDG1_Init();
+  MX_RAMECC_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
+
+  #ifdef ERROR_HANDLING_ENABLED
+  	error_counter_init();
+#endif
+
   system_setup();
 
   /* USER CODE END 2 */
@@ -464,10 +518,12 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_LSI
+                              |RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.HSIState = RCC_HSI_DIV2;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 4;
@@ -537,6 +593,7 @@ void system_setup() {
 	// 6 -- Init ADC DMA
 	// 7 -- Start UART receive interrupts
 
+	init_flash_ecc();
 
 	packet_event_flags = osEventFlagsNew(NULL);
     if (packet_event_flags == NULL) {
@@ -556,12 +613,11 @@ void system_setup() {
     TIM2->CCR4 = 0;
 	HAL_TIM_OC_Start_IT(&htim2, TIM_CHANNEL_4);
 
+#ifdef ERROR_HANDLING_ENABLED
 	if (!voltage_monitor_init()) {
 		while (1);
 	}
-
-
-
+#endif
 
 	if (!init_adc_dma()) {
 		while (1);
@@ -569,24 +625,7 @@ void system_setup() {
 
 	HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
 
-}
 
-void sync() {
-	send_ACK();
-
-	uint8_t key;
-
-	// Wait for 0xFF to be received
-	HAL_UART_AbortReceive(&huart1);
-	do {
-		HAL_UART_Receive(&huart1, UART_RX_BUFFER, 9, 100);
-		key = UART_RX_BUFFER[0];
-	} while (key != 0xFF);
-
-	//calibrateRTC(UART_RX_BUFFER); // TODO: calibrate rtc
-	HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
-
-	send_ACK();
 }
 
 void send_ACK() {
@@ -646,6 +685,17 @@ void enter_stop() {
 	  reset_packet_sequence_numbers();
 	  xTaskResumeAll();
 }
+
+void init_flash_ecc() {
+	HAL_FLASH_Unlock();
+
+	HAL_NVIC_SetPriority(FLASH_IRQn, 15, 0);
+	HAL_NVIC_EnableIRQ(FLASH_IRQn);
+	HAL_FLASHEx_EnableEccCorrectionInterrupt();
+	HAL_FLASHEx_EnableEccDetectionInterrupt();
+
+}
+
 /* USER CODE END 4 */
 
 /**
@@ -659,13 +709,16 @@ void enter_stop() {
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   /* USER CODE BEGIN Callback 0 */
+	HAL_IWDG_Refresh(&hiwdg1);
 
   /* USER CODE END Callback 0 */
   if (htim->Instance == TIM6) {
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
-
+	if (htim == &htim3) {
+		NVIC_SystemReset();
+	}
   /* USER CODE END Callback 1 */
 }
 
@@ -677,9 +730,10 @@ void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
 	/* User can add his own implementation to report the HAL error return state */
-	__disable_irq();
-	while (1) {
-	}
+	ERROR_STRUCT error;
+	error.category = EC_peripheral;
+	error.detail = ED_UNDEFINED;
+	handle_error(error);
   /* USER CODE END Error_Handler_Debug */
 }
 

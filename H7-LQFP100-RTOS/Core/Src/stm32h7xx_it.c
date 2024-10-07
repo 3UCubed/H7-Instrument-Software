@@ -68,12 +68,24 @@ extern SPI_HandleTypeDef hspi1;
 extern SPI_HandleTypeDef hspi2;
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim2;
+extern TIM_HandleTypeDef htim3;
 extern DMA_HandleTypeDef hdma_usart1_tx;
 extern UART_HandleTypeDef huart1;
 extern TIM_HandleTypeDef htim6;
 
 /* USER CODE BEGIN EV */
-
+extern RAMECC_HandleTypeDef hramecc1_m1;
+extern RAMECC_HandleTypeDef hramecc1_m2;
+extern RAMECC_HandleTypeDef hramecc1_m3;
+extern RAMECC_HandleTypeDef hramecc1_m4;
+extern RAMECC_HandleTypeDef hramecc1_m5;
+extern RAMECC_HandleTypeDef hramecc2_m1;
+extern RAMECC_HandleTypeDef hramecc2_m2;
+extern RAMECC_HandleTypeDef hramecc2_m3;
+extern RAMECC_HandleTypeDef hramecc2_m4;
+extern RAMECC_HandleTypeDef hramecc2_m5;
+extern RAMECC_HandleTypeDef hramecc3_m1;
+extern RAMECC_HandleTypeDef hramecc3_m2;
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -99,7 +111,9 @@ void NMI_Handler(void)
 void HardFault_Handler(void)
 {
   /* USER CODE BEGIN HardFault_IRQn 0 */
-
+	if ((FLASH->SR1 & FLASH_SR_DBECCERR) || (FLASH->SR2 & FLASH_SR_DBECCERR)) {
+		FLASH_IRQHandler();
+	}
   /* USER CODE END HardFault_IRQn 0 */
   while (1)
   {
@@ -172,6 +186,20 @@ void DebugMon_Handler(void)
 /* For the available peripheral interrupt handler names,                      */
 /* please refer to the startup file (startup_stm32h7xx.s).                    */
 /******************************************************************************/
+
+/**
+  * @brief This function handles Flash global interrupt.
+  */
+void FLASH_IRQHandler(void)
+{
+  /* USER CODE BEGIN FLASH_IRQn 0 */
+
+  /* USER CODE END FLASH_IRQn 0 */
+  HAL_FLASH_IRQHandler();
+  /* USER CODE BEGIN FLASH_IRQn 1 */
+
+  /* USER CODE END FLASH_IRQn 1 */
+}
 
 /**
   * @brief This function handles DMA1 stream0 global interrupt.
@@ -342,6 +370,20 @@ void TIM2_IRQHandler(void)
 }
 
 /**
+  * @brief This function handles TIM3 global interrupt.
+  */
+void TIM3_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM3_IRQn 0 */
+
+  /* USER CODE END TIM3_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim3);
+  /* USER CODE BEGIN TIM3_IRQn 1 */
+
+  /* USER CODE END TIM3_IRQn 1 */
+}
+
+/**
   * @brief This function handles I2C1 event interrupt.
   */
 void I2C1_EV_IRQHandler(void)
@@ -443,5 +485,50 @@ void TIM6_DAC_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
+/**
+ * @brief This function handles RAMECC global interrupt
+ */
+void ECC_IRQHandler(void) {
+	// Domain 1
+	if (__HAL_RAMECC_GET_FLAG(&hramecc1_m1, RAMECC_FLAGS_ALL)) {
+		HAL_RAMECC_IRQHandler(&hramecc1_m1);
+	}
+	if (__HAL_RAMECC_GET_FLAG(&hramecc1_m2, RAMECC_FLAGS_ALL)) {
+		HAL_RAMECC_IRQHandler(&hramecc1_m2);
+	}
+	if (__HAL_RAMECC_GET_FLAG(&hramecc1_m3, RAMECC_FLAGS_ALL)) {
+		HAL_RAMECC_IRQHandler(&hramecc1_m3);
+	}
+	if (__HAL_RAMECC_GET_FLAG(&hramecc1_m4, RAMECC_FLAGS_ALL)) {
+		HAL_RAMECC_IRQHandler(&hramecc1_m4);
+	}
+	if (__HAL_RAMECC_GET_FLAG(&hramecc1_m5, RAMECC_FLAGS_ALL)) {
+		HAL_RAMECC_IRQHandler(&hramecc1_m5);
+	}
 
+	// Domain 2
+	if (__HAL_RAMECC_GET_FLAG(&hramecc2_m1, RAMECC_FLAGS_ALL)) {
+		HAL_RAMECC_IRQHandler(&hramecc2_m1);
+	}
+	if (__HAL_RAMECC_GET_FLAG(&hramecc2_m2, RAMECC_FLAGS_ALL)) {
+		HAL_RAMECC_IRQHandler(&hramecc2_m2);
+	}
+	if (__HAL_RAMECC_GET_FLAG(&hramecc2_m3, RAMECC_FLAGS_ALL)) {
+		HAL_RAMECC_IRQHandler(&hramecc2_m3);
+	}
+	if (__HAL_RAMECC_GET_FLAG(&hramecc2_m4, RAMECC_FLAGS_ALL)) {
+		HAL_RAMECC_IRQHandler(&hramecc2_m4);
+	}
+	if (__HAL_RAMECC_GET_FLAG(&hramecc2_m5, RAMECC_FLAGS_ALL)) {
+		HAL_RAMECC_IRQHandler(&hramecc2_m5);
+	}
+
+	// Domain 3
+	if (__HAL_RAMECC_GET_FLAG(&hramecc3_m1, RAMECC_FLAGS_ALL)) {
+		HAL_RAMECC_IRQHandler(&hramecc3_m1);
+	}
+	if (__HAL_RAMECC_GET_FLAG(&hramecc3_m2, RAMECC_FLAGS_ALL)) {
+		HAL_RAMECC_IRQHandler(&hramecc3_m2);
+	}
+}
 /* USER CODE END 1 */

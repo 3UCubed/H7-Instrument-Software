@@ -1,2 +1,0 @@
-../Drivers/CMSIS/Include/core_cm7.h:2156:34:__NVIC_SystemReset	4	static,ignoring_inline_asm
-../Core/Src/error_packet_handler.c:11:6:error_protocol	16	static

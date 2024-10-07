@@ -1,0 +1,121 @@
+\doxysection{main.\+h}
+\hypertarget{main_8h_source}{}\label{main_8h_source}\index{Core/inc/main.h@{Core/inc/main.h}}
+\mbox{\hyperlink{main_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ USER\ CODE\ BEGIN\ Header\ */}}
+\DoxyCodeLine{00019\ \textcolor{comment}{/*\ USER\ CODE\ END\ Header\ */}}
+\DoxyCodeLine{00020\ }
+\DoxyCodeLine{00021\ \textcolor{comment}{/*\ Define\ to\ prevent\ recursive\ inclusion\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/*/}}
+\DoxyCodeLine{00022\ \textcolor{preprocessor}{\#ifndef\ \_\_MAIN\_H}}
+\DoxyCodeLine{00023\ \textcolor{preprocessor}{\#define\ \_\_MAIN\_H}}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#ifdef\ \_\_cplusplus}}
+\DoxyCodeLine{00026\ \textcolor{keyword}{extern}\ \textcolor{stringliteral}{"{}C"{}}\ \{}
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{comment}{/*\ Includes\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/*/}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ "{}stm32h7xx\_hal.h"{}}}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00032\ \textcolor{comment}{/*\ Private\ includes\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/*/}}
+\DoxyCodeLine{00033\ \textcolor{comment}{/*\ USER\ CODE\ BEGIN\ Includes\ */}}
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\#include\ "{}cmsis\_os.h"{}}\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ For\ freeRTOS\ commands}}
+\DoxyCodeLine{00035\ \textcolor{preprocessor}{\#include\ <stdio.h>}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ For\ uint\ data\ types}}
+\DoxyCodeLine{00036\ \textcolor{preprocessor}{\#include\ "{}string.h"{}}\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ For\ memcpy}}
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00038\ \textcolor{preprocessor}{\#include\ "{}packet\_creation.h"{}}\ \ \ \ \textcolor{comment}{//\ For\ resetting\ packet\ sequence\ numbers}}
+\DoxyCodeLine{00039\ \textcolor{preprocessor}{\#include\ "{}voltage\_monitor.h"{}}\ \ \ \ \textcolor{comment}{//\ For\ initializing\ voltage\ monitor\ in\ system\_setup}}
+\DoxyCodeLine{00040\ \textcolor{preprocessor}{\#include\ "{}sample\_data.h"{}}\ \ \ \ \ \ \ \ \textcolor{comment}{//\ For\ initializing\ adc\ dma\ in\ system\_setup}}
+\DoxyCodeLine{00041\ \textcolor{preprocessor}{\#include\ "{}time\_tagging.h"{}}\ \ \ \ \ \ \ \textcolor{comment}{//\ For\ letting\ sync\ calibrate\ RTC}}
+\DoxyCodeLine{00042\ }
+\DoxyCodeLine{00043\ \textcolor{comment}{//\#define\ ERROR\_HANDLING\_ENABLED}}
+\DoxyCodeLine{00044\ }
+\DoxyCodeLine{00045\ \textcolor{preprocessor}{\#define\ UART\_RX\_BUFFER\_SIZE\ 64}}
+\DoxyCodeLine{00046\ }
+\DoxyCodeLine{00047\ \textcolor{preprocessor}{\#define\ PMT\_FLAG\_ID\ 0x0001}}
+\DoxyCodeLine{00048\ \textcolor{preprocessor}{\#define\ ERPA\_FLAG\_ID\ 0x0002}}
+\DoxyCodeLine{00049\ \textcolor{preprocessor}{\#define\ HK\_FLAG\_ID\ 0x0004}}
+\DoxyCodeLine{00050\ }
+\DoxyCodeLine{00051\ \textcolor{preprocessor}{\#define\ VOLTAGE\_MONITOR\_FLAG\_ID\ 0x0001}}
+\DoxyCodeLine{00052\ \textcolor{preprocessor}{\#define\ STOP\_FLAG\ 0x0002}}
+\DoxyCodeLine{00053\ \textcolor{preprocessor}{\#define\ AUTOINIT\_FLAG\ 0x0004}}
+\DoxyCodeLine{00054\ \textcolor{preprocessor}{\#define\ AUTODEINIT\_FLAG\ 0x0008}}
+\DoxyCodeLine{00055\ }
+\DoxyCodeLine{00056\ \textcolor{preprocessor}{\#define\ SCIENCE\_FLAG\ 0x0001}}
+\DoxyCodeLine{00057\ \textcolor{preprocessor}{\#define\ IDLE\_FLAG\ 0x0002}}
+\DoxyCodeLine{00058\ }
+\DoxyCodeLine{00059\ }
+\DoxyCodeLine{00060\ }
+\DoxyCodeLine{00061\ \textcolor{comment}{/*\ USER\ CODE\ END\ Includes\ */}}
+\DoxyCodeLine{00062\ }
+\DoxyCodeLine{00063\ \textcolor{comment}{/*\ Exported\ types\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/*/}}
+\DoxyCodeLine{00064\ \textcolor{comment}{/*\ USER\ CODE\ BEGIN\ ET\ */}}
+\DoxyCodeLine{00065\ }
+\DoxyCodeLine{00066\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\{}
+\DoxyCodeLine{00067\ \ \ \ \ GPIO\_TypeDef\ *gpio;}
+\DoxyCodeLine{00068\ \ \ \ \ uint16\_t\ pin;}
+\DoxyCodeLine{00069\ \}\ \mbox{\hyperlink{structgpio__pins}{gpio\_pins}};}
+\DoxyCodeLine{00070\ }
+\DoxyCodeLine{00071\ \textcolor{comment}{/*\ USER\ CODE\ END\ ET\ */}}
+\DoxyCodeLine{00072\ }
+\DoxyCodeLine{00073\ \textcolor{comment}{/*\ Exported\ constants\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/*/}}
+\DoxyCodeLine{00074\ \textcolor{comment}{/*\ USER\ CODE\ BEGIN\ EC\ */}}
+\DoxyCodeLine{00075\ }
+\DoxyCodeLine{00076\ \textcolor{keyword}{extern}\ osEventFlagsId\_t\ packet\_event\_flags;}
+\DoxyCodeLine{00077\ \textcolor{keyword}{extern}\ osEventFlagsId\_t\ utility\_event\_flags;}
+\DoxyCodeLine{00078\ \textcolor{keyword}{extern}\ osEventFlagsId\_t\ mode\_event\_flags;}
+\DoxyCodeLine{00079\ }
+\DoxyCodeLine{00080\ \textcolor{keyword}{extern}\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{char}\ UART\_RX\_BUFFER[UART\_RX\_BUFFER\_SIZE];}
+\DoxyCodeLine{00081\ \textcolor{keyword}{extern}\ \textcolor{keyword}{const}\ \mbox{\hyperlink{structgpio__pins}{gpio\_pins}}\ gpios[];}
+\DoxyCodeLine{00082\ \textcolor{keyword}{extern}\ \textcolor{keyword}{volatile}\ uint32\_t\ uptime\_millis;}
+\DoxyCodeLine{00083\ \textcolor{keyword}{extern}\ uint32\_t\ DAC\_OUT[32];}
+\DoxyCodeLine{00084\ \textcolor{keyword}{extern}\ \textcolor{keyword}{volatile}\ uint8\_t\ HK\_ENABLED;}
+\DoxyCodeLine{00085\ \textcolor{keyword}{extern}\ \textcolor{keyword}{volatile}\ uint8\_t\ ERPA\_ENABLED;}
+\DoxyCodeLine{00086\ \textcolor{comment}{/*\ USER\ CODE\ END\ EC\ */}}
+\DoxyCodeLine{00087\ }
+\DoxyCodeLine{00088\ \textcolor{comment}{/*\ Exported\ macro\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/*/}}
+\DoxyCodeLine{00089\ \textcolor{comment}{/*\ USER\ CODE\ BEGIN\ EM\ */}}
+\DoxyCodeLine{00090\ }
+\DoxyCodeLine{00091\ \textcolor{comment}{/*\ USER\ CODE\ END\ EM\ */}}
+\DoxyCodeLine{00092\ }
+\DoxyCodeLine{00093\ \textcolor{comment}{/*\ Exported\ functions\ prototypes\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/*/}}
+\DoxyCodeLine{00094\ \textcolor{keywordtype}{void}\ Error\_Handler(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{00095\ }
+\DoxyCodeLine{00096\ \textcolor{comment}{/*\ USER\ CODE\ BEGIN\ EFP\ */}}
+\DoxyCodeLine{00097\ uint8\_t\ get\_current\_step();}
+\DoxyCodeLine{00098\ \textcolor{keywordtype}{void}\ enter\_stop();}
+\DoxyCodeLine{00099\ \textcolor{comment}{/*\ USER\ CODE\ END\ EFP\ */}}
+\DoxyCodeLine{00100\ }
+\DoxyCodeLine{00101\ \textcolor{comment}{/*\ Private\ defines\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/*/}}
+\DoxyCodeLine{00102\ }
+\DoxyCodeLine{00103\ \textcolor{comment}{/*\ USER\ CODE\ BEGIN\ Private\ defines\ */}}
+\DoxyCodeLine{00104\ \textcolor{preprocessor}{\#define\ FLASH\_BASE\_ADDR\ \ \ \ \ \ (uint32\_t)(FLASH\_BASE)}}
+\DoxyCodeLine{00105\ \textcolor{preprocessor}{\#define\ FLASH\_END\_ADDR\ \ \ \ \ \ \ (uint32\_t)(0x081FFFFF)}}
+\DoxyCodeLine{00106\ }
+\DoxyCodeLine{00107\ \textcolor{comment}{/*\ Base\ address\ of\ the\ Flash\ sectors\ Bank\ 1\ */}}
+\DoxyCodeLine{00108\ \textcolor{preprocessor}{\#define\ ADDR\_FLASH\_SECTOR\_0\_BANK1\ \ \ \ \ ((uint32\_t)0x08000000)\ }\textcolor{comment}{/*\ Base\ @\ of\ Sector\ 0,\ 128\ Kbytes\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00109\ \textcolor{preprocessor}{\#define\ ADDR\_FLASH\_SECTOR\_1\_BANK1\ \ \ \ \ ((uint32\_t)0x08020000)\ }\textcolor{comment}{/*\ Base\ @\ of\ Sector\ 1,\ 128\ Kbytes\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00110\ \textcolor{preprocessor}{\#define\ ADDR\_FLASH\_SECTOR\_2\_BANK1\ \ \ \ \ ((uint32\_t)0x08040000)\ }\textcolor{comment}{/*\ Base\ @\ of\ Sector\ 2,\ 128\ Kbytes\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00111\ \textcolor{preprocessor}{\#define\ ADDR\_FLASH\_SECTOR\_3\_BANK1\ \ \ \ \ ((uint32\_t)0x08060000)\ }\textcolor{comment}{/*\ Base\ @\ of\ Sector\ 3,\ 128\ Kbytes\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00112\ \textcolor{preprocessor}{\#define\ ADDR\_FLASH\_SECTOR\_4\_BANK1\ \ \ \ \ ((uint32\_t)0x08080000)\ }\textcolor{comment}{/*\ Base\ @\ of\ Sector\ 4,\ 128\ Kbytes\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00113\ \textcolor{preprocessor}{\#define\ ADDR\_FLASH\_SECTOR\_5\_BANK1\ \ \ \ \ ((uint32\_t)0x080A0000)\ }\textcolor{comment}{/*\ Base\ @\ of\ Sector\ 5,\ 128\ Kbytes\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00114\ \textcolor{preprocessor}{\#define\ ADDR\_FLASH\_SECTOR\_6\_BANK1\ \ \ \ \ ((uint32\_t)0x080C0000)\ }\textcolor{comment}{/*\ Base\ @\ of\ Sector\ 6,\ 128\ Kbytes\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00115\ \textcolor{preprocessor}{\#define\ ADDR\_FLASH\_SECTOR\_7\_BANK1\ \ \ \ \ ((uint32\_t)0x080E0000)\ }\textcolor{comment}{/*\ Base\ @\ of\ Sector\ 7,\ 128\ Kbytes\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00116\ }
+\DoxyCodeLine{00117\ \textcolor{comment}{/*\ Base\ address\ of\ the\ Flash\ sectors\ Bank\ 2\ */}}
+\DoxyCodeLine{00118\ \textcolor{preprocessor}{\#define\ ADDR\_FLASH\_SECTOR\_0\_BANK2\ \ \ \ \ ((uint32\_t)0x08100000)\ }\textcolor{comment}{/*\ Base\ @\ of\ Sector\ 0,\ 128\ Kbytes\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00119\ \textcolor{preprocessor}{\#define\ ADDR\_FLASH\_SECTOR\_1\_BANK2\ \ \ \ \ ((uint32\_t)0x08120000)\ }\textcolor{comment}{/*\ Base\ @\ of\ Sector\ 1,\ 128\ Kbytes\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00120\ \textcolor{preprocessor}{\#define\ ADDR\_FLASH\_SECTOR\_2\_BANK2\ \ \ \ \ ((uint32\_t)0x08140000)\ }\textcolor{comment}{/*\ Base\ @\ of\ Sector\ 2,\ 128\ Kbytes\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00121\ \textcolor{preprocessor}{\#define\ ADDR\_FLASH\_SECTOR\_3\_BANK2\ \ \ \ \ ((uint32\_t)0x08160000)\ }\textcolor{comment}{/*\ Base\ @\ of\ Sector\ 3,\ 128\ Kbytes\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00122\ \textcolor{preprocessor}{\#define\ ADDR\_FLASH\_SECTOR\_4\_BANK2\ \ \ \ \ ((uint32\_t)0x08180000)\ }\textcolor{comment}{/*\ Base\ @\ of\ Sector\ 4,\ 128\ Kbytes\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00123\ \textcolor{preprocessor}{\#define\ ADDR\_FLASH\_SECTOR\_5\_BANK2\ \ \ \ \ ((uint32\_t)0x081A0000)\ }\textcolor{comment}{/*\ Base\ @\ of\ Sector\ 5,\ 128\ Kbytes\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00124\ \textcolor{preprocessor}{\#define\ ADDR\_FLASH\_SECTOR\_6\_BANK2\ \ \ \ \ ((uint32\_t)0x081C0000)\ }\textcolor{comment}{/*\ Base\ @\ of\ Sector\ 6,\ 128\ Kbytes\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00125\ \textcolor{preprocessor}{\#define\ ADDR\_FLASH\_SECTOR\_7\_BANK2\ \ \ \ \ ((uint32\_t)0x081E0000)\ }\textcolor{comment}{/*\ Base\ @\ of\ Sector\ 7,\ 128\ Kbytes\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00126\ \textcolor{comment}{/*\ USER\ CODE\ END\ Private\ defines\ */}}
+\DoxyCodeLine{00127\ }
+\DoxyCodeLine{00128\ \textcolor{preprocessor}{\#ifdef\ \_\_cplusplus}}
+\DoxyCodeLine{00129\ \}}
+\DoxyCodeLine{00130\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00131\ }
+\DoxyCodeLine{00132\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \_\_MAIN\_H\ */}\textcolor{preprocessor}{}}
+
+\end{DoxyCode}

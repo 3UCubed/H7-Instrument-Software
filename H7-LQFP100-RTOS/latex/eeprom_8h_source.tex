@@ -1,0 +1,85 @@
+\doxysection{eeprom.\+h}
+\hypertarget{eeprom_8h_source}{}\label{eeprom_8h_source}\index{Core/inc/eeprom.h@{Core/inc/eeprom.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ eeprom.h}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ \ Created\ on:\ Aug\ 22,\ 2024}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *\ \ \ \ \ \ Author:\ jaredmorrison}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00007\ }
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#ifndef\ INC\_EEPROM\_H\_}}
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#define\ INC\_EEPROM\_H\_}}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \textcolor{comment}{/*\ Includes\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/*/}}
+\DoxyCodeLine{00012\ \textcolor{preprocessor}{\#include\ "{}stm32h7xx\_hal.h"{}}}
+\DoxyCodeLine{00013\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{main_8h}{main.h}}"{}}}
+\DoxyCodeLine{00014\ }
+\DoxyCodeLine{00015\ \textcolor{comment}{/*\ Exported\ constants\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/*/}}
+\DoxyCodeLine{00016\ \textcolor{comment}{/*\ EEPROM\ emulation\ firmware\ error\ codes\ */}}
+\DoxyCodeLine{00017\ \textcolor{preprocessor}{\#define\ EE\_OK\ \ \ \ \ \ (uint32\_t)HAL\_OK}}
+\DoxyCodeLine{00018\ \textcolor{preprocessor}{\#define\ EE\_ERROR\ \ \ (uint32\_t)HAL\_ERROR}}
+\DoxyCodeLine{00019\ \textcolor{preprocessor}{\#define\ EE\_BUSY\ \ \ \ (uint32\_t)HAL\_BUSY}}
+\DoxyCodeLine{00020\ \textcolor{preprocessor}{\#define\ EE\_TIMEOUT\ (uint32\_t)HAL\_TIMEOUT}}
+\DoxyCodeLine{00021\ }
+\DoxyCodeLine{00022\ \textcolor{comment}{/*\ Define\ the\ size\ of\ the\ sectors\ to\ be\ used\ */}}
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ \textcolor{preprocessor}{\ \ \#define\ PAGE\_SIZE\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (uint32\_t)0x20000\ \ }\textcolor{comment}{/*\ Page\ size\ =\ 128KByte\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00025\ }
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \textcolor{comment}{/*\ Device\ voltage\ range\ supposed\ to\ be\ [2.7V\ to\ 3.6V],\ the\ operation\ will}}
+\DoxyCodeLine{00028\ \textcolor{comment}{\ \ \ be\ done\ by\ word\ \ */}}
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#define\ VOLTAGE\_RANGE\ \ \ \ \ \ \ \ \ \ \ (uint8\_t)VOLTAGE\_RANGE\_3}}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00031\ \textcolor{comment}{/*\ EEPROM\ emulation\ start\ address\ in\ Flash\ */}}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\ \ \#define\ EEPROM\_START\_ADDRESS\ \ ADDR\_FLASH\_SECTOR\_6\_BANK2\ }\textcolor{comment}{/*\ sector6\ of\ bank\ 2\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00035\ }
+\DoxyCodeLine{00036\ \textcolor{comment}{/*\ Pages\ 0\ and\ 1\ base\ and\ end\ addresses\ */}}
+\DoxyCodeLine{00037\ \textcolor{preprocessor}{\#define\ PAGE0\_BASE\_ADDRESS\ \ \ \ ((uint32\_t)(EEPROM\_START\_ADDRESS\ +\ 0x0000))}}
+\DoxyCodeLine{00038\ \textcolor{preprocessor}{\#define\ PAGE0\_END\_ADDRESS\ \ \ \ \ ((uint32\_t)(EEPROM\_START\_ADDRESS\ +\ (PAGE\_SIZE\ -\/\ 1)))}}
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00040\ \textcolor{preprocessor}{\ \ \#define\ PAGE0\_ID\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ FLASH\_SECTOR\_6}}
+\DoxyCodeLine{00041\ }
+\DoxyCodeLine{00042\ }
+\DoxyCodeLine{00043\ \textcolor{preprocessor}{\#define\ PAGE1\_BASE\_ADDRESS\ \ \ \ ((uint32\_t)(EEPROM\_START\_ADDRESS\ +\ PAGE\_SIZE))}}
+\DoxyCodeLine{00044\ \textcolor{preprocessor}{\#define\ PAGE1\_END\_ADDRESS\ \ \ \ \ ((uint32\_t)(EEPROM\_START\_ADDRESS\ +\ (2\ *\ PAGE\_SIZE\ -\/\ 1)))}}
+\DoxyCodeLine{00045\ }
+\DoxyCodeLine{00046\ \textcolor{preprocessor}{\ \ \#define\ PAGE1\_ID\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ FLASH\_SECTOR\_7}}
+\DoxyCodeLine{00047\ }
+\DoxyCodeLine{00048\ }
+\DoxyCodeLine{00049\ \textcolor{comment}{/*\ Used\ Flash\ pages\ for\ EEPROM\ emulation\ */}}
+\DoxyCodeLine{00050\ \textcolor{preprocessor}{\#define\ PAGE0\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ((uint16\_t)0x0000)}}
+\DoxyCodeLine{00051\ \textcolor{preprocessor}{\#define\ PAGE1\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ((uint16\_t)0x0001)\ }\textcolor{comment}{/*\ Page\ nb\ between\ PAGE0\_BASE\_ADDRESS\ \&\ PAGE1\_BASE\_ADDRESS*/}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00052\ }
+\DoxyCodeLine{00053\ \textcolor{comment}{/*\ No\ valid\ page\ define\ */}}
+\DoxyCodeLine{00054\ \textcolor{preprocessor}{\#define\ NO\_VALID\_PAGE\ \ \ \ \ \ \ \ \ ((uint16\_t)0x00AB)}}
+\DoxyCodeLine{00055\ }
+\DoxyCodeLine{00056\ \textcolor{comment}{/*\ Page\ status\ definitions\ */}}
+\DoxyCodeLine{00057\ \textcolor{preprocessor}{\#define\ ERASED\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ((uint16\_t)0xFFFF)\ \ \ \ \ }\textcolor{comment}{/*\ Page\ is\ empty\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00058\ \textcolor{preprocessor}{\#define\ RECEIVE\_DATA\ \ \ \ \ \ \ \ \ \ ((uint16\_t)0xEEEE)\ \ \ \ \ }\textcolor{comment}{/*\ Page\ is\ marked\ to\ receive\ data\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00059\ \textcolor{preprocessor}{\#define\ VALID\_PAGE\ \ \ \ \ \ \ \ \ \ \ \ ((uint16\_t)0x0000)\ \ \ \ \ }\textcolor{comment}{/*\ Page\ containing\ valid\ data\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00060\ }
+\DoxyCodeLine{00061\ \textcolor{comment}{/*\ Valid\ pages\ in\ read\ and\ write\ defines\ */}}
+\DoxyCodeLine{00062\ \textcolor{preprocessor}{\#define\ READ\_FROM\_VALID\_PAGE\ \ ((uint8\_t)0x00)}}
+\DoxyCodeLine{00063\ \textcolor{preprocessor}{\#define\ WRITE\_IN\_VALID\_PAGE\ \ \ ((uint8\_t)0x01)}}
+\DoxyCodeLine{00064\ }
+\DoxyCodeLine{00065\ \textcolor{comment}{/*\ Page\ full\ define\ */}}
+\DoxyCodeLine{00066\ \textcolor{preprocessor}{\#define\ PAGE\_FULL\ \ \ \ \ \ \ \ \ \ \ \ \ ((uint8\_t)0x80)}}
+\DoxyCodeLine{00067\ }
+\DoxyCodeLine{00068\ \textcolor{comment}{/*\ Variables'\ number\ */}}
+\DoxyCodeLine{00069\ \textcolor{preprocessor}{\#define\ NB\_OF\_VAR\ \ \ \ \ \ \ \ \ \ \ \ \ ((uint8\_t)0x1D)}}
+\DoxyCodeLine{00070\ }
+\DoxyCodeLine{00071\ \textcolor{comment}{/*\ Exported\ types\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/*/}}
+\DoxyCodeLine{00072\ \textcolor{comment}{/*\ Exported\ macro\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/*/}}
+\DoxyCodeLine{00073\ \textcolor{comment}{/*\ Exported\ functions\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00074\ uint16\_t\ EE\_Init(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{00075\ uint16\_t\ EE\_ReadVariable(uint16\_t\ VirtAddress,\ uint16\_t*\ Data);}
+\DoxyCodeLine{00076\ uint16\_t\ EE\_WriteVariable(uint16\_t\ VirtAddress,\ uint16\_t\ Data);}
+\DoxyCodeLine{00077\ }
+\DoxyCodeLine{00078\ }
+\DoxyCodeLine{00079\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ INC\_EEPROM\_H\_\ */}\textcolor{preprocessor}{}}
+
+\end{DoxyCode}

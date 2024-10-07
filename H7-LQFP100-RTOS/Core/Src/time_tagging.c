@@ -29,24 +29,51 @@ void get_uptime(uint8_t *buffer) {
 	buffer[3] = uptime & 0xFF;
 }
 
-void get_timestamp(uint8_t *buffer) {
+void get_unix_time(uint8_t* buffer) {
+	#define UNIX_TIME_CONST   (719561U)
+	#define SECONDS_IN_1_HOUR (3600U)
+	#define SECONDS_IN_1_MIN  (60U)
+	#define DAYS_IN_SECONDS   (24U * SECONDS_IN_1_HOUR)
+
 	RTC_TimeTypeDef current_time;
 	RTC_DateTypeDef current_date;
 
 	HAL_RTC_GetTime(&hrtc, &current_time, RTC_FORMAT_BIN);
 	HAL_RTC_GetDate(&hrtc, &current_date, RTC_FORMAT_BIN);
-	uint32_t milliseconds = 1000000 - (current_time.SubSeconds * 100);
+	uint16_t milliseconds = (10000 - (current_time.SubSeconds)) / 10;
 
-	buffer[0] = current_date.Year;				// 0-99
-	buffer[1] = current_date.Month;				// 1-12
-	buffer[2] = current_date.Date;				// 1-31
-	buffer[3] = current_time.Hours;				// 0-23
-	buffer[4] = current_time.Minutes;			// 0-59
-	buffer[5] = current_time.Seconds;			// 0-59
-	buffer[6] = ((milliseconds >> 24) & 0xFF);
-	buffer[7] = ((milliseconds >> 16) & 0xFF);
-	buffer[8] = ((milliseconds >> 8) & 0xFF);
-	buffer[9] = milliseconds & 0xFF;
+	uint16_t y;
+	uint8_t m;
+	uint8_t d;
+	uint64_t unix_tm_val = 0;
+
+
+	y = current_date.Year + 2000;
+	m = current_date.Month;
+	d = current_date.Date;
+	// January and February are counted as months 13 and 14 of the previous year
+	if (m <= 2)
+	{
+		m += 12;
+		y -= 1;
+	}
+	// convert years to days
+	unix_tm_val = (365 * y) + (y / 4) - (y / 100) + (y / 400);
+	// convert months to days
+	unix_tm_val += (30 * m) + (3 * (m + 1) / 5) + d;
+	// Unix time starts on January 1st, 1970
+	unix_tm_val -= UNIX_TIME_CONST;
+	// convert days to seconds
+	unix_tm_val *= DAYS_IN_SECONDS;
+	//Add hours, minutes and seconds
+	unix_tm_val += (SECONDS_IN_1_HOUR * current_time.Hours) + (SECONDS_IN_1_MIN * current_time.Minutes) + current_time.Seconds;
+
+	buffer[0] = ((unix_tm_val >> 24) & 0xFF);
+	buffer[1] = ((unix_tm_val >> 16) & 0xFF);
+	buffer[2] = ((unix_tm_val >> 8) & 0xFF);
+	buffer[3] = unix_tm_val & 0xFF;
+	buffer[4] = ((milliseconds >> 8) & 0xFF);
+	buffer[5] = milliseconds & 0xFF;
 }
 
 void calibrateRTC(uint8_t *buffer) {

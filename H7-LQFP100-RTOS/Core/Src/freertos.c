@@ -30,7 +30,7 @@
 #include "packet_creation.h"	// For creating packets
 #include "dac.h"				// For Science/Idle modes
 #include "tim.h"				// For Science/Idle modes
-#include "error_packet_handler.h"
+#include "iwdg.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -159,6 +159,18 @@ const osThreadAttr_t Idle_task_attributes = {
   .cb_size = sizeof(Idle_taskControlBlock),
   .stack_mem = &Idle_taskBuffer[0],
   .stack_size = sizeof(Idle_taskBuffer),
+  .priority = (osPriority_t) osPriorityRealtime7,
+};
+/* Definitions for Sync_task */
+osThreadId_t Sync_taskHandle;
+uint32_t Sync_taskBuffer[ 128 ];
+osStaticThreadDef_t Sync_taskControlBlock;
+const osThreadAttr_t Sync_task_attributes = {
+  .name = "Sync_task",
+  .cb_mem = &Sync_taskControlBlock,
+  .cb_size = sizeof(Sync_taskControlBlock),
+  .stack_mem = &Sync_taskBuffer[0],
+  .stack_size = sizeof(Sync_taskBuffer),
   .priority = (osPriority_t) osPriorityNormal,
 };
 
@@ -176,6 +188,7 @@ void Voltage_Monitor_init(void *argument);
 void STOP_init(void *argument);
 void Science_init(void *argument);
 void Idle_init(void *argument);
+void Sync_init(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -192,6 +205,7 @@ void vApplicationTickHook( void )
    code must not attempt to block, and only the interrupt safe FreeRTOS API
    functions can be used (those that end in FromISR()). */
 	uptime_millis++;
+
 }
 /* USER CODE END 3 */
 
@@ -257,6 +271,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of Idle_task */
   Idle_taskHandle = osThreadNew(Idle_init, NULL, &Idle_task_attributes);
+
+  /* creation of Sync_task */
+  Sync_taskHandle = osThreadNew(Sync_init, NULL, &Sync_task_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -403,31 +420,19 @@ void AUTODEINIT_init(void *argument)
 void Voltage_Monitor_init(void *argument)
 {
   /* USER CODE BEGIN Voltage_Monitor_init */
-	VOLTAGE_RAIL *rail_monitor_ptr;
+	uint8_t rails_in_bound = 1;
   /* Infinite loop */
   for(;;)
   {
-	  osEventFlagsWait(utility_event_flags, VOLTAGE_MONITOR_FLAG_ID, osFlagsWaitAny,
-	  		osWaitForever);
-
+	  osEventFlagsWait(utility_event_flags, VOLTAGE_MONITOR_FLAG_ID, osFlagsWaitAny, osWaitForever);
 	  set_rail_monitor();
-
-	  rail_monitor_ptr = get_rail_monitor();
-
-		// Iterate through all voltage rails
-		for (int i = 0; i < NUM_VOLTAGE_RAILS; i++){
-			if (rail_monitor_ptr[i].is_enabled){
-				// If current rail is not in range...
-				if (!in_range(rail_monitor_ptr[i].data, rail_monitor_ptr[i].min_voltage, rail_monitor_ptr[i].max_voltage)){
-					// Increase that rails error count
-					rail_monitor_ptr[i].error_count++;
-					// If that rails' error count is at 3, proceed with error protocol for that rail
-					if (rail_monitor_ptr[i].error_count == 3) {
-						//error_protocol(rail_monitor_ptr[i].name);
-					}
-				}
-			}
-		}
+	  rails_in_bound = monitor_rails();
+	  if (!rails_in_bound && !IDLING) {
+		  osEventFlagsSet(mode_event_flags, IDLE_FLAG);
+		  while (!IDLING) {};
+		  osDelay(1000);
+		  osEventFlagsSet(mode_event_flags, SCIENCE_FLAG);
+	  }
   }
   /* USER CODE END Voltage_Monitor_init */
 }
@@ -447,6 +452,9 @@ void STOP_init(void *argument)
   {
 	  osEventFlagsWait(utility_event_flags, STOP_FLAG, osFlagsWaitAny,osWaitForever);
 	  osEventFlagsClear(utility_event_flags, STOP_FLAG);
+
+	  osEventFlagsSet(mode_event_flags, IDLE_FLAG);
+	  while (!IDLING) {};
 
 	  enter_stop();
   }
@@ -468,17 +476,19 @@ void Science_init(void *argument)
   for(;;)
   {
 		osEventFlagsWait(mode_event_flags, SCIENCE_FLAG, osFlagsWaitAny, osWaitForever);
-
+		osThreadSuspend(Voltage_MonitorHandle);
+		IDLING = 0;
 		// Enabling all voltages
 		for (int i = 0; i < 9; i++) {
 			HAL_GPIO_WritePin(gpios[i].gpio, gpios[i].pin, GPIO_PIN_SET);
-			osDelay(200);
+			osDelay(100);
 		}
 
 		// Telling rail monitor which voltages are now enabled
-		for (int i = RAIL_2v5; i <= RAIL_n800v; i++) {
+		for (int i = RAIL_busvmon; i <= RAIL_TMP1; i++) {
 			set_rail_monitor_enable(i, 1);
 		}
+		osThreadResume(Voltage_MonitorHandle);
 
 		__disable_irq();
 
@@ -487,6 +497,7 @@ void Science_init(void *argument)
 		ERPA_ENABLED = 1;
 		uptime_millis = 0;
 		reset_packet_sequence_numbers();
+		osEventFlagsSet(packet_event_flags, HK_FLAG_ID);
 		TIM2->CCR4 = 312;
 		HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_1);			// PMT packet on
 
@@ -520,23 +531,61 @@ void Idle_init(void *argument)
 		HAL_TIM_OC_Stop_IT(&htim1, TIM_CHANNEL_1);			// PMT packet off
 		HK_ENABLED = 0;
 		HAL_DAC_Stop_DMA(&hdac1, DAC_CHANNEL_1);			// Disable auto sweep
+		osThreadSuspend(Voltage_MonitorHandle);
 
 		// Telling rail monitor which voltages are now disabled
-		for (int i = RAIL_n800v; i >= RAIL_2v5; i--) {
+		for (int i = RAIL_TMP1; i >= RAIL_busvmon; i--) {
 			set_rail_monitor_enable(i, 0);
 		}
 
 		// Disabling all voltages
 		for (int i = 8; i >= 0; i--) {
 			HAL_GPIO_WritePin(gpios[i].gpio, gpios[i].pin, GPIO_PIN_RESET);
-			osDelay(200);
+			osDelay(100);
 		}
+		osDelay(3500);		// TODO: Reduce to 1000 for assembled instrument
+		IDLING = 1;
+		osThreadResume(Voltage_MonitorHandle);
 
 		// Yield thread control
 		osThreadYield();
 
   }
   /* USER CODE END Idle_init */
+}
+
+/* USER CODE BEGIN Header_Sync_init */
+/**
+* @brief Function implementing the Sync_task thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_Sync_init */
+void Sync_init(void *argument)
+{
+  /* USER CODE BEGIN Sync_init */
+  /* Infinite loop */
+  for(;;)
+  {
+	  	osEventFlagsWait(mode_event_flags, SYNC_FLAG, osFlagsWaitAny, osWaitForever);
+	  	send_ACK();
+
+	  	uint8_t key;
+
+	  	// Wait for 0xFF to be received
+	  	HAL_UART_AbortReceive(&huart1);
+	  	do {
+	  		HAL_UART_Receive(&huart1, UART_RX_BUFFER, 9, 100);
+	  		key = UART_RX_BUFFER[0];
+	  	} while (key != 0xFF);
+	  	calibrateRTC(UART_RX_BUFFER);
+	  	osDelay(10);
+	  	HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
+	  	send_error_counter_packet();
+	    get_reset_cause();
+
+  }
+  /* USER CODE END Sync_init */
 }
 
 /* Private application code --------------------------------------------------*/
