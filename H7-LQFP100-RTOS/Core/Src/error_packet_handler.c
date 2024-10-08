@@ -14,44 +14,36 @@
 #include "eeprom.h"
 #include "tim.h"
 #include "dac.h"
+
 void emergency_shutdown();
 void flash_mass_erase();
-/**
- * @brief Array storing virtual addresses for EEPROM emulation variables.
- *
- * This array holds the virtual addresses of the variables stored in the emulated EEPROM.
- * The addresses are defined to start from `0x5550` and continue sequentially.
- * The size of the array is determined by the `NB_OF_VAR` constant.
- */
-uint16_t VirtAddVarTab[NB_OF_VAR] = {0x5550, 0x5551, 0x5552, 0x5553, 0x5554, 0x5555, 0x5556, 0x5557, 0x5558, 0x5559, 0x555A, 0x555B, 0x555C, 0x555D, 0x555E, 0x555F, 0x6660, 0x6661, 0x6662, 0x6663, 0x6664, 0x6665, 0x6666, 0x6667, 0x6668, 0x6669, 0x666A, 0x666B, 0x666C, 0x666D, 0x666E};
 
 /**
- * @brief Array used to store the error counters.
- *
- * The reason this array is of size NUM_ERROR_COUNTERS instead of NB_OF_VAR is because
- * there are two extra variables stored in the EE used for keeping track of the last
- * error that occurred. There are a total of 29 variables that we keep track of in the
- * EE. The first 27 are the error counters, and the last two are the error codes for the
- * last error that occurred.
+ * @brief Array storing virtual addresses for EEPROM emulation variables.
+ */
+uint16_t VirtAddVarTab[NB_OF_VAR] = {
+		0x0001, 0x0002, 0x0003, 0x0004, 0x0005,
+		0x0006, 0x0007, 0x0008, 0x0009, 0x0010,
+		0x0011, 0x0012, 0x0013, 0x0014, 0x0015,
+		0x0016, 0x0017, 0x0018, 0x0019, 0x0020,
+		0x0021, 0x0022, 0x0023, 0x0024, 0x0025,
+		0x0026, 0x0027, 0x0028, 0x0029, 0x0030,
+		0x0031
+};
+
+/**
+ * @brief Array used to store the error counters locally after fetching from flash.
  */
 uint16_t local_cpy[NUM_ERROR_COUNTERS];
 
 /**
- * @brief Handles all errors in the system.
+ * @brief Handles system errors based on the provided error structure.
+ *        Initiates an emergency shutdown, manages Flash ECC-related errors, and sends error packets.
  *
- * Built in error handler calls this function instead of entering an infinite while loop.
- * Before calling this function, the caller will create a new variable of type ERROR_STRUCT
- * and populate the error_category and error_detail attributes with the respective codes.
- * Given and error category and detail, this error handler proceeds with the appropriate actions.
- * Regardless of what caused the error, this error handler will always increment the error counter,
- * set the previous error to whatever error we are currently handling, send an error packet,
- * and enter IDLE mode. Additional actions are taken depending on the error category.
- *
- * @param error Error given by the caller.
+ * @param error The error structure containing the error category and details.
  */
 void handle_error(ERROR_STRUCT error) {
 #ifdef ERROR_HANDLING_ENABLED
-	// Turn off all power supply rails
 	emergency_shutdown();
 
 	// If error was caused by flash ECC...
@@ -77,16 +69,19 @@ void handle_error(ERROR_STRUCT error) {
 	send_junk_packet();
 
 	HAL_TIM_Base_Start_IT(&htim3);
-
 #endif
 }
 
+/**
+ * @brief Performs a mass erase of Flash memory.
+ *        Unlocks Flash and erases all sectors in Bank 2, handling errors if the erase fails.
+ */
 void flash_mass_erase() {
 	HAL_FLASH_Unlock();
 
 	static FLASH_EraseInitTypeDef EraseInitStruct;
-	/* Fill EraseInit structure*/
 	uint32_t SECTORError = 0;
+
 	EraseInitStruct.TypeErase = FLASH_TYPEERASE_SECTORS;
 	EraseInitStruct.VoltageRange = FLASH_VOLTAGE_RANGE_3;
 	EraseInitStruct.Banks = FLASH_BANK_2;
@@ -115,13 +110,10 @@ void error_counter_init() {
 }
 
 /**
- * @brief Increments the error counter for a given error, and updates the variable in the EE.
+ * @brief Increments the error counters for the specified error.
+ *        Updates both the category and detail counters and saves the updated values.
  *
- * I designed the error categories and codes such that they correspond to an index in our
- * local_cpy array. To see what index a particular error is stored in, just check the value
- * each category or detail is assigned in the header file.
- *
- * @param error Error given by the caller.
+ * @param error The error structure containing the error category and details.
  */
 void increment_error_counter(ERROR_STRUCT error) {
 	local_cpy[error.category]++;
@@ -155,10 +147,10 @@ void reset_error_counters() {
  * @brief Resets the previous error codes to 0xFF. 0xFF was chose because it doesn't correspond to any error code.
  */
 void reset_previous_error() {
-	if ((EE_WriteVariable(VirtAddVarTab[PREV_ERROR_CATEGORY_INDEX], 0xFF)) != HAL_OK) {
+	if ((EE_WriteVariable(VirtAddVarTab[PREV_ERROR_CATEGORY_INDEX], EC_UNDEFINED)) != HAL_OK) {
 		Error_Handler();
 	}
-	if ((EE_WriteVariable(VirtAddVarTab[PREV_ERROR_DETAIL_INDEX], 0xFF)) != HAL_OK) {
+	if ((EE_WriteVariable(VirtAddVarTab[PREV_ERROR_DETAIL_INDEX], ED_UNDEFINED)) != HAL_OK) {
 		Error_Handler();
 	}
 }
@@ -336,15 +328,18 @@ void send_junk_packet() {	// TODO: Figure out if we still need this.
 	HAL_UART_Transmit(&huart1, buffer, JUNK_PACKET_SIZE, 100);
 }
 
-
+/**
+ * @brief Initiates an emergency shutdown of the system.
+ *        Disables timers, DAC, rail monitoring, and all power supply voltages, setting the system to idle.
+ */
 void emergency_shutdown() {
 	ERPA_ENABLED = 0;
 	TIM2->CCR4 = 0;
-	HAL_TIM_OC_Stop_IT(&htim1, TIM_CHANNEL_1);			// PMT packet off
+	HAL_TIM_OC_Stop_IT(&htim1, TIM_CHANNEL_1);
 	HAL_TIM_OC_Stop_IT(&htim2, TIM_CHANNEL_4);
 
 	HK_ENABLED = 0;
-	HAL_DAC_Stop_DMA(&hdac1, DAC_CHANNEL_1);			// Disable auto sweep
+	HAL_DAC_Stop_DMA(&hdac1, DAC_CHANNEL_1);
 
 
 	// Telling rail monitor which voltages are now disabled

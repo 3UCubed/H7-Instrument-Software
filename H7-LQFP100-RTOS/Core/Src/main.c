@@ -40,6 +40,11 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
+
+/**
+ * @brief Enumeration of predefined DAC values.
+ *        Represents specific output values for the DAC.
+ */
 typedef enum {
     DAC_VALUE_0 = 0,
     DAC_VALUE_620 = 620,
@@ -51,6 +56,10 @@ typedef enum {
     DAC_VALUE_4095 = 4095
 } DAC_VALUES;
 
+/**
+ * @brief Enumeration of accepted command codes.
+ *        Defines a set of command values for controlling system power, modes, and error handling.
+ */
 typedef enum {
 	CMD_SDN1_ON = 0x10,
 	CMD_SDN1_OFF = 0x00,
@@ -92,7 +101,6 @@ typedef enum {
 	CMD_SEND_PREVIOUS_ERROR = 0xEF
 }ACCEPTED_COMMANDS;
 
-
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -102,7 +110,6 @@ typedef enum {
 
 #define ACK 0xFF
 #define NACK 0x00
-
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -113,6 +120,11 @@ typedef enum {
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+
+/**
+ * @brief Array of GPIO pin configurations.
+ *        Represents the mapping of specific GPIO ports and pins to system components.
+ */
 const gpio_pins gpios[] = {
 		{ GPIOB, GPIO_PIN_2 	},	// 0 -- SDN1
 		{ GPIOB, GPIO_PIN_5 	},	// 1 -- SYS_ON
@@ -125,6 +137,12 @@ const gpio_pins gpios[] = {
 		{ GPIOB, GPIO_PIN_6 	}	// 8 -- 800HVON
 };
 
+/**
+ * @brief Array of DAC output values representing sweeping up and down voltages.
+ *
+ * DAC_OUT alternates between specified DAC values to control the output voltage.
+ * The first half sweeps up, reaching a maximum at DAC_VALUE_4095, then sweeps down.
+ */
 uint32_t DAC_OUT[DAC_OUT_ARRAY_SIZE] = {
 		DAC_VALUE_0, DAC_VALUE_0,		// |	Sweeping Up
 		DAC_VALUE_620, DAC_VALUE_620,	// |
@@ -217,8 +235,6 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim) {
 			HK_100_ms_counter = 0;
 		}
 		HK_100_ms_counter++;
-
-
 	} else {
 		// Unknown timer interrupt
 	}
@@ -480,8 +496,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
  * @brief Retrieves and handles the cause of a system reset.
  *        Checks for watchdog and brownout reset conditions and reports errors.
  */
-void get_reset_cause()
-{
+void get_reset_cause() {
 	ERROR_STRUCT error;
 
 	if (__HAL_RCC_GET_FLAG(RCC_FLAG_IWDG1RST))
@@ -507,8 +522,7 @@ void get_reset_cause()
   * @brief  The application entry point.
   * @retval int
   */
-int main(void)
-{
+int main(void) {
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
@@ -551,15 +565,12 @@ int main(void)
 #endif
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
-
   system_setup();
-
   /* USER CODE END 2 */
 
   /* Init scheduler */
-  osKernelInitialize();  /* Call init function for freertos objects (in freertos.c) */
+  osKernelInitialize();
   MX_FREERTOS_Init();
-
   /* Start scheduler */
   osKernelStart();
   /* We should never get here as control is now taken by the scheduler */
@@ -577,8 +588,7 @@ int main(void)
   * @brief System Clock Configuration
   * @retval None
   */
-void SystemClock_Config(void)
-{
+void SystemClock_Config(void) {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
@@ -639,8 +649,7 @@ void SystemClock_Config(void)
   * @brief Peripherals Common Clock Configuration
   * @retval None
   */
-void PeriphCommonClock_Config(void)
-{
+void PeriphCommonClock_Config(void) {
   RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
 
   /** Initializes the peripherals clock
@@ -668,7 +677,6 @@ void PeriphCommonClock_Config(void)
  *        Sets up error handling, event flags, timer, voltage monitoring, ADC, and UART reception.
  */
 void system_setup() {
-
 #ifdef ERROR_HANDLING_ENABLED
 	error_counter_init();
 	init_flash_ecc();
@@ -802,8 +810,7 @@ void init_flash_ecc() {
   * @param  htim : TIM handle
   * @retval None
   */
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
   /* USER CODE BEGIN Callback 0 */
 	HAL_IWDG_Refresh(&hiwdg1);
 
@@ -822,8 +829,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   * @brief  This function is executed in case of error occurrence.
   * @retval None
   */
-void Error_Handler(void)
-{
+void Error_Handler(void) {
   /* USER CODE BEGIN Error_Handler_Debug */
 	/* User can add his own implementation to report the HAL error return state */
 	ERROR_STRUCT error;
@@ -841,8 +847,7 @@ void Error_Handler(void)
   * @param  line: assert_param error line source number
   * @retval None
   */
-void assert_failed(uint8_t *file, uint32_t line)
-{
+void assert_failed(uint8_t *file, uint32_t line) {
   /* USER CODE BEGIN 6 */
 	/* User can add his own implementation to report the file name and line number,
      ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
