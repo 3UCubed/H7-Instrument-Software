@@ -48,7 +48,7 @@ void create_erpa_packet() {
 	uint8_t erpa_spi[2];
 	uint16_t erpa_adc[1];
 	uint8_t uptime[UPTIME_SIZE];
-	uint8_t sweep_step = -1;
+	STEP_VALUES sweep_step = INVALID_STEP;
 
 	get_uptime(uptime);
 	sweep_step = get_current_step();

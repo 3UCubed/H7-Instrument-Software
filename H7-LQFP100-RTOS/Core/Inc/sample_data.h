@@ -17,7 +17,7 @@
 #define ADC3_NUM_CHANNELS 4
 
 
-uint8_t init_adc_dma();
+void init_adc_dma();
 void sample_pmt_spi(uint8_t *buffer);
 void sample_erpa_spi(uint8_t *buffer);
 void sample_erpa_adc(uint16_t *buffer);

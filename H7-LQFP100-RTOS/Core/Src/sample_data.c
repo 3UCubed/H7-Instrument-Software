@@ -20,8 +20,7 @@ static uint16_t pmt_spi_raw_data[1];
 static uint8_t raw_i2c[2];
 
 // Public Functions
-uint8_t init_adc_dma() {
-	uint8_t status = 0;
+void init_adc_dma() {
 
 	if (HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_OFFSET_LINEARITY,
 	ADC_SINGLE_ENDED) != HAL_OK) {
@@ -44,11 +43,6 @@ uint8_t init_adc_dma() {
 	}
 	hspi2.Instance->CR1 |= 1 << 10;
 	hspi1.Instance->CR1 |= 1 << 10;
-
-
-	status = 1;
-
-	return status;
 }
 
 //void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef * hspi)

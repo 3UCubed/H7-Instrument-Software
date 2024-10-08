@@ -31,16 +31,18 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "cmsis_os.h"			// For freeRTOS commands
-#include <stdio.h>				// For uint data types
-#include "string.h"				// For memcpy
+#include "cmsis_os.h"
+#include <stdio.h>
+#include "string.h"
 
-#include "packet_creation.h"	// For resetting packet sequence numbers
-#include "voltage_monitor.h"	// For initializing voltage monitor in system_setup
-#include "sample_data.h"		// For initializing adc dma in system_setup
-#include "time_tagging.h"		// For letting sync calibrate RTC
+#include "packet_creation.h"
+#include "voltage_monitor.h"
+#include "sample_data.h"
+#include "time_tagging.h"
 
 #define ERROR_HANDLING_ENABLED
+
+#define ERPA_PWM_FREQ 312
 
 #define UART_RX_BUFFER_SIZE 64
 
@@ -57,8 +59,6 @@ extern "C" {
 #define IDLE_FLAG 0x0002
 #define SYNC_FLAG 0x0004
 
-
-
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -69,11 +69,34 @@ typedef struct {
 	uint16_t pin;
 } gpio_pins;
 
+typedef enum {
+    STEP_0 = 0,
+    STEP_1 = 1,
+    STEP_2 = 2,
+    STEP_3 = 3,
+    STEP_4 = 4,
+    STEP_5 = 5,
+    STEP_6 = 6,
+    STEP_7 = 7,
+    INVALID_STEP = 255
+} STEP_VALUES;
+
+enum {
+	GPIOS_INDEX_SDN1 = 0,
+	GPIOS_INDEX_SYS = 1,
+	GPIOS_INDEX_3V3 = 2,
+	GPIOS_INDEX_5V = 3,
+	GPIOS_INDEX_N3V3 = 4,
+	GPIOS_INDEX_N5V = 5,
+	GPIOS_INDEX_15V = 6,
+	GPIOS_INDEX_N200V = 7,
+	GPIOS_INDEX_N800V = 8
+};
+
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
-
 extern osEventFlagsId_t packet_event_flags;
 extern osEventFlagsId_t utility_event_flags;
 extern osEventFlagsId_t mode_event_flags;
@@ -96,7 +119,7 @@ extern volatile uint8_t IDLING;
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-uint8_t get_current_step();
+STEP_VALUES get_current_step();
 void enter_stop();
 void send_ACK();
 void send_NACK();
@@ -109,7 +132,6 @@ void get_reset_cause();
 #define FLASH_BASE_ADDR      (uint32_t)(FLASH_BASE)
 #define FLASH_END_ADDR       (uint32_t)(0x081FFFFF)
 
-/* Base address of the Flash sectors Bank 1 */
 #define ADDR_FLASH_SECTOR_0_BANK1     ((uint32_t)0x08000000) /* Base @ of Sector 0, 128 Kbytes */
 #define ADDR_FLASH_SECTOR_1_BANK1     ((uint32_t)0x08020000) /* Base @ of Sector 1, 128 Kbytes */
 #define ADDR_FLASH_SECTOR_2_BANK1     ((uint32_t)0x08040000) /* Base @ of Sector 2, 128 Kbytes */
@@ -119,7 +141,6 @@ void get_reset_cause();
 #define ADDR_FLASH_SECTOR_6_BANK1     ((uint32_t)0x080C0000) /* Base @ of Sector 6, 128 Kbytes */
 #define ADDR_FLASH_SECTOR_7_BANK1     ((uint32_t)0x080E0000) /* Base @ of Sector 7, 128 Kbytes */
 
-/* Base address of the Flash sectors Bank 2 */
 #define ADDR_FLASH_SECTOR_0_BANK2     ((uint32_t)0x08100000) /* Base @ of Sector 0, 128 Kbytes */
 #define ADDR_FLASH_SECTOR_1_BANK2     ((uint32_t)0x08120000) /* Base @ of Sector 1, 128 Kbytes */
 #define ADDR_FLASH_SECTOR_2_BANK2     ((uint32_t)0x08140000) /* Base @ of Sector 2, 128 Kbytes */

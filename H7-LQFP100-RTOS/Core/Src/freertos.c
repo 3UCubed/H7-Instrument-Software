@@ -364,7 +364,7 @@ void AUTOINIT_init(void *argument)
 		osEventFlagsWait(utility_event_flags, AUTOINIT_FLAG, osFlagsWaitAny, osWaitForever);
 
 		// Enabling all voltages from SDN1 to 15V (inclusive)
-		for (int i = 0; i < 7; i++) {
+		for (int i = GPIOS_INDEX_SDN1; i <= GPIOS_INDEX_15V; i++) {
 			HAL_GPIO_WritePin(gpios[i].gpio, gpios[i].pin, GPIO_PIN_SET);
 			osDelay(100);
 		}
@@ -399,7 +399,7 @@ void AUTODEINIT_init(void *argument)
 		}
 
 		// Disabling all voltages from 15V to SDN1 (inclusive)
-		for (int i = 6; i >= 0; i--) {
+		for (int i = GPIOS_INDEX_15V; i >= GPIOS_INDEX_SDN1; i--) {
 			HAL_GPIO_WritePin(gpios[i].gpio, gpios[i].pin, GPIO_PIN_RESET);
 			osDelay(100);
 		}
@@ -426,6 +426,7 @@ void Voltage_Monitor_init(void *argument)
   {
 	  osEventFlagsWait(utility_event_flags, VOLTAGE_MONITOR_FLAG_ID, osFlagsWaitAny, osWaitForever);
 	  set_rail_monitor();
+#ifdef ERROR_HANDLING_ENABLED
 	  rails_in_bound = monitor_rails();
 	  if (!rails_in_bound && !IDLING) {
 		  osEventFlagsSet(mode_event_flags, IDLE_FLAG);
@@ -433,6 +434,7 @@ void Voltage_Monitor_init(void *argument)
 		  osDelay(1000);
 		  osEventFlagsSet(mode_event_flags, SCIENCE_FLAG);
 	  }
+#endif
   }
   /* USER CODE END Voltage_Monitor_init */
 }
@@ -479,7 +481,7 @@ void Science_init(void *argument)
 		osThreadSuspend(Voltage_MonitorHandle);
 		IDLING = 0;
 		// Enabling all voltages
-		for (int i = 0; i < 9; i++) {
+		for (int i = GPIOS_INDEX_SDN1; i <= GPIOS_INDEX_N800V; i++) {
 			HAL_GPIO_WritePin(gpios[i].gpio, gpios[i].pin, GPIO_PIN_SET);
 			osDelay(100);
 		}
@@ -498,7 +500,7 @@ void Science_init(void *argument)
 		uptime_millis = 0;
 		reset_packet_sequence_numbers();
 		osEventFlagsSet(packet_event_flags, HK_FLAG_ID);
-		TIM2->CCR4 = 312;
+		TIM2->CCR4 = ERPA_PWM_FREQ;
 		HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_1);			// PMT packet on
 
 		__enable_irq();
@@ -539,7 +541,7 @@ void Idle_init(void *argument)
 		}
 
 		// Disabling all voltages
-		for (int i = 8; i >= 0; i--) {
+		for (int i = GPIOS_INDEX_N800V; i >= GPIOS_INDEX_SDN1; i--) {
 			HAL_GPIO_WritePin(gpios[i].gpio, gpios[i].pin, GPIO_PIN_RESET);
 			osDelay(100);
 		}

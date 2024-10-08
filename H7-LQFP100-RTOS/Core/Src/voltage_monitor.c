@@ -9,8 +9,7 @@
 
 VOLTAGE_RAIL rail_monitor[NUM_VOLTAGE_RAILS];
 
-uint8_t voltage_monitor_init() {
-	uint8_t status = 0;
+void voltage_monitor_init() {
 
 	rail_monitor[RAIL_vsense].name = RAIL_vsense;
 	rail_monitor[RAIL_vsense].error_count = 0;
@@ -197,24 +196,15 @@ uint8_t voltage_monitor_init() {
 	rail_monitor[RAIL_TMP1].OOB_1 = 0;
 	rail_monitor[RAIL_TMP1].OOB_2 = 0;
 	rail_monitor[RAIL_TMP1].OOB_3 = 0;
-
-	status = 1;
-
-	return status;
 }
 
 
-uint8_t set_rail_monitor_enable(VOLTAGE_RAIL_NAME rail_name, uint8_t enable_value) {
-	uint8_t status = 0;
+void set_rail_monitor_enable(VOLTAGE_RAIL_NAME rail_name, uint8_t enable_value) {
 	rail_monitor[rail_name].is_enabled = enable_value;
-	status = 1;
-
-	return status;
 }
 
 
-uint8_t set_rail_monitor() {
-	uint8_t status = 0;
+void set_rail_monitor() {
 	uint16_t hk_adc1[10];
 	uint16_t hk_adc3[4];
 	int16_t hk_i2c[4];
@@ -242,10 +232,6 @@ uint8_t set_rail_monitor() {
 	memcpy(&rail_monitor[RAIL_n200v].data, &hk_adc1[4], sizeof(uint16_t));
 	memcpy(&rail_monitor[RAIL_n800v].data, &hk_adc1[5], sizeof(uint16_t));
 	memcpy(&rail_monitor[RAIL_TMP1].data, &hk_adc1[9], sizeof(uint16_t));
-
-	status = 1;
-
-	return status;
 }
 
 VOLTAGE_RAIL* get_rail_monitor() {

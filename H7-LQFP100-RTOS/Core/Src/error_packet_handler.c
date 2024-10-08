@@ -353,7 +353,7 @@ void emergency_shutdown() {
 	}
 
 	// Disabling all voltages
-	for (int i = 8; i >= 0; i--) {
+	for (int i = GPIOS_INDEX_N800V; i >= GPIOS_INDEX_SDN1; i--) {
 		HAL_GPIO_WritePin(gpios[i].gpio, gpios[i].pin, GPIO_PIN_RESET);
 	}
 	IDLING = 1;

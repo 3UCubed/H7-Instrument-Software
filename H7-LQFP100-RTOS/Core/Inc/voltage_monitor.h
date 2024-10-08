@@ -47,9 +47,9 @@ typedef struct {
 	uint16_t OOB_3;
 } VOLTAGE_RAIL;
 
-uint8_t voltage_monitor_init();
-uint8_t set_rail_monitor_enable(VOLTAGE_RAIL_NAME rail_name, uint8_t enable_value);
-uint8_t set_rail_monitor();
+void voltage_monitor_init();
+void set_rail_monitor_enable(VOLTAGE_RAIL_NAME rail_name, uint8_t enable_value);
+void set_rail_monitor();
 VOLTAGE_RAIL* get_rail_monitor();
 int16_t convert_ADT7410(int16_t raw);
 uint8_t check_bounds(VOLTAGE_RAIL_NAME name, uint16_t raw, int min, int max);
