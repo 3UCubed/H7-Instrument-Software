@@ -45,6 +45,8 @@ extern "C" {
 #define ERPA_PWM_FREQ 312
 
 #define UART_RX_BUFFER_SIZE 64
+#define DAC_OUT_ARRAY_SIZE 32
+
 
 #define PMT_FLAG_ID 0x0001
 #define ERPA_FLAG_ID 0x0002
@@ -59,17 +61,24 @@ extern "C" {
 #define IDLE_FLAG 0x0002
 #define SYNC_FLAG 0x0004
 
+#define ENABLED 1
+#define DISABLED 0
+
+#define UART_TIMEOUT_MS 100
+
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
 
-typedef struct {
+typedef struct
+{
 	GPIO_TypeDef *gpio;
 	uint16_t pin;
 } gpio_pins;
 
-typedef enum {
+typedef enum
+{
     STEP_0 = 0,
     STEP_1 = 1,
     STEP_2 = 2,
@@ -81,7 +90,8 @@ typedef enum {
     INVALID_STEP = 255
 } STEP_VALUES;
 
-enum {
+enum
+{
 	GPIOS_INDEX_SDN1 = 0,
 	GPIOS_INDEX_SYS = 1,
 	GPIOS_INDEX_3V3 = 2,

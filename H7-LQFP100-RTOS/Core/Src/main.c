@@ -107,7 +107,6 @@ typedef enum
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define DAC_OUT_ARRAY_SIZE 32
 #define HK_100MS_COUNTER_MAX 32
 
 #define ACK 0xFF
@@ -173,8 +172,8 @@ osEventFlagsId_t utility_event_flags;
 osEventFlagsId_t mode_event_flags;
 
 unsigned char UART_RX_BUFFER[UART_RX_BUFFER_SIZE];
-volatile uint8_t HK_ENABLED = 0;
-volatile uint8_t ERPA_ENABLED = 0;
+volatile uint8_t HK_ENABLED = DISABLED;
+volatile uint8_t ERPA_ENABLED = DISABLED;
 volatile uint8_t step = 0;
 volatile uint32_t cadence = 3125;
 volatile uint32_t uptime_millis = 0;
@@ -263,9 +262,11 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 	HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
-	unsigned char key = UART_RX_BUFFER[0];
+	uint8_t key_index = 0;
+	unsigned char key = UART_RX_BUFFER[key_index];
 
-	switch (key) {
+	switch (key)
+	{
 	case CMD_SDN1_ON:
 	{
 		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_SDN1].gpio, gpios[GPIOS_INDEX_SDN1].pin, GPIO_PIN_SET);
@@ -281,7 +282,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	case CMD_SYS_ON:
 	{
 		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_SYS].gpio, gpios[GPIOS_INDEX_SYS].pin, GPIO_PIN_SET);
-		set_rail_monitor_enable(RAIL_2v5, 1);
+		set_rail_monitor_enable(RAIL_2v5, ENABLED);
 		break;
 	}
 
@@ -294,7 +295,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 
 		for (int i = RAIL_n800v; i >= RAIL_2v5; i--)
 		{
-			set_rail_monitor_enable(i, 0);
+			set_rail_monitor_enable(i, DISABLED);
 		}
 		break;
 	}
@@ -302,98 +303,98 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	case CMD_3V3_ON:
 	{
 		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_3V3].gpio, gpios[GPIOS_INDEX_3V3].pin, GPIO_PIN_SET);
-		set_rail_monitor_enable(RAIL_3v3, 1);
+		set_rail_monitor_enable(RAIL_3v3, ENABLED);
 		break;
 	}
 
 	case CMD_3V3_OFF:
 	{
 		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_3V3].gpio, gpios[GPIOS_INDEX_3V3].pin, GPIO_PIN_RESET);
-		set_rail_monitor_enable(RAIL_3v3, 0);
+		set_rail_monitor_enable(RAIL_3v3, DISABLED);
 		break;
 	}
 
 	case CMD_5V_ON:
 	{
 		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_5V].gpio, gpios[GPIOS_INDEX_5V].pin, GPIO_PIN_SET);
-		set_rail_monitor_enable(RAIL_5v, 1);
+		set_rail_monitor_enable(RAIL_5v, ENABLED);
 		break;
 	}
 
 	case CMD_5V_OFF:
 	{
 		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_5V].gpio, gpios[GPIOS_INDEX_5V].pin, GPIO_PIN_RESET);
-		set_rail_monitor_enable(RAIL_5v, 0);
+		set_rail_monitor_enable(RAIL_5v, DISABLED);
 		break;
 	}
 
 	case CMD_N3V3_ON:
 	{
 		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_N3V3].gpio, gpios[GPIOS_INDEX_N3V3].pin, GPIO_PIN_SET);
-		set_rail_monitor_enable(RAIL_n3v3, 1);
+		set_rail_monitor_enable(RAIL_n3v3, ENABLED);
 		break;
 	}
 
 	case CMD_N3V3_OFF:
 	{
 		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_N3V3].gpio, gpios[GPIOS_INDEX_N3V3].pin, GPIO_PIN_RESET);
-		set_rail_monitor_enable(RAIL_n3v3, 0);
+		set_rail_monitor_enable(RAIL_n3v3, DISABLED);
 		break;
 	}
 
 	case CMD_N5V_ON:
 	{
 		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_N5V].gpio, gpios[GPIOS_INDEX_N5V].pin, GPIO_PIN_SET);
-		set_rail_monitor_enable(RAIL_n5v, 1);
+		set_rail_monitor_enable(RAIL_n5v, ENABLED);
 		break;
 	}
 
 	case CMD_N5V_OFF:
 	{
 		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_N5V].gpio, gpios[GPIOS_INDEX_N5V].pin, GPIO_PIN_RESET);
-		set_rail_monitor_enable(RAIL_n5v, 0);
+		set_rail_monitor_enable(RAIL_n5v, DISABLED);
 		break;
 	}
 
 	case CMD_15V_ON:
 	{
 		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_15V].gpio, gpios[GPIOS_INDEX_15V].pin, GPIO_PIN_SET);
-		set_rail_monitor_enable(RAIL_15v, 1);
+		set_rail_monitor_enable(RAIL_15v, ENABLED);
 		break;
 	}
 
 	case CMD_15V_OFF:
 	{
 		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_15V].gpio, gpios[GPIOS_INDEX_15V].pin, GPIO_PIN_RESET);
-		set_rail_monitor_enable(RAIL_15v, 0);
+		set_rail_monitor_enable(RAIL_15v, DISABLED);
 		break;
 	}
 
 	case CMD_N200V_ON:
 	{
 		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_N200V].gpio, gpios[GPIOS_INDEX_N200V].pin, GPIO_PIN_SET);
-		set_rail_monitor_enable(RAIL_n200v, 1);
+		set_rail_monitor_enable(RAIL_n200v, ENABLED);
 		break;
 	}
 
 	case CMD_N200V_OFF:
 	{
 		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_N200V].gpio, gpios[GPIOS_INDEX_N200V].pin, GPIO_PIN_RESET);
-		set_rail_monitor_enable(RAIL_n200v, 0);
+		set_rail_monitor_enable(RAIL_n200v, DISABLED);
 		break;
 	}
 
 	case CMD_N800V_ON:
 	{
 		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_N800V].gpio, gpios[GPIOS_INDEX_N800V].pin, GPIO_PIN_SET);
-		set_rail_monitor_enable(RAIL_n800v, 1);
+		set_rail_monitor_enable(RAIL_n800v, ENABLED);
 		break;
 	}
 
 	case CMD_N800V_OFF:
 	{
 		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_N800V].gpio, gpios[GPIOS_INDEX_N800V].pin, GPIO_PIN_RESET);
-		set_rail_monitor_enable(RAIL_n800v, 0);
+		set_rail_monitor_enable(RAIL_n800v, DISABLED);
 		break;
 	}
 
@@ -413,13 +414,13 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	{
 		osEventFlagsSet(packet_event_flags, ERPA_FLAG_ID);
 		TIM2->CCR4 = ERPA_PWM_FREQ;
-		ERPA_ENABLED = 1;
+		ERPA_ENABLED = ENABLED;
 		break;
 	}
 
 	case CMD_ERPA_OFF:
 	{
-		ERPA_ENABLED = 0;
+		ERPA_ENABLED = DISABLED;
 		TIM2->CCR4 = 0;
 		break;
 	}
@@ -440,13 +441,13 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	case CMD_HK_ON:
 	{
 		osEventFlagsSet(packet_event_flags, HK_FLAG_ID);
-		HK_ENABLED = 1;
+		HK_ENABLED = ENABLED;
 		break;
 	}
 
 	case CMD_HK_OFF:
 	{
-		HK_ENABLED = 0;
+		HK_ENABLED = DISABLED;
 		break;
 	}
 
@@ -786,7 +787,7 @@ void send_ACK()
 	static uint8_t tx_buffer[1];
 
 	tx_buffer[0] = ACK;
-	HAL_UART_Transmit(&huart1, tx_buffer, 1, 100);
+	HAL_UART_Transmit(&huart1, tx_buffer, 1, UART_TIMEOUT_MS);
 }
 
 /**
@@ -798,7 +799,7 @@ void send_NACK()
 	static uint8_t tx_buffer[1];
 
 	tx_buffer[0] = NACK;
-	HAL_UART_Transmit(&huart1, tx_buffer, 1, 100);
+	HAL_UART_Transmit(&huart1, tx_buffer, 1, UART_TIMEOUT_MS);
 }
 
 /**

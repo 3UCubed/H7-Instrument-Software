@@ -17,7 +17,8 @@
 
 #include <stdio.h>
 
-typedef enum {
+typedef enum
+{
 	EC_power_supply_rail = 0x00,
 	EC_seu = 0x01,
 	EC_peripheral = 0x02,
@@ -26,7 +27,8 @@ typedef enum {
 	EC_UNDEFINED = 0x05
 }ERROR_CATEGORY;
 
-typedef enum {
+typedef enum
+{
 	ED_vsense = 0x06,
 	ED_vrefint = 0x07,
 	ED_TEMP1 = 0x08,
@@ -52,7 +54,8 @@ typedef enum {
 	ED_UNDEFINED = 0x1C
 }ERROR_DETAIL;
 
-typedef struct {
+typedef struct
+{
 	ERROR_CATEGORY category;
 	ERROR_DETAIL detail;
 	uint16_t OOB_1;

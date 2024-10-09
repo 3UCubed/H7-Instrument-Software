@@ -310,7 +310,7 @@ void send_error_counter_packet()
 	buffer[58] = ((local_cpy[ED_UNDEFINED] & 0xFF00) >> 8);
 	buffer[59] = (local_cpy[ED_UNDEFINED] & 0xFF);
 
-	HAL_UART_Transmit(&huart1, buffer, ERROR_COUNTER_PACKET_SIZE, 100);
+	HAL_UART_Transmit(&huart1, buffer, ERROR_COUNTER_PACKET_SIZE, UART_TIMEOUT_MS);
 }
 
 /**
@@ -330,7 +330,7 @@ void send_previous_error_packet()
 	buffer[2] = prev_error.category;
 	buffer[3] = prev_error.detail;
 
-	HAL_UART_Transmit(&huart1, buffer, PREV_ERROR_PACKET_SIZE, 100);
+	HAL_UART_Transmit(&huart1, buffer, PREV_ERROR_PACKET_SIZE, UART_TIMEOUT_MS);
 }
 
 /**
@@ -361,7 +361,7 @@ void send_current_error_packet(ERROR_STRUCT error)
 	buffer[8] = ((error.OOB_3 & 0xFF00) >> 8);
 	buffer[9] = (error.OOB_3 & 0xFF);
 
-	HAL_UART_Transmit(&huart1, buffer, CURRENT_ERROR_PACKET_SIZE, 100);
+	HAL_UART_Transmit(&huart1, buffer, CURRENT_ERROR_PACKET_SIZE, UART_TIMEOUT_MS);
 }
 
 /**
@@ -377,7 +377,7 @@ void send_junk_packet()
 		buffer[i] = 0xCE;
 	}
 
-	HAL_UART_Transmit(&huart1, buffer, JUNK_PACKET_SIZE, 100);
+	HAL_UART_Transmit(&huart1, buffer, JUNK_PACKET_SIZE, UART_TIMEOUT_MS);
 }
 
 /**

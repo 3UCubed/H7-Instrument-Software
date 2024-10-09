@@ -41,7 +41,10 @@ typedef StaticTask_t osStaticThreadDef_t;
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define PS_RAIL_DELAY 100
+#define IDLE_TO_SCIENCE_DELAY 1000
+#define IDLE_TO_VOLTAGE_MONITOR_DELAY 3500	// TODO: Reduce to 1000 for assembled instrument
+#define SYNC_DELAY 10
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -197,6 +200,10 @@ void vApplicationTickHook(void);
 void vApplicationStackOverflowHook(xTaskHandle xTask, signed char *pcTaskName);
 
 /* USER CODE BEGIN 3 */
+/**
+ * @brief Tick hook function called by each tick interrupt.
+ *		  Increments uptime_millis, used in time tagging.
+ */
 void vApplicationTickHook( void )
 {
    /* This function will be called by each tick interrupt if
@@ -223,7 +230,8 @@ void vApplicationStackOverflowHook(xTaskHandle xTask, signed char *pcTaskName)
   * @param  None
   * @retval None
   */
-void MX_FREERTOS_Init(void) {
+void MX_FREERTOS_Init(void)
+{
   /* USER CODE BEGIN Init */
 
   /* USER CODE END Init */
@@ -287,16 +295,18 @@ void MX_FREERTOS_Init(void) {
 
 /* USER CODE BEGIN Header_PMT_init */
 /**
-  * @brief  Function implementing the PMT_task thread.
-  * @param  argument: Not used
-  * @retval None
-  */
+ * @brief Initializes the PMT thread.
+ *
+ * This function waits for PMT event flags, creates a PMT packet,
+ * and yields control to other threads in an infinite loop.
+ */
 /* USER CODE END Header_PMT_init */
 void PMT_init(void *argument)
 {
   /* USER CODE BEGIN PMT_init */
   /* Infinite loop */
-	for (;;) {
+	for (;;)
+	{
 		osEventFlagsWait(packet_event_flags, PMT_FLAG_ID, osFlagsWaitAny, osWaitForever);
 
 		create_pmt_packet();
@@ -308,16 +318,18 @@ void PMT_init(void *argument)
 
 /* USER CODE BEGIN Header_ERPA_init */
 /**
-* @brief Function implementing the ERPA_task thread.
-* @param argument: Not used
-* @retval None
-*/
+ * @brief Initializes the ERPA thread.
+ *
+ * This function waits for ERPA event flags, creates an ERPA packet,
+ * and yields control to other threads in an infinite loop.
+ */
 /* USER CODE END Header_ERPA_init */
 void ERPA_init(void *argument)
 {
   /* USER CODE BEGIN ERPA_init */
   /* Infinite loop */
-	for (;;) {
+	for (;;)
+	{
 		osEventFlagsWait(packet_event_flags, ERPA_FLAG_ID, osFlagsWaitAny, osWaitForever);
 
 		create_erpa_packet();
@@ -329,16 +341,18 @@ void ERPA_init(void *argument)
 
 /* USER CODE BEGIN Header_HK_init */
 /**
-* @brief Function implementing the HK_task thread.
-* @param argument: Not used
-* @retval None
-*/
+ * @brief Initializes the HK thread.
+ *
+ * This function waits for HK event flags, creates an HK packet,
+ * and yields control to other threads in an infinite loop.
+ */
 /* USER CODE END Header_HK_init */
 void HK_init(void *argument)
 {
   /* USER CODE BEGIN HK_init */
   /* Infinite loop */
-	for (;;) {
+	for (;;)
+	{
 		osEventFlagsWait(packet_event_flags, HK_FLAG_ID, osFlagsWaitAny, osWaitForever);
 
 		create_hk_packet();
@@ -350,28 +364,32 @@ void HK_init(void *argument)
 
 /* USER CODE BEGIN Header_AUTOINIT_init */
 /**
-* @brief Function implementing the AUTOINIT_task thread.
-* @param argument: Not used
-* @retval None
-*/
+ * @brief Initializes the AUTOINIT thread.
+ *
+ * This function waits for AUTOINIT event flags, enables all voltages
+ * from SDN1 to 15V, updates the rail monitor, and yields control to
+ * other threads in an infinite loop.
+ */
 /* USER CODE END Header_AUTOINIT_init */
 void AUTOINIT_init(void *argument)
 {
   /* USER CODE BEGIN AUTOINIT_init */
   /* Infinite loop */
-	for (;;) {
-
+	for (;;)
+	{
 		osEventFlagsWait(utility_event_flags, AUTOINIT_FLAG, osFlagsWaitAny, osWaitForever);
 
 		// Enabling all voltages from SDN1 to 15V (inclusive)
-		for (int i = GPIOS_INDEX_SDN1; i <= GPIOS_INDEX_15V; i++) {
+		for (int i = GPIOS_INDEX_SDN1; i <= GPIOS_INDEX_15V; i++)
+		{
 			HAL_GPIO_WritePin(gpios[i].gpio, gpios[i].pin, GPIO_PIN_SET);
-			osDelay(100);
+			osDelay(PS_RAIL_DELAY);
 		}
 
 		// Telling rail monitor which rails are now enabled
-		for (int i = RAIL_2v5; i <= RAIL_15v; i++){
-			set_rail_monitor_enable(i, 1);
+		for (int i = RAIL_2v5; i <= RAIL_15v; i++)
+		{
+			set_rail_monitor_enable(i, ENABLED);
 		}
 		osThreadYield();
 	}
@@ -380,30 +398,33 @@ void AUTOINIT_init(void *argument)
 
 /* USER CODE BEGIN Header_AUTODEINIT_init */
 /**
-* @brief Function implementing the AUTODEINIT_task thread.
-* @param argument: Not used
-* @retval None
-*/
+ * @brief Initializes the AUTODEINIT thread.
+ *
+ * This function waits for AUTODEINIT event flags, disables all voltages
+ * from 15V to SDN1, updates the rail monitor, and yields control to
+ * other threads in an infinite loop.
+ */
 /* USER CODE END Header_AUTODEINIT_init */
 void AUTODEINIT_init(void *argument)
 {
   /* USER CODE BEGIN AUTODEINIT_init */
   /* Infinite loop */
-	for (;;) {
-
+	for (;;)
+	{
 		osEventFlagsWait(utility_event_flags, AUTODEINIT_FLAG, osFlagsWaitAny, osWaitForever);
 
 		// Telling rail monitor which rails are now disabled
-		for (int i = RAIL_15v; i >= RAIL_2v5; i--){
-			set_rail_monitor_enable(i, 0);
+		for (int i = RAIL_15v; i >= RAIL_2v5; i--)
+		{
+			set_rail_monitor_enable(i, DISABLED);
 		}
 
 		// Disabling all voltages from 15V to SDN1 (inclusive)
-		for (int i = GPIOS_INDEX_15V; i >= GPIOS_INDEX_SDN1; i--) {
+		for (int i = GPIOS_INDEX_15V; i >= GPIOS_INDEX_SDN1; i--)
+		{
 			HAL_GPIO_WritePin(gpios[i].gpio, gpios[i].pin, GPIO_PIN_RESET);
-			osDelay(100);
+			osDelay(PS_RAIL_DELAY);
 		}
-
 
 		osThreadYield();
 	}
@@ -412,10 +433,12 @@ void AUTODEINIT_init(void *argument)
 
 /* USER CODE BEGIN Header_Voltage_Monitor_init */
 /**
-* @brief Function implementing the Voltage_Monitor thread.
-* @param argument: Not used
-* @retval None
-*/
+ * @brief Initializes the Voltage Monitor thread.
+ *
+ * This function waits for voltage monitor event flags, sets the rail monitor,
+ * and checks rail status. If rails are out of bounds, it transitions to idle mode
+ * before returning to science mode.
+ */
 /* USER CODE END Header_Voltage_Monitor_init */
 void Voltage_Monitor_init(void *argument)
 {
@@ -428,10 +451,11 @@ void Voltage_Monitor_init(void *argument)
 	  set_rail_monitor();
 #ifdef ERROR_HANDLING_ENABLED
 	  rails_in_bound = monitor_rails();
-	  if (!rails_in_bound && !IDLING) {
+	  if (!rails_in_bound && !IDLING)
+	  {
 		  osEventFlagsSet(mode_event_flags, IDLE_FLAG);
 		  while (!IDLING) {};
-		  osDelay(1000);
+		  osDelay(IDLE_TO_SCIENCE_DELAY);
 		  osEventFlagsSet(mode_event_flags, SCIENCE_FLAG);
 	  }
 #endif
@@ -441,10 +465,11 @@ void Voltage_Monitor_init(void *argument)
 
 /* USER CODE BEGIN Header_STOP_init */
 /**
-* @brief Function implementing the STOP_task thread.
-* @param argument: Not used
-* @retval None
-*/
+ * @brief Initializes the STOP thread.
+ *
+ * This function waits for the STOP event flag, clears it, sets the IDLE flag,
+ * and enters stop mode when idle.
+ */
 /* USER CODE END Header_STOP_init */
 void STOP_init(void *argument)
 {
@@ -465,10 +490,12 @@ void STOP_init(void *argument)
 
 /* USER CODE BEGIN Header_Science_init */
 /**
-* @brief Function implementing the Science_task thread.
-* @param argument: Not used
-* @retval None
-*/
+ * @brief Initializes the Science thread.
+ *
+ * This function waits for the SCIENCE event flag, enables all voltages,
+ * updates the rail monitor, starts DAC in DMA mode, and resets packet
+ * sequence numbers, transitioning to the science mode.
+ */
 /* USER CODE END Header_Science_init */
 void Science_init(void *argument)
 {
@@ -480,43 +507,45 @@ void Science_init(void *argument)
 		osEventFlagsWait(mode_event_flags, SCIENCE_FLAG, osFlagsWaitAny, osWaitForever);
 		osThreadSuspend(Voltage_MonitorHandle);
 		IDLING = 0;
+
 		// Enabling all voltages
-		for (int i = GPIOS_INDEX_SDN1; i <= GPIOS_INDEX_N800V; i++) {
+		for (int i = GPIOS_INDEX_SDN1; i <= GPIOS_INDEX_N800V; i++)
+		{
 			HAL_GPIO_WritePin(gpios[i].gpio, gpios[i].pin, GPIO_PIN_SET);
-			osDelay(100);
+			osDelay(PS_RAIL_DELAY);
 		}
 
 		// Telling rail monitor which voltages are now enabled
-		for (int i = RAIL_busvmon; i <= RAIL_TMP1; i++) {
-			set_rail_monitor_enable(i, 1);
+		for (int i = RAIL_busvmon; i <= RAIL_TMP1; i++)
+		{
+			set_rail_monitor_enable(i, ENABLED);
 		}
 		osThreadResume(Voltage_MonitorHandle);
 
 		__disable_irq();
-		HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, DAC_OUT, 32, DAC_ALIGN_12B_R);	// Enable auto sweep (doesn't start until ERPA timer is started)
-		HK_ENABLED = 1;
-		ERPA_ENABLED = 1;
+		HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, DAC_OUT, DAC_OUT_ARRAY_SIZE, DAC_ALIGN_12B_R);
+		HK_ENABLED = ENABLED;
+		ERPA_ENABLED = ENABLED;
 		uptime_millis = 0;
 		reset_packet_sequence_numbers();
 		osEventFlagsSet(packet_event_flags, HK_FLAG_ID);
 		TIM2->CCR4 = ERPA_PWM_FREQ;
-		HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_1);			// PMT packet on
-
+		HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_1);
 		__enable_irq();
 
-		// Yield thread control
 		osThreadYield();
-
   }
   /* USER CODE END Science_init */
 }
 
 /* USER CODE BEGIN Header_Idle_init */
 /**
-* @brief Function implementing the Idle_task thread.
-* @param argument: Not used
-* @retval None
-*/
+ * @brief Initializes the Idle thread.
+ *
+ * This function waits for the IDLE event flag, disables ERPA and HK,
+ * stops the DAC, updates the rail monitor, disables all voltages,
+ * and yields control to other threads.
+ */
 /* USER CODE END Header_Idle_init */
 void Idle_init(void *argument)
 {
@@ -527,40 +556,43 @@ void Idle_init(void *argument)
   {
 		osEventFlagsWait(mode_event_flags, IDLE_FLAG, osFlagsWaitAny, osWaitForever);
 
-		ERPA_ENABLED = 0;
+		ERPA_ENABLED = DISABLED;
 		TIM2->CCR4 = 0;
-		HAL_TIM_OC_Stop_IT(&htim1, TIM_CHANNEL_1);			// PMT packet off
-		HK_ENABLED = 0;
-		HAL_DAC_Stop_DMA(&hdac1, DAC_CHANNEL_1);			// Disable auto sweep
+		HAL_TIM_OC_Stop_IT(&htim1, TIM_CHANNEL_1);
+		HK_ENABLED = DISABLED;
+		HAL_DAC_Stop_DMA(&hdac1, DAC_CHANNEL_1);
 		osThreadSuspend(Voltage_MonitorHandle);
 
 		// Telling rail monitor which voltages are now disabled
-		for (int i = RAIL_TMP1; i >= RAIL_busvmon; i--) {
-			set_rail_monitor_enable(i, 0);
+		for (int i = RAIL_TMP1; i >= RAIL_busvmon; i--)
+		{
+			set_rail_monitor_enable(i, DISABLED);
 		}
 
 		// Disabling all voltages
-		for (int i = GPIOS_INDEX_N800V; i >= GPIOS_INDEX_SDN1; i--) {
+		for (int i = GPIOS_INDEX_N800V; i >= GPIOS_INDEX_SDN1; i--)
+		{
 			HAL_GPIO_WritePin(gpios[i].gpio, gpios[i].pin, GPIO_PIN_RESET);
-			osDelay(100);
+			osDelay(PS_RAIL_DELAY);
 		}
-		osDelay(3500);		// TODO: Reduce to 1000 for assembled instrument
+		osDelay(IDLE_TO_VOLTAGE_MONITOR_DELAY);
 		IDLING = 1;
 		osThreadResume(Voltage_MonitorHandle);
 
 		// Yield thread control
 		osThreadYield();
-
   }
   /* USER CODE END Idle_init */
 }
 
 /* USER CODE BEGIN Header_Sync_init */
 /**
-* @brief Function implementing the Sync_task thread.
-* @param argument: Not used
-* @retval None
-*/
+ * @brief Initializes the Sync thread.
+ *
+ * This function waits for the SYNC event flag, sends an acknowledgment,
+ * waits for a specific key value to be received, calibrates the RTC,
+ * and handles UART communication for error counting and reset cause.
+ */
 /* USER CODE END Header_Sync_init */
 void Sync_init(void *argument)
 {
@@ -572,19 +604,23 @@ void Sync_init(void *argument)
 	  	send_ACK();
 
 	  	uint8_t key;
+	  	uint8_t key_index = 0;
+	  	uint8_t expected_key_value = 0xFF;
+	  	uint8_t rtc_buffer_size = 9;
 
 	  	// Wait for 0xFF to be received
 	  	HAL_UART_AbortReceive(&huart1);
-	  	do {
-	  		HAL_UART_Receive(&huart1, UART_RX_BUFFER, 9, 100);
-	  		key = UART_RX_BUFFER[0];
-	  	} while (key != 0xFF);
+	  	do
+	  	{
+	  		HAL_UART_Receive(&huart1, UART_RX_BUFFER, rtc_buffer_size, UART_TIMEOUT_MS);
+	  		key = UART_RX_BUFFER[key_index];
+	  	} while (key != expected_key_value);
+
 	  	calibrateRTC(UART_RX_BUFFER);
-	  	osDelay(10);
+	  	osDelay(SYNC_DELAY);
 	  	HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
 	  	send_error_counter_packet();
 	    get_reset_cause();
-
   }
   /* USER CODE END Sync_init */
 }
