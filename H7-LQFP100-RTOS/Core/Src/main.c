@@ -45,7 +45,8 @@
  * @brief Enumeration of predefined DAC values.
  *        Represents specific output values for the DAC.
  */
-typedef enum {
+typedef enum
+{
     DAC_VALUE_0 = 0,
     DAC_VALUE_620 = 620,
     DAC_VALUE_1241 = 1241,
@@ -60,7 +61,8 @@ typedef enum {
  * @brief Enumeration of accepted command codes.
  *        Defines a set of command values for controlling system power, modes, and error handling.
  */
-typedef enum {
+typedef enum
+{
 	CMD_SDN1_ON = 0x10,
 	CMD_SDN1_OFF = 0x00,
 	CMD_SYS_ON = 0x11,
@@ -125,7 +127,8 @@ typedef enum {
  * @brief Array of GPIO pin configurations.
  *        Represents the mapping of specific GPIO ports and pins to system components.
  */
-const gpio_pins gpios[] = {
+const gpio_pins gpios[] =
+{
 		{ GPIOB, GPIO_PIN_2 	},	// 0 -- SDN1
 		{ GPIOB, GPIO_PIN_5 	},	// 1 -- SYS_ON
 		{ GPIOC, GPIO_PIN_10 	},	// 2 -- 3v3_EN
@@ -143,7 +146,8 @@ const gpio_pins gpios[] = {
  * DAC_OUT alternates between specified DAC values to control the output voltage.
  * The first half sweeps up, reaching a maximum at DAC_VALUE_4095, then sweeps down.
  */
-uint32_t DAC_OUT[DAC_OUT_ARRAY_SIZE] = {
+uint32_t DAC_OUT[DAC_OUT_ARRAY_SIZE] =
+{
 		DAC_VALUE_0, DAC_VALUE_0,		// |	Sweeping Up
 		DAC_VALUE_620, DAC_VALUE_620,	// |
 		DAC_VALUE_1241, DAC_VALUE_1241,	// |
@@ -194,7 +198,8 @@ void init_flash_ecc();
  * @brief Callback function for handling ECC correction in flash memory.
  *        Detects and handles single-bit flash ECC errors.
  */
-void HAL_FLASHEx_EccCorrectionCallback() {
+void HAL_FLASHEx_EccCorrectionCallback()
+{
 	ERROR_STRUCT error;
 	error.category = EC_seu;
 	error.detail = ED_single_bit_error_flash;
@@ -205,7 +210,8 @@ void HAL_FLASHEx_EccCorrectionCallback() {
  * @brief Callback function for handling ECC detection in flash memory.
  *        Detects and handles double-bit flash ECC errors.
  */
-void HAL_FLASHEx_EccDetectionCallback() {
+void HAL_FLASHEx_EccDetectionCallback()
+{
 	ERROR_STRUCT error;
 	error.category = EC_seu;
 	error.detail = ED_double_bit_error_flash;
@@ -218,24 +224,32 @@ void HAL_FLASHEx_EccDetectionCallback() {
  *
  * @param htim Pointer to the timer handle triggering the callback.
  */
-void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim) {
-	if (htim == &htim1) {
+void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
+{
+	if (htim == &htim1)
+	{
 		osEventFlagsSet(packet_event_flags, PMT_FLAG_ID);
 	}
-	else if (htim == &htim2) {
-		if (ERPA_ENABLED) {
+	else if (htim == &htim2)
+	{
+		if (ERPA_ENABLED)
+		{
 			osEventFlagsSet(packet_event_flags, ERPA_FLAG_ID);
 		}
-		if (HK_100_ms_counter == HK_100MS_COUNTER_MAX) {
+		if (HK_100_ms_counter == HK_100MS_COUNTER_MAX)
+		{
 			osEventFlagsSet(utility_event_flags, VOLTAGE_MONITOR_FLAG_ID);
 
-			if (HK_ENABLED){
+			if (HK_ENABLED)
+			{
 				osEventFlagsSet(packet_event_flags, HK_FLAG_ID);
 			}
 			HK_100_ms_counter = 0;
 		}
 		HK_100_ms_counter++;
-	} else {
+	}
+	else
+	{
 		// Unknown timer interrupt
 	}
 }
@@ -246,169 +260,200 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim) {
  *
  * @param huart Pointer to the UART handle triggering the callback.
  */
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
 	HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
 	unsigned char key = UART_RX_BUFFER[0];
 
 	switch (key) {
-	case CMD_SDN1_ON: {
+	case CMD_SDN1_ON:
+	{
 		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_SDN1].gpio, gpios[GPIOS_INDEX_SDN1].pin, GPIO_PIN_SET);
 		break;
 	}
 
-	case CMD_SDN1_OFF: {
+	case CMD_SDN1_OFF:
+	{
 		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_SDN1].gpio, gpios[GPIOS_INDEX_SDN1].pin, GPIO_PIN_RESET);
 		break;
 	}
 
-	case CMD_SYS_ON: {
+	case CMD_SYS_ON:
+	{
 		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_SYS].gpio, gpios[GPIOS_INDEX_SYS].pin, GPIO_PIN_SET);
 		set_rail_monitor_enable(RAIL_2v5, 1);
 		break;
 	}
 
-	case CMD_SYS_OFF: {
-		for (int i = GPIOS_INDEX_N800V; i > GPIOS_INDEX_SDN1; i--) {
+	case CMD_SYS_OFF:
+	{
+		for (int i = GPIOS_INDEX_N800V; i > GPIOS_INDEX_SDN1; i--)
+		{
 			HAL_GPIO_WritePin(gpios[i].gpio, gpios[i].pin, GPIO_PIN_RESET);
 		}
 
-		for (int i = RAIL_n800v; i >= RAIL_2v5; i--) {
+		for (int i = RAIL_n800v; i >= RAIL_2v5; i--)
+		{
 			set_rail_monitor_enable(i, 0);
 		}
 		break;
 	}
 
-	case CMD_3V3_ON: {
+	case CMD_3V3_ON:
+	{
 		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_3V3].gpio, gpios[GPIOS_INDEX_3V3].pin, GPIO_PIN_SET);
 		set_rail_monitor_enable(RAIL_3v3, 1);
 		break;
 	}
 
-	case CMD_3V3_OFF: {
+	case CMD_3V3_OFF:
+	{
 		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_3V3].gpio, gpios[GPIOS_INDEX_3V3].pin, GPIO_PIN_RESET);
 		set_rail_monitor_enable(RAIL_3v3, 0);
 		break;
 	}
 
-	case CMD_5V_ON: {
+	case CMD_5V_ON:
+	{
 		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_5V].gpio, gpios[GPIOS_INDEX_5V].pin, GPIO_PIN_SET);
 		set_rail_monitor_enable(RAIL_5v, 1);
 		break;
 	}
 
-	case CMD_5V_OFF: {
+	case CMD_5V_OFF:
+	{
 		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_5V].gpio, gpios[GPIOS_INDEX_5V].pin, GPIO_PIN_RESET);
 		set_rail_monitor_enable(RAIL_5v, 0);
 		break;
 	}
 
-	case CMD_N3V3_ON: {
+	case CMD_N3V3_ON:
+	{
 		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_N3V3].gpio, gpios[GPIOS_INDEX_N3V3].pin, GPIO_PIN_SET);
 		set_rail_monitor_enable(RAIL_n3v3, 1);
 		break;
 	}
 
-	case CMD_N3V3_OFF: {
+	case CMD_N3V3_OFF:
+	{
 		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_N3V3].gpio, gpios[GPIOS_INDEX_N3V3].pin, GPIO_PIN_RESET);
 		set_rail_monitor_enable(RAIL_n3v3, 0);
 		break;
 	}
 
-	case CMD_N5V_ON: {
+	case CMD_N5V_ON:
+	{
 		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_N5V].gpio, gpios[GPIOS_INDEX_N5V].pin, GPIO_PIN_SET);
 		set_rail_monitor_enable(RAIL_n5v, 1);
 		break;
 	}
 
-	case CMD_N5V_OFF: {
+	case CMD_N5V_OFF:
+	{
 		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_N5V].gpio, gpios[GPIOS_INDEX_N5V].pin, GPIO_PIN_RESET);
 		set_rail_monitor_enable(RAIL_n5v, 0);
 		break;
 	}
 
-	case CMD_15V_ON: {
+	case CMD_15V_ON:
+	{
 		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_15V].gpio, gpios[GPIOS_INDEX_15V].pin, GPIO_PIN_SET);
 		set_rail_monitor_enable(RAIL_15v, 1);
 		break;
 	}
 
-	case CMD_15V_OFF: {
+	case CMD_15V_OFF:
+	{
 		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_15V].gpio, gpios[GPIOS_INDEX_15V].pin, GPIO_PIN_RESET);
 		set_rail_monitor_enable(RAIL_15v, 0);
 		break;
 	}
 
-	case CMD_N200V_ON: {
+	case CMD_N200V_ON:
+	{
 		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_N200V].gpio, gpios[GPIOS_INDEX_N200V].pin, GPIO_PIN_SET);
 		set_rail_monitor_enable(RAIL_n200v, 1);
 		break;
 	}
 
-	case CMD_N200V_OFF: {
+	case CMD_N200V_OFF:
+	{
 		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_N200V].gpio, gpios[GPIOS_INDEX_N200V].pin, GPIO_PIN_RESET);
 		set_rail_monitor_enable(RAIL_n200v, 0);
 		break;
 	}
 
-	case CMD_N800V_ON: {
+	case CMD_N800V_ON:
+	{
 		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_N800V].gpio, gpios[GPIOS_INDEX_N800V].pin, GPIO_PIN_SET);
 		set_rail_monitor_enable(RAIL_n800v, 1);
 		break;
 	}
 
-	case CMD_N800V_OFF: {
+	case CMD_N800V_OFF:
+	{
 		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_N800V].gpio, gpios[GPIOS_INDEX_N800V].pin, GPIO_PIN_RESET);
 		set_rail_monitor_enable(RAIL_n800v, 0);
 		break;
 	}
 
-	case CMD_AUTOSWEEP_ON: {
+	case CMD_AUTOSWEEP_ON:
+	{
 		HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, DAC_OUT, DAC_OUT_ARRAY_SIZE, DAC_ALIGN_12B_R);
 		break;
 	}
 
-	case CMD_AUTOSWEEP_OFF: {
+	case CMD_AUTOSWEEP_OFF:
+	{
 		HAL_DAC_Stop_DMA(&hdac1, DAC_CHANNEL_1);
 		break;
 	}
 
-	case CMD_ERPA_ON: {
+	case CMD_ERPA_ON:
+	{
 		osEventFlagsSet(packet_event_flags, ERPA_FLAG_ID);
 		TIM2->CCR4 = ERPA_PWM_FREQ;
 		ERPA_ENABLED = 1;
 		break;
 	}
 
-	case CMD_ERPA_OFF: {
+	case CMD_ERPA_OFF:
+	{
 		ERPA_ENABLED = 0;
 		TIM2->CCR4 = 0;
 		break;
 	}
 
-	case CMD_PMT_ON: {
+	case CMD_PMT_ON:
+	{
 		HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_1);
 		osEventFlagsSet(packet_event_flags, PMT_FLAG_ID);
 		break;
 	}
 
-	case CMD_PMT_OFF: {
+	case CMD_PMT_OFF:
+	{
 		HAL_TIM_OC_Stop_IT(&htim1, TIM_CHANNEL_1);
 		break;
 	}
 
-	case CMD_HK_ON: {
+	case CMD_HK_ON:
+	{
 		osEventFlagsSet(packet_event_flags, HK_FLAG_ID);
 		HK_ENABLED = 1;
 		break;
 	}
 
-	case CMD_HK_OFF: {
+	case CMD_HK_OFF:
+	{
 		HK_ENABLED = 0;
 		break;
 	}
 
-	case CMD_STEP_UP: {
-		if (step < 14) {
+	case CMD_STEP_UP:
+	{
+		if (step < 14)
+		{
 			step += 2;
 			HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R,
 					DAC_OUT[step]);
@@ -417,8 +462,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		break;
 	}
 
-	case CMD_STEP_DOWN: {
-		if (step > 1) {
+	case CMD_STEP_DOWN:
+	{
+		if (step > 1)
+		{
 			step -= 2;
 			HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R,
 					DAC_OUT[step]);
@@ -427,65 +474,78 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		break;
 	}
 
-	case CMD_FACTOR_UP: {
-		if (cadence <= 50000) {
+	case CMD_FACTOR_UP:
+	{
+		if (cadence <= 50000)
+		{
 			cadence *= 2;
 			TIM2->ARR = cadence;
 		}
 		break;
 	}
 
-	case CMD_FACTOR_DOWN: {
-		if (cadence >= 6250) {
+	case CMD_FACTOR_DOWN:
+	{
+		if (cadence >= 6250)
+		{
 			cadence /= 2;
 			TIM2->ARR = cadence;
 		}
 		break;
 	}
 
-	case CMD_ENTER_STOP: {
+	case CMD_ENTER_STOP:
+	{
 		osEventFlagsSet(utility_event_flags, STOP_FLAG);
 		break;
 	}
 
-	case CMD_AUTO_INIT: {
+	case CMD_AUTO_INIT:
+	{
 		osEventFlagsSet(utility_event_flags, AUTOINIT_FLAG);
 		break;
 	}
 
-	case CMD_AUTO_DEINIT: {
+	case CMD_AUTO_DEINIT:
+	{
 		osEventFlagsSet(utility_event_flags, AUTODEINIT_FLAG);
 		break;
 	}
 
-	case CMD_SYNC_MODE: {
+	case CMD_SYNC_MODE:
+	{
 		osEventFlagsSet(mode_event_flags, SYNC_FLAG);
 		break;
 	}
 
-	case CMD_SCIENCE_MODE: {
+	case CMD_SCIENCE_MODE:
+	{
 		osEventFlagsSet(mode_event_flags, SCIENCE_FLAG);
 		break;
 	}
 
-	case CMD_IDLE_MODE: {
+	case CMD_IDLE_MODE:
+	{
 		osEventFlagsSet(mode_event_flags, IDLE_FLAG);
 		break;
 	}
 
-	case CMD_RESET_ERROR_COUNTERS: {
+	case CMD_RESET_ERROR_COUNTERS:
+	{
 		reset_error_counters();
 		break;
 	}
 
-	case CMD_SEND_PREVIOUS_ERROR: {
+	case CMD_SEND_PREVIOUS_ERROR:
+	{
 #ifdef ERROR_HANDLING_ENABLED
 		send_previous_error_packet();
 #endif
 		break;
 	}
 
-	default: {
+	default:
+	{
 		// Unknown command
 		break;
 	}
@@ -496,7 +556,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
  * @brief Retrieves and handles the cause of a system reset.
  *        Checks for watchdog and brownout reset conditions and reports errors.
  */
-void get_reset_cause() {
+void get_reset_cause()
+{
 	ERROR_STRUCT error;
 
 	if (__HAL_RCC_GET_FLAG(RCC_FLAG_IWDG1RST))
@@ -578,7 +639,8 @@ int main(void)
   /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-	while (1) {
+	while (1)
+	{
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -680,24 +742,28 @@ void PeriphCommonClock_Config(void)
  * @brief Initializes the system and its components.
  *        Sets up error handling, event flags, timer, voltage monitoring, ADC, and UART reception.
  */
-void system_setup() {
+void system_setup()
+{
 #ifdef ERROR_HANDLING_ENABLED
 	error_counter_init();
 	init_flash_ecc();
 #endif
 
 	packet_event_flags = osEventFlagsNew(NULL);
-    if (packet_event_flags == NULL) {
+    if (packet_event_flags == NULL)
+    {
         Error_Handler();
     }
 
     utility_event_flags = osEventFlagsNew(NULL);
-    if (utility_event_flags == NULL) {
+    if (utility_event_flags == NULL)
+    {
         Error_Handler();
     }
 
     mode_event_flags = osEventFlagsNew(NULL);
-    if (mode_event_flags == NULL) {
+    if (mode_event_flags == NULL)
+    {
         Error_Handler();
     }
 
@@ -715,7 +781,8 @@ void system_setup() {
  * @brief Sends an acknowledgment (ACK) over UART.
  *        Transmits a single byte indicating a successful operation.
  */
-void send_ACK() {
+void send_ACK()
+{
 	static uint8_t tx_buffer[1];
 
 	tx_buffer[0] = ACK;
@@ -726,7 +793,8 @@ void send_ACK() {
  * @brief Sends a negative acknowledgment (NACK) over UART.
  *        Transmits a single byte indicating an unsuccessful operation.
  */
-void send_NACK() {
+void send_NACK()
+{
 	static uint8_t tx_buffer[1];
 
 	tx_buffer[0] = NACK;
@@ -738,12 +806,14 @@ void send_NACK() {
  *
  * @return The corresponding step value based on the DAC1 output, or -1 if out of range.
  */
-STEP_VALUES get_current_step() {
+STEP_VALUES get_current_step()
+{
 	int dac_value;
 
 	dac_value = DAC1->DHR12R1;
 
-	switch (dac_value) {
+	switch (dac_value)
+	{
 	case DAC_VALUE_0:
 		return STEP_0;
 
@@ -777,7 +847,8 @@ STEP_VALUES get_current_step() {
  * @brief Enters low-power stop mode after sending an acknowledgment.
  *        Suspends all FreeRTOS tasks, enters stop mode, and resumes configuration upon wake-up.
  */
-void enter_stop() {
+void enter_stop()
+{
 	  send_ACK();
 
 	  vTaskSuspendAll();
@@ -795,7 +866,8 @@ void enter_stop() {
  * @brief Initializes Flash ECC (Error Correction Code) settings.
  *        Unlocks Flash memory, sets IRQ priority, and enables ECC correction and detection interrupts.
  */
-void init_flash_ecc() {
+void init_flash_ecc()
+{
 	HAL_FLASH_Unlock();
 
 	HAL_NVIC_SetPriority(FLASH_IRQn, 15, 0);
@@ -820,11 +892,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	HAL_IWDG_Refresh(&hiwdg1);
 
   /* USER CODE END Callback 0 */
-  if (htim->Instance == TIM6) {
+  if (htim->Instance == TIM6)
+  {
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
-  if (htim == &htim3) {
+  if (htim == &htim3)
+  {
 	NVIC_SystemReset();
   }
   /* USER CODE END Callback 1 */

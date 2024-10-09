@@ -25,11 +25,11 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "usart.h"				// For uart handle
-#include "voltage_monitor.h"	// For AUTOINIT and AUTODEINIT tasks
-#include "packet_creation.h"	// For creating packets
-#include "dac.h"				// For Science/Idle modes
-#include "tim.h"				// For Science/Idle modes
+#include "usart.h"
+#include "voltage_monitor.h"
+#include "packet_creation.h"
+#include "dac.h"
+#include "tim.h"
 #include "iwdg.h"
 /* USER CODE END Includes */
 
