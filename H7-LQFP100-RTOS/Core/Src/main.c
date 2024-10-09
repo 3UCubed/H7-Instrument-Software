@@ -522,7 +522,8 @@ void get_reset_cause() {
   * @brief  The application entry point.
   * @retval int
   */
-int main(void) {
+int main(void)
+{
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
@@ -569,8 +570,9 @@ int main(void) {
   /* USER CODE END 2 */
 
   /* Init scheduler */
-  osKernelInitialize();
+  osKernelInitialize();  /* Call init function for freertos objects (in freertos.c) */
   MX_FREERTOS_Init();
+
   /* Start scheduler */
   osKernelStart();
   /* We should never get here as control is now taken by the scheduler */
@@ -588,7 +590,8 @@ int main(void) {
   * @brief System Clock Configuration
   * @retval None
   */
-void SystemClock_Config(void) {
+void SystemClock_Config(void)
+{
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
@@ -649,7 +652,8 @@ void SystemClock_Config(void) {
   * @brief Peripherals Common Clock Configuration
   * @retval None
   */
-void PeriphCommonClock_Config(void) {
+void PeriphCommonClock_Config(void)
+{
   RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
 
   /** Initializes the peripherals clock
@@ -810,7 +814,8 @@ void init_flash_ecc() {
   * @param  htim : TIM handle
   * @retval None
   */
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
   /* USER CODE BEGIN Callback 0 */
 	HAL_IWDG_Refresh(&hiwdg1);
 
@@ -829,7 +834,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
   * @brief  This function is executed in case of error occurrence.
   * @retval None
   */
-void Error_Handler(void) {
+void Error_Handler(void)
+{
   /* USER CODE BEGIN Error_Handler_Debug */
 	/* User can add his own implementation to report the HAL error return state */
 	ERROR_STRUCT error;
@@ -847,7 +853,8 @@ void Error_Handler(void) {
   * @param  line: assert_param error line source number
   * @retval None
   */
-void assert_failed(uint8_t *file, uint32_t line) {
+void assert_failed(uint8_t *file, uint32_t line)
+{
   /* USER CODE BEGIN 6 */
 	/* User can add his own implementation to report the file name and line number,
      ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */

@@ -147,7 +147,7 @@ const osThreadAttr_t Science_task_attributes = {
   .cb_size = sizeof(Science_taskControlBlock),
   .stack_mem = &Science_taskBuffer[0],
   .stack_size = sizeof(Science_taskBuffer),
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityRealtime7,
 };
 /* Definitions for Idle_task */
 osThreadId_t Idle_taskHandle;
@@ -493,7 +493,6 @@ void Science_init(void *argument)
 		osThreadResume(Voltage_MonitorHandle);
 
 		__disable_irq();
-
 		HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, DAC_OUT, 32, DAC_ALIGN_12B_R);	// Enable auto sweep (doesn't start until ERPA timer is started)
 		HK_ENABLED = 1;
 		ERPA_ENABLED = 1;
