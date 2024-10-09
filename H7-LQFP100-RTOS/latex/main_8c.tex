@@ -12,6 +12,7 @@
 {\ttfamily \#include "{}dma.\+h"{}}\newline
 {\ttfamily \#include "{}i2c.\+h"{}}\newline
 {\ttfamily \#include "{}iwdg.\+h"{}}\newline
+{\ttfamily \#include "{}ramecc.\+h"{}}\newline
 {\ttfamily \#include "{}rtc.\+h"{}}\newline
 {\ttfamily \#include "{}spi.\+h"{}}\newline
 {\ttfamily \#include "{}tim.\+h"{}}\newline
@@ -20,12 +21,82 @@
 \doxysubsubsection*{Macros}
 \begin{DoxyCompactItemize}
 \item 
+\Hypertarget{main_8c_a8029fb2f617d5067990290f1b844a245}\label{main_8c_a8029fb2f617d5067990290f1b844a245} 
+\#define {\bfseries HK\+\_\+100\+MS\+\_\+\+COUNTER\+\_\+\+MAX}~32
+\item 
 \Hypertarget{main_8c_a6f6489887e08bff4887d0bc5dcf214d8}\label{main_8c_a6f6489887e08bff4887d0bc5dcf214d8} 
 \#define {\bfseries ACK}~0x\+FF
 \item 
 \Hypertarget{main_8c_a958518a45b12053ae33606ee7cb68a55}\label{main_8c_a958518a45b12053ae33606ee7cb68a55} 
 \#define {\bfseries NACK}~0x00
 \end{DoxyCompactItemize}
+\doxysubsubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{main_8c_a261e7496d4378da67becd9eb355fefef}\label{main_8c_a261e7496d4378da67becd9eb355fefef} 
+enum \mbox{\hyperlink{main_8c_a261e7496d4378da67becd9eb355fefef}{DAC\+\_\+\+VALUES}} \{ \newline
+{\bfseries DAC\+\_\+\+VALUE\+\_\+0} = 0
+, {\bfseries DAC\+\_\+\+VALUE\+\_\+620} = 620
+, {\bfseries DAC\+\_\+\+VALUE\+\_\+1241} = 1241
+, {\bfseries DAC\+\_\+\+VALUE\+\_\+1861} = 1861
+, \newline
+{\bfseries DAC\+\_\+\+VALUE\+\_\+2482} = 2482
+, {\bfseries DAC\+\_\+\+VALUE\+\_\+3103} = 3103
+, {\bfseries DAC\+\_\+\+VALUE\+\_\+3723} = 3723
+, {\bfseries DAC\+\_\+\+VALUE\+\_\+4095} = 4095
+ \}
+\begin{DoxyCompactList}\small\item\em Enumeration of predefined DAC values. Represents specific output values for the DAC. \end{DoxyCompactList}\item 
+\Hypertarget{main_8c_ac91dc31b7ac877c8e1a2ff5bcd1542bb}\label{main_8c_ac91dc31b7ac877c8e1a2ff5bcd1542bb} 
+enum \mbox{\hyperlink{main_8c_ac91dc31b7ac877c8e1a2ff5bcd1542bb}{ACCEPTED\+\_\+\+COMMANDS}} \{ \newline
+{\bfseries CMD\+\_\+\+SDN1\+\_\+\+ON} = 0x10
+, {\bfseries CMD\+\_\+\+SDN1\+\_\+\+OFF} = 0x00
+, {\bfseries CMD\+\_\+\+SYS\+\_\+\+ON} = 0x11
+, {\bfseries CMD\+\_\+\+SYS\+\_\+\+OFF} = 0x01
+, \newline
+{\bfseries CMD\+\_\+3\+V3\+\_\+\+ON} = 0x12
+, {\bfseries CMD\+\_\+3\+V3\+\_\+\+OFF} = 0x02
+, {\bfseries CMD\+\_\+5\+V\+\_\+\+ON} = 0x13
+, {\bfseries CMD\+\_\+5\+V\+\_\+\+OFF} = 0x03
+, \newline
+{\bfseries CMD\+\_\+\+N3\+V3\+\_\+\+ON} = 0x14
+, {\bfseries CMD\+\_\+\+N3\+V3\+\_\+\+OFF} = 0x04
+, {\bfseries CMD\+\_\+\+N5\+V\+\_\+\+ON} = 0x15
+, {\bfseries CMD\+\_\+\+N5\+V\+\_\+\+OFF} = 0x05
+, \newline
+{\bfseries CMD\+\_\+15\+V\+\_\+\+ON} = 0x16
+, {\bfseries CMD\+\_\+15\+V\+\_\+\+OFF} = 0x06
+, {\bfseries CMD\+\_\+\+N200\+V\+\_\+\+ON} = 0x17
+, {\bfseries CMD\+\_\+\+N200\+V\+\_\+\+OFF} = 0x07
+, \newline
+{\bfseries CMD\+\_\+\+N800\+V\+\_\+\+ON} = 0x18
+, {\bfseries CMD\+\_\+\+N800\+V\+\_\+\+OFF} = 0x08
+, {\bfseries CMD\+\_\+\+AUTOSWEEP\+\_\+\+ON} = 0x19
+, {\bfseries CMD\+\_\+\+AUTOSWEEP\+\_\+\+OFF} = 0x09
+, \newline
+{\bfseries CMD\+\_\+\+ERPA\+\_\+\+ON} = 0x1A
+, {\bfseries CMD\+\_\+\+ERPA\+\_\+\+OFF} = 0x0A
+, {\bfseries CMD\+\_\+\+PMT\+\_\+\+ON} = 0x1B
+, {\bfseries CMD\+\_\+\+PMT\+\_\+\+OFF} = 0x0B
+, \newline
+{\bfseries CMD\+\_\+\+HK\+\_\+\+ON} = 0x1C
+, {\bfseries CMD\+\_\+\+HK\+\_\+\+OFF} = 0x0C
+, {\bfseries CMD\+\_\+\+STEP\+\_\+\+UP} = 0x1D
+, {\bfseries CMD\+\_\+\+STEP\+\_\+\+DOWN} = 0x0D
+, \newline
+{\bfseries CMD\+\_\+\+FACTOR\+\_\+\+UP} = 0x1E
+, {\bfseries CMD\+\_\+\+FACTOR\+\_\+\+DOWN} = 0x0E
+, {\bfseries CMD\+\_\+\+ENTER\+\_\+\+STOP} = 0x0F
+, {\bfseries CMD\+\_\+\+AUTO\+\_\+\+INIT} = 0x\+E0
+, \newline
+{\bfseries CMD\+\_\+\+AUTO\+\_\+\+DEINIT} = 0x\+D0
+, {\bfseries CMD\+\_\+\+SYNC\+\_\+\+MODE} = 0x\+AF
+, {\bfseries CMD\+\_\+\+SCIENCE\+\_\+\+MODE} = 0x\+BF
+, {\bfseries CMD\+\_\+\+IDLE\+\_\+\+MODE} = 0x\+CF
+, \newline
+{\bfseries CMD\+\_\+\+RESET\+\_\+\+ERROR\+\_\+\+COUNTERS} = 0x\+DF
+, {\bfseries CMD\+\_\+\+SEND\+\_\+\+PREVIOUS\+\_\+\+ERROR} = 0x\+EF
+ \}
+\begin{DoxyCompactList}\small\item\em Enumeration of accepted command codes. Defines a set of command values for controlling system power, modes, and error handling. \end{DoxyCompactList}\end{DoxyCompactItemize}
 \doxysubsubsection*{Functions}
 \begin{DoxyCompactItemize}
 \item 
@@ -35,35 +106,38 @@ void \mbox{\hyperlink{main_8c_a336c5acb34a801b2984e602b97ed7b73}{Periph\+Common\
 \begin{DoxyCompactList}\small\item\em Peripherals Common Clock Configuration. \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{main_8c_abade755e13d07c10889ae83143656158}{MX\+\_\+\+FREERTOS\+\_\+\+Init}} (void)
 \begin{DoxyCompactList}\small\item\em Free\+RTOS initialization. \end{DoxyCompactList}\item 
-\Hypertarget{main_8c_acad8d8e00188ae6a02d298b85487c352}\label{main_8c_acad8d8e00188ae6a02d298b85487c352} 
-void {\bfseries get\+\_\+reset\+\_\+cause} ()
-\item 
 \Hypertarget{main_8c_ade84f7557ff2c4c54418ea5d849ebe4a}\label{main_8c_ade84f7557ff2c4c54418ea5d849ebe4a} 
 void {\bfseries system\+\_\+setup} ()
-\item 
-\Hypertarget{main_8c_ac2c0f781ac38ca35f3ec5115c5f9b981}\label{main_8c_ac2c0f781ac38ca35f3ec5115c5f9b981} 
-void {\bfseries send\+\_\+\+ACK} ()
-\item 
-\Hypertarget{main_8c_a92fe58192c69ebc45158bf31a95cc071}\label{main_8c_a92fe58192c69ebc45158bf31a95cc071} 
-void {\bfseries send\+\_\+\+NACK} ()
-\item 
-\Hypertarget{main_8c_ad55f80ed3cd8b6c4f247763b747016af}\label{main_8c_ad55f80ed3cd8b6c4f247763b747016af} 
-void {\bfseries sync} ()
-\item 
-\Hypertarget{main_8c_a1fc39499fe9db8b7fb88005e9f107a36}\label{main_8c_a1fc39499fe9db8b7fb88005e9f107a36} 
-void {\bfseries HAL\+\_\+\+TIM\+\_\+\+OC\+\_\+\+Delay\+Elapsed\+Callback} (TIM\+\_\+\+Handle\+Type\+Def \texorpdfstring{$\ast$}{*}htim)
-\item 
-\Hypertarget{main_8c_ae494a9643f29b87d6d81e5264e60e57b}\label{main_8c_ae494a9643f29b87d6d81e5264e60e57b} 
-void {\bfseries HAL\+\_\+\+UART\+\_\+\+Rx\+Cplt\+Callback} (UART\+\_\+\+Handle\+Type\+Def \texorpdfstring{$\ast$}{*}huart)
-\item 
+\begin{DoxyCompactList}\small\item\em Initializes the system and its components. Sets up error handling, event flags, timer, voltage monitoring, ADC, and UART reception. \end{DoxyCompactList}\item 
+\Hypertarget{main_8c_ac4674edb81e0d573cc5d95aa798e5ed9}\label{main_8c_ac4674edb81e0d573cc5d95aa798e5ed9} 
+void {\bfseries init\+\_\+flash\+\_\+ecc} ()
+\begin{DoxyCompactList}\small\item\em Initializes Flash ECC (Error Correction Code) settings. Unlocks Flash memory, sets IRQ priority, and enables ECC correction and detection interrupts. \end{DoxyCompactList}\item 
+\Hypertarget{main_8c_a68eb2974a8f814325cd7efe46b8154c1}\label{main_8c_a68eb2974a8f814325cd7efe46b8154c1} 
+void {\bfseries HAL\+\_\+\+FLASHEx\+\_\+\+Ecc\+Correction\+Callback} ()
+\begin{DoxyCompactList}\small\item\em Callback function for handling ECC correction in flash memory. Detects and handles single-\/bit flash ECC errors. \end{DoxyCompactList}\item 
+\Hypertarget{main_8c_af83a6b6e19c98abd2c14cf7c16d6fee8}\label{main_8c_af83a6b6e19c98abd2c14cf7c16d6fee8} 
+void {\bfseries HAL\+\_\+\+FLASHEx\+\_\+\+Ecc\+Detection\+Callback} ()
+\begin{DoxyCompactList}\small\item\em Callback function for handling ECC detection in flash memory. Detects and handles double-\/bit flash ECC errors. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_a1fc39499fe9db8b7fb88005e9f107a36}{HAL\+\_\+\+TIM\+\_\+\+OC\+\_\+\+Delay\+Elapsed\+Callback}} (TIM\+\_\+\+Handle\+Type\+Def \texorpdfstring{$\ast$}{*}htim)
+\begin{DoxyCompactList}\small\item\em Output compare callback for handling timer events. Sets event flags based on the triggered timer and manages housekeeping tasks. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{main_8c_ae494a9643f29b87d6d81e5264e60e57b}{HAL\+\_\+\+UART\+\_\+\+Rx\+Cplt\+Callback}} (UART\+\_\+\+Handle\+Type\+Def \texorpdfstring{$\ast$}{*}huart)
+\begin{DoxyCompactList}\small\item\em UART receive complete callback. Processes received commands to control GPIO pins and manage power rails. \end{DoxyCompactList}\item 
+\Hypertarget{main_8c_acad8d8e00188ae6a02d298b85487c352}\label{main_8c_acad8d8e00188ae6a02d298b85487c352} 
+void {\bfseries get\+\_\+reset\+\_\+cause} ()
+\begin{DoxyCompactList}\small\item\em Retrieves and handles the cause of a system reset. Checks for watchdog and brownout reset conditions and reports errors. \end{DoxyCompactList}\item 
 int \mbox{\hyperlink{main_8c_a840291bc02cba5474a4cb46a9b9566fe}{main}} (void)
 \begin{DoxyCompactList}\small\item\em The application entry point. \end{DoxyCompactList}\item 
-\Hypertarget{main_8c_ad6563de0a104b1b0a6af02e5793cf77e}\label{main_8c_ad6563de0a104b1b0a6af02e5793cf77e} 
-uint8\+\_\+t {\bfseries get\+\_\+current\+\_\+step} ()
-\item 
+\Hypertarget{main_8c_ac2c0f781ac38ca35f3ec5115c5f9b981}\label{main_8c_ac2c0f781ac38ca35f3ec5115c5f9b981} 
+void {\bfseries send\+\_\+\+ACK} ()
+\begin{DoxyCompactList}\small\item\em Sends an acknowledgment (ACK) over UART. Transmits a single byte indicating a successful operation. \end{DoxyCompactList}\item 
+\Hypertarget{main_8c_a92fe58192c69ebc45158bf31a95cc071}\label{main_8c_a92fe58192c69ebc45158bf31a95cc071} 
+void {\bfseries send\+\_\+\+NACK} ()
+\begin{DoxyCompactList}\small\item\em Sends a negative acknowledgment (NACK) over UART. Transmits a single byte indicating an unsuccessful operation. \end{DoxyCompactList}\item 
+STEP\+\_\+\+VALUES \mbox{\hyperlink{main_8c_a93d72c19e6fe1b36d2b1e286cfcd62c5}{get\+\_\+current\+\_\+step}} ()
+\begin{DoxyCompactList}\small\item\em Retrieves the current step value based on the DAC output. \end{DoxyCompactList}\item 
 \Hypertarget{main_8c_a0322b72ab110431a0425c2911346bb6a}\label{main_8c_a0322b72ab110431a0425c2911346bb6a} 
 void {\bfseries enter\+\_\+stop} ()
-\item 
+\begin{DoxyCompactList}\small\item\em Enters low-\/power stop mode after sending an acknowledgment. Suspends all Free\+RTOS tasks, enters stop mode, and resumes configuration upon wake-\/up. \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{main_8c_a8a3b0ad512a6e6c6157440b68d395eac}{HAL\+\_\+\+TIM\+\_\+\+Period\+Elapsed\+Callback}} (TIM\+\_\+\+Handle\+Type\+Def \texorpdfstring{$\ast$}{*}htim)
 \begin{DoxyCompactList}\small\item\em Period elapsed callback in non blocking mode. \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{main_8c_a1730ffe1e560465665eb47d9264826f9}{Error\+\_\+\+Handler}} (void)
@@ -72,9 +146,9 @@ void \mbox{\hyperlink{main_8c_a1730ffe1e560465665eb47d9264826f9}{Error\+\_\+\+Ha
 \begin{DoxyCompactItemize}
 \item 
 const gpio\+\_\+pins \mbox{\hyperlink{main_8c_a9090902cad57b8863e80ab36ee3ddb5e}{gpios}} \mbox{[}$\,$\mbox{]}
-\item 
-uint32\+\_\+t \mbox{\hyperlink{main_8c_ad75232664858394289f7df39a1895028}{DAC\+\_\+\+OUT}} \mbox{[}32\mbox{]}
-\item 
+\begin{DoxyCompactList}\small\item\em Array of GPIO pin configurations. Represents the mapping of specific GPIO ports and pins to system components. \end{DoxyCompactList}\item 
+uint32\+\_\+t \mbox{\hyperlink{main_8c_a21f6241dde9eb54e6df6cb2c9427b696}{DAC\+\_\+\+OUT}} \mbox{[}DAC\+\_\+\+OUT\+\_\+\+ARRAY\+\_\+\+SIZE\mbox{]}
+\begin{DoxyCompactList}\small\item\em Array of DAC output values representing sweeping up and down voltages. \end{DoxyCompactList}\item 
 \Hypertarget{main_8c_a447eff76e65165627d5dbf5df180f5af}\label{main_8c_a447eff76e65165627d5dbf5df180f5af} 
 os\+Event\+Flags\+Id\+\_\+t {\bfseries packet\+\_\+event\+\_\+flags}
 \item 
@@ -88,10 +162,10 @@ os\+Event\+Flags\+Id\+\_\+t {\bfseries mode\+\_\+event\+\_\+flags}
 unsigned char {\bfseries UART\+\_\+\+RX\+\_\+\+BUFFER} \mbox{[}UART\+\_\+\+RX\+\_\+\+BUFFER\+\_\+\+SIZE\mbox{]}
 \item 
 \Hypertarget{main_8c_ab688922a0d211179d4785883167fb150}\label{main_8c_ab688922a0d211179d4785883167fb150} 
-volatile uint8\+\_\+t {\bfseries HK\+\_\+\+ENABLED} = 0
+volatile uint8\+\_\+t {\bfseries HK\+\_\+\+ENABLED} = DISABLED
 \item 
 \Hypertarget{main_8c_acbaa7fb5b7d79a29be2a16c9d67226f7}\label{main_8c_acbaa7fb5b7d79a29be2a16c9d67226f7} 
-volatile uint8\+\_\+t {\bfseries ERPA\+\_\+\+ENABLED} = 0
+volatile uint8\+\_\+t {\bfseries ERPA\+\_\+\+ENABLED} = DISABLED
 \item 
 \Hypertarget{main_8c_ade4e041cdc9d3172f6a588c68da2c754}\label{main_8c_ade4e041cdc9d3172f6a588c68da2c754} 
 volatile uint8\+\_\+t {\bfseries step} = 0
@@ -102,14 +176,11 @@ volatile uint32\+\_\+t {\bfseries cadence} = 3125
 \Hypertarget{main_8c_a6a1cef5f74698e4131fd59aa93db4fc1}\label{main_8c_a6a1cef5f74698e4131fd59aa93db4fc1} 
 volatile uint32\+\_\+t {\bfseries uptime\+\_\+millis} = 0
 \item 
-\Hypertarget{main_8c_afa4cafe0f0f3575f947bbc93933b2a2c}\label{main_8c_afa4cafe0f0f3575f947bbc93933b2a2c} 
-volatile uint8\+\_\+t {\bfseries tx\+\_\+flag} = 1
-\item 
-\Hypertarget{main_8c_a10529ddc79d4ffde8d8a77c82584c0f2}\label{main_8c_a10529ddc79d4ffde8d8a77c82584c0f2} 
-volatile uint8\+\_\+t {\bfseries HK\+\_\+10\+\_\+second\+\_\+counter} = 0
-\item 
 \Hypertarget{main_8c_a84fc7af76d7872922faadf85362b91f8}\label{main_8c_a84fc7af76d7872922faadf85362b91f8} 
 volatile uint8\+\_\+t {\bfseries HK\+\_\+100\+\_\+ms\+\_\+counter} = 0
+\item 
+\Hypertarget{main_8c_a772ea5bb342cc2c5c97d32374dd4efe8}\label{main_8c_a772ea5bb342cc2c5c97d32374dd4efe8} 
+volatile uint8\+\_\+t {\bfseries IDLING} = 1
 \end{DoxyCompactItemize}
 
 
@@ -145,6 +216,34 @@ This function is executed in case of error occurrence.
 {\em None} & \\
 \hline
 \end{DoxyRetVals}
+\Hypertarget{main_8c_a93d72c19e6fe1b36d2b1e286cfcd62c5}\index{main.c@{main.c}!get\_current\_step@{get\_current\_step}}
+\index{get\_current\_step@{get\_current\_step}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{get\_current\_step()}{get\_current\_step()}}
+{\footnotesize\ttfamily \label{main_8c_a93d72c19e6fe1b36d2b1e286cfcd62c5} 
+STEP\+\_\+\+VALUES get\+\_\+current\+\_\+step (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Retrieves the current step value based on the DAC output. 
+
+\begin{DoxyReturn}{Returns}
+The corresponding step value based on the DAC1 output, or -\/1 if out of range. 
+\end{DoxyReturn}
+\Hypertarget{main_8c_a1fc39499fe9db8b7fb88005e9f107a36}\index{main.c@{main.c}!HAL\_TIM\_OC\_DelayElapsedCallback@{HAL\_TIM\_OC\_DelayElapsedCallback}}
+\index{HAL\_TIM\_OC\_DelayElapsedCallback@{HAL\_TIM\_OC\_DelayElapsedCallback}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{HAL\_TIM\_OC\_DelayElapsedCallback()}{HAL\_TIM\_OC\_DelayElapsedCallback()}}
+{\footnotesize\ttfamily \label{main_8c_a1fc39499fe9db8b7fb88005e9f107a36} 
+void HAL\+\_\+\+TIM\+\_\+\+OC\+\_\+\+Delay\+Elapsed\+Callback (\begin{DoxyParamCaption}\item[{TIM\+\_\+\+Handle\+Type\+Def \texorpdfstring{$\ast$}{*}}]{htim}{}\end{DoxyParamCaption})}
+
+
+
+Output compare callback for handling timer events. Sets event flags based on the triggered timer and manages housekeeping tasks. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em htim} & Pointer to the timer handle triggering the callback. \\
+\hline
+\end{DoxyParams}
 \Hypertarget{main_8c_a8a3b0ad512a6e6c6157440b68d395eac}\index{main.c@{main.c}!HAL\_TIM\_PeriodElapsedCallback@{HAL\_TIM\_PeriodElapsedCallback}}
 \index{HAL\_TIM\_PeriodElapsedCallback@{HAL\_TIM\_PeriodElapsedCallback}!main.c@{main.c}}
 \doxysubsubsection{\texorpdfstring{HAL\_TIM\_PeriodElapsedCallback()}{HAL\_TIM\_PeriodElapsedCallback()}}
@@ -168,6 +267,21 @@ This function is called when TIM6 interrupt took place, inside HAL\+\_\+\+TIM\+\
 {\em None} & \\
 \hline
 \end{DoxyRetVals}
+\Hypertarget{main_8c_ae494a9643f29b87d6d81e5264e60e57b}\index{main.c@{main.c}!HAL\_UART\_RxCpltCallback@{HAL\_UART\_RxCpltCallback}}
+\index{HAL\_UART\_RxCpltCallback@{HAL\_UART\_RxCpltCallback}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{HAL\_UART\_RxCpltCallback()}{HAL\_UART\_RxCpltCallback()}}
+{\footnotesize\ttfamily \label{main_8c_ae494a9643f29b87d6d81e5264e60e57b} 
+void HAL\+\_\+\+UART\+\_\+\+Rx\+Cplt\+Callback (\begin{DoxyParamCaption}\item[{UART\+\_\+\+Handle\+Type\+Def \texorpdfstring{$\ast$}{*}}]{huart}{}\end{DoxyParamCaption})}
+
+
+
+UART receive complete callback. Processes received commands to control GPIO pins and manage power rails. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em huart} & Pointer to the UART handle triggering the callback. \\
+\hline
+\end{DoxyParams}
 \Hypertarget{main_8c_a840291bc02cba5474a4cb46a9b9566fe}\index{main.c@{main.c}!main@{main}}
 \index{main@{main}!main.c@{main.c}}
 \doxysubsubsection{\texorpdfstring{main()}{main()}}
@@ -242,20 +356,42 @@ Initializes the RCC Oscillators according to the specified parameters in the RCC
 Initializes the CPU, AHB and APB buses clocks
 
 \doxysubsection{Variable Documentation}
-\Hypertarget{main_8c_ad75232664858394289f7df39a1895028}\index{main.c@{main.c}!DAC\_OUT@{DAC\_OUT}}
+\Hypertarget{main_8c_a21f6241dde9eb54e6df6cb2c9427b696}\index{main.c@{main.c}!DAC\_OUT@{DAC\_OUT}}
 \index{DAC\_OUT@{DAC\_OUT}!main.c@{main.c}}
 \doxysubsubsection{\texorpdfstring{DAC\_OUT}{DAC\_OUT}}
-{\footnotesize\ttfamily \label{main_8c_ad75232664858394289f7df39a1895028} 
-uint32\+\_\+t DAC\+\_\+\+OUT\mbox{[}32\mbox{]}}
+{\footnotesize\ttfamily \label{main_8c_a21f6241dde9eb54e6df6cb2c9427b696} 
+uint32\+\_\+t DAC\+\_\+\+OUT\mbox{[}DAC\+\_\+\+OUT\+\_\+\+ARRAY\+\_\+\+SIZE\mbox{]}}
 
 {\bfseries Initial value\+:}
 \begin{DoxyCode}{0}
-\DoxyCodeLine{=\ \{\ 0,\ 0,\ 620,\ 620,\ 1241,\ 1241,\ 1861,\ 1861,\ 2482,\ 2482,}
-\DoxyCodeLine{\ \ \ \ \ \ \ \ 3103,\ 3103,\ 3723,\ 3723,\ 4095,\ 4095,\ 4095,\ 4095,\ 3723,\ 3723,\ 3103,\ 3103,}
-\DoxyCodeLine{\ \ \ \ \ \ \ \ 2482,\ 2482,\ 1861,\ 1861,\ 1241,\ 1241,\ 620,\ 620,\ 0,\ 0\ \}}
+\DoxyCodeLine{=}
+\DoxyCodeLine{\{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ DAC\_VALUE\_0,\ DAC\_VALUE\_0,\ \ \ \ \ \ \ }
+\DoxyCodeLine{\ \ \ \ \ \ \ \ DAC\_VALUE\_620,\ DAC\_VALUE\_620,\ \ \ }
+\DoxyCodeLine{\ \ \ \ \ \ \ \ DAC\_VALUE\_1241,\ DAC\_VALUE\_1241,\ }
+\DoxyCodeLine{\ \ \ \ \ \ \ \ DAC\_VALUE\_1861,\ DAC\_VALUE\_1861,\ }
+\DoxyCodeLine{\ \ \ \ \ \ \ \ DAC\_VALUE\_2482,\ DAC\_VALUE\_2482,\ }
+\DoxyCodeLine{\ \ \ \ \ \ \ \ DAC\_VALUE\_3103,\ DAC\_VALUE\_3103,\ }
+\DoxyCodeLine{\ \ \ \ \ \ \ \ DAC\_VALUE\_3723,\ DAC\_VALUE\_3723,\ }
+\DoxyCodeLine{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ DAC\_VALUE\_4095,\ DAC\_VALUE\_4095,\ }
+\DoxyCodeLine{\ \ \ \ \ \ \ \ DAC\_VALUE\_4095,\ DAC\_VALUE\_4095,\ }
+\DoxyCodeLine{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ DAC\_VALUE\_3723,\ DAC\_VALUE\_3723,\ }
+\DoxyCodeLine{\ \ \ \ \ \ \ \ DAC\_VALUE\_3103,\ DAC\_VALUE\_3103,\ }
+\DoxyCodeLine{\ \ \ \ \ \ \ \ DAC\_VALUE\_2482,\ DAC\_VALUE\_2482,\ }
+\DoxyCodeLine{\ \ \ \ \ \ \ \ DAC\_VALUE\_1861,\ DAC\_VALUE\_1861,\ }
+\DoxyCodeLine{\ \ \ \ \ \ \ \ DAC\_VALUE\_1241,\ DAC\_VALUE\_1241,\ }
+\DoxyCodeLine{\ \ \ \ \ \ \ \ DAC\_VALUE\_620,\ DAC\_VALUE\_620,\ \ \ }
+\DoxyCodeLine{\ \ \ \ \ \ \ \ DAC\_VALUE\_0,\ DAC\_VALUE\_0\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{\}}
 
 \end{DoxyCode}
-\Hypertarget{main_8c_a9090902cad57b8863e80ab36ee3ddb5e}\index{main.c@{main.c}!gpios@{gpios}}
+
+
+Array of DAC output values representing sweeping up and down voltages. 
+
+DAC\+\_\+\+OUT alternates between specified DAC values to control the output voltage. The first half sweeps up, reaching a maximum at DAC\+\_\+\+VALUE\+\_\+4095, then sweeps down. \Hypertarget{main_8c_a9090902cad57b8863e80ab36ee3ddb5e}\index{main.c@{main.c}!gpios@{gpios}}
 \index{gpios@{gpios}!main.c@{main.c}}
 \doxysubsubsection{\texorpdfstring{gpios}{gpios}}
 {\footnotesize\ttfamily \label{main_8c_a9090902cad57b8863e80ab36ee3ddb5e} 
@@ -263,16 +399,21 @@ const gpio\+\_\+pins gpios\mbox{[}$\,$\mbox{]}}
 
 {\bfseries Initial value\+:}
 \begin{DoxyCode}{0}
-\DoxyCodeLine{=\ \{}
-\DoxyCodeLine{\{\ GPIOB,\ GPIO\_PIN\_2\ \},\ \ }
-\DoxyCodeLine{\{\ GPIOB,\ GPIO\_PIN\_5\ \},\ \ }
-\DoxyCodeLine{\{\ GPIOC,\ GPIO\_PIN\_10\ \},\ }
-\DoxyCodeLine{\{\ GPIOC,\ GPIO\_PIN\_7\ \},\ \ }
-\DoxyCodeLine{\{\ GPIOC,\ GPIO\_PIN\_6\ \},\ \ }
-\DoxyCodeLine{\{\ GPIOC,\ GPIO\_PIN\_8\ \},\ \ }
-\DoxyCodeLine{\{\ GPIOC,\ GPIO\_PIN\_9\ \},\ \ }
-\DoxyCodeLine{\{\ GPIOC,\ GPIO\_PIN\_13\ \},\ }
-\DoxyCodeLine{\{\ GPIOB,\ GPIO\_PIN\_6\ \}\ \ \ }
+\DoxyCodeLine{=}
+\DoxyCodeLine{\{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \{\ GPIOB,\ GPIO\_PIN\_2\ \ \ \ \ \},\ \ }
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \{\ GPIOB,\ GPIO\_PIN\_5\ \ \ \ \ \},\ \ }
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \{\ GPIOC,\ GPIO\_PIN\_10\ \ \ \ \},\ \ }
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \{\ GPIOC,\ GPIO\_PIN\_7\ \ \ \ \ \},\ \ }
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \{\ GPIOC,\ GPIO\_PIN\_6\ \ \ \ \ \},\ \ }
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \{\ GPIOC,\ GPIO\_PIN\_8\ \ \ \ \ \},\ \ }
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \{\ GPIOC,\ GPIO\_PIN\_9\ \ \ \ \ \},\ \ }
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \{\ GPIOC,\ GPIO\_PIN\_13\ \ \ \ \},\ \ }
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \{\ GPIOB,\ GPIO\_PIN\_6\ \ \ \ \ \}\ \ \ }
 \DoxyCodeLine{\}}
 
 \end{DoxyCode}
+
+
+Array of GPIO pin configurations. Represents the mapping of specific GPIO ports and pins to system components. 
+

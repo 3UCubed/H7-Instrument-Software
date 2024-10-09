@@ -1,0 +1,276 @@
+\doxysection{Core/src/voltage\+\_\+monitor.c File Reference}
+\hypertarget{voltage__monitor_8c}{}\label{voltage__monitor_8c}\index{Core/src/voltage\_monitor.c@{Core/src/voltage\_monitor.c}}
+
+
+\+: Implementation for voltage monitoring  
+
+
+{\ttfamily \#include "{}voltage\+\_\+monitor.\+h"{}}\newline
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{voltage__monitor_8c_a44eca93cd2cd2513b9a0d586624adbd8}\label{voltage__monitor_8c_a44eca93cd2cd2513b9a0d586624adbd8} 
+\#define {\bfseries RAIL\+\_\+\+VSENSE\+\_\+\+MAX}~906
+\item 
+\Hypertarget{voltage__monitor_8c_a2d9d9f8c794f665019b5d5c2bb9c3326}\label{voltage__monitor_8c_a2d9d9f8c794f665019b5d5c2bb9c3326} 
+\#define {\bfseries RAIL\+\_\+\+VSENSE\+\_\+\+MIN}~596
+\item 
+\Hypertarget{voltage__monitor_8c_a754ba21bc0f4e5aade913107b79f0feb}\label{voltage__monitor_8c_a754ba21bc0f4e5aade913107b79f0feb} 
+\#define {\bfseries RAIL\+\_\+\+VREFINT\+\_\+\+MAX}~1557
+\item 
+\Hypertarget{voltage__monitor_8c_ae37327c0214405eca7cd0dc9c8bc5386}\label{voltage__monitor_8c_ae37327c0214405eca7cd0dc9c8bc5386} 
+\#define {\bfseries RAIL\+\_\+\+VREFINT\+\_\+\+MIN}~1464
+\item 
+\Hypertarget{voltage__monitor_8c_a2426e415ee8f6e3fc05984f10becec88}\label{voltage__monitor_8c_a2426e415ee8f6e3fc05984f10becec88} 
+\#define {\bfseries RAIL\+\_\+\+TEMP1\+\_\+\+MAX}~800
+\item 
+\Hypertarget{voltage__monitor_8c_ac40d237078751d7bf7389f7aedddf78e}\label{voltage__monitor_8c_ac40d237078751d7bf7389f7aedddf78e} 
+\#define {\bfseries RAIL\+\_\+\+TEMP1\+\_\+\+MIN}~7872
+\item 
+\Hypertarget{voltage__monitor_8c_a64ff5209be337b22c82353fbb09495c2}\label{voltage__monitor_8c_a64ff5209be337b22c82353fbb09495c2} 
+\#define {\bfseries RAIL\+\_\+\+TEMP2\+\_\+\+MAX}~800
+\item 
+\Hypertarget{voltage__monitor_8c_aaa3274c0199cbfb2bad281ac11388b7b}\label{voltage__monitor_8c_aaa3274c0199cbfb2bad281ac11388b7b} 
+\#define {\bfseries RAIL\+\_\+\+TEMP2\+\_\+\+MIN}~7872
+\item 
+\Hypertarget{voltage__monitor_8c_a2335b80dd0f58b5ff904eaae1e1885c6}\label{voltage__monitor_8c_a2335b80dd0f58b5ff904eaae1e1885c6} 
+\#define {\bfseries RAIL\+\_\+\+TEMP3\+\_\+\+MAX}~800
+\item 
+\Hypertarget{voltage__monitor_8c_a55a22d2d87f2435327fdd7d6ffcc8f26}\label{voltage__monitor_8c_a55a22d2d87f2435327fdd7d6ffcc8f26} 
+\#define {\bfseries RAIL\+\_\+\+TEMP3\+\_\+\+MIN}~7872
+\item 
+\Hypertarget{voltage__monitor_8c_aca7c9a5cfc911e2aab2026b03845dd27}\label{voltage__monitor_8c_aca7c9a5cfc911e2aab2026b03845dd27} 
+\#define {\bfseries RAIL\+\_\+\+TEMP4\+\_\+\+MAX}~800
+\item 
+\Hypertarget{voltage__monitor_8c_a6c66f1324f3268b4169aaaee0d03fb20}\label{voltage__monitor_8c_a6c66f1324f3268b4169aaaee0d03fb20} 
+\#define {\bfseries RAIL\+\_\+\+TEMP4\+\_\+\+MIN}~7872
+\item 
+\Hypertarget{voltage__monitor_8c_add54541b18830b9999b80d96b1e9c596}\label{voltage__monitor_8c_add54541b18830b9999b80d96b1e9c596} 
+\#define {\bfseries RAIL\+\_\+\+BUSVMON\+\_\+\+MAX}~10000
+\item 
+\Hypertarget{voltage__monitor_8c_a3a6f4d1fcea2c79295921f109aa36f73}\label{voltage__monitor_8c_a3a6f4d1fcea2c79295921f109aa36f73} 
+\#define {\bfseries RAIL\+\_\+\+BUSVMON\+\_\+\+MIN}~0
+\item 
+\Hypertarget{voltage__monitor_8c_ac53fc4eb8fe69f494b376480383c17fc}\label{voltage__monitor_8c_ac53fc4eb8fe69f494b376480383c17fc} 
+\#define {\bfseries RAIL\+\_\+\+BUSIMON\+\_\+\+MAX}~10000
+\item 
+\Hypertarget{voltage__monitor_8c_abb52c74781b088d99684f344a8da1c50}\label{voltage__monitor_8c_abb52c74781b088d99684f344a8da1c50} 
+\#define {\bfseries RAIL\+\_\+\+BUSIMON\+\_\+\+MIN}~0
+\item 
+\Hypertarget{voltage__monitor_8c_a37f68bbeecba17a9529cd1060e8ba4d9}\label{voltage__monitor_8c_a37f68bbeecba17a9529cd1060e8ba4d9} 
+\#define {\bfseries RAIL\+\_\+2\+V5\+\_\+\+MAX}~3414
+\item 
+\Hypertarget{voltage__monitor_8c_a704ac8dc6fc14f1719368a081de04b1e}\label{voltage__monitor_8c_a704ac8dc6fc14f1719368a081de04b1e} 
+\#define {\bfseries RAIL\+\_\+2\+V5\+\_\+\+MIN}~2792
+\item 
+\Hypertarget{voltage__monitor_8c_a7387d730ea685778059c3e4ec2ff32d5}\label{voltage__monitor_8c_a7387d730ea685778059c3e4ec2ff32d5} 
+\#define {\bfseries RAIL\+\_\+3\+V3\+\_\+\+MAX}~1596
+\item 
+\Hypertarget{voltage__monitor_8c_ab472314cb1ab819377bdae1ffd128be2}\label{voltage__monitor_8c_ab472314cb1ab819377bdae1ffd128be2} 
+\#define {\bfseries RAIL\+\_\+3\+V3\+\_\+\+MIN}~1306
+\item 
+\Hypertarget{voltage__monitor_8c_a2976518d9e0be477c2161dab242a5500}\label{voltage__monitor_8c_a2976518d9e0be477c2161dab242a5500} 
+\#define {\bfseries RAIL\+\_\+5\+V\+\_\+\+MAX}~4095
+\item 
+\Hypertarget{voltage__monitor_8c_aea7c12bb9b14ca0283c99fb60238c180}\label{voltage__monitor_8c_aea7c12bb9b14ca0283c99fb60238c180} 
+\#define {\bfseries RAIL\+\_\+5\+V\+\_\+\+MIN}~3350
+\item 
+\Hypertarget{voltage__monitor_8c_a5668d66b22daf1c9f27e4f709dd5574a}\label{voltage__monitor_8c_a5668d66b22daf1c9f27e4f709dd5574a} 
+\#define {\bfseries RAIL\+\_\+\+N3\+V3\+\_\+\+MAX}~4286
+\item 
+\Hypertarget{voltage__monitor_8c_a102c21afadcb4c2aa99da4b05ce82b48}\label{voltage__monitor_8c_a102c21afadcb4c2aa99da4b05ce82b48} 
+\#define {\bfseries RAIL\+\_\+\+N3\+V3\+\_\+\+MIN}~3507
+\item 
+\Hypertarget{voltage__monitor_8c_ac3c7c8ccedde5ded393ccfdd1de26f19}\label{voltage__monitor_8c_ac3c7c8ccedde5ded393ccfdd1de26f19} 
+\#define {\bfseries RAIL\+\_\+\+N5\+V\+\_\+\+MAX}~10000
+\item 
+\Hypertarget{voltage__monitor_8c_a330d36267b0bf611bc8bd51a99ca180a}\label{voltage__monitor_8c_a330d36267b0bf611bc8bd51a99ca180a} 
+\#define {\bfseries RAIL\+\_\+\+N5\+V\+\_\+\+MIN}~0
+\item 
+\Hypertarget{voltage__monitor_8c_a86fd6ce62025799911a298c928c995c0}\label{voltage__monitor_8c_a86fd6ce62025799911a298c928c995c0} 
+\#define {\bfseries RAIL\+\_\+15\+V\+\_\+\+MAX}~4095
+\item 
+\Hypertarget{voltage__monitor_8c_a057b2b091042d77963f72c68101f9cee}\label{voltage__monitor_8c_a057b2b091042d77963f72c68101f9cee} 
+\#define {\bfseries RAIL\+\_\+15\+V\+\_\+\+MIN}~3350
+\item 
+\Hypertarget{voltage__monitor_8c_aa42e50eef831afba07fcd83d877e4496}\label{voltage__monitor_8c_aa42e50eef831afba07fcd83d877e4496} 
+\#define {\bfseries RAIL\+\_\+5\+VREF\+\_\+\+MAX}~4095
+\item 
+\Hypertarget{voltage__monitor_8c_ad06c4e14ab1d6b8681d8583474db3fb8}\label{voltage__monitor_8c_ad06c4e14ab1d6b8681d8583474db3fb8} 
+\#define {\bfseries RAIL\+\_\+5\+VREF\+\_\+\+MIN}~3350
+\item 
+\Hypertarget{voltage__monitor_8c_a2b467ba16652ed7f8f19e85895d38cf8}\label{voltage__monitor_8c_a2b467ba16652ed7f8f19e85895d38cf8} 
+\#define {\bfseries RAIL\+\_\+\+N200\+V\+\_\+\+MAX}~3686
+\item 
+\Hypertarget{voltage__monitor_8c_a223295f0c335f68d0175ad9aaf04a01a}\label{voltage__monitor_8c_a223295f0c335f68d0175ad9aaf04a01a} 
+\#define {\bfseries RAIL\+\_\+\+N200\+V\+\_\+\+MIN}~3015
+\item 
+\Hypertarget{voltage__monitor_8c_a7415425523a81e9a3e48800ac8152bdd}\label{voltage__monitor_8c_a7415425523a81e9a3e48800ac8152bdd} 
+\#define {\bfseries RAIL\+\_\+\+N800\+V\+\_\+\+MAX}~3494
+\item 
+\Hypertarget{voltage__monitor_8c_ad99f24073495fecc081f3f96f641d7ba}\label{voltage__monitor_8c_ad99f24073495fecc081f3f96f641d7ba} 
+\#define {\bfseries RAIL\+\_\+\+N800\+V\+\_\+\+MIN}~2859
+\item 
+\Hypertarget{voltage__monitor_8c_aeacbc818533113cb33762b277250708f}\label{voltage__monitor_8c_aeacbc818533113cb33762b277250708f} 
+\#define {\bfseries RAIL\+\_\+\+TMP1\+\_\+\+MAX}~2720
+\item 
+\Hypertarget{voltage__monitor_8c_aaaea49eca0b11b4232eb52bbb79abf34}\label{voltage__monitor_8c_aaaea49eca0b11b4232eb52bbb79abf34} 
+\#define {\bfseries RAIL\+\_\+\+TMP1\+\_\+\+MIN}~2023
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{voltage__monitor_8c_a1cb17e7873bdd2d469147b0f372ae964}\label{voltage__monitor_8c_a1cb17e7873bdd2d469147b0f372ae964} 
+void {\bfseries voltage\+\_\+monitor\+\_\+init} ()
+\begin{DoxyCompactList}\small\item\em Initializes the voltage monitoring system by setting up each rail\textquotesingle{}s parameters such as name, error count, enable status, voltage limits, and out-\/of-\/bound counters. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{voltage__monitor_8c_a04dcdb9f09162c2c30fc6163168cf885}{set\+\_\+rail\+\_\+monitor\+\_\+enable}} (VOLTAGE\+\_\+\+RAIL\+\_\+\+NAME rail\+\_\+name, uint8\+\_\+t enable\+\_\+value)
+\begin{DoxyCompactList}\small\item\em Enables or disables monitoring for a specified voltage rail. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{voltage__monitor_8c_a1a8a14aec1cde7926f54e1f7d7c6d17b}{set\+\_\+rail\+\_\+monitor}} ()
+\begin{DoxyCompactList}\small\item\em Samples housekeeping ADC and I2C data and updates voltage rail monitor values. \end{DoxyCompactList}\item 
+VOLTAGE\+\_\+\+RAIL \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{voltage__monitor_8c_a5f62a1acee847939b7766470e9fac29a}{get\+\_\+rail\+\_\+monitor}} ()
+\begin{DoxyCompactList}\small\item\em Retrieves the voltage rail monitor array. \end{DoxyCompactList}\item 
+int16\+\_\+t \mbox{\hyperlink{voltage__monitor_8c_a6b45645003158a5d9e0202464c697e22}{convert\+\_\+\+ADT7410}} (int16\+\_\+t raw)
+\begin{DoxyCompactList}\small\item\em Converts raw temperature data from the ADT7410 sensor to a readable value. \end{DoxyCompactList}\item 
+uint8\+\_\+t \mbox{\hyperlink{voltage__monitor_8c_acdf9b2da6fc1c03161fef06af5df56e9}{check\+\_\+bounds}} (VOLTAGE\+\_\+\+RAIL\+\_\+\+NAME name, uint16\+\_\+t raw, int min, int max)
+\begin{DoxyCompactList}\small\item\em Checks if the raw voltage or temperature reading is within specified bounds. \end{DoxyCompactList}\item 
+uint8\+\_\+t \mbox{\hyperlink{voltage__monitor_8c_a914927d2dd2ebf35986950e1d91ef8d4}{monitor\+\_\+rails}} ()
+\begin{DoxyCompactList}\small\item\em Monitors the status of voltage rails and checks if they are within specified bounds. \end{DoxyCompactList}\item 
+ERROR\+\_\+\+DETAIL \mbox{\hyperlink{voltage__monitor_8c_ac8391d12baf7cbb93a9b9cb570a23c0e}{get\+\_\+rail\+\_\+name\+\_\+error\+\_\+detail}} (VOLTAGE\+\_\+\+RAIL\+\_\+\+NAME rail\+\_\+name)
+\begin{DoxyCompactList}\small\item\em Retrieves the error detail associated with a specific voltage rail. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{voltage__monitor_8c_a6757f390b54fa941e7e91a53460dd8d5}\label{voltage__monitor_8c_a6757f390b54fa941e7e91a53460dd8d5} 
+VOLTAGE\+\_\+\+RAIL {\bfseries rail\+\_\+monitor} \mbox{[}NUM\+\_\+\+VOLTAGE\+\_\+\+RAILS\mbox{]}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\+: Implementation for voltage monitoring 
+
+\begin{DoxyAuthor}{Author}
+\+: Jared Morrison 
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+\+: October 9, 2024  
+\end{DoxyDate}
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{voltage__monitor_8c_acdf9b2da6fc1c03161fef06af5df56e9}\index{voltage\_monitor.c@{voltage\_monitor.c}!check\_bounds@{check\_bounds}}
+\index{check\_bounds@{check\_bounds}!voltage\_monitor.c@{voltage\_monitor.c}}
+\doxysubsubsection{\texorpdfstring{check\_bounds()}{check\_bounds()}}
+{\footnotesize\ttfamily \label{voltage__monitor_8c_acdf9b2da6fc1c03161fef06af5df56e9} 
+uint8\+\_\+t check\+\_\+bounds (\begin{DoxyParamCaption}\item[{VOLTAGE\+\_\+\+RAIL\+\_\+\+NAME}]{name}{, }\item[{uint16\+\_\+t}]{raw}{, }\item[{int}]{min}{, }\item[{int}]{max}{}\end{DoxyParamCaption})}
+
+
+
+Checks if the raw voltage or temperature reading is within specified bounds. 
+
+For temperature rails, the raw data is first converted before checking the bounds.
+
+
+\begin{DoxyParams}{Parameters}
+{\em name} & The voltage rail being checked. \\
+\hline
+{\em raw} & The raw data to be checked. \\
+\hline
+{\em min} & The minimum acceptable value. \\
+\hline
+{\em max} & The maximum acceptable value. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+1 if the value is within bounds, 0 otherwise. 
+\end{DoxyReturn}
+\Hypertarget{voltage__monitor_8c_a6b45645003158a5d9e0202464c697e22}\index{voltage\_monitor.c@{voltage\_monitor.c}!convert\_ADT7410@{convert\_ADT7410}}
+\index{convert\_ADT7410@{convert\_ADT7410}!voltage\_monitor.c@{voltage\_monitor.c}}
+\doxysubsubsection{\texorpdfstring{convert\_ADT7410()}{convert\_ADT7410()}}
+{\footnotesize\ttfamily \label{voltage__monitor_8c_a6b45645003158a5d9e0202464c697e22} 
+int16\+\_\+t convert\+\_\+\+ADT7410 (\begin{DoxyParamCaption}\item[{int16\+\_\+t}]{raw}{}\end{DoxyParamCaption})}
+
+
+
+Converts raw temperature data from the ADT7410 sensor to a readable value. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em raw} & The raw temperature data from the ADT7410 sensor. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The converted temperature in degrees Celsius. 
+\end{DoxyReturn}
+\Hypertarget{voltage__monitor_8c_a5f62a1acee847939b7766470e9fac29a}\index{voltage\_monitor.c@{voltage\_monitor.c}!get\_rail\_monitor@{get\_rail\_monitor}}
+\index{get\_rail\_monitor@{get\_rail\_monitor}!voltage\_monitor.c@{voltage\_monitor.c}}
+\doxysubsubsection{\texorpdfstring{get\_rail\_monitor()}{get\_rail\_monitor()}}
+{\footnotesize\ttfamily \label{voltage__monitor_8c_a5f62a1acee847939b7766470e9fac29a} 
+VOLTAGE\+\_\+\+RAIL \texorpdfstring{$\ast$}{*} get\+\_\+rail\+\_\+monitor (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Retrieves the voltage rail monitor array. 
+
+\begin{DoxyReturn}{Returns}
+Pointer to the array of monitored voltage rails. 
+\end{DoxyReturn}
+\Hypertarget{voltage__monitor_8c_ac8391d12baf7cbb93a9b9cb570a23c0e}\index{voltage\_monitor.c@{voltage\_monitor.c}!get\_rail\_name\_error\_detail@{get\_rail\_name\_error\_detail}}
+\index{get\_rail\_name\_error\_detail@{get\_rail\_name\_error\_detail}!voltage\_monitor.c@{voltage\_monitor.c}}
+\doxysubsubsection{\texorpdfstring{get\_rail\_name\_error\_detail()}{get\_rail\_name\_error\_detail()}}
+{\footnotesize\ttfamily \label{voltage__monitor_8c_ac8391d12baf7cbb93a9b9cb570a23c0e} 
+ERROR\+\_\+\+DETAIL get\+\_\+rail\+\_\+name\+\_\+error\+\_\+detail (\begin{DoxyParamCaption}\item[{VOLTAGE\+\_\+\+RAIL\+\_\+\+NAME}]{rail\+\_\+name}{}\end{DoxyParamCaption})}
+
+
+
+Retrieves the error detail associated with a specific voltage rail. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em rail\+\_\+name} & The voltage rail for which to get the error detail. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The corresponding ERROR\+\_\+\+DETAIL enumeration value for the specified rail. 
+\end{DoxyReturn}
+\Hypertarget{voltage__monitor_8c_a914927d2dd2ebf35986950e1d91ef8d4}\index{voltage\_monitor.c@{voltage\_monitor.c}!monitor\_rails@{monitor\_rails}}
+\index{monitor\_rails@{monitor\_rails}!voltage\_monitor.c@{voltage\_monitor.c}}
+\doxysubsubsection{\texorpdfstring{monitor\_rails()}{monitor\_rails()}}
+{\footnotesize\ttfamily \label{voltage__monitor_8c_a914927d2dd2ebf35986950e1d91ef8d4} 
+uint8\+\_\+t monitor\+\_\+rails (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Monitors the status of voltage rails and checks if they are within specified bounds. 
+
+For each enabled rail, the function checks if the current reading is within defined min and max voltages. If a rail is not enabled, it checks against a tolerance value. If a rail goes out of bounds, its error count is incremented, and the relevant data is stored. An error is handled if the out-\/of-\/bounds condition is encountered three times.
+
+\begin{DoxyReturn}{Returns}
+1 if all rails are within bounds, 0 if any rail is out of bounds. 
+\end{DoxyReturn}
+\Hypertarget{voltage__monitor_8c_a1a8a14aec1cde7926f54e1f7d7c6d17b}\index{voltage\_monitor.c@{voltage\_monitor.c}!set\_rail\_monitor@{set\_rail\_monitor}}
+\index{set\_rail\_monitor@{set\_rail\_monitor}!voltage\_monitor.c@{voltage\_monitor.c}}
+\doxysubsubsection{\texorpdfstring{set\_rail\_monitor()}{set\_rail\_monitor()}}
+{\footnotesize\ttfamily \label{voltage__monitor_8c_a1a8a14aec1cde7926f54e1f7d7c6d17b} 
+void set\+\_\+rail\+\_\+monitor (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Samples housekeeping ADC and I2C data and updates voltage rail monitor values. 
+
+Samples data from ADC1, ADC3, and I2C channels, then updates the corresponding voltage rail monitor entries with the sampled values. \Hypertarget{voltage__monitor_8c_a04dcdb9f09162c2c30fc6163168cf885}\index{voltage\_monitor.c@{voltage\_monitor.c}!set\_rail\_monitor\_enable@{set\_rail\_monitor\_enable}}
+\index{set\_rail\_monitor\_enable@{set\_rail\_monitor\_enable}!voltage\_monitor.c@{voltage\_monitor.c}}
+\doxysubsubsection{\texorpdfstring{set\_rail\_monitor\_enable()}{set\_rail\_monitor\_enable()}}
+{\footnotesize\ttfamily \label{voltage__monitor_8c_a04dcdb9f09162c2c30fc6163168cf885} 
+void set\+\_\+rail\+\_\+monitor\+\_\+enable (\begin{DoxyParamCaption}\item[{VOLTAGE\+\_\+\+RAIL\+\_\+\+NAME}]{rail\+\_\+name}{, }\item[{uint8\+\_\+t}]{enable\+\_\+value}{}\end{DoxyParamCaption})}
+
+
+
+Enables or disables monitoring for a specified voltage rail. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em rail\+\_\+name} & The voltage rail to modify. \\
+\hline
+{\em enable\+\_\+value} & 1 to enable monitoring, 0 to disable. \\
+\hline
+\end{DoxyParams}

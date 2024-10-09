@@ -1,0 +1,113 @@
+\doxysection{Core/src/packet\+\_\+creation.c File Reference}
+\hypertarget{packet__creation_8c}{}\label{packet__creation_8c}\index{Core/src/packet\_creation.c@{Core/src/packet\_creation.c}}
+
+
+\+: Implementation file for creation of all data packets.  
+
+
+{\ttfamily \#include "{}packet\+\_\+creation.\+h"{}}\newline
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{packet__creation_8c_a44c269ff7cea3d748ed72875248e239d}\label{packet__creation_8c_a44c269ff7cea3d748ed72875248e239d} 
+\#define {\bfseries PMT\+\_\+\+DATA\+\_\+\+SIZE}~10
+\item 
+\Hypertarget{packet__creation_8c_a7edc1aaa46e6bdf5e6475e68c48a25f1}\label{packet__creation_8c_a7edc1aaa46e6bdf5e6475e68c48a25f1} 
+\#define {\bfseries ERPA\+\_\+\+DATA\+\_\+\+SIZE}~14
+\item 
+\Hypertarget{packet__creation_8c_a4a30f5dc7d531c20e6d54ab16b22c2ec}\label{packet__creation_8c_a4a30f5dc7d531c20e6d54ab16b22c2ec} 
+\#define {\bfseries HK\+\_\+\+DATA\+\_\+\+SIZE}~50
+\item 
+\Hypertarget{packet__creation_8c_a41a15639b79c54d63cd32cf304a1b7c0}\label{packet__creation_8c_a41a15639b79c54d63cd32cf304a1b7c0} 
+\#define {\bfseries UPTIME\+\_\+\+SIZE}~4
+\item 
+\Hypertarget{packet__creation_8c_a7b4282b06832a01cee279660fd4b829d}\label{packet__creation_8c_a7b4282b06832a01cee279660fd4b829d} 
+\#define {\bfseries TIMESTAMP\+\_\+\+SIZE}~6
+\item 
+\Hypertarget{packet__creation_8c_adb613cbcf8681847f691f76d2533d11f}\label{packet__creation_8c_adb613cbcf8681847f691f76d2533d11f} 
+\#define {\bfseries PMT\+\_\+\+SYNC}~0x\+FF
+\item 
+\Hypertarget{packet__creation_8c_a5a7d643fcf8d256fb918bebbb26e25b8}\label{packet__creation_8c_a5a7d643fcf8d256fb918bebbb26e25b8} 
+\#define {\bfseries ERPA\+\_\+\+SYNC}~0x\+EE
+\item 
+\Hypertarget{packet__creation_8c_af97a37a0f42ab2bfd6b57f779c1b4fe7}\label{packet__creation_8c_af97a37a0f42ab2bfd6b57f779c1b4fe7} 
+\#define {\bfseries HK\+\_\+\+SYNC}~0x\+DD
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{packet__creation_8c_a7ea254a95b9c80aef80927d4252255e5}{create\+\_\+pmt\+\_\+packet}} ()
+\begin{DoxyCompactList}\small\item\em Creates and transmits a PMT packet. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{packet__creation_8c_a59162054ea1fa4d70052084c3d3cb471}{create\+\_\+erpa\+\_\+packet}} ()
+\begin{DoxyCompactList}\small\item\em Creates and transmits an ERPA packet. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{packet__creation_8c_a872b4b36678d5069fbaf3c13a45820dc}{create\+\_\+hk\+\_\+packet}} ()
+\begin{DoxyCompactList}\small\item\em Creates and transmits a housekeeping (HK) packet. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{packet__creation_8c_aa6f1f6df890cf6a90808fcff2661c28d}{reset\+\_\+packet\+\_\+sequence\+\_\+numbers}} ()
+\begin{DoxyCompactList}\small\item\em Resets the packet sequence numbers for PMT, ERPA, and HK packets. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{packet__creation_8c_adc9e4a67aedf3eefcd08a618aa19f390}\label{packet__creation_8c_adc9e4a67aedf3eefcd08a618aa19f390} 
+uint16\+\_\+t {\bfseries pmt\+\_\+seq} = 0
+\item 
+\Hypertarget{packet__creation_8c_a6f927a4bfe32dcaecb6ba9847eca78fe}\label{packet__creation_8c_a6f927a4bfe32dcaecb6ba9847eca78fe} 
+uint32\+\_\+t {\bfseries erpa\+\_\+seq} = 0
+\item 
+\Hypertarget{packet__creation_8c_ab32ddd0dc4772ea581a17ef771c76f3a}\label{packet__creation_8c_ab32ddd0dc4772ea581a17ef771c76f3a} 
+uint16\+\_\+t {\bfseries hk\+\_\+seq} = 0
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\+: Implementation file for creation of all data packets. 
+
+\begin{DoxyAuthor}{Author}
+\+: Jared Morrison 
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+\+: October 9, 2024  
+\end{DoxyDate}
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{packet__creation_8c_a59162054ea1fa4d70052084c3d3cb471}\index{packet\_creation.c@{packet\_creation.c}!create\_erpa\_packet@{create\_erpa\_packet}}
+\index{create\_erpa\_packet@{create\_erpa\_packet}!packet\_creation.c@{packet\_creation.c}}
+\doxysubsubsection{\texorpdfstring{create\_erpa\_packet()}{create\_erpa\_packet()}}
+{\footnotesize\ttfamily \label{packet__creation_8c_a59162054ea1fa4d70052084c3d3cb471} 
+void create\+\_\+erpa\+\_\+packet (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Creates and transmits an ERPA packet. 
+
+This function samples the ERPA SPI and ADC data, retrieves uptime information, constructs a packet with synchronization bytes, sequence number, and data, and transmits it over UART. \Hypertarget{packet__creation_8c_a872b4b36678d5069fbaf3c13a45820dc}\index{packet\_creation.c@{packet\_creation.c}!create\_hk\_packet@{create\_hk\_packet}}
+\index{create\_hk\_packet@{create\_hk\_packet}!packet\_creation.c@{packet\_creation.c}}
+\doxysubsubsection{\texorpdfstring{create\_hk\_packet()}{create\_hk\_packet()}}
+{\footnotesize\ttfamily \label{packet__creation_8c_a872b4b36678d5069fbaf3c13a45820dc} 
+void create\+\_\+hk\+\_\+packet (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Creates and transmits a housekeeping (HK) packet. 
+
+This function retrieves uptime and UNIX time information, samples the voltage rails, constructs a packet with synchronization bytes, sequence number, and voltage readings, and transmits it over UART. \Hypertarget{packet__creation_8c_a7ea254a95b9c80aef80927d4252255e5}\index{packet\_creation.c@{packet\_creation.c}!create\_pmt\_packet@{create\_pmt\_packet}}
+\index{create\_pmt\_packet@{create\_pmt\_packet}!packet\_creation.c@{packet\_creation.c}}
+\doxysubsubsection{\texorpdfstring{create\_pmt\_packet()}{create\_pmt\_packet()}}
+{\footnotesize\ttfamily \label{packet__creation_8c_a7ea254a95b9c80aef80927d4252255e5} 
+void create\+\_\+pmt\+\_\+packet (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Creates and transmits a PMT packet. 
+
+This function samples the PMT SPI data, retrieves uptime information, constructs a packet with synchronization bytes and data, and transmits it over UART. \Hypertarget{packet__creation_8c_aa6f1f6df890cf6a90808fcff2661c28d}\index{packet\_creation.c@{packet\_creation.c}!reset\_packet\_sequence\_numbers@{reset\_packet\_sequence\_numbers}}
+\index{reset\_packet\_sequence\_numbers@{reset\_packet\_sequence\_numbers}!packet\_creation.c@{packet\_creation.c}}
+\doxysubsubsection{\texorpdfstring{reset\_packet\_sequence\_numbers()}{reset\_packet\_sequence\_numbers()}}
+{\footnotesize\ttfamily \label{packet__creation_8c_aa6f1f6df890cf6a90808fcff2661c28d} 
+void reset\+\_\+packet\+\_\+sequence\+\_\+numbers (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Resets the packet sequence numbers for PMT, ERPA, and HK packets. 
+
+This function sets the sequence counters for the PMT, ERPA, and housekeeping (HK) packets back to zero. It is useful for reinitializing the packet transmission system. 

@@ -28,6 +28,9 @@ void {\bfseries Usage\+Fault\+\_\+\+Handler} (void)
 \Hypertarget{stm32h7xx__it_8c_adbdfb05858cc36fc520974df37ec3cb0}\label{stm32h7xx__it_8c_adbdfb05858cc36fc520974df37ec3cb0} 
 void {\bfseries Debug\+Mon\+\_\+\+Handler} (void)
 \begin{DoxyCompactList}\small\item\em This function handles Debug monitor. \end{DoxyCompactList}\item 
+\Hypertarget{stm32h7xx__it_8c_ae5c044ed8d30b13cb7eb9df52586c64d}\label{stm32h7xx__it_8c_ae5c044ed8d30b13cb7eb9df52586c64d} 
+void {\bfseries FLASH\+\_\+\+IRQHandler} (void)
+\begin{DoxyCompactList}\small\item\em This function handles Flash global interrupt. \end{DoxyCompactList}\item 
 \Hypertarget{stm32h7xx__it_8c_a1b70a4441662b1d6548e803499da414f}\label{stm32h7xx__it_8c_a1b70a4441662b1d6548e803499da414f} 
 void {\bfseries DMA1\+\_\+\+Stream0\+\_\+\+IRQHandler} (void)
 \begin{DoxyCompactList}\small\item\em This function handles DMA1 stream0 global interrupt. \end{DoxyCompactList}\item 
@@ -64,6 +67,9 @@ void {\bfseries TIM1\+\_\+\+CC\+\_\+\+IRQHandler} (void)
 \Hypertarget{stm32h7xx__it_8c_a38ad4725462bdc5e86c4ead4f04b9fc2}\label{stm32h7xx__it_8c_a38ad4725462bdc5e86c4ead4f04b9fc2} 
 void {\bfseries TIM2\+\_\+\+IRQHandler} (void)
 \begin{DoxyCompactList}\small\item\em This function handles TIM2 global interrupt. \end{DoxyCompactList}\item 
+\Hypertarget{stm32h7xx__it_8c_ac8e51d2183b5230cbd5481f8867adce9}\label{stm32h7xx__it_8c_ac8e51d2183b5230cbd5481f8867adce9} 
+void {\bfseries TIM3\+\_\+\+IRQHandler} (void)
+\begin{DoxyCompactList}\small\item\em This function handles TIM3 global interrupt. \end{DoxyCompactList}\item 
 \Hypertarget{stm32h7xx__it_8c_a272ffa65eb8ff5c4a065b0d3473611cd}\label{stm32h7xx__it_8c_a272ffa65eb8ff5c4a065b0d3473611cd} 
 void {\bfseries I2\+C1\+\_\+\+EV\+\_\+\+IRQHandler} (void)
 \begin{DoxyCompactList}\small\item\em This function handles I2\+C1 event interrupt. \end{DoxyCompactList}\item 
@@ -84,7 +90,10 @@ void {\bfseries DMA1\+\_\+\+Stream7\+\_\+\+IRQHandler} (void)
 \begin{DoxyCompactList}\small\item\em This function handles DMA1 stream7 global interrupt. \end{DoxyCompactList}\item 
 \Hypertarget{stm32h7xx__it_8c_a0839a45f331c4c067939b9c4533bbf4d}\label{stm32h7xx__it_8c_a0839a45f331c4c067939b9c4533bbf4d} 
 void {\bfseries TIM6\+\_\+\+DAC\+\_\+\+IRQHandler} (void)
-\begin{DoxyCompactList}\small\item\em This function handles TIM6 global interrupt, DAC1\+\_\+\+CH1 and DAC1\+\_\+\+CH2 underrun error interrupts. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\begin{DoxyCompactList}\small\item\em This function handles TIM6 global interrupt, DAC1\+\_\+\+CH1 and DAC1\+\_\+\+CH2 underrun error interrupts. \end{DoxyCompactList}\item 
+\Hypertarget{stm32h7xx__it_8c_ad058519973ac5e9cc3fca85fad16be13}\label{stm32h7xx__it_8c_ad058519973ac5e9cc3fca85fad16be13} 
+void {\bfseries ECC\+\_\+\+IRQHandler} (void)
+\begin{DoxyCompactList}\small\item\em This function handles RAMECC global interrupt. \end{DoxyCompactList}\end{DoxyCompactItemize}
 \doxysubsubsection*{Variables}
 \begin{DoxyCompactItemize}
 \item 
@@ -127,6 +136,9 @@ TIM\+\_\+\+Handle\+Type\+Def {\bfseries htim1}
 \Hypertarget{stm32h7xx__it_8c_a2c80fd5510e2990a59a5c90d745c716c}\label{stm32h7xx__it_8c_a2c80fd5510e2990a59a5c90d745c716c} 
 TIM\+\_\+\+Handle\+Type\+Def {\bfseries htim2}
 \item 
+\Hypertarget{stm32h7xx__it_8c_aac3d2c59ee0e3bbae1b99529a154eb62}\label{stm32h7xx__it_8c_aac3d2c59ee0e3bbae1b99529a154eb62} 
+TIM\+\_\+\+Handle\+Type\+Def {\bfseries htim3}
+\item 
 \Hypertarget{stm32h7xx__it_8c_a5af94ab36bfe698db3e6beea96d10a90}\label{stm32h7xx__it_8c_a5af94ab36bfe698db3e6beea96d10a90} 
 DMA\+\_\+\+Handle\+Type\+Def {\bfseries hdma\+\_\+usart1\+\_\+tx}
 \item 
@@ -135,6 +147,42 @@ UART\+\_\+\+Handle\+Type\+Def {\bfseries huart1}
 \item 
 \Hypertarget{stm32h7xx__it_8c_a1564492831a79fa18466467c3420c3c3}\label{stm32h7xx__it_8c_a1564492831a79fa18466467c3420c3c3} 
 TIM\+\_\+\+Handle\+Type\+Def {\bfseries htim6}
+\item 
+\Hypertarget{stm32h7xx__it_8c_a3b161e0140d9dbb62815abe34721c8d2}\label{stm32h7xx__it_8c_a3b161e0140d9dbb62815abe34721c8d2} 
+RAMECC\+\_\+\+Handle\+Type\+Def {\bfseries hramecc1\+\_\+m1}
+\item 
+\Hypertarget{stm32h7xx__it_8c_a241c5aef83d7c9998f548a4a50de8292}\label{stm32h7xx__it_8c_a241c5aef83d7c9998f548a4a50de8292} 
+RAMECC\+\_\+\+Handle\+Type\+Def {\bfseries hramecc1\+\_\+m2}
+\item 
+\Hypertarget{stm32h7xx__it_8c_a39e67f6b6aa67a88589b746eedb13d01}\label{stm32h7xx__it_8c_a39e67f6b6aa67a88589b746eedb13d01} 
+RAMECC\+\_\+\+Handle\+Type\+Def {\bfseries hramecc1\+\_\+m3}
+\item 
+\Hypertarget{stm32h7xx__it_8c_a945c0a1d2a143495f0ad2100658a90ad}\label{stm32h7xx__it_8c_a945c0a1d2a143495f0ad2100658a90ad} 
+RAMECC\+\_\+\+Handle\+Type\+Def {\bfseries hramecc1\+\_\+m4}
+\item 
+\Hypertarget{stm32h7xx__it_8c_a65501786a329590ea2e854d55e727483}\label{stm32h7xx__it_8c_a65501786a329590ea2e854d55e727483} 
+RAMECC\+\_\+\+Handle\+Type\+Def {\bfseries hramecc1\+\_\+m5}
+\item 
+\Hypertarget{stm32h7xx__it_8c_a04330f788754f8a73a17e375cb3f7868}\label{stm32h7xx__it_8c_a04330f788754f8a73a17e375cb3f7868} 
+RAMECC\+\_\+\+Handle\+Type\+Def {\bfseries hramecc2\+\_\+m1}
+\item 
+\Hypertarget{stm32h7xx__it_8c_a06b828c832125185aac5320378650c27}\label{stm32h7xx__it_8c_a06b828c832125185aac5320378650c27} 
+RAMECC\+\_\+\+Handle\+Type\+Def {\bfseries hramecc2\+\_\+m2}
+\item 
+\Hypertarget{stm32h7xx__it_8c_af55e4469a367b8e42ac1b65cdab99f5b}\label{stm32h7xx__it_8c_af55e4469a367b8e42ac1b65cdab99f5b} 
+RAMECC\+\_\+\+Handle\+Type\+Def {\bfseries hramecc2\+\_\+m3}
+\item 
+\Hypertarget{stm32h7xx__it_8c_a5f94c8d4b7d143c248d7b4084a94869f}\label{stm32h7xx__it_8c_a5f94c8d4b7d143c248d7b4084a94869f} 
+RAMECC\+\_\+\+Handle\+Type\+Def {\bfseries hramecc2\+\_\+m4}
+\item 
+\Hypertarget{stm32h7xx__it_8c_ae6d93d5f2b9da81782d62eacc0d18ecd}\label{stm32h7xx__it_8c_ae6d93d5f2b9da81782d62eacc0d18ecd} 
+RAMECC\+\_\+\+Handle\+Type\+Def {\bfseries hramecc2\+\_\+m5}
+\item 
+\Hypertarget{stm32h7xx__it_8c_af40517ea5254f4b7f3c57ad36ebb05cd}\label{stm32h7xx__it_8c_af40517ea5254f4b7f3c57ad36ebb05cd} 
+RAMECC\+\_\+\+Handle\+Type\+Def {\bfseries hramecc3\+\_\+m1}
+\item 
+\Hypertarget{stm32h7xx__it_8c_aa0702aa7db48edd750403f7b3cf7cf6d}\label{stm32h7xx__it_8c_aa0702aa7db48edd750403f7b3cf7cf6d} 
+RAMECC\+\_\+\+Handle\+Type\+Def {\bfseries hramecc3\+\_\+m2}
 \end{DoxyCompactItemize}
 
 
