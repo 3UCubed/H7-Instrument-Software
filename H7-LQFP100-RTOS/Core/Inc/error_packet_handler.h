@@ -17,20 +17,6 @@
 
 #include <stdio.h>
 
-#define ERROR_COUNTER_PACKET_SIZE 60
-#define PREV_ERROR_PACKET_SIZE 4
-#define CURRENT_ERROR_PACKET_SIZE 10
-#define JUNK_PACKET_SIZE 1024
-
-#define ERROR_COUNTER_PACKET_SYNC 0xCC
-#define PREV_ERROR_PACKET_SYNC 0xAA
-#define CURRENT_ERROR_PACKET_SYNC 0xBB
-
-#define NUM_ERROR_COUNTERS 29
-
-#define PREV_ERROR_CATEGORY_INDEX 29
-#define PREV_ERROR_DETAIL_INDEX 30
-
 typedef enum {
 	EC_power_supply_rail = 0x00,
 	EC_seu = 0x01,
@@ -76,17 +62,9 @@ typedef struct {
 }ERROR_STRUCT;
 
 void error_counter_init();
-void increment_error_counter(ERROR_STRUCT error);
-void update_error_counter();
-void reset_error_counters();
-void reset_previous_error();
-void set_previous_error(ERROR_STRUCT error);
-ERROR_STRUCT get_previous_error();
 void handle_error(ERROR_STRUCT error);
 void send_error_counter_packet();
 void send_previous_error_packet();
-void send_current_error_packet(ERROR_STRUCT error);
-void send_junk_packet();
-
+void reset_error_counters();
 
 #endif /* INC_ERROR_PACKET_HANDLER_H_ */

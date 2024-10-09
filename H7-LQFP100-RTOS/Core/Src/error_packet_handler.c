@@ -15,8 +15,29 @@
 #include "tim.h"
 #include "dac.h"
 
+#define ERROR_COUNTER_PACKET_SIZE 60
+#define PREV_ERROR_PACKET_SIZE 4
+#define CURRENT_ERROR_PACKET_SIZE 10
+#define JUNK_PACKET_SIZE 1024
+
+#define ERROR_COUNTER_PACKET_SYNC 0xCC
+#define PREV_ERROR_PACKET_SYNC 0xAA
+#define CURRENT_ERROR_PACKET_SYNC 0xBB
+
+#define NUM_ERROR_COUNTERS 29
+
+#define PREV_ERROR_CATEGORY_INDEX 29
+#define PREV_ERROR_DETAIL_INDEX 30
+
 void emergency_shutdown();
 void flash_mass_erase();
+void increment_error_counter(ERROR_STRUCT error);
+void update_error_counter();
+void reset_previous_error();
+void set_previous_error(ERROR_STRUCT error);
+ERROR_STRUCT get_previous_error();
+void send_current_error_packet(ERROR_STRUCT error);
+void send_junk_packet();
 
 /**
  * @brief Array storing virtual addresses for EEPROM emulation variables.
@@ -318,7 +339,7 @@ void send_current_error_packet(ERROR_STRUCT error) {
  *
  * Used to clear out the buffer on the OBC.
  */
-void send_junk_packet() {	// TODO: Figure out if we still need this.
+void send_junk_packet() {
 	uint8_t buffer[JUNK_PACKET_SIZE];
 
 	for (int i = 0; i < JUNK_PACKET_SIZE; i++) {
@@ -340,7 +361,6 @@ void emergency_shutdown() {
 
 	HK_ENABLED = 0;
 	HAL_DAC_Stop_DMA(&hdac1, DAC_CHANNEL_1);
-
 
 	// Telling rail monitor which voltages are now disabled
 	for (int i = RAIL_TMP1; i >= RAIL_busvmon; i--) {
