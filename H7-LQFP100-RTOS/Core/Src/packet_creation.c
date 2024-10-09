@@ -1,21 +1,39 @@
 /*
- * packet_creation.c
- *
- *  Created on: Aug 6, 2024
- *      Author: 3ucubed
+ ******************************************************************************
+ * @file           : packet_creation.c
+ * @author 		   : Jared Morrison
+ * @date	 	   : October 9, 2024
+ * @brief          : Implementation file for creation of all data packets.
+ ******************************************************************************
  */
 
 #include "packet_creation.h"
+
+#define PMT_DATA_SIZE 10
+#define ERPA_DATA_SIZE 14
+#define HK_DATA_SIZE 50
+#define UPTIME_SIZE 4
+#define TIMESTAMP_SIZE 6
+
+#define PMT_SYNC 0xFF
+#define ERPA_SYNC 0xEE
+#define HK_SYNC 0xDD
 
 uint16_t pmt_seq = 0;
 uint32_t erpa_seq = 0;
 uint16_t hk_seq = 0;
 
+/**
+ * @brief Creates and transmits a PMT packet.
+ *
+ * This function samples the PMT SPI data, retrieves uptime information,
+ * constructs a packet with synchronization bytes and data,
+ * and transmits it over UART.
+ */
+void create_pmt_packet()
+{
+	while (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_8)) {};
 
-
-void create_pmt_packet() {
-	while (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_8)) {
-	}
 	uint8_t buffer[PMT_DATA_SIZE];
 	uint8_t pmt_spi[2];
 	uint8_t uptime[UPTIME_SIZE];
@@ -34,15 +52,21 @@ void create_pmt_packet() {
 	buffer[8] = uptime[2];
 	buffer[9] = uptime[3];
 
-	HAL_UART_Transmit(&huart1, buffer, PMT_DATA_SIZE, 100);
+	HAL_UART_Transmit(&huart1, buffer, PMT_DATA_SIZE, UART_TIMEOUT_MS);
 
 	pmt_seq++;
 }
 
-
-void create_erpa_packet() {
-	while (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_11)) {
-	}
+/**
+ * @brief Creates and transmits an ERPA packet.
+ *
+ * This function samples the ERPA SPI and ADC data, retrieves uptime information,
+ * constructs a packet with synchronization bytes, sequence number, and data,
+ * and transmits it over UART.
+ */
+void create_erpa_packet()
+{
+	while (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_11)) {};
 
 	uint8_t buffer[ERPA_DATA_SIZE];
 	uint8_t erpa_spi[2];
@@ -71,13 +95,20 @@ void create_erpa_packet() {
 	buffer[12] = uptime[2];
 	buffer[13] = uptime[3];
 
-	HAL_UART_Transmit(&huart1, buffer, ERPA_DATA_SIZE, 100);
+	HAL_UART_Transmit(&huart1, buffer, ERPA_DATA_SIZE, UART_TIMEOUT_MS);
 
 	erpa_seq++;
 }
 
-
-void create_hk_packet() {
+/**
+ * @brief Creates and transmits a housekeeping (HK) packet.
+ *
+ * This function retrieves uptime and UNIX time information, samples the voltage rails,
+ * constructs a packet with synchronization bytes, sequence number, and voltage readings,
+ * and transmits it over UART.
+ */
+void create_hk_packet()
+{
 	VOLTAGE_RAIL *rail_monitor_ptr;
 	uint8_t buffer[HK_DATA_SIZE];
 	uint8_t timestamp[TIMESTAMP_SIZE];
@@ -86,7 +117,6 @@ void create_hk_packet() {
 	get_uptime(uptime);
 	get_unix_time(timestamp);
 	rail_monitor_ptr = get_rail_monitor();
-
 
 	buffer[0] = HK_SYNC;                     	// HK SYNC 0xCC MSB
 	buffer[1] = HK_SYNC;                     	// HK SYNC 0xCC LSB
@@ -139,12 +169,19 @@ void create_hk_packet() {
 	buffer[48] = uptime[2];
 	buffer[49] = uptime[3];
 
-	HAL_UART_Transmit(&huart1, buffer, HK_DATA_SIZE, 100);
+	HAL_UART_Transmit(&huart1, buffer, HK_DATA_SIZE, UART_TIMEOUT_MS);
 
 	hk_seq++;
 }
 
-void reset_packet_sequence_numbers() {
+/**
+ * @brief Resets the packet sequence numbers for PMT, ERPA, and HK packets.
+ *
+ * This function sets the sequence counters for the PMT, ERPA, and housekeeping (HK) packets
+ * back to zero. It is useful for reinitializing the packet transmission system.
+ */
+void reset_packet_sequence_numbers()
+{
 	pmt_seq = 0;
 	erpa_seq = 0;
 	hk_seq = 0;

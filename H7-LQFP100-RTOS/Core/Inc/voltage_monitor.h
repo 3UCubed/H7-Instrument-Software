@@ -1,8 +1,10 @@
 /*
- * voltage_monitor.h
- *
- *  Created on: Aug 6, 2024
- *      Author: 3ucubed
+ ******************************************************************************
+ * @file           : voltage_monitor.h
+ * @author 		   : Jared Morrison
+ * @date	 	   : October 9, 2024
+ * @brief          : Header file for voltage monitoring
+ ******************************************************************************
  */
 
 #ifndef INC_VOLTAGE_MONITOR_H_
@@ -10,8 +12,8 @@
 
 #define NUM_VOLTAGE_RAILS 18
 
-#include <stdio.h>				// For uint data types
-#include "sample_data.h"		// For setting rail data
+#include <stdio.h>
+#include "sample_data.h"
 #include "error_packet_handler.h"
 
 typedef enum {

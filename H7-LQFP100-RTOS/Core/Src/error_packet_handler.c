@@ -1,11 +1,11 @@
-/**
- * @file error_packet_handler.c
- * @brief Implementation of error packet handling
- *
- * Handles all errors in the system. If the built in HAL error handler is called by a peripheral, it redirects here.
- *
- * @author Jared Morrison
- * @date September 4, 2024
+/*
+ ******************************************************************************
+ * @file           : error_packet_handler.c
+ * @author 		   : Jared Morrison
+ * @date	 	   : October 9, 2024
+ * @brief          : Handles all errors in the system. If the built in HAL
+ * 					 error handler is called by a peripheral, it redirects here.
+ ******************************************************************************
  */
 
 #include "error_packet_handler.h"

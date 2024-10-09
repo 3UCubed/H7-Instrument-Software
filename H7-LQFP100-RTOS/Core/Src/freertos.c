@@ -1,8 +1,10 @@
 /* USER CODE BEGIN Header */
 /**
  ******************************************************************************
- * File Name          : freertos.c
- * Description        : Code for freertos applications
+ * @file           : freertos.c
+ * @author 		   : Jared Morrison
+ * @date	 	   : October 9, 2024
+ * @brief          : Implementation of freertos tasks.
  ******************************************************************************
  * @attention
  *
