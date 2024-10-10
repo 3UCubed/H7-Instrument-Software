@@ -227,21 +227,21 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	if (htim == &htim1)
 	{
-		osEventFlagsSet(packet_event_flags, PMT_FLAG_ID);
+		osEventFlagsSet(packet_event_flags, PMT_FLAG);
 	}
 	else if (htim == &htim2)
 	{
 		if (ERPA_ENABLED)
 		{
-			osEventFlagsSet(packet_event_flags, ERPA_FLAG_ID);
+			osEventFlagsSet(packet_event_flags, ERPA_FLAG);
 		}
 		if (HK_100_ms_counter == HK_100MS_COUNTER_MAX)
 		{
-			osEventFlagsSet(utility_event_flags, VOLTAGE_MONITOR_FLAG_ID);
+			osEventFlagsSet(utility_event_flags, VOLTAGE_MONITOR_FLAG);
 
 			if (HK_ENABLED)
 			{
-				osEventFlagsSet(packet_event_flags, HK_FLAG_ID);
+				osEventFlagsSet(packet_event_flags, HK_FLAG);
 			}
 			HK_100_ms_counter = 0;
 		}
@@ -412,7 +412,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 
 	case CMD_ERPA_ON:
 	{
-		osEventFlagsSet(packet_event_flags, ERPA_FLAG_ID);
+		osEventFlagsSet(packet_event_flags, ERPA_FLAG);
 		TIM2->CCR4 = ERPA_PWM_FREQ;
 		ERPA_ENABLED = ENABLED;
 		break;
@@ -428,7 +428,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	case CMD_PMT_ON:
 	{
 		HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_1);
-		osEventFlagsSet(packet_event_flags, PMT_FLAG_ID);
+		osEventFlagsSet(packet_event_flags, PMT_FLAG);
 		break;
 	}
 
@@ -440,7 +440,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 
 	case CMD_HK_ON:
 	{
-		osEventFlagsSet(packet_event_flags, HK_FLAG_ID);
+		osEventFlagsSet(packet_event_flags, HK_FLAG);
 		HK_ENABLED = ENABLED;
 		break;
 	}

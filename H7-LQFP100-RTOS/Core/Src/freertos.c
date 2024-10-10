@@ -309,7 +309,7 @@ void PMT_init(void *argument)
   /* Infinite loop */
 	for (;;)
 	{
-		osEventFlagsWait(packet_event_flags, PMT_FLAG_ID, osFlagsWaitAny, osWaitForever);
+		osEventFlagsWait(packet_event_flags, PMT_FLAG, osFlagsWaitAny, osWaitForever);
 
 		create_pmt_packet();
 
@@ -332,7 +332,7 @@ void ERPA_init(void *argument)
   /* Infinite loop */
 	for (;;)
 	{
-		osEventFlagsWait(packet_event_flags, ERPA_FLAG_ID, osFlagsWaitAny, osWaitForever);
+		osEventFlagsWait(packet_event_flags, ERPA_FLAG, osFlagsWaitAny, osWaitForever);
 
 		create_erpa_packet();
 
@@ -355,7 +355,7 @@ void HK_init(void *argument)
   /* Infinite loop */
 	for (;;)
 	{
-		osEventFlagsWait(packet_event_flags, HK_FLAG_ID, osFlagsWaitAny, osWaitForever);
+		osEventFlagsWait(packet_event_flags, HK_FLAG, osFlagsWaitAny, osWaitForever);
 
 		create_hk_packet();
 
@@ -449,7 +449,7 @@ void Voltage_Monitor_init(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	  osEventFlagsWait(utility_event_flags, VOLTAGE_MONITOR_FLAG_ID, osFlagsWaitAny, osWaitForever);
+	  osEventFlagsWait(utility_event_flags, VOLTAGE_MONITOR_FLAG, osFlagsWaitAny, osWaitForever);
 	  set_rail_monitor();
 #ifdef ERROR_HANDLING_ENABLED
 	  rails_in_bound = monitor_rails();
@@ -530,7 +530,7 @@ void Science_init(void *argument)
 		ERPA_ENABLED = ENABLED;
 		uptime_millis = 0;
 		reset_packet_sequence_numbers();
-		osEventFlagsSet(packet_event_flags, HK_FLAG_ID);
+		osEventFlagsSet(packet_event_flags, HK_FLAG);
 		TIM2->CCR4 = ERPA_PWM_FREQ;
 		HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_1);
 		__enable_irq();
