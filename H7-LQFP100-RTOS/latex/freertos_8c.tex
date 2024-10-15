@@ -1,0 +1,504 @@
+\doxysection{Core/src/freertos.c File Reference}
+\hypertarget{freertos_8c}{}\label{freertos_8c}\index{Core/src/freertos.c@{Core/src/freertos.c}}
+
+
+\+: Implementation of freertos tasks.  
+
+
+{\ttfamily \#include "{}Free\+RTOS.\+h"{}}\newline
+{\ttfamily \#include "{}task.\+h"{}}\newline
+{\ttfamily \#include "{}main.\+h"{}}\newline
+{\ttfamily \#include "{}cmsis\+\_\+os.\+h"{}}\newline
+{\ttfamily \#include "{}usart.\+h"{}}\newline
+{\ttfamily \#include "{}voltage\+\_\+monitor.\+h"{}}\newline
+{\ttfamily \#include "{}packet\+\_\+creation.\+h"{}}\newline
+{\ttfamily \#include "{}dac.\+h"{}}\newline
+{\ttfamily \#include "{}tim.\+h"{}}\newline
+{\ttfamily \#include "{}iwdg.\+h"{}}\newline
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{freertos_8c_aaee9bc8678814eb10045d266c8e9ba88}\label{freertos_8c_aaee9bc8678814eb10045d266c8e9ba88} 
+\#define {\bfseries PS\+\_\+\+RAIL\+\_\+\+DELAY}~100
+\item 
+\Hypertarget{freertos_8c_ac148ea16decd829e86e1534aa9691554}\label{freertos_8c_ac148ea16decd829e86e1534aa9691554} 
+\#define {\bfseries IDLE\+\_\+\+TO\+\_\+\+SCIENCE\+\_\+\+DELAY}~1000
+\item 
+\Hypertarget{freertos_8c_a5fc037f565f537b71a1d5713a6295d8b}\label{freertos_8c_a5fc037f565f537b71a1d5713a6295d8b} 
+\#define {\bfseries IDLE\+\_\+\+TO\+\_\+\+VOLTAGE\+\_\+\+MONITOR\+\_\+\+DELAY}~3500
+\item 
+\Hypertarget{freertos_8c_a2ff02a0539291446db156642f3cf45d8}\label{freertos_8c_a2ff02a0539291446db156642f3cf45d8} 
+\#define {\bfseries SYNC\+\_\+\+DELAY}~10
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{freertos_8c_a5bee4f77f84f0c92aeb06fdccdb82573}\label{freertos_8c_a5bee4f77f84f0c92aeb06fdccdb82573} 
+typedef Static\+Task\+\_\+t {\bfseries os\+Static\+Thread\+Def\+\_\+t}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{freertos_8c_a337ce00173018ad9f84f8596a6ac9c6e}{PMT\+\_\+init}} (void \texorpdfstring{$\ast$}{*}argument)
+\begin{DoxyCompactList}\small\item\em Initializes the PMT thread. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{freertos_8c_a7594dc6f42ed797c97c88068562de9c4}{ERPA\+\_\+init}} (void \texorpdfstring{$\ast$}{*}argument)
+\begin{DoxyCompactList}\small\item\em Initializes the ERPA thread. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{freertos_8c_a8d36ce2d327909513102b49dcde4e3c3}{HK\+\_\+init}} (void \texorpdfstring{$\ast$}{*}argument)
+\begin{DoxyCompactList}\small\item\em Initializes the HK thread. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{freertos_8c_aa36aac42e45b961692efecd48036c310}{AUTOINIT\+\_\+init}} (void \texorpdfstring{$\ast$}{*}argument)
+\begin{DoxyCompactList}\small\item\em Initializes the AUTOINIT thread. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{freertos_8c_a4d433aafca8b8d43962af4128cf0e820}{AUTODEINIT\+\_\+init}} (void \texorpdfstring{$\ast$}{*}argument)
+\begin{DoxyCompactList}\small\item\em Initializes the AUTODEINIT thread. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{freertos_8c_ac8c01aba361e85357de8c66aceb4c544}{Voltage\+\_\+\+Monitor\+\_\+init}} (void \texorpdfstring{$\ast$}{*}argument)
+\begin{DoxyCompactList}\small\item\em Initializes the Voltage Monitor thread. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{freertos_8c_a4581840f0511d30abcc7f021ac2497f4}{STOP\+\_\+init}} (void \texorpdfstring{$\ast$}{*}argument)
+\begin{DoxyCompactList}\small\item\em Initializes the STOP thread. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{freertos_8c_a08fae4702676c0a76ab3888a0ae5459b}{Science\+\_\+init}} (void \texorpdfstring{$\ast$}{*}argument)
+\begin{DoxyCompactList}\small\item\em Initializes the Science thread. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{freertos_8c_a6d9d16eb5ff2a884ecac654323b70750}{Idle\+\_\+init}} (void \texorpdfstring{$\ast$}{*}argument)
+\begin{DoxyCompactList}\small\item\em Initializes the Idle thread. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{freertos_8c_a4d4e9a8a1761bb340a1d8ab0c8ad1895}{Sync\+\_\+init}} (void \texorpdfstring{$\ast$}{*}argument)
+\begin{DoxyCompactList}\small\item\em Initializes the Sync thread. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{freertos_8c_abade755e13d07c10889ae83143656158}{MX\+\_\+\+FREERTOS\+\_\+\+Init}} (void)
+\begin{DoxyCompactList}\small\item\em Free\+RTOS initialization. \end{DoxyCompactList}\item 
+\Hypertarget{freertos_8c_a9ca051aa77e17583aa5a85d5de5c199a}\label{freertos_8c_a9ca051aa77e17583aa5a85d5de5c199a} 
+void {\bfseries v\+Application\+Tick\+Hook} (void)
+\begin{DoxyCompactList}\small\item\em Tick hook function called by each tick interrupt. Increments uptime\+\_\+millis, used in time tagging. \end{DoxyCompactList}\item 
+\Hypertarget{freertos_8c_a407179f96d6ae48a303e8695fd23379b}\label{freertos_8c_a407179f96d6ae48a303e8695fd23379b} 
+void {\bfseries v\+Application\+Stack\+Overflow\+Hook} (x\+Task\+Handle x\+Task, signed char \texorpdfstring{$\ast$}{*}pc\+Task\+Name)
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{freertos_8c_a1af15f327b59218af935726964c12961}\label{freertos_8c_a1af15f327b59218af935726964c12961} 
+os\+Thread\+Id\+\_\+t {\bfseries PMT\+\_\+task\+Handle}
+\item 
+\Hypertarget{freertos_8c_a5b3a4bc8634edd6e15824e73f181f217}\label{freertos_8c_a5b3a4bc8634edd6e15824e73f181f217} 
+uint32\+\_\+t {\bfseries PMT\+\_\+task\+Buffer} \mbox{[}128\mbox{]}
+\item 
+\Hypertarget{freertos_8c_a8170eaa65478ff49e494171cb26c3e2d}\label{freertos_8c_a8170eaa65478ff49e494171cb26c3e2d} 
+os\+Static\+Thread\+Def\+\_\+t {\bfseries PMT\+\_\+task\+Control\+Block}
+\item 
+const os\+Thread\+Attr\+\_\+t \mbox{\hyperlink{freertos_8c_a11620c10ef7eb1257cfaab7045d0004d}{PMT\+\_\+task\+\_\+attributes}}
+\item 
+\Hypertarget{freertos_8c_a0b9f540022a881212bfa4c18157092b6}\label{freertos_8c_a0b9f540022a881212bfa4c18157092b6} 
+os\+Thread\+Id\+\_\+t {\bfseries ERPA\+\_\+task\+Handle}
+\item 
+\Hypertarget{freertos_8c_a4ad3f93853d3ae869b420d59cb8f76ac}\label{freertos_8c_a4ad3f93853d3ae869b420d59cb8f76ac} 
+uint32\+\_\+t {\bfseries ERPA\+\_\+task\+Buffer} \mbox{[}128\mbox{]}
+\item 
+\Hypertarget{freertos_8c_a57c3c7b20c62438740e6988c6969f513}\label{freertos_8c_a57c3c7b20c62438740e6988c6969f513} 
+os\+Static\+Thread\+Def\+\_\+t {\bfseries ERPA\+\_\+task\+Control\+Block}
+\item 
+const os\+Thread\+Attr\+\_\+t \mbox{\hyperlink{freertos_8c_ac9580a41c5ba189ea2adb7a55186e1bd}{ERPA\+\_\+task\+\_\+attributes}}
+\item 
+\Hypertarget{freertos_8c_ad07df42b36d816d2e2d9caca7c0f9cc6}\label{freertos_8c_ad07df42b36d816d2e2d9caca7c0f9cc6} 
+os\+Thread\+Id\+\_\+t {\bfseries HK\+\_\+task\+Handle}
+\item 
+\Hypertarget{freertos_8c_ae0358fc4bf815b7d40704c50ce2c5384}\label{freertos_8c_ae0358fc4bf815b7d40704c50ce2c5384} 
+uint32\+\_\+t {\bfseries HK\+\_\+task\+Buffer} \mbox{[}128\mbox{]}
+\item 
+\Hypertarget{freertos_8c_a874660e5266a64195a7e4f93b6b46338}\label{freertos_8c_a874660e5266a64195a7e4f93b6b46338} 
+os\+Static\+Thread\+Def\+\_\+t {\bfseries HK\+\_\+task\+Control\+Block}
+\item 
+const os\+Thread\+Attr\+\_\+t \mbox{\hyperlink{freertos_8c_ac01d5151416e4a83683b76e5e9c09c18}{HK\+\_\+task\+\_\+attributes}}
+\item 
+\Hypertarget{freertos_8c_a02b5239a814fa56503806cb68fdd0da1}\label{freertos_8c_a02b5239a814fa56503806cb68fdd0da1} 
+os\+Thread\+Id\+\_\+t {\bfseries AUTOINIT\+\_\+task\+Handle}
+\item 
+\Hypertarget{freertos_8c_a318137ca2108ea4350c0ca510acdc686}\label{freertos_8c_a318137ca2108ea4350c0ca510acdc686} 
+uint32\+\_\+t {\bfseries AUTOINIT\+\_\+task\+Buffer} \mbox{[}128\mbox{]}
+\item 
+\Hypertarget{freertos_8c_aafdab807391460d3f9b2a0f807beec6a}\label{freertos_8c_aafdab807391460d3f9b2a0f807beec6a} 
+os\+Static\+Thread\+Def\+\_\+t {\bfseries AUTOINIT\+\_\+task\+Control\+Block}
+\item 
+const os\+Thread\+Attr\+\_\+t \mbox{\hyperlink{freertos_8c_a85105200b62caf4623cb83c31534dd10}{AUTOINIT\+\_\+task\+\_\+attributes}}
+\item 
+\Hypertarget{freertos_8c_af237724dcc0da5684395f27aadec4acc}\label{freertos_8c_af237724dcc0da5684395f27aadec4acc} 
+os\+Thread\+Id\+\_\+t {\bfseries AUTODEINIT\+\_\+task\+Handle}
+\item 
+\Hypertarget{freertos_8c_ac8ec62c233b589fab3ecec0dda839ead}\label{freertos_8c_ac8ec62c233b589fab3ecec0dda839ead} 
+uint32\+\_\+t {\bfseries AUTODEINIT\+\_\+task\+Buffer} \mbox{[}128\mbox{]}
+\item 
+\Hypertarget{freertos_8c_ace0ac8d2add717147fe47983093fdc2f}\label{freertos_8c_ace0ac8d2add717147fe47983093fdc2f} 
+os\+Static\+Thread\+Def\+\_\+t {\bfseries AUTODEINIT\+\_\+task\+Control\+Block}
+\item 
+const os\+Thread\+Attr\+\_\+t \mbox{\hyperlink{freertos_8c_ad25d16097aae6fbf47c6689312cdbb1b}{AUTODEINIT\+\_\+task\+\_\+attributes}}
+\item 
+\Hypertarget{freertos_8c_aff9653f5ffff4ee2911d8000b15e0ab3}\label{freertos_8c_aff9653f5ffff4ee2911d8000b15e0ab3} 
+os\+Thread\+Id\+\_\+t {\bfseries Voltage\+\_\+\+Monitor\+Handle}
+\item 
+\Hypertarget{freertos_8c_a2745adb797624c131b2d97343fdc41cc}\label{freertos_8c_a2745adb797624c131b2d97343fdc41cc} 
+uint32\+\_\+t {\bfseries Voltage\+\_\+\+Monitor\+Buffer} \mbox{[}128\mbox{]}
+\item 
+\Hypertarget{freertos_8c_aea55b22bde007a572044f93039dd5554}\label{freertos_8c_aea55b22bde007a572044f93039dd5554} 
+os\+Static\+Thread\+Def\+\_\+t {\bfseries Voltage\+\_\+\+Monitor\+Control\+Block}
+\item 
+const os\+Thread\+Attr\+\_\+t \mbox{\hyperlink{freertos_8c_a96a3780cd543aa30b92a92d899fab568}{Voltage\+\_\+\+Monitor\+\_\+attributes}}
+\item 
+\Hypertarget{freertos_8c_a1797e8dac531a695457fe946df311b02}\label{freertos_8c_a1797e8dac531a695457fe946df311b02} 
+os\+Thread\+Id\+\_\+t {\bfseries STOP\+\_\+task\+Handle}
+\item 
+\Hypertarget{freertos_8c_a1053498b41622e475b4ce5e4a86199d8}\label{freertos_8c_a1053498b41622e475b4ce5e4a86199d8} 
+uint32\+\_\+t {\bfseries STOP\+\_\+task\+Buffer} \mbox{[}128\mbox{]}
+\item 
+\Hypertarget{freertos_8c_a27366ff8a69c3ae0b285dfe57449106a}\label{freertos_8c_a27366ff8a69c3ae0b285dfe57449106a} 
+os\+Static\+Thread\+Def\+\_\+t {\bfseries STOP\+\_\+task\+Control\+Block}
+\item 
+const os\+Thread\+Attr\+\_\+t \mbox{\hyperlink{freertos_8c_a4edf68a609e02e180215197e624d0db9}{STOP\+\_\+task\+\_\+attributes}}
+\item 
+\Hypertarget{freertos_8c_ac373e48872a1349785e80cc6dfb2fd40}\label{freertos_8c_ac373e48872a1349785e80cc6dfb2fd40} 
+os\+Thread\+Id\+\_\+t {\bfseries Science\+\_\+task\+Handle}
+\item 
+\Hypertarget{freertos_8c_ab233826a403a26e5225fe11b38464949}\label{freertos_8c_ab233826a403a26e5225fe11b38464949} 
+uint32\+\_\+t {\bfseries Science\+\_\+task\+Buffer} \mbox{[}128\mbox{]}
+\item 
+\Hypertarget{freertos_8c_a53f7df651fd8e97bcc17ba7b35337f35}\label{freertos_8c_a53f7df651fd8e97bcc17ba7b35337f35} 
+os\+Static\+Thread\+Def\+\_\+t {\bfseries Science\+\_\+task\+Control\+Block}
+\item 
+const os\+Thread\+Attr\+\_\+t \mbox{\hyperlink{freertos_8c_ac2c5dd5c215a9d99c562473791f79b97}{Science\+\_\+task\+\_\+attributes}}
+\item 
+\Hypertarget{freertos_8c_a2f53f74433889aa58ac77d9130d606a9}\label{freertos_8c_a2f53f74433889aa58ac77d9130d606a9} 
+os\+Thread\+Id\+\_\+t {\bfseries Idle\+\_\+task\+Handle}
+\item 
+\Hypertarget{freertos_8c_aa6d95d03435cc77c1c8cb81928a6958f}\label{freertos_8c_aa6d95d03435cc77c1c8cb81928a6958f} 
+uint32\+\_\+t {\bfseries Idle\+\_\+task\+Buffer} \mbox{[}128\mbox{]}
+\item 
+\Hypertarget{freertos_8c_a13a4cb268875e1ed36a1644396112f99}\label{freertos_8c_a13a4cb268875e1ed36a1644396112f99} 
+os\+Static\+Thread\+Def\+\_\+t {\bfseries Idle\+\_\+task\+Control\+Block}
+\item 
+const os\+Thread\+Attr\+\_\+t \mbox{\hyperlink{freertos_8c_a3a8e8577954ee02776b00bad486790a7}{Idle\+\_\+task\+\_\+attributes}}
+\item 
+\Hypertarget{freertos_8c_af6c66797355372ff54ff7d034e098d50}\label{freertos_8c_af6c66797355372ff54ff7d034e098d50} 
+os\+Thread\+Id\+\_\+t {\bfseries Sync\+\_\+task\+Handle}
+\item 
+\Hypertarget{freertos_8c_a386c56f615d02da77bb3d251630fa06c}\label{freertos_8c_a386c56f615d02da77bb3d251630fa06c} 
+uint32\+\_\+t {\bfseries Sync\+\_\+task\+Buffer} \mbox{[}128\mbox{]}
+\item 
+\Hypertarget{freertos_8c_aff507c30af3ea31838ce0a11a8c0c179}\label{freertos_8c_aff507c30af3ea31838ce0a11a8c0c179} 
+os\+Static\+Thread\+Def\+\_\+t {\bfseries Sync\+\_\+task\+Control\+Block}
+\item 
+const os\+Thread\+Attr\+\_\+t \mbox{\hyperlink{freertos_8c_a278b548544e849a1109207e2e97cd25a}{Sync\+\_\+task\+\_\+attributes}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\+: Implementation of freertos tasks. 
+
+\begin{DoxyAuthor}{Author}
+\+: Jared Morrison 
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+\+: October 9, 2024 
+\end{DoxyDate}
+\begin{DoxyAttention}{Attention}
+
+\end{DoxyAttention}
+Copyright (c) 2024 STMicroelectronics. All rights reserved.
+
+This software is licensed under terms that can be found in the LICENSE file in the root directory of this software component. If no LICENSE file comes with this software, it is provided AS-\/\+IS. 
+
+\doxysubsection{Function Documentation}
+\Hypertarget{freertos_8c_a4d433aafca8b8d43962af4128cf0e820}\index{freertos.c@{freertos.c}!AUTODEINIT\_init@{AUTODEINIT\_init}}
+\index{AUTODEINIT\_init@{AUTODEINIT\_init}!freertos.c@{freertos.c}}
+\doxysubsubsection{\texorpdfstring{AUTODEINIT\_init()}{AUTODEINIT\_init()}}
+{\footnotesize\ttfamily \label{freertos_8c_a4d433aafca8b8d43962af4128cf0e820} 
+void AUTODEINIT\+\_\+init (\begin{DoxyParamCaption}\item[{void \texorpdfstring{$\ast$}{*}}]{argument}{}\end{DoxyParamCaption})}
+
+
+
+Initializes the AUTODEINIT thread. 
+
+This function waits for AUTODEINIT event flags, disables all voltages from 15V to SDN1, updates the rail monitor, and yields control to other threads in an infinite loop. \Hypertarget{freertos_8c_aa36aac42e45b961692efecd48036c310}\index{freertos.c@{freertos.c}!AUTOINIT\_init@{AUTOINIT\_init}}
+\index{AUTOINIT\_init@{AUTOINIT\_init}!freertos.c@{freertos.c}}
+\doxysubsubsection{\texorpdfstring{AUTOINIT\_init()}{AUTOINIT\_init()}}
+{\footnotesize\ttfamily \label{freertos_8c_aa36aac42e45b961692efecd48036c310} 
+void AUTOINIT\+\_\+init (\begin{DoxyParamCaption}\item[{void \texorpdfstring{$\ast$}{*}}]{argument}{}\end{DoxyParamCaption})}
+
+
+
+Initializes the AUTOINIT thread. 
+
+This function waits for AUTOINIT event flags, enables all voltages from SDN1 to 15V, updates the rail monitor, and yields control to other threads in an infinite loop. \Hypertarget{freertos_8c_a7594dc6f42ed797c97c88068562de9c4}\index{freertos.c@{freertos.c}!ERPA\_init@{ERPA\_init}}
+\index{ERPA\_init@{ERPA\_init}!freertos.c@{freertos.c}}
+\doxysubsubsection{\texorpdfstring{ERPA\_init()}{ERPA\_init()}}
+{\footnotesize\ttfamily \label{freertos_8c_a7594dc6f42ed797c97c88068562de9c4} 
+void ERPA\+\_\+init (\begin{DoxyParamCaption}\item[{void \texorpdfstring{$\ast$}{*}}]{argument}{}\end{DoxyParamCaption})}
+
+
+
+Initializes the ERPA thread. 
+
+This function waits for ERPA event flags, creates an ERPA packet, and yields control to other threads in an infinite loop. \Hypertarget{freertos_8c_a8d36ce2d327909513102b49dcde4e3c3}\index{freertos.c@{freertos.c}!HK\_init@{HK\_init}}
+\index{HK\_init@{HK\_init}!freertos.c@{freertos.c}}
+\doxysubsubsection{\texorpdfstring{HK\_init()}{HK\_init()}}
+{\footnotesize\ttfamily \label{freertos_8c_a8d36ce2d327909513102b49dcde4e3c3} 
+void HK\+\_\+init (\begin{DoxyParamCaption}\item[{void \texorpdfstring{$\ast$}{*}}]{argument}{}\end{DoxyParamCaption})}
+
+
+
+Initializes the HK thread. 
+
+This function waits for HK event flags, creates an HK packet, and yields control to other threads in an infinite loop. \Hypertarget{freertos_8c_a6d9d16eb5ff2a884ecac654323b70750}\index{freertos.c@{freertos.c}!Idle\_init@{Idle\_init}}
+\index{Idle\_init@{Idle\_init}!freertos.c@{freertos.c}}
+\doxysubsubsection{\texorpdfstring{Idle\_init()}{Idle\_init()}}
+{\footnotesize\ttfamily \label{freertos_8c_a6d9d16eb5ff2a884ecac654323b70750} 
+void Idle\+\_\+init (\begin{DoxyParamCaption}\item[{void \texorpdfstring{$\ast$}{*}}]{argument}{}\end{DoxyParamCaption})}
+
+
+
+Initializes the Idle thread. 
+
+This function waits for the IDLE event flag, disables ERPA and HK, stops the DAC, updates the rail monitor, disables all voltages, and yields control to other threads. \Hypertarget{freertos_8c_abade755e13d07c10889ae83143656158}\index{freertos.c@{freertos.c}!MX\_FREERTOS\_Init@{MX\_FREERTOS\_Init}}
+\index{MX\_FREERTOS\_Init@{MX\_FREERTOS\_Init}!freertos.c@{freertos.c}}
+\doxysubsubsection{\texorpdfstring{MX\_FREERTOS\_Init()}{MX\_FREERTOS\_Init()}}
+{\footnotesize\ttfamily \label{freertos_8c_abade755e13d07c10889ae83143656158} 
+void MX\+\_\+\+FREERTOS\+\_\+\+Init (\begin{DoxyParamCaption}\item[{void}]{}{}\end{DoxyParamCaption})}
+
+
+
+Free\+RTOS initialization. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em None} & \\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyRetVals}{Return values}
+{\em None} & \\
+\hline
+\end{DoxyRetVals}
+\Hypertarget{freertos_8c_a337ce00173018ad9f84f8596a6ac9c6e}\index{freertos.c@{freertos.c}!PMT\_init@{PMT\_init}}
+\index{PMT\_init@{PMT\_init}!freertos.c@{freertos.c}}
+\doxysubsubsection{\texorpdfstring{PMT\_init()}{PMT\_init()}}
+{\footnotesize\ttfamily \label{freertos_8c_a337ce00173018ad9f84f8596a6ac9c6e} 
+void PMT\+\_\+init (\begin{DoxyParamCaption}\item[{void \texorpdfstring{$\ast$}{*}}]{argument}{}\end{DoxyParamCaption})}
+
+
+
+Initializes the PMT thread. 
+
+This function waits for PMT event flags, creates a PMT packet, and yields control to other threads in an infinite loop. \Hypertarget{freertos_8c_a08fae4702676c0a76ab3888a0ae5459b}\index{freertos.c@{freertos.c}!Science\_init@{Science\_init}}
+\index{Science\_init@{Science\_init}!freertos.c@{freertos.c}}
+\doxysubsubsection{\texorpdfstring{Science\_init()}{Science\_init()}}
+{\footnotesize\ttfamily \label{freertos_8c_a08fae4702676c0a76ab3888a0ae5459b} 
+void Science\+\_\+init (\begin{DoxyParamCaption}\item[{void \texorpdfstring{$\ast$}{*}}]{argument}{}\end{DoxyParamCaption})}
+
+
+
+Initializes the Science thread. 
+
+This function waits for the SCIENCE event flag, enables all voltages, updates the rail monitor, starts DAC in DMA mode, and resets packet sequence numbers, transitioning to the science mode. \Hypertarget{freertos_8c_a4581840f0511d30abcc7f021ac2497f4}\index{freertos.c@{freertos.c}!STOP\_init@{STOP\_init}}
+\index{STOP\_init@{STOP\_init}!freertos.c@{freertos.c}}
+\doxysubsubsection{\texorpdfstring{STOP\_init()}{STOP\_init()}}
+{\footnotesize\ttfamily \label{freertos_8c_a4581840f0511d30abcc7f021ac2497f4} 
+void STOP\+\_\+init (\begin{DoxyParamCaption}\item[{void \texorpdfstring{$\ast$}{*}}]{argument}{}\end{DoxyParamCaption})}
+
+
+
+Initializes the STOP thread. 
+
+This function waits for the STOP event flag, clears it, sets the IDLE flag, and enters stop mode when idle. \Hypertarget{freertos_8c_a4d4e9a8a1761bb340a1d8ab0c8ad1895}\index{freertos.c@{freertos.c}!Sync\_init@{Sync\_init}}
+\index{Sync\_init@{Sync\_init}!freertos.c@{freertos.c}}
+\doxysubsubsection{\texorpdfstring{Sync\_init()}{Sync\_init()}}
+{\footnotesize\ttfamily \label{freertos_8c_a4d4e9a8a1761bb340a1d8ab0c8ad1895} 
+void Sync\+\_\+init (\begin{DoxyParamCaption}\item[{void \texorpdfstring{$\ast$}{*}}]{argument}{}\end{DoxyParamCaption})}
+
+
+
+Initializes the Sync thread. 
+
+This function waits for the SYNC event flag, sends an acknowledgment, waits for a specific key value to be received, calibrates the RTC, and handles UART communication for error counting and reset cause. \Hypertarget{freertos_8c_ac8c01aba361e85357de8c66aceb4c544}\index{freertos.c@{freertos.c}!Voltage\_Monitor\_init@{Voltage\_Monitor\_init}}
+\index{Voltage\_Monitor\_init@{Voltage\_Monitor\_init}!freertos.c@{freertos.c}}
+\doxysubsubsection{\texorpdfstring{Voltage\_Monitor\_init()}{Voltage\_Monitor\_init()}}
+{\footnotesize\ttfamily \label{freertos_8c_ac8c01aba361e85357de8c66aceb4c544} 
+void Voltage\+\_\+\+Monitor\+\_\+init (\begin{DoxyParamCaption}\item[{void \texorpdfstring{$\ast$}{*}}]{argument}{}\end{DoxyParamCaption})}
+
+
+
+Initializes the Voltage Monitor thread. 
+
+This function waits for voltage monitor event flags, sets the rail monitor, and checks rail status. If rails are out of bounds, it transitions to idle mode before returning to science mode. 
+
+\doxysubsection{Variable Documentation}
+\Hypertarget{freertos_8c_ad25d16097aae6fbf47c6689312cdbb1b}\index{freertos.c@{freertos.c}!AUTODEINIT\_task\_attributes@{AUTODEINIT\_task\_attributes}}
+\index{AUTODEINIT\_task\_attributes@{AUTODEINIT\_task\_attributes}!freertos.c@{freertos.c}}
+\doxysubsubsection{\texorpdfstring{AUTODEINIT\_task\_attributes}{AUTODEINIT\_task\_attributes}}
+{\footnotesize\ttfamily \label{freertos_8c_ad25d16097aae6fbf47c6689312cdbb1b} 
+const os\+Thread\+Attr\+\_\+t AUTODEINIT\+\_\+task\+\_\+attributes}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{=\ \{}
+\DoxyCodeLine{\ \ .name\ =\ \textcolor{stringliteral}{"{}AUTODEINIT\_task"{}},}
+\DoxyCodeLine{\ \ .cb\_mem\ =\ \&AUTODEINIT\_taskControlBlock,}
+\DoxyCodeLine{\ \ .cb\_size\ =\ \textcolor{keyword}{sizeof}(AUTODEINIT\_taskControlBlock),}
+\DoxyCodeLine{\ \ .stack\_mem\ =\ \&AUTODEINIT\_taskBuffer[0],}
+\DoxyCodeLine{\ \ .stack\_size\ =\ \textcolor{keyword}{sizeof}(AUTODEINIT\_taskBuffer),}
+\DoxyCodeLine{\ \ .priority\ =\ (osPriority\_t)\ osPriorityNormal,}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+\Hypertarget{freertos_8c_a85105200b62caf4623cb83c31534dd10}\index{freertos.c@{freertos.c}!AUTOINIT\_task\_attributes@{AUTOINIT\_task\_attributes}}
+\index{AUTOINIT\_task\_attributes@{AUTOINIT\_task\_attributes}!freertos.c@{freertos.c}}
+\doxysubsubsection{\texorpdfstring{AUTOINIT\_task\_attributes}{AUTOINIT\_task\_attributes}}
+{\footnotesize\ttfamily \label{freertos_8c_a85105200b62caf4623cb83c31534dd10} 
+const os\+Thread\+Attr\+\_\+t AUTOINIT\+\_\+task\+\_\+attributes}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{=\ \{}
+\DoxyCodeLine{\ \ .name\ =\ \textcolor{stringliteral}{"{}AUTOINIT\_task"{}},}
+\DoxyCodeLine{\ \ .cb\_mem\ =\ \&AUTOINIT\_taskControlBlock,}
+\DoxyCodeLine{\ \ .cb\_size\ =\ \textcolor{keyword}{sizeof}(AUTOINIT\_taskControlBlock),}
+\DoxyCodeLine{\ \ .stack\_mem\ =\ \&AUTOINIT\_taskBuffer[0],}
+\DoxyCodeLine{\ \ .stack\_size\ =\ \textcolor{keyword}{sizeof}(AUTOINIT\_taskBuffer),}
+\DoxyCodeLine{\ \ .priority\ =\ (osPriority\_t)\ osPriorityNormal,}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+\Hypertarget{freertos_8c_ac9580a41c5ba189ea2adb7a55186e1bd}\index{freertos.c@{freertos.c}!ERPA\_task\_attributes@{ERPA\_task\_attributes}}
+\index{ERPA\_task\_attributes@{ERPA\_task\_attributes}!freertos.c@{freertos.c}}
+\doxysubsubsection{\texorpdfstring{ERPA\_task\_attributes}{ERPA\_task\_attributes}}
+{\footnotesize\ttfamily \label{freertos_8c_ac9580a41c5ba189ea2adb7a55186e1bd} 
+const os\+Thread\+Attr\+\_\+t ERPA\+\_\+task\+\_\+attributes}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{=\ \{}
+\DoxyCodeLine{\ \ .name\ =\ \textcolor{stringliteral}{"{}ERPA\_task"{}},}
+\DoxyCodeLine{\ \ .cb\_mem\ =\ \&ERPA\_taskControlBlock,}
+\DoxyCodeLine{\ \ .cb\_size\ =\ \textcolor{keyword}{sizeof}(ERPA\_taskControlBlock),}
+\DoxyCodeLine{\ \ .stack\_mem\ =\ \&ERPA\_taskBuffer[0],}
+\DoxyCodeLine{\ \ .stack\_size\ =\ \textcolor{keyword}{sizeof}(ERPA\_taskBuffer),}
+\DoxyCodeLine{\ \ .priority\ =\ (osPriority\_t)\ osPriorityRealtime7,}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+\Hypertarget{freertos_8c_ac01d5151416e4a83683b76e5e9c09c18}\index{freertos.c@{freertos.c}!HK\_task\_attributes@{HK\_task\_attributes}}
+\index{HK\_task\_attributes@{HK\_task\_attributes}!freertos.c@{freertos.c}}
+\doxysubsubsection{\texorpdfstring{HK\_task\_attributes}{HK\_task\_attributes}}
+{\footnotesize\ttfamily \label{freertos_8c_ac01d5151416e4a83683b76e5e9c09c18} 
+const os\+Thread\+Attr\+\_\+t HK\+\_\+task\+\_\+attributes}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{=\ \{}
+\DoxyCodeLine{\ \ .name\ =\ \textcolor{stringliteral}{"{}HK\_task"{}},}
+\DoxyCodeLine{\ \ .cb\_mem\ =\ \&HK\_taskControlBlock,}
+\DoxyCodeLine{\ \ .cb\_size\ =\ \textcolor{keyword}{sizeof}(HK\_taskControlBlock),}
+\DoxyCodeLine{\ \ .stack\_mem\ =\ \&HK\_taskBuffer[0],}
+\DoxyCodeLine{\ \ .stack\_size\ =\ \textcolor{keyword}{sizeof}(HK\_taskBuffer),}
+\DoxyCodeLine{\ \ .priority\ =\ (osPriority\_t)\ osPriorityRealtime4,}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+\Hypertarget{freertos_8c_a3a8e8577954ee02776b00bad486790a7}\index{freertos.c@{freertos.c}!Idle\_task\_attributes@{Idle\_task\_attributes}}
+\index{Idle\_task\_attributes@{Idle\_task\_attributes}!freertos.c@{freertos.c}}
+\doxysubsubsection{\texorpdfstring{Idle\_task\_attributes}{Idle\_task\_attributes}}
+{\footnotesize\ttfamily \label{freertos_8c_a3a8e8577954ee02776b00bad486790a7} 
+const os\+Thread\+Attr\+\_\+t Idle\+\_\+task\+\_\+attributes}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{=\ \{}
+\DoxyCodeLine{\ \ .name\ =\ \textcolor{stringliteral}{"{}Idle\_task"{}},}
+\DoxyCodeLine{\ \ .cb\_mem\ =\ \&Idle\_taskControlBlock,}
+\DoxyCodeLine{\ \ .cb\_size\ =\ \textcolor{keyword}{sizeof}(Idle\_taskControlBlock),}
+\DoxyCodeLine{\ \ .stack\_mem\ =\ \&Idle\_taskBuffer[0],}
+\DoxyCodeLine{\ \ .stack\_size\ =\ \textcolor{keyword}{sizeof}(Idle\_taskBuffer),}
+\DoxyCodeLine{\ \ .priority\ =\ (osPriority\_t)\ osPriorityRealtime7,}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+\Hypertarget{freertos_8c_a11620c10ef7eb1257cfaab7045d0004d}\index{freertos.c@{freertos.c}!PMT\_task\_attributes@{PMT\_task\_attributes}}
+\index{PMT\_task\_attributes@{PMT\_task\_attributes}!freertos.c@{freertos.c}}
+\doxysubsubsection{\texorpdfstring{PMT\_task\_attributes}{PMT\_task\_attributes}}
+{\footnotesize\ttfamily \label{freertos_8c_a11620c10ef7eb1257cfaab7045d0004d} 
+const os\+Thread\+Attr\+\_\+t PMT\+\_\+task\+\_\+attributes}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{=\ \{}
+\DoxyCodeLine{\ \ .name\ =\ \textcolor{stringliteral}{"{}PMT\_task"{}},}
+\DoxyCodeLine{\ \ .cb\_mem\ =\ \&PMT\_taskControlBlock,}
+\DoxyCodeLine{\ \ .cb\_size\ =\ \textcolor{keyword}{sizeof}(PMT\_taskControlBlock),}
+\DoxyCodeLine{\ \ .stack\_mem\ =\ \&PMT\_taskBuffer[0],}
+\DoxyCodeLine{\ \ .stack\_size\ =\ \textcolor{keyword}{sizeof}(PMT\_taskBuffer),}
+\DoxyCodeLine{\ \ .priority\ =\ (osPriority\_t)\ osPriorityRealtime6,}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+\Hypertarget{freertos_8c_ac2c5dd5c215a9d99c562473791f79b97}\index{freertos.c@{freertos.c}!Science\_task\_attributes@{Science\_task\_attributes}}
+\index{Science\_task\_attributes@{Science\_task\_attributes}!freertos.c@{freertos.c}}
+\doxysubsubsection{\texorpdfstring{Science\_task\_attributes}{Science\_task\_attributes}}
+{\footnotesize\ttfamily \label{freertos_8c_ac2c5dd5c215a9d99c562473791f79b97} 
+const os\+Thread\+Attr\+\_\+t Science\+\_\+task\+\_\+attributes}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{=\ \{}
+\DoxyCodeLine{\ \ .name\ =\ \textcolor{stringliteral}{"{}Science\_task"{}},}
+\DoxyCodeLine{\ \ .cb\_mem\ =\ \&Science\_taskControlBlock,}
+\DoxyCodeLine{\ \ .cb\_size\ =\ \textcolor{keyword}{sizeof}(Science\_taskControlBlock),}
+\DoxyCodeLine{\ \ .stack\_mem\ =\ \&Science\_taskBuffer[0],}
+\DoxyCodeLine{\ \ .stack\_size\ =\ \textcolor{keyword}{sizeof}(Science\_taskBuffer),}
+\DoxyCodeLine{\ \ .priority\ =\ (osPriority\_t)\ osPriorityRealtime7,}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+\Hypertarget{freertos_8c_a4edf68a609e02e180215197e624d0db9}\index{freertos.c@{freertos.c}!STOP\_task\_attributes@{STOP\_task\_attributes}}
+\index{STOP\_task\_attributes@{STOP\_task\_attributes}!freertos.c@{freertos.c}}
+\doxysubsubsection{\texorpdfstring{STOP\_task\_attributes}{STOP\_task\_attributes}}
+{\footnotesize\ttfamily \label{freertos_8c_a4edf68a609e02e180215197e624d0db9} 
+const os\+Thread\+Attr\+\_\+t STOP\+\_\+task\+\_\+attributes}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{=\ \{}
+\DoxyCodeLine{\ \ .name\ =\ \textcolor{stringliteral}{"{}STOP\_task"{}},}
+\DoxyCodeLine{\ \ .cb\_mem\ =\ \&STOP\_taskControlBlock,}
+\DoxyCodeLine{\ \ .cb\_size\ =\ \textcolor{keyword}{sizeof}(STOP\_taskControlBlock),}
+\DoxyCodeLine{\ \ .stack\_mem\ =\ \&STOP\_taskBuffer[0],}
+\DoxyCodeLine{\ \ .stack\_size\ =\ \textcolor{keyword}{sizeof}(STOP\_taskBuffer),}
+\DoxyCodeLine{\ \ .priority\ =\ (osPriority\_t)\ osPriorityNormal,}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+\Hypertarget{freertos_8c_a278b548544e849a1109207e2e97cd25a}\index{freertos.c@{freertos.c}!Sync\_task\_attributes@{Sync\_task\_attributes}}
+\index{Sync\_task\_attributes@{Sync\_task\_attributes}!freertos.c@{freertos.c}}
+\doxysubsubsection{\texorpdfstring{Sync\_task\_attributes}{Sync\_task\_attributes}}
+{\footnotesize\ttfamily \label{freertos_8c_a278b548544e849a1109207e2e97cd25a} 
+const os\+Thread\+Attr\+\_\+t Sync\+\_\+task\+\_\+attributes}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{=\ \{}
+\DoxyCodeLine{\ \ .name\ =\ \textcolor{stringliteral}{"{}Sync\_task"{}},}
+\DoxyCodeLine{\ \ .cb\_mem\ =\ \&Sync\_taskControlBlock,}
+\DoxyCodeLine{\ \ .cb\_size\ =\ \textcolor{keyword}{sizeof}(Sync\_taskControlBlock),}
+\DoxyCodeLine{\ \ .stack\_mem\ =\ \&Sync\_taskBuffer[0],}
+\DoxyCodeLine{\ \ .stack\_size\ =\ \textcolor{keyword}{sizeof}(Sync\_taskBuffer),}
+\DoxyCodeLine{\ \ .priority\ =\ (osPriority\_t)\ osPriorityNormal,}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+\Hypertarget{freertos_8c_a96a3780cd543aa30b92a92d899fab568}\index{freertos.c@{freertos.c}!Voltage\_Monitor\_attributes@{Voltage\_Monitor\_attributes}}
+\index{Voltage\_Monitor\_attributes@{Voltage\_Monitor\_attributes}!freertos.c@{freertos.c}}
+\doxysubsubsection{\texorpdfstring{Voltage\_Monitor\_attributes}{Voltage\_Monitor\_attributes}}
+{\footnotesize\ttfamily \label{freertos_8c_a96a3780cd543aa30b92a92d899fab568} 
+const os\+Thread\+Attr\+\_\+t Voltage\+\_\+\+Monitor\+\_\+attributes}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{=\ \{}
+\DoxyCodeLine{\ \ .name\ =\ \textcolor{stringliteral}{"{}Voltage\_Monitor"{}},}
+\DoxyCodeLine{\ \ .cb\_mem\ =\ \&Voltage\_MonitorControlBlock,}
+\DoxyCodeLine{\ \ .cb\_size\ =\ \textcolor{keyword}{sizeof}(Voltage\_MonitorControlBlock),}
+\DoxyCodeLine{\ \ .stack\_mem\ =\ \&Voltage\_MonitorBuffer[0],}
+\DoxyCodeLine{\ \ .stack\_size\ =\ \textcolor{keyword}{sizeof}(Voltage\_MonitorBuffer),}
+\DoxyCodeLine{\ \ .priority\ =\ (osPriority\_t)\ osPriorityRealtime5,}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}

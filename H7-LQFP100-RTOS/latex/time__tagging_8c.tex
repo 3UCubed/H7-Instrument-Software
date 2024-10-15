@@ -1,0 +1,119 @@
+\doxysection{Core/src/time\+\_\+tagging.c File Reference}
+\hypertarget{time__tagging_8c}{}\label{time__tagging_8c}\index{Core/src/time\_tagging.c@{Core/src/time\_tagging.c}}
+
+
+\+: Implementation for all time tagging related functions  
+
+
+{\ttfamily \#include "{}time\+\_\+tagging.\+h"{}}\newline
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{time__tagging_8c_a7ee9fd8d28937979aa82e50d91826950}\label{time__tagging_8c_a7ee9fd8d28937979aa82e50d91826950} 
+\#define {\bfseries UNIX\+\_\+\+TIME\+\_\+\+CONST}~(719561U)
+\item 
+\Hypertarget{time__tagging_8c_a77bc8ab95a7481f39605a09a546b6b5e}\label{time__tagging_8c_a77bc8ab95a7481f39605a09a546b6b5e} 
+\#define {\bfseries SECONDS\+\_\+\+IN\+\_\+1\+\_\+\+HOUR}~(3600U)
+\item 
+\Hypertarget{time__tagging_8c_a95c0931f5b10c8abc3efa61d6c0967ca}\label{time__tagging_8c_a95c0931f5b10c8abc3efa61d6c0967ca} 
+\#define {\bfseries SECONDS\+\_\+\+IN\+\_\+1\+\_\+\+MIN}~(60U)
+\item 
+\Hypertarget{time__tagging_8c_ae3861e48add667ff87e0212632fc6c19}\label{time__tagging_8c_ae3861e48add667ff87e0212632fc6c19} 
+\#define {\bfseries DAYS\+\_\+\+IN\+\_\+\+SECONDS}~(24U \texorpdfstring{$\ast$}{*} SECONDS\+\_\+\+IN\+\_\+1\+\_\+\+HOUR)
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+HAL\+\_\+\+Status\+Type\+Def \mbox{\hyperlink{time__tagging_8c_a02fe9cb2e022f600220884b83090e496}{RTC\+\_\+\+Set\+Time}} (RTC\+\_\+\+Handle\+Type\+Def \texorpdfstring{$\ast$}{*}hrtc, RTC\+\_\+\+Time\+Type\+Def \texorpdfstring{$\ast$}{*}s\+Time, uint32\+\_\+t Format)
+\begin{DoxyCompactList}\small\item\em Sets the time for the RTC. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{time__tagging_8c_ae0ddbac79bae3c5f0508df7d50196177}{get\+\_\+uptime}} (uint8\+\_\+t \texorpdfstring{$\ast$}{*}buffer)
+\begin{DoxyCompactList}\small\item\em Gets the system uptime and stores it in a buffer. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{time__tagging_8c_a9380ddfdb047510c2d91f0a4aa8741f2}{get\+\_\+unix\+\_\+time}} (uint8\+\_\+t \texorpdfstring{$\ast$}{*}buffer)
+\begin{DoxyCompactList}\small\item\em Retrieves the current Unix time and milliseconds, storing them in a buffer. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{time__tagging_8c_a41922de9acb8bdc558a1c769d438d32d}{calibrate\+RTC}} (uint8\+\_\+t \texorpdfstring{$\ast$}{*}buffer)
+\begin{DoxyCompactList}\small\item\em Calibrates the RTC with the specified date and time values. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\+: Implementation for all time tagging related functions 
+
+\begin{DoxyAuthor}{Author}
+\+: Jared Morrison 
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+\+: October 9, 2024  
+\end{DoxyDate}
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{time__tagging_8c_a41922de9acb8bdc558a1c769d438d32d}\index{time\_tagging.c@{time\_tagging.c}!calibrateRTC@{calibrateRTC}}
+\index{calibrateRTC@{calibrateRTC}!time\_tagging.c@{time\_tagging.c}}
+\doxysubsubsection{\texorpdfstring{calibrateRTC()}{calibrateRTC()}}
+{\footnotesize\ttfamily \label{time__tagging_8c_a41922de9acb8bdc558a1c769d438d32d} 
+void calibrate\+RTC (\begin{DoxyParamCaption}\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{buffer}{}\end{DoxyParamCaption})}
+
+
+
+Calibrates the RTC with the specified date and time values. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em buffer} & Pointer to a buffer containing the date and time values in the following order\+: \mbox{[}0\mbox{]} = 0x\+FF (ignored) \mbox{[}1\mbox{]} = Year \mbox{[}2\mbox{]} = Month \mbox{[}3\mbox{]} = Day \mbox{[}4\mbox{]} = Hour \mbox{[}5\mbox{]} = Minute \mbox{[}6\mbox{]} = Second \mbox{[}7\mbox{]} = ms MSB \mbox{[}8\mbox{]} = ms LSB \\
+\hline
+\end{DoxyParams}
+\Hypertarget{time__tagging_8c_a9380ddfdb047510c2d91f0a4aa8741f2}\index{time\_tagging.c@{time\_tagging.c}!get\_unix\_time@{get\_unix\_time}}
+\index{get\_unix\_time@{get\_unix\_time}!time\_tagging.c@{time\_tagging.c}}
+\doxysubsubsection{\texorpdfstring{get\_unix\_time()}{get\_unix\_time()}}
+{\footnotesize\ttfamily \label{time__tagging_8c_a9380ddfdb047510c2d91f0a4aa8741f2} 
+void get\+\_\+unix\+\_\+time (\begin{DoxyParamCaption}\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{buffer}{}\end{DoxyParamCaption})}
+
+
+
+Retrieves the current Unix time and milliseconds, storing them in a buffer. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em buffer} & Pointer to a buffer where the Unix time (4 bytes) and milliseconds (2 bytes) will be stored. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{time__tagging_8c_ae0ddbac79bae3c5f0508df7d50196177}\index{time\_tagging.c@{time\_tagging.c}!get\_uptime@{get\_uptime}}
+\index{get\_uptime@{get\_uptime}!time\_tagging.c@{time\_tagging.c}}
+\doxysubsubsection{\texorpdfstring{get\_uptime()}{get\_uptime()}}
+{\footnotesize\ttfamily \label{time__tagging_8c_ae0ddbac79bae3c5f0508df7d50196177} 
+void get\+\_\+uptime (\begin{DoxyParamCaption}\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{buffer}{}\end{DoxyParamCaption})}
+
+
+
+Gets the system uptime and stores it in a buffer. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em buffer} & Pointer to a buffer where the uptime will be stored as four bytes. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{time__tagging_8c_a02fe9cb2e022f600220884b83090e496}\index{time\_tagging.c@{time\_tagging.c}!RTC\_SetTime@{RTC\_SetTime}}
+\index{RTC\_SetTime@{RTC\_SetTime}!time\_tagging.c@{time\_tagging.c}}
+\doxysubsubsection{\texorpdfstring{RTC\_SetTime()}{RTC\_SetTime()}}
+{\footnotesize\ttfamily \label{time__tagging_8c_a02fe9cb2e022f600220884b83090e496} 
+HAL\+\_\+\+Status\+Type\+Def RTC\+\_\+\+Set\+Time (\begin{DoxyParamCaption}\item[{RTC\+\_\+\+Handle\+Type\+Def \texorpdfstring{$\ast$}{*}}]{hrtc}{, }\item[{RTC\+\_\+\+Time\+Type\+Def \texorpdfstring{$\ast$}{*}}]{s\+Time}{, }\item[{uint32\+\_\+t}]{Format}{}\end{DoxyParamCaption})}
+
+
+
+Sets the time for the RTC. 
+
+This function configures the time in the RTC peripheral. The time is set in 24-\/hour format.
+
+
+\begin{DoxyParams}{Parameters}
+{\em hrtc} & Pointer to a RTC\+\_\+\+Handle\+Type\+Def structure that contains the configuration information for the specified RTC. \\
+\hline
+{\em s\+Time} & Pointer to a RTC\+\_\+\+Time\+Type\+Def structure that contains the time values to be set. \\
+\hline
+{\em Format} & Specifies the format of the time (24-\/hour or 12-\/hour).\\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyRetVals}{Return values}
+{\em HAL\+\_\+\+Status\+Type\+Def} & HAL\+\_\+\+OK on success, HAL\+\_\+\+ERROR on failure. \\
+\hline
+\end{DoxyRetVals}

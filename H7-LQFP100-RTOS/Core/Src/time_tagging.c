@@ -1,25 +1,37 @@
-/*
- * time.c
- *
- *  Created on: Aug 6, 2024
- *      Author: 3ucubed
+/**
+ ******************************************************************************
+ * @file           : time_tagging.c
+ * @author 		   : Jared Morrison
+ * @date	 	   : October 9, 2024
+ * @brief          : Implementation for all time tagging related functions
+ ******************************************************************************
  */
 
 #include "time_tagging.h"
 
-void get_uptime(uint8_t *buffer) {
+HAL_StatusTypeDef RTC_SetTime(RTC_HandleTypeDef *hrtc, RTC_TimeTypeDef *sTime, uint32_t Format);
+
+/**
+ * @brief Gets the system uptime and stores it in a buffer.
+ *
+ * @param buffer Pointer to a buffer where the uptime will be stored as four bytes.
+ */
+void get_uptime(uint8_t *buffer)
+{
 	uint32_t uptime = 0;
 	uint32_t ms = uptime_millis;
 	uint32_t st = SysTick->VAL;
 
-	// Did uptime_millis rollover while reading SysTick->VAL?
-	if (ms != uptime_millis) {
+	// Ensuring uptime_millis hasn't rolled over
+	if (ms != uptime_millis)
+	{
 		ms = uptime_millis;
 		st = SysTick->VAL;
 	}
 	uptime = ms * 1000 - st / ((SysTick->LOAD + 1) / 1000);
 
-	if (ms == 0){
+	if (ms == 0)
+	{
 		uptime = 0;
 	}
 
@@ -29,7 +41,13 @@ void get_uptime(uint8_t *buffer) {
 	buffer[3] = uptime & 0xFF;
 }
 
-void get_unix_time(uint8_t* buffer) {
+/**
+ * @brief Retrieves the current Unix time and milliseconds, storing them in a buffer.
+ *
+ * @param buffer Pointer to a buffer where the Unix time (4 bytes) and milliseconds (2 bytes) will be stored.
+ */
+void get_unix_time(uint8_t* buffer)
+{
 	#define UNIX_TIME_CONST   (719561U)
 	#define SECONDS_IN_1_HOUR (3600U)
 	#define SECONDS_IN_1_MIN  (60U)
@@ -46,7 +64,6 @@ void get_unix_time(uint8_t* buffer) {
 	uint8_t m;
 	uint8_t d;
 	uint64_t unix_tm_val = 0;
-
 
 	y = current_date.Year + 2000;
 	m = current_date.Month;
@@ -76,10 +93,22 @@ void get_unix_time(uint8_t* buffer) {
 	buffer[5] = milliseconds & 0xFF;
 }
 
-void calibrateRTC(uint8_t *buffer) {
-	//    [0]     [1]     [2]     [3]     [4]     [5]     [6]     [7]     [8]
-	//    0xFF    Year   Month    Day     Hour   Minute  Second  ms MSB  ms LSB
-
+/**
+ * @brief Calibrates the RTC with the specified date and time values.
+ *
+ * @param buffer Pointer to a buffer containing the date and time values in the following order:
+ *               [0] = 0xFF (ignored)
+ *               [1] = Year
+ *               [2] = Month
+ *               [3] = Day
+ *               [4] = Hour
+ *               [5] = Minute
+ *               [6] = Second
+ *               [7] = ms MSB
+ *               [8] = ms LSB
+ */
+void calibrateRTC(uint8_t *buffer)
+{
 	RTC_DateTypeDef date_struct;
 	RTC_TimeTypeDef time_struct;
 	uint8_t year = buffer[1];
@@ -102,32 +131,42 @@ void calibrateRTC(uint8_t *buffer) {
 	HAL_StatusTypeDef status;
 
 	status = HAL_RTC_SetDate(&hrtc, &date_struct, RTC_FORMAT_BIN);
-	if (status != HAL_OK) {
+	if (status != HAL_OK)
+	{
 		Error_Handler();
 	}
 	RTC_SetTime(&hrtc, &time_struct, RTC_FORMAT_BIN);
 }
 
-
-HAL_StatusTypeDef RTC_SetTime(RTC_HandleTypeDef *hrtc, RTC_TimeTypeDef *sTime,
-		uint32_t Format) {
+/**
+ * @brief Sets the time for the RTC.
+ *
+ * This function configures the time in the RTC peripheral. The time is set in 24-hour format.
+ *
+ * @param hrtc Pointer to a RTC_HandleTypeDef structure that contains
+ *              the configuration information for the specified RTC.
+ * @param sTime Pointer to a RTC_TimeTypeDef structure that contains
+ *               the time values to be set.
+ * @param Format Specifies the format of the time (24-hour or 12-hour).
+ *
+ * @retval HAL_StatusTypeDef HAL_OK on success, HAL_ERROR on failure.
+ */
+HAL_StatusTypeDef RTC_SetTime(RTC_HandleTypeDef *hrtc, RTC_TimeTypeDef *sTime, uint32_t Format)
+{
 	uint32_t tmpreg;
 	HAL_StatusTypeDef status;
 
-	/* Process Locked */
 	__HAL_LOCK(hrtc);
 
 	hrtc->State = HAL_RTC_STATE_BUSY;
 
-	/* Disable the write protection for RTC registers */
 	__HAL_RTC_WRITEPROTECTION_DISABLE(hrtc);
-	/* Enter Initialization mode */
-	status = RTC_EnterInitMode(hrtc);
-	if (status == HAL_OK) {
 
+	status = RTC_EnterInitMode(hrtc);
+	if (status == HAL_OK)
+	{
 		sTime->TimeFormat = 0x00U;
 		assert_param(IS_RTC_HOUR24(sTime->Hours));
-
 		assert_param(IS_RTC_MINUTES(sTime->Minutes));
 		assert_param(IS_RTC_SECONDS(sTime->Seconds));
 
@@ -137,24 +176,20 @@ HAL_StatusTypeDef RTC_SetTime(RTC_HandleTypeDef *hrtc, RTC_TimeTypeDef *sTime,
 				| ((uint32_t) RTC_ByteToBcd2(sTime->Seconds) << RTC_TR_SU_Pos)
 				| (((uint32_t) sTime->TimeFormat) << RTC_TR_PM_Pos));
 
-		/* Set the RTC_TR register */
 		hrtc->Instance->TR = (uint32_t) (tmpreg & RTC_TR_RESERVED_MASK);
 
-		/* Exit Initialization mode */
 		status = RTC_ExitInitMode(hrtc);
 	}
 
-	/* Enable the write protection for RTC registers */
 	__HAL_RTC_WRITEPROTECTION_ENABLE(hrtc);
 
-	if (status == HAL_OK) {
+	if (status == HAL_OK)
+	{
 		hrtc->State = HAL_RTC_STATE_READY;
 	}
 
-	/* Process Unlocked */
 	__HAL_UNLOCK(hrtc);
 	return status;
-
 }
 
 

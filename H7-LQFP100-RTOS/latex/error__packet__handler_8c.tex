@@ -2,28 +2,62 @@
 \hypertarget{error__packet__handler_8c}{}\label{error__packet__handler_8c}\index{Core/src/error\_packet\_handler.c@{Core/src/error\_packet\_handler.c}}
 
 
-Implementation of error packet handling.  
+\+: Handles all errors in the system. If the built in HAL error handler is called by a peripheral, it redirects here.  
 
 
 {\ttfamily \#include "{}error\+\_\+packet\+\_\+handler.\+h"{}}\newline
 {\ttfamily \#include "{}usart.\+h"{}}\newline
 {\ttfamily \#include "{}main.\+h"{}}\newline
 {\ttfamily \#include "{}eeprom.\+h"{}}\newline
+{\ttfamily \#include "{}tim.\+h"{}}\newline
+{\ttfamily \#include "{}dac.\+h"{}}\newline
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{error__packet__handler_8c_aa1f19f43a9b6f10f9118a4eaeeed3a9b}\label{error__packet__handler_8c_aa1f19f43a9b6f10f9118a4eaeeed3a9b} 
+\#define {\bfseries ERROR\+\_\+\+COUNTER\+\_\+\+PACKET\+\_\+\+SIZE}~60
+\item 
+\Hypertarget{error__packet__handler_8c_a314adc7f17b903d5fcee7b6e6f136fef}\label{error__packet__handler_8c_a314adc7f17b903d5fcee7b6e6f136fef} 
+\#define {\bfseries PREV\+\_\+\+ERROR\+\_\+\+PACKET\+\_\+\+SIZE}~4
+\item 
+\Hypertarget{error__packet__handler_8c_a4916d7a7342fb91d35cbacc18d0ecda4}\label{error__packet__handler_8c_a4916d7a7342fb91d35cbacc18d0ecda4} 
+\#define {\bfseries CURRENT\+\_\+\+ERROR\+\_\+\+PACKET\+\_\+\+SIZE}~10
+\item 
+\Hypertarget{error__packet__handler_8c_aa1299c054dfc47b08080b41179de6f86}\label{error__packet__handler_8c_aa1299c054dfc47b08080b41179de6f86} 
+\#define {\bfseries JUNK\+\_\+\+PACKET\+\_\+\+SIZE}~1024
+\item 
+\Hypertarget{error__packet__handler_8c_a4464e3c090618077c1d99491cd415a45}\label{error__packet__handler_8c_a4464e3c090618077c1d99491cd415a45} 
+\#define {\bfseries ERROR\+\_\+\+COUNTER\+\_\+\+PACKET\+\_\+\+SYNC}~0x\+CC
+\item 
+\Hypertarget{error__packet__handler_8c_a703c8525e474924698f930d7b0a7eda9}\label{error__packet__handler_8c_a703c8525e474924698f930d7b0a7eda9} 
+\#define {\bfseries PREV\+\_\+\+ERROR\+\_\+\+PACKET\+\_\+\+SYNC}~0x\+AA
+\item 
+\Hypertarget{error__packet__handler_8c_adc2a675007e5eb548d11e2c39626db75}\label{error__packet__handler_8c_adc2a675007e5eb548d11e2c39626db75} 
+\#define {\bfseries CURRENT\+\_\+\+ERROR\+\_\+\+PACKET\+\_\+\+SYNC}~0x\+BB
+\item 
+\Hypertarget{error__packet__handler_8c_ac7256ef0fd7e13035be515a15079a280}\label{error__packet__handler_8c_ac7256ef0fd7e13035be515a15079a280} 
+\#define {\bfseries NUM\+\_\+\+ERROR\+\_\+\+COUNTERS}~29
+\item 
+\Hypertarget{error__packet__handler_8c_aa9c2e32d7ef25bf64345c5f4b5038493}\label{error__packet__handler_8c_aa9c2e32d7ef25bf64345c5f4b5038493} 
+\#define {\bfseries PREV\+\_\+\+ERROR\+\_\+\+CATEGORY\+\_\+\+INDEX}~29
+\item 
+\Hypertarget{error__packet__handler_8c_a00b39108de07c4082764d5a4284bd10b}\label{error__packet__handler_8c_a00b39108de07c4082764d5a4284bd10b} 
+\#define {\bfseries PREV\+\_\+\+ERROR\+\_\+\+DETAIL\+\_\+\+INDEX}~30
+\end{DoxyCompactItemize}
 \doxysubsubsection*{Functions}
 \begin{DoxyCompactItemize}
 \item 
-void \mbox{\hyperlink{error__packet__handler_8c_a8407dc8a2dc2749fc2a58460320c6195}{handle\+\_\+error}} (ERROR\+\_\+\+STRUCT error)
-\begin{DoxyCompactList}\small\item\em Handles all errors in the system. \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{error__packet__handler_8c_a2de3b1d11097ae22d07e6b96f3278cad}{error\+\_\+counter\+\_\+init}} ()
-\item 
+\Hypertarget{error__packet__handler_8c_a2a595643a86dbbc243e7213e64b16b11}\label{error__packet__handler_8c_a2a595643a86dbbc243e7213e64b16b11} 
+void {\bfseries emergency\+\_\+shutdown} ()
+\begin{DoxyCompactList}\small\item\em Initiates an emergency shutdown of the system. Disables timers, DAC, rail monitoring, and all power supply voltages, setting the system to idle. \end{DoxyCompactList}\item 
+\Hypertarget{error__packet__handler_8c_aa15b7db23a8dc3e9f9104dceb73231e9}\label{error__packet__handler_8c_aa15b7db23a8dc3e9f9104dceb73231e9} 
+void {\bfseries flash\+\_\+mass\+\_\+erase} ()
+\begin{DoxyCompactList}\small\item\em Performs a mass erase of Flash memory. Unlocks Flash and erases all sectors in Bank 2, handling errors if the erase fails. \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{error__packet__handler_8c_a26dea563992120d994e008ed7b3afaeb}{increment\+\_\+error\+\_\+counter}} (ERROR\+\_\+\+STRUCT error)
-\begin{DoxyCompactList}\small\item\em Increments the error counter for a given error, and updates the variable in the EE. \end{DoxyCompactList}\item 
+\begin{DoxyCompactList}\small\item\em Increments the error counters for the specified error. Updates both the category and detail counters and saves the updated values. \end{DoxyCompactList}\item 
 \Hypertarget{error__packet__handler_8c_a52864e5e29f01761e5f96f11018582cb}\label{error__packet__handler_8c_a52864e5e29f01761e5f96f11018582cb} 
 void {\bfseries update\+\_\+error\+\_\+counter} ()
 \begin{DoxyCompactList}\small\item\em Writes the contents of local\+\_\+cpy to the EE, excluding the previous error codes. \end{DoxyCompactList}\item 
-\Hypertarget{error__packet__handler_8c_a19f04466415a2ecb349ba32fb4b81ee6}\label{error__packet__handler_8c_a19f04466415a2ecb349ba32fb4b81ee6} 
-void {\bfseries reset\+\_\+error\+\_\+counters} ()
-\begin{DoxyCompactList}\small\item\em Resets all error counters in the EE to 0. \end{DoxyCompactList}\item 
 \Hypertarget{error__packet__handler_8c_a19a647905636b18e6c21d342517792c6}\label{error__packet__handler_8c_a19a647905636b18e6c21d342517792c6} 
 void {\bfseries reset\+\_\+previous\+\_\+error} ()
 \begin{DoxyCompactList}\small\item\em Resets the previous error codes to 0x\+FF. 0x\+FF was chose because it doesn\textquotesingle{}t correspond to any error code. \end{DoxyCompactList}\item 
@@ -31,35 +65,39 @@ void \mbox{\hyperlink{error__packet__handler_8c_a84c1cad9d754d01d270ab474f226284
 \begin{DoxyCompactList}\small\item\em Sets previous error code in the EE. \end{DoxyCompactList}\item 
 ERROR\+\_\+\+STRUCT \mbox{\hyperlink{error__packet__handler_8c_abd725398ca96aa85e30a10c232038ae2}{get\+\_\+previous\+\_\+error}} ()
 \begin{DoxyCompactList}\small\item\em Reads the previous error codes from EE. \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{error__packet__handler_8c_ad7a503293430e826fed773a9f2b0092a}{send\+\_\+error\+\_\+counter\+\_\+packet}} ()
-\begin{DoxyCompactList}\small\item\em Creates and sends a packet containing all 27 error counters. \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{error__packet__handler_8c_aa574bf051be4df536870e04c700276dc}{send\+\_\+previous\+\_\+error\+\_\+packet}} ()
-\begin{DoxyCompactList}\small\item\em Creates and sends a packet containing the error codes for the previous error. \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{error__packet__handler_8c_a3f1c92a52e81b3c48906860212263b2c}{send\+\_\+current\+\_\+error\+\_\+packet}} (ERROR\+\_\+\+STRUCT error)
 \begin{DoxyCompactList}\small\item\em Creates and sends a packet containing the error codes for the current error. \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{error__packet__handler_8c_a34102ff7288e524a4491e6ddb8544a2a}{send\+\_\+junk\+\_\+packet}} ()
-\begin{DoxyCompactList}\small\item\em Creates and sends a junk packet containing all 0x\+CE. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\begin{DoxyCompactList}\small\item\em Creates and sends a junk packet containing all 0x\+CE. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{error__packet__handler_8c_a8407dc8a2dc2749fc2a58460320c6195}{handle\+\_\+error}} (ERROR\+\_\+\+STRUCT error)
+\begin{DoxyCompactList}\small\item\em Handles system errors based on the provided error structure. Initiates an emergency shutdown, manages Flash ECC-\/related errors, and sends error packets. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{error__packet__handler_8c_a2de3b1d11097ae22d07e6b96f3278cad}{error\+\_\+counter\+\_\+init}} ()
+\item 
+\Hypertarget{error__packet__handler_8c_a19f04466415a2ecb349ba32fb4b81ee6}\label{error__packet__handler_8c_a19f04466415a2ecb349ba32fb4b81ee6} 
+void {\bfseries reset\+\_\+error\+\_\+counters} ()
+\begin{DoxyCompactList}\small\item\em Resets all error counters in the EE to 0. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{error__packet__handler_8c_ad7a503293430e826fed773a9f2b0092a}{send\+\_\+error\+\_\+counter\+\_\+packet}} ()
+\begin{DoxyCompactList}\small\item\em Creates and sends a packet containing all 27 error counters. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{error__packet__handler_8c_aa574bf051be4df536870e04c700276dc}{send\+\_\+previous\+\_\+error\+\_\+packet}} ()
+\begin{DoxyCompactList}\small\item\em Creates and sends a packet containing the error codes for the previous error. \end{DoxyCompactList}\end{DoxyCompactItemize}
 \doxysubsubsection*{Variables}
 \begin{DoxyCompactItemize}
 \item 
-uint16\+\_\+t \mbox{\hyperlink{error__packet__handler_8c_a1fb74b26daf6fdfa3dc85e4232ef4769}{Virt\+Add\+Var\+Tab}} \mbox{[}NB\+\_\+\+OF\+\_\+\+VAR\mbox{]} = \{0x5550, 0x5551, 0x5552, 0x5553, 0x5554, 0x5555, 0x5556, 0x5557, 0x5558, 0x5559, 0x555A, 0x555B, 0x555C, 0x555D, 0x555E, 0x555F, 0x6660, 0x6661, 0x6662, 0x6663, 0x6664, 0x6665, 0x6666, 0x6667, 0x6668, 0x6669, 0x666A, 0x666B, 0x666C\}
+uint16\+\_\+t \mbox{\hyperlink{error__packet__handler_8c_a1fb74b26daf6fdfa3dc85e4232ef4769}{Virt\+Add\+Var\+Tab}} \mbox{[}NB\+\_\+\+OF\+\_\+\+VAR\mbox{]}
 \begin{DoxyCompactList}\small\item\em Array storing virtual addresses for EEPROM emulation variables. \end{DoxyCompactList}\item 
-uint16\+\_\+t \mbox{\hyperlink{error__packet__handler_8c_aaf49355162b21ca49d5b3396a9647822}{Var\+Data\+Tab}} \mbox{[}NB\+\_\+\+OF\+\_\+\+VAR\mbox{]} = \{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0\}
-\begin{DoxyCompactList}\small\item\em Array storing the data values for EEPROM emulation variables. \end{DoxyCompactList}\item 
-uint16\+\_\+t \mbox{\hyperlink{error__packet__handler_8c_aeca103e6eac9984a435459facf1d9733}{local\+\_\+cpy}} \mbox{[}NUM\+\_\+\+ERROR\+\_\+\+COUNTERS\mbox{]}
-\begin{DoxyCompactList}\small\item\em Array used to store the error counters. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\Hypertarget{error__packet__handler_8c_aeca103e6eac9984a435459facf1d9733}\label{error__packet__handler_8c_aeca103e6eac9984a435459facf1d9733} 
+uint16\+\_\+t {\bfseries local\+\_\+cpy} \mbox{[}NUM\+\_\+\+ERROR\+\_\+\+COUNTERS\mbox{]}
+\begin{DoxyCompactList}\small\item\em Array used to store the error counters locally after fetching from flash. \end{DoxyCompactList}\end{DoxyCompactItemize}
 
 
 \doxysubsection{Detailed Description}
-Implementation of error packet handling. 
-
-Handles all errors in the system. If the built in HAL error handler is called by a peripheral, it redirects here.
+\+: Handles all errors in the system. If the built in HAL error handler is called by a peripheral, it redirects here. 
 
 \begin{DoxyAuthor}{Author}
-Jared Morrison 
+\+: Jared Morrison 
 \end{DoxyAuthor}
 \begin{DoxyDate}{Date}
-September 4, 2024 
+\+: October 9, 2024  
 \end{DoxyDate}
 
 
@@ -91,13 +129,11 @@ void handle\+\_\+error (\begin{DoxyParamCaption}\item[{ERROR\+\_\+\+STRUCT}]{err
 
 
 
-Handles all errors in the system. 
-
-Built in error handler calls this function instead of entering an infinite while loop. Before calling this function, the caller will create a new variable of type ERROR\+\_\+\+STRUCT and populate the error\+\_\+category and error\+\_\+detail attributes with the respective codes. Given and error category and detail, this error handler proceeds with the appropriate actions. Regardless of what caused the error, this error handler will always increment the error counter, set the previous error to whatever error we are currently handling, send an error packet, and enter IDLE mode. Additional actions are taken depending on the error category.
+Handles system errors based on the provided error structure. Initiates an emergency shutdown, manages Flash ECC-\/related errors, and sends error packets. 
 
 
 \begin{DoxyParams}{Parameters}
-{\em error} & Error given by the caller. \\
+{\em error} & The error structure containing the error category and details. \\
 \hline
 \end{DoxyParams}
 \Hypertarget{error__packet__handler_8c_a26dea563992120d994e008ed7b3afaeb}\index{error\_packet\_handler.c@{error\_packet\_handler.c}!increment\_error\_counter@{increment\_error\_counter}}
@@ -108,13 +144,11 @@ void increment\+\_\+error\+\_\+counter (\begin{DoxyParamCaption}\item[{ERROR\+\_
 
 
 
-Increments the error counter for a given error, and updates the variable in the EE. 
-
-I designed the error categories and codes such that they correspond to an index in our local\+\_\+cpy array. To see what index a particular error is stored in, just check the value each category or detail is assigned in the header file.
+Increments the error counters for the specified error. Updates both the category and detail counters and saves the updated values. 
 
 
 \begin{DoxyParams}{Parameters}
-{\em error} & Error given by the caller. \\
+{\em error} & The error structure containing the error category and details. \\
 \hline
 \end{DoxyParams}
 \Hypertarget{error__packet__handler_8c_a3f1c92a52e81b3c48906860212263b2c}\index{error\_packet\_handler.c@{error\_packet\_handler.c}!send\_current\_error\_packet@{send\_current\_error\_packet}}
@@ -175,34 +209,27 @@ Sets previous error code in the EE.
 
 
 \doxysubsection{Variable Documentation}
-\Hypertarget{error__packet__handler_8c_aeca103e6eac9984a435459facf1d9733}\index{error\_packet\_handler.c@{error\_packet\_handler.c}!local\_cpy@{local\_cpy}}
-\index{local\_cpy@{local\_cpy}!error\_packet\_handler.c@{error\_packet\_handler.c}}
-\doxysubsubsection{\texorpdfstring{local\_cpy}{local\_cpy}}
-{\footnotesize\ttfamily \label{error__packet__handler_8c_aeca103e6eac9984a435459facf1d9733} 
-uint16\+\_\+t local\+\_\+cpy\mbox{[}NUM\+\_\+\+ERROR\+\_\+\+COUNTERS\mbox{]}}
-
-
-
-Array used to store the error counters. 
-
-The reason this array is of size NUM\+\_\+\+ERROR\+\_\+\+COUNTERS instead of NB\+\_\+\+OF\+\_\+\+VAR is because there are two extra variables stored in the EE used for keeping track of the last error that occurred. There are a total of 29 variables that we keep track of in the EE. The first 27 are the error counters, and the last two are the error codes for the last error that occurred. \Hypertarget{error__packet__handler_8c_aaf49355162b21ca49d5b3396a9647822}\index{error\_packet\_handler.c@{error\_packet\_handler.c}!VarDataTab@{VarDataTab}}
-\index{VarDataTab@{VarDataTab}!error\_packet\_handler.c@{error\_packet\_handler.c}}
-\doxysubsubsection{\texorpdfstring{VarDataTab}{VarDataTab}}
-{\footnotesize\ttfamily \label{error__packet__handler_8c_aaf49355162b21ca49d5b3396a9647822} 
-uint16\+\_\+t Var\+Data\+Tab\mbox{[}NB\+\_\+\+OF\+\_\+\+VAR\mbox{]} = \{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0\}}
-
-
-
-Array storing the data values for EEPROM emulation variables. 
-
-This array holds the data associated with each virtual address in the {\ttfamily Virt\+Add\+Var\+Tab} array. Initially, all values are set to {\ttfamily 0}, and they can be updated as needed during program execution. The size of the array is determined by the {\ttfamily NB\+\_\+\+OF\+\_\+\+VAR} constant. \Hypertarget{error__packet__handler_8c_a1fb74b26daf6fdfa3dc85e4232ef4769}\index{error\_packet\_handler.c@{error\_packet\_handler.c}!VirtAddVarTab@{VirtAddVarTab}}
+\Hypertarget{error__packet__handler_8c_a1fb74b26daf6fdfa3dc85e4232ef4769}\index{error\_packet\_handler.c@{error\_packet\_handler.c}!VirtAddVarTab@{VirtAddVarTab}}
 \index{VirtAddVarTab@{VirtAddVarTab}!error\_packet\_handler.c@{error\_packet\_handler.c}}
 \doxysubsubsection{\texorpdfstring{VirtAddVarTab}{VirtAddVarTab}}
 {\footnotesize\ttfamily \label{error__packet__handler_8c_a1fb74b26daf6fdfa3dc85e4232ef4769} 
-uint16\+\_\+t Virt\+Add\+Var\+Tab\mbox{[}NB\+\_\+\+OF\+\_\+\+VAR\mbox{]} = \{0x5550, 0x5551, 0x5552, 0x5553, 0x5554, 0x5555, 0x5556, 0x5557, 0x5558, 0x5559, 0x555A, 0x555B, 0x555C, 0x555D, 0x555E, 0x555F, 0x6660, 0x6661, 0x6662, 0x6663, 0x6664, 0x6665, 0x6666, 0x6667, 0x6668, 0x6669, 0x666A, 0x666B, 0x666C\}}
+uint16\+\_\+t Virt\+Add\+Var\+Tab\mbox{[}NB\+\_\+\+OF\+\_\+\+VAR\mbox{]}}
 
+{\bfseries Initial value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{=}
+\DoxyCodeLine{\{}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ 0x0001,\ 0x0002,\ 0x0003,\ 0x0004,\ 0x0005,}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ 0x0006,\ 0x0007,\ 0x0008,\ 0x0009,\ 0x0010,}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ 0x0011,\ 0x0012,\ 0x0013,\ 0x0014,\ 0x0015,}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ 0x0016,\ 0x0017,\ 0x0018,\ 0x0019,\ 0x0020,}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ 0x0021,\ 0x0022,\ 0x0023,\ 0x0024,\ 0x0025,}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ 0x0026,\ 0x0027,\ 0x0028,\ 0x0029,\ 0x0030,}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ 0x0031}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
 
 
 Array storing virtual addresses for EEPROM emulation variables. 
 
-This array holds the virtual addresses of the variables stored in the emulated EEPROM. The addresses are defined to start from {\ttfamily 0x5550} and continue sequentially. The size of the array is determined by the {\ttfamily NB\+\_\+\+OF\+\_\+\+VAR} constant. 

@@ -1,0 +1,165 @@
+\doxysection{Core/src/sample\+\_\+data.c File Reference}
+\hypertarget{sample__data_8c}{}\label{sample__data_8c}\index{Core/src/sample\_data.c@{Core/src/sample\_data.c}}
+
+
+\+: Implementation of data sampling  
+
+
+{\ttfamily \#include "{}sample\+\_\+data.\+h"{}}\newline
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{sample__data_8c_a09f8a1b1741ecd6a3a7c978cd1ceb9a9}\label{sample__data_8c_a09f8a1b1741ecd6a3a7c978cd1ceb9a9} 
+{\bfseries ALIGN\+\_\+32\+BYTES} (static uint16\+\_\+t ADC1\+\_\+raw\+\_\+data\mbox{[}ADC1\+\_\+\+NUM\+\_\+\+CHANNELS\mbox{]})
+\item 
+\Hypertarget{sample__data_8c_af2f481d25e68569fc4d8c3785ad2afdc}\label{sample__data_8c_af2f481d25e68569fc4d8c3785ad2afdc} 
+{\bfseries ALIGN\+\_\+32\+BYTES} (static uint16\+\_\+t ADC3\+\_\+raw\+\_\+data\mbox{[}ADC3\+\_\+\+NUM\+\_\+\+CHANNELS\mbox{]})
+\item 
+void \mbox{\hyperlink{sample__data_8c_a962e34faf0b92ef32e7ce0881851130d}{init\+\_\+adc\+\_\+dma}} ()
+\begin{DoxyCompactList}\small\item\em Initializes ADCs with DMA. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{sample__data_8c_a5d17c081db8397c2dda42e72f4e84618}{sample\+\_\+pmt\+\_\+spi}} (uint8\+\_\+t \texorpdfstring{$\ast$}{*}buffer)
+\begin{DoxyCompactList}\small\item\em Samples PMT data via SPI. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{sample__data_8c_ac9e1ba0ab9533964316e43945dc5acba}{sample\+\_\+erpa\+\_\+spi}} (uint8\+\_\+t \texorpdfstring{$\ast$}{*}buffer)
+\begin{DoxyCompactList}\small\item\em Samples ERPA data via SPI. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{sample__data_8c_a035b416cf0b00c3d2c24e408659eba93}{sample\+\_\+erpa\+\_\+adc}} (uint16\+\_\+t \texorpdfstring{$\ast$}{*}buffer)
+\begin{DoxyCompactList}\small\item\em Samples ERPA data from ADC. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{sample__data_8c_a856d194d8f4ea43a276f7a0f1e4783b4}{sample\+\_\+hk\+\_\+i2c}} (int16\+\_\+t \texorpdfstring{$\ast$}{*}buffer)
+\begin{DoxyCompactList}\small\item\em Samples HK data from I2C sensors. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{sample__data_8c_a1fd6e586f2153d0a168873977a1f6798}{sample\+\_\+hk\+\_\+adc1}} (uint16\+\_\+t \texorpdfstring{$\ast$}{*}buffer)
+\begin{DoxyCompactList}\small\item\em Samples HK data from ADC1 channels. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{sample__data_8c_a460a0db9aec7caa1cfd6f9a477145724}{sample\+\_\+hk\+\_\+adc3}} (uint16\+\_\+t \texorpdfstring{$\ast$}{*}buffer)
+\begin{DoxyCompactList}\small\item\em Samples HK data from ADC3 channels. \end{DoxyCompactList}\item 
+int16\+\_\+t \mbox{\hyperlink{sample__data_8c_a1239679f86b97e0d2b5af783d6e25003}{poll\+\_\+i2c\+\_\+sensor}} (const uint8\+\_\+t TEMP\+\_\+\+ADDR)
+\begin{DoxyCompactList}\small\item\em Polls temperature data from an I2C sensor. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\+: Implementation of data sampling 
+
+\begin{DoxyAuthor}{Author}
+\+: Jared Morrison 
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+\+: October 9, 2024  
+\end{DoxyDate}
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{sample__data_8c_a962e34faf0b92ef32e7ce0881851130d}\index{sample\_data.c@{sample\_data.c}!init\_adc\_dma@{init\_adc\_dma}}
+\index{init\_adc\_dma@{init\_adc\_dma}!sample\_data.c@{sample\_data.c}}
+\doxysubsubsection{\texorpdfstring{init\_adc\_dma()}{init\_adc\_dma()}}
+{\footnotesize\ttfamily \label{sample__data_8c_a962e34faf0b92ef32e7ce0881851130d} 
+void init\+\_\+adc\+\_\+dma (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Initializes ADCs with DMA. 
+
+This function calibrates and starts DMA for ADC1 and ADC3. It also enables the SPI peripherals. \Hypertarget{sample__data_8c_a1239679f86b97e0d2b5af783d6e25003}\index{sample\_data.c@{sample\_data.c}!poll\_i2c\_sensor@{poll\_i2c\_sensor}}
+\index{poll\_i2c\_sensor@{poll\_i2c\_sensor}!sample\_data.c@{sample\_data.c}}
+\doxysubsubsection{\texorpdfstring{poll\_i2c\_sensor()}{poll\_i2c\_sensor()}}
+{\footnotesize\ttfamily \label{sample__data_8c_a1239679f86b97e0d2b5af783d6e25003} 
+int16\+\_\+t poll\+\_\+i2c\+\_\+sensor (\begin{DoxyParamCaption}\item[{const uint8\+\_\+t}]{TEMP\+\_\+\+ADDR}{}\end{DoxyParamCaption})}
+
+
+
+Polls temperature data from an I2C sensor. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em TEMP\+\_\+\+ADDR} & I2C address of the temperature sensor. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+int16\+\_\+t The temperature data received from the sensor. 
+\end{DoxyReturn}
+\Hypertarget{sample__data_8c_a035b416cf0b00c3d2c24e408659eba93}\index{sample\_data.c@{sample\_data.c}!sample\_erpa\_adc@{sample\_erpa\_adc}}
+\index{sample\_erpa\_adc@{sample\_erpa\_adc}!sample\_data.c@{sample\_data.c}}
+\doxysubsubsection{\texorpdfstring{sample\_erpa\_adc()}{sample\_erpa\_adc()}}
+{\footnotesize\ttfamily \label{sample__data_8c_a035b416cf0b00c3d2c24e408659eba93} 
+void sample\+\_\+erpa\+\_\+adc (\begin{DoxyParamCaption}\item[{uint16\+\_\+t \texorpdfstring{$\ast$}{*}}]{buffer}{}\end{DoxyParamCaption})}
+
+
+
+Samples ERPA data from ADC. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em buffer} & Pointer to store the sampled data. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sample__data_8c_ac9e1ba0ab9533964316e43945dc5acba}\index{sample\_data.c@{sample\_data.c}!sample\_erpa\_spi@{sample\_erpa\_spi}}
+\index{sample\_erpa\_spi@{sample\_erpa\_spi}!sample\_data.c@{sample\_data.c}}
+\doxysubsubsection{\texorpdfstring{sample\_erpa\_spi()}{sample\_erpa\_spi()}}
+{\footnotesize\ttfamily \label{sample__data_8c_ac9e1ba0ab9533964316e43945dc5acba} 
+void sample\+\_\+erpa\+\_\+spi (\begin{DoxyParamCaption}\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{buffer}{}\end{DoxyParamCaption})}
+
+
+
+Samples ERPA data via SPI. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em buffer} & Pointer to store the sampled data. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sample__data_8c_a1fd6e586f2153d0a168873977a1f6798}\index{sample\_data.c@{sample\_data.c}!sample\_hk\_adc1@{sample\_hk\_adc1}}
+\index{sample\_hk\_adc1@{sample\_hk\_adc1}!sample\_data.c@{sample\_data.c}}
+\doxysubsubsection{\texorpdfstring{sample\_hk\_adc1()}{sample\_hk\_adc1()}}
+{\footnotesize\ttfamily \label{sample__data_8c_a1fd6e586f2153d0a168873977a1f6798} 
+void sample\+\_\+hk\+\_\+adc1 (\begin{DoxyParamCaption}\item[{uint16\+\_\+t \texorpdfstring{$\ast$}{*}}]{buffer}{}\end{DoxyParamCaption})}
+
+
+
+Samples HK data from ADC1 channels. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em buffer} & Pointer to store the sampled ADC values. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sample__data_8c_a460a0db9aec7caa1cfd6f9a477145724}\index{sample\_data.c@{sample\_data.c}!sample\_hk\_adc3@{sample\_hk\_adc3}}
+\index{sample\_hk\_adc3@{sample\_hk\_adc3}!sample\_data.c@{sample\_data.c}}
+\doxysubsubsection{\texorpdfstring{sample\_hk\_adc3()}{sample\_hk\_adc3()}}
+{\footnotesize\ttfamily \label{sample__data_8c_a460a0db9aec7caa1cfd6f9a477145724} 
+void sample\+\_\+hk\+\_\+adc3 (\begin{DoxyParamCaption}\item[{uint16\+\_\+t \texorpdfstring{$\ast$}{*}}]{buffer}{}\end{DoxyParamCaption})}
+
+
+
+Samples HK data from ADC3 channels. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em buffer} & Pointer to store the sampled ADC values. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sample__data_8c_a856d194d8f4ea43a276f7a0f1e4783b4}\index{sample\_data.c@{sample\_data.c}!sample\_hk\_i2c@{sample\_hk\_i2c}}
+\index{sample\_hk\_i2c@{sample\_hk\_i2c}!sample\_data.c@{sample\_data.c}}
+\doxysubsubsection{\texorpdfstring{sample\_hk\_i2c()}{sample\_hk\_i2c()}}
+{\footnotesize\ttfamily \label{sample__data_8c_a856d194d8f4ea43a276f7a0f1e4783b4} 
+void sample\+\_\+hk\+\_\+i2c (\begin{DoxyParamCaption}\item[{int16\+\_\+t \texorpdfstring{$\ast$}{*}}]{buffer}{}\end{DoxyParamCaption})}
+
+
+
+Samples HK data from I2C sensors. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em buffer} & Pointer to store the sampled data from sensors. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{sample__data_8c_a5d17c081db8397c2dda42e72f4e84618}\index{sample\_data.c@{sample\_data.c}!sample\_pmt\_spi@{sample\_pmt\_spi}}
+\index{sample\_pmt\_spi@{sample\_pmt\_spi}!sample\_data.c@{sample\_data.c}}
+\doxysubsubsection{\texorpdfstring{sample\_pmt\_spi()}{sample\_pmt\_spi()}}
+{\footnotesize\ttfamily \label{sample__data_8c_a5d17c081db8397c2dda42e72f4e84618} 
+void sample\+\_\+pmt\+\_\+spi (\begin{DoxyParamCaption}\item[{uint8\+\_\+t \texorpdfstring{$\ast$}{*}}]{buffer}{}\end{DoxyParamCaption})}
+
+
+
+Samples PMT data via SPI. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em buffer} & Pointer to store the sampled data. \\
+\hline
+\end{DoxyParams}

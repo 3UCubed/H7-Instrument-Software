@@ -41,16 +41,76 @@
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 
+/**
+ * @brief Enumeration of predefined DAC values.
+ *        Represents specific output values for the DAC.
+ */
+typedef enum
+{
+    DAC_VALUE_0 = 0,
+    DAC_VALUE_620 = 620,
+    DAC_VALUE_1241 = 1241,
+    DAC_VALUE_1861 = 1861,
+    DAC_VALUE_2482 = 2482,
+    DAC_VALUE_3103 = 3103,
+    DAC_VALUE_3723 = 3723,
+    DAC_VALUE_4095 = 4095
+} DAC_VALUES;
+
+/**
+ * @brief Enumeration of accepted command codes.
+ *        Defines a set of command values for controlling system power, modes, and error handling.
+ */
+typedef enum
+{
+	CMD_SDN1_ON = 0x10,
+	CMD_SDN1_OFF = 0x00,
+	CMD_SYS_ON = 0x11,
+	CMD_SYS_OFF = 0x01,
+	CMD_3V3_ON = 0x12,
+	CMD_3V3_OFF = 0x02,
+	CMD_5V_ON = 0x13,
+	CMD_5V_OFF = 0x03,
+	CMD_N3V3_ON = 0x14,
+	CMD_N3V3_OFF = 0x04,
+	CMD_N5V_ON = 0x15,
+	CMD_N5V_OFF = 0x05,
+	CMD_15V_ON = 0x16,
+	CMD_15V_OFF = 0x06,
+	CMD_N200V_ON = 0x17,
+	CMD_N200V_OFF = 0x07,
+	CMD_N800V_ON = 0x18,
+	CMD_N800V_OFF = 0x08,
+	CMD_AUTOSWEEP_ON = 0x19,
+	CMD_AUTOSWEEP_OFF = 0x09,
+	CMD_ERPA_ON = 0x1A,
+	CMD_ERPA_OFF = 0x0A,
+	CMD_PMT_ON = 0x1B,
+	CMD_PMT_OFF = 0x0B,
+	CMD_HK_ON = 0x1C,
+	CMD_HK_OFF = 0x0C,
+	CMD_STEP_UP = 0x1D,
+	CMD_STEP_DOWN = 0x0D,
+	CMD_FACTOR_UP = 0x1E,
+	CMD_FACTOR_DOWN = 0x0E,
+	CMD_ENTER_STOP = 0x0F,
+	CMD_AUTO_INIT = 0xE0,
+	CMD_AUTO_DEINIT = 0xD0,
+	CMD_SYNC_MODE = 0xAF,
+	CMD_SCIENCE_MODE = 0xBF,
+	CMD_IDLE_MODE = 0xCF,
+	CMD_RESET_ERROR_COUNTERS = 0xDF,
+	CMD_SEND_PREVIOUS_ERROR = 0xEF
+}ACCEPTED_COMMANDS;
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
-//#define FLIGHT_MODE
+#define HK_100MS_COUNTER_MAX 32
 
 #define ACK 0xFF
 #define NACK 0x00
-
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -61,36 +121,63 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-const gpio_pins gpios[] = {
-{ GPIOB, GPIO_PIN_2 },	// 0 -- SDN1
-{ GPIOB, GPIO_PIN_5 },	// 1 -- SYS_ON
-{ GPIOC, GPIO_PIN_10 },	// 2 -- 3v3_EN
-{ GPIOC, GPIO_PIN_7 },	// 3 -- 5v_EN
-{ GPIOC, GPIO_PIN_6 },	// 4 -- N3V3_EN
-{ GPIOC, GPIO_PIN_8 },	// 5 -- N5V_EN
-{ GPIOC, GPIO_PIN_9 },	// 6 -- 15V_EN
-{ GPIOC, GPIO_PIN_13 },	// 7 -- N150V_EN
-{ GPIOB, GPIO_PIN_6 }	// 8 -- 800HVON
+
+/**
+ * @brief Array of GPIO pin configurations.
+ *        Represents the mapping of specific GPIO ports and pins to system components.
+ */
+const gpio_pins gpios[] =
+{
+		{ GPIOB, GPIO_PIN_2 	},	// 0 -- SDN1
+		{ GPIOB, GPIO_PIN_5 	},	// 1 -- SYS_ON
+		{ GPIOC, GPIO_PIN_10 	},	// 2 -- 3v3_EN
+		{ GPIOC, GPIO_PIN_7 	},	// 3 -- 5v_EN
+		{ GPIOC, GPIO_PIN_6 	},	// 4 -- N3V3_EN
+		{ GPIOC, GPIO_PIN_8 	},	// 5 -- N5V_EN
+		{ GPIOC, GPIO_PIN_9 	},	// 6 -- 15V_EN
+		{ GPIOC, GPIO_PIN_13 	},	// 7 -- N150V_EN
+		{ GPIOB, GPIO_PIN_6 	}	// 8 -- 800HVON
 };
 
-uint32_t DAC_OUT[32] = { 0, 0, 620, 620, 1241, 1241, 1861, 1861, 2482, 2482,
-		3103, 3103, 3723, 3723, 4095, 4095, 4095, 4095, 3723, 3723, 3103, 3103,
-		2482, 2482, 1861, 1861, 1241, 1241, 620, 620, 0, 0 }; // For 3.3 volts
+/**
+ * @brief Array of DAC output values representing sweeping up and down voltages.
+ *
+ * DAC_OUT alternates between specified DAC values to control the output voltage.
+ * The first half sweeps up, reaching a maximum at DAC_VALUE_4095, then sweeps down.
+ */
+uint32_t DAC_OUT[DAC_OUT_ARRAY_SIZE] =
+{
+		DAC_VALUE_0, DAC_VALUE_0,		// |	Sweeping Up
+		DAC_VALUE_620, DAC_VALUE_620,	// |
+		DAC_VALUE_1241, DAC_VALUE_1241,	// |
+		DAC_VALUE_1861, DAC_VALUE_1861,	// |
+		DAC_VALUE_2482, DAC_VALUE_2482,	// |
+		DAC_VALUE_3103, DAC_VALUE_3103,	// |
+		DAC_VALUE_3723, DAC_VALUE_3723,	// V
+
+		DAC_VALUE_4095, DAC_VALUE_4095,	// --	Max Sweep
+		DAC_VALUE_4095, DAC_VALUE_4095, // --
+
+		DAC_VALUE_3723, DAC_VALUE_3723,	// |	Sweeping Down
+		DAC_VALUE_3103, DAC_VALUE_3103,	// |
+		DAC_VALUE_2482, DAC_VALUE_2482,	// |
+		DAC_VALUE_1861, DAC_VALUE_1861,	// |
+		DAC_VALUE_1241, DAC_VALUE_1241,	// |
+		DAC_VALUE_620, DAC_VALUE_620,	// |
+		DAC_VALUE_0, DAC_VALUE_0		// V
+}; // For 3.3 volts
 
 osEventFlagsId_t packet_event_flags;
 osEventFlagsId_t utility_event_flags;
 osEventFlagsId_t mode_event_flags;
 
 unsigned char UART_RX_BUFFER[UART_RX_BUFFER_SIZE];
-volatile uint8_t HK_ENABLED = 0;
-volatile uint8_t ERPA_ENABLED = 0;
+volatile uint8_t HK_ENABLED = DISABLED;
+volatile uint8_t ERPA_ENABLED = DISABLED;
 volatile uint8_t step = 0;
 volatile uint32_t cadence = 3125;
 volatile uint32_t uptime_millis = 0;
-volatile uint8_t tx_flag = 1;
-volatile uint8_t HK_10_second_counter = 0;
 volatile uint8_t HK_100_ms_counter = 0;
-
 volatile uint8_t IDLING = 1;
 /* USER CODE END PV */
 
@@ -106,220 +193,268 @@ void init_flash_ecc();
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-void HAL_FLASHEx_EccCorrectionCallback() {
+/**
+ * @brief Callback function for handling ECC correction in flash memory.
+ *        Detects and handles single-bit flash ECC errors.
+ */
+void HAL_FLASHEx_EccCorrectionCallback()
+{
 	ERROR_STRUCT error;
 	error.category = EC_seu;
 	error.detail = ED_single_bit_error_flash;
 	handle_error(error);
 }
 
-void HAL_FLASHEx_EccDetectionCallback() {
+/**
+ * @brief Callback function for handling ECC detection in flash memory.
+ *        Detects and handles double-bit flash ECC errors.
+ */
+void HAL_FLASHEx_EccDetectionCallback()
+{
 	ERROR_STRUCT error;
 	error.category = EC_seu;
 	error.detail = ED_double_bit_error_flash;
 	handle_error(error);
 }
 
-void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim) {
-	if (htim == &htim1) {
-		osEventFlagsSet(packet_event_flags, PMT_FLAG_ID);
+/**
+ * @brief Output compare callback for handling timer events.
+ *        Sets event flags based on the triggered timer and manages housekeeping tasks.
+ *
+ * @param htim Pointer to the timer handle triggering the callback.
+ */
+void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
+{
+	if (htim == &htim1)
+	{
+		osEventFlagsSet(packet_event_flags, PMT_FLAG);
 	}
-	else if (htim == &htim2) {
-		if (ERPA_ENABLED) {
-			osEventFlagsSet(packet_event_flags, ERPA_FLAG_ID);
+	else if (htim == &htim2)
+	{
+		if (ERPA_ENABLED)
+		{
+			osEventFlagsSet(packet_event_flags, ERPA_FLAG);
 		}
-		if (HK_100_ms_counter == 32) {
-#ifdef ERROR_HANDLING_ENABLED
-			osEventFlagsSet(utility_event_flags, VOLTAGE_MONITOR_FLAG_ID);
-#endif
+		if (HK_100_ms_counter == HK_100MS_COUNTER_MAX)
+		{
+			osEventFlagsSet(utility_event_flags, VOLTAGE_MONITOR_FLAG);
 
-			if (HK_ENABLED){
-				osEventFlagsSet(packet_event_flags, HK_FLAG_ID);
+			if (HK_ENABLED)
+			{
+				osEventFlagsSet(packet_event_flags, HK_FLAG);
 			}
 			HK_100_ms_counter = 0;
 		}
 		HK_100_ms_counter++;
-
-
-	} else {
-		printf("Unknown Timer Interrupt\n");
+	}
+	else
+	{
+		// Unknown timer interrupt
 	}
 }
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+/**
+ * @brief UART receive complete callback.
+ *        Processes received commands to control GPIO pins and manage power rails.
+ *
+ * @param huart Pointer to the UART handle triggering the callback.
+ */
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
 	HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
-	unsigned char key = UART_RX_BUFFER[0];
+	uint8_t key_index = 0;
+	unsigned char key = UART_RX_BUFFER[key_index];
 
-	switch (key) {
-	case 0x10: {
-		printf("SDN1 ON\n");
-		HAL_GPIO_WritePin(gpios[0].gpio, gpios[0].pin, GPIO_PIN_SET);
+	switch (key)
+	{
+	case CMD_SDN1_ON:
+	{
+		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_SDN1].gpio, gpios[GPIOS_INDEX_SDN1].pin, GPIO_PIN_SET);
 		break;
 	}
-	case 0x00: {
-		printf("SDN1 OFF\n");
-		HAL_GPIO_WritePin(gpios[0].gpio, gpios[0].pin, GPIO_PIN_RESET);
-		break;
-	}
-	case 0x11: {
-		printf("SYS ON PB5\n");
-		HAL_GPIO_WritePin(gpios[1].gpio, gpios[1].pin, GPIO_PIN_SET);
-		set_rail_monitor_enable(RAIL_2v5, 1);
-		break;
-	}
-	case 0x01: {
-		printf("SYS OFF PB5\n");
 
-		// Turning off all voltage enables (including high voltages) in order from highest to lowest, including SYS_ON
-		for (int i = 8; i > 0; i--) {
+	case CMD_SDN1_OFF:
+	{
+		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_SDN1].gpio, gpios[GPIOS_INDEX_SDN1].pin, GPIO_PIN_RESET);
+		break;
+	}
+
+	case CMD_SYS_ON:
+	{
+		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_SYS].gpio, gpios[GPIOS_INDEX_SYS].pin, GPIO_PIN_SET);
+		set_rail_monitor_enable(RAIL_2v5, ENABLED);
+		break;
+	}
+
+	case CMD_SYS_OFF:
+	{
+		for (int i = GPIOS_INDEX_N800V; i > GPIOS_INDEX_SDN1; i--)
+		{
 			HAL_GPIO_WritePin(gpios[i].gpio, gpios[i].pin, GPIO_PIN_RESET);
 		}
 
-		for (int i = RAIL_n800v; i >= RAIL_2v5; i--) {
-			set_rail_monitor_enable(i, 0);
+		for (int i = RAIL_n800v; i >= RAIL_2v5; i--)
+		{
+			set_rail_monitor_enable(i, DISABLED);
 		}
+		break;
+	}
 
+	case CMD_3V3_ON:
+	{
+		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_3V3].gpio, gpios[GPIOS_INDEX_3V3].pin, GPIO_PIN_SET);
+		set_rail_monitor_enable(RAIL_3v3, ENABLED);
 		break;
 	}
-	case 0x12: {
-		printf("3v3 ON PC10\n");
-		HAL_GPIO_WritePin(gpios[2].gpio, gpios[2].pin, GPIO_PIN_SET);
-		set_rail_monitor_enable(RAIL_3v3, 1);
 
+	case CMD_3V3_OFF:
+	{
+		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_3V3].gpio, gpios[GPIOS_INDEX_3V3].pin, GPIO_PIN_RESET);
+		set_rail_monitor_enable(RAIL_3v3, DISABLED);
 		break;
 	}
-	case 0x02: {
-		printf("3v3 OFF PC10\n");
-		HAL_GPIO_WritePin(gpios[2].gpio, gpios[2].pin, GPIO_PIN_RESET);
-		set_rail_monitor_enable(RAIL_3v3, 0);
-		break;
-	}
-	case 0x13: {
-		printf("5v ON PC7\n");
-		HAL_GPIO_WritePin(gpios[3].gpio, gpios[3].pin, GPIO_PIN_SET);
-		set_rail_monitor_enable(RAIL_5v, 1);
 
+	case CMD_5V_ON:
+	{
+		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_5V].gpio, gpios[GPIOS_INDEX_5V].pin, GPIO_PIN_SET);
+		set_rail_monitor_enable(RAIL_5v, ENABLED);
 		break;
 	}
-	case 0x03: {
-		printf("5v OFF PC7\n");
-		HAL_GPIO_WritePin(gpios[3].gpio, gpios[3].pin, GPIO_PIN_RESET);
-		set_rail_monitor_enable(RAIL_5v, 0);
-		break;
-	}
-	case 0x14: {
-		printf("n3v3 ON PC6\n");
-		HAL_GPIO_WritePin(gpios[4].gpio, gpios[4].pin, GPIO_PIN_SET);
-		set_rail_monitor_enable(RAIL_n3v3, 1);
 
+	case CMD_5V_OFF:
+	{
+		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_5V].gpio, gpios[GPIOS_INDEX_5V].pin, GPIO_PIN_RESET);
+		set_rail_monitor_enable(RAIL_5v, DISABLED);
 		break;
 	}
-	case 0x04: {
-		printf("n3v3 OFF PC6\n");
-		HAL_GPIO_WritePin(gpios[4].gpio, gpios[4].pin, GPIO_PIN_RESET);
-		set_rail_monitor_enable(RAIL_n3v3, 0);
-		break;
-	}
-	case 0x15: {
-		printf("n5v ON PC8\n");
-		HAL_GPIO_WritePin(gpios[5].gpio, gpios[5].pin, GPIO_PIN_SET);
-		set_rail_monitor_enable(RAIL_n5v, 1);
 
+	case CMD_N3V3_ON:
+	{
+		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_N3V3].gpio, gpios[GPIOS_INDEX_N3V3].pin, GPIO_PIN_SET);
+		set_rail_monitor_enable(RAIL_n3v3, ENABLED);
 		break;
 	}
-	case 0x05: {
-		printf("n5v OFF PC8\n");
-		HAL_GPIO_WritePin(gpios[5].gpio, gpios[5].pin, GPIO_PIN_RESET);
-		set_rail_monitor_enable(RAIL_n5v, 0);
-		break;
-	}
-	case 0x16: {
-		printf("15v ON PC9\n");
-		HAL_GPIO_WritePin(gpios[6].gpio, gpios[6].pin, GPIO_PIN_SET);
-		set_rail_monitor_enable(RAIL_15v, 1);
 
+	case CMD_N3V3_OFF:
+	{
+		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_N3V3].gpio, gpios[GPIOS_INDEX_N3V3].pin, GPIO_PIN_RESET);
+		set_rail_monitor_enable(RAIL_n3v3, DISABLED);
 		break;
 	}
-	case 0x06: {
-		printf("15v OFF PC9\n");
-		HAL_GPIO_WritePin(gpios[6].gpio, gpios[6].pin, GPIO_PIN_RESET);
-		set_rail_monitor_enable(RAIL_15v, 0);
-		break;
-	}
-	case 0x17: {
-		printf("n200v ON PC13\n");
-		HAL_GPIO_WritePin(gpios[7].gpio, gpios[7].pin, GPIO_PIN_SET);
-		set_rail_monitor_enable(RAIL_n200v, 1);
 
+	case CMD_N5V_ON:
+	{
+		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_N5V].gpio, gpios[GPIOS_INDEX_N5V].pin, GPIO_PIN_SET);
+		set_rail_monitor_enable(RAIL_n5v, ENABLED);
 		break;
 	}
-	case 0x07: {
-		printf("n200v OFF PC13\n");
-		HAL_GPIO_WritePin(gpios[7].gpio, gpios[7].pin, GPIO_PIN_RESET);
-		set_rail_monitor_enable(RAIL_n200v, 0);
-		break;
-	}
-	case 0x18: {
-		printf("800v ON PB6\n");
-		HAL_GPIO_WritePin(gpios[8].gpio, gpios[8].pin, GPIO_PIN_SET);
-		set_rail_monitor_enable(RAIL_n800v, 1);
 
+	case CMD_N5V_OFF:
+	{
+		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_N5V].gpio, gpios[GPIOS_INDEX_N5V].pin, GPIO_PIN_RESET);
+		set_rail_monitor_enable(RAIL_n5v, DISABLED);
 		break;
 	}
-	case 0x08: {
-		printf("800v OFF PB6\n");
-		HAL_GPIO_WritePin(gpios[8].gpio, gpios[8].pin, GPIO_PIN_RESET);
-		set_rail_monitor_enable(RAIL_n800v, 0);
+
+	case CMD_15V_ON:
+	{
+		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_15V].gpio, gpios[GPIOS_INDEX_15V].pin, GPIO_PIN_SET);
+		set_rail_monitor_enable(RAIL_15v, ENABLED);
 		break;
 	}
-	case 0x19: {
-		printf("AUTOSWEEP ON\n");
-		HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, DAC_OUT, 32, DAC_ALIGN_12B_R);
+
+	case CMD_15V_OFF:
+	{
+		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_15V].gpio, gpios[GPIOS_INDEX_15V].pin, GPIO_PIN_RESET);
+		set_rail_monitor_enable(RAIL_15v, DISABLED);
 		break;
 	}
-	case 0x09: {
-		printf("AUTOSWEEP OFF\n");
+
+	case CMD_N200V_ON:
+	{
+		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_N200V].gpio, gpios[GPIOS_INDEX_N200V].pin, GPIO_PIN_SET);
+		set_rail_monitor_enable(RAIL_n200v, ENABLED);
+		break;
+	}
+
+	case CMD_N200V_OFF:
+	{
+		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_N200V].gpio, gpios[GPIOS_INDEX_N200V].pin, GPIO_PIN_RESET);
+		set_rail_monitor_enable(RAIL_n200v, DISABLED);
+		break;
+	}
+
+	case CMD_N800V_ON:
+	{
+		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_N800V].gpio, gpios[GPIOS_INDEX_N800V].pin, GPIO_PIN_SET);
+		set_rail_monitor_enable(RAIL_n800v, ENABLED);
+		break;
+	}
+
+	case CMD_N800V_OFF:
+	{
+		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_N800V].gpio, gpios[GPIOS_INDEX_N800V].pin, GPIO_PIN_RESET);
+		set_rail_monitor_enable(RAIL_n800v, DISABLED);
+		break;
+	}
+
+	case CMD_AUTOSWEEP_ON:
+	{
+		HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, DAC_OUT, DAC_OUT_ARRAY_SIZE, DAC_ALIGN_12B_R);
+		break;
+	}
+
+	case CMD_AUTOSWEEP_OFF:
+	{
 		HAL_DAC_Stop_DMA(&hdac1, DAC_CHANNEL_1);
 		break;
 	}
-	case 0x1A: {
-		printf("ERPA ON\n");
-		osEventFlagsSet(packet_event_flags, ERPA_FLAG_ID);
-		TIM2->CCR4 = 312;
-		ERPA_ENABLED = 1;
+
+	case CMD_ERPA_ON:
+	{
+		osEventFlagsSet(packet_event_flags, ERPA_FLAG);
+		TIM2->CCR4 = ERPA_PWM_FREQ;
+		ERPA_ENABLED = ENABLED;
 		break;
 	}
-	case 0x0A: {
-		printf("ERPA OFF\n");
-		ERPA_ENABLED = 0;
+
+	case CMD_ERPA_OFF:
+	{
+		ERPA_ENABLED = DISABLED;
 		TIM2->CCR4 = 0;
 		break;
 	}
-	case 0x1B: {
-		printf("PMT ON\n");
+
+	case CMD_PMT_ON:
+	{
 		HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_1);
-		osEventFlagsSet(packet_event_flags, PMT_FLAG_ID);
+		osEventFlagsSet(packet_event_flags, PMT_FLAG);
 		break;
 	}
-	case 0x0B: {
-		printf("PMT OFF\n");
+
+	case CMD_PMT_OFF:
+	{
 		HAL_TIM_OC_Stop_IT(&htim1, TIM_CHANNEL_1);
 		break;
 	}
-	case 0x1C: {
-		printf("HK ON \n");
-		osEventFlagsSet(packet_event_flags, HK_FLAG_ID);
-		HK_ENABLED = 1;
+
+	case CMD_HK_ON:
+	{
+		osEventFlagsSet(packet_event_flags, HK_FLAG);
+		HK_ENABLED = ENABLED;
 		break;
 	}
-	case 0x0C: {
-		printf("HK OFF\n");
-		HK_ENABLED = 0;
+
+	case CMD_HK_OFF:
+	{
+		HK_ENABLED = DISABLED;
 		break;
 	}
-	case 0x1D: {
-		printf("Step Up\n");
-		if (step < 14) {
+
+	case CMD_STEP_UP:
+	{
+		if (step < 14)
+		{
 			step += 2;
 			HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R,
 					DAC_OUT[step]);
@@ -327,9 +462,11 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		}
 		break;
 	}
-	case 0x0D: {
-		printf("Step Down\n");
-		if (step > 1) {
+
+	case CMD_STEP_DOWN:
+	{
+		if (step > 1)
+		{
 			step -= 2;
 			HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R,
 					DAC_OUT[step]);
@@ -337,67 +474,89 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		}
 		break;
 	}
-	case 0x1E: {
-		printf("Factor Up\n");
-		if (cadence <= 50000) {
+
+	case CMD_FACTOR_UP:
+	{
+		if (cadence <= 50000)
+		{
 			cadence *= 2;
 			TIM2->ARR = cadence;
 		}
 		break;
 	}
-	case 0x0E: {
-		printf("Factor Down\n");
-		if (cadence >= 6250) {
+
+	case CMD_FACTOR_DOWN:
+	{
+		if (cadence >= 6250)
+		{
 			cadence /= 2;
 			TIM2->ARR = cadence;
 		}
 		break;
 	}
-	case 0x0F: {
-		printf("Enter STOP mode\n");
+
+	case CMD_ENTER_STOP:
+	{
 		osEventFlagsSet(utility_event_flags, STOP_FLAG);
 		break;
 	}
-	case 0xE0: {
-		printf("Auto Init\n");
+
+	case CMD_AUTO_INIT:
+	{
 		osEventFlagsSet(utility_event_flags, AUTOINIT_FLAG);
 		break;
 	}
-	case 0xD0: {
-		printf("Auto Deinit\n");
-		osEventFlagsSet(utility_event_flags, AUTODEINIT_FLAG);
 
+	case CMD_AUTO_DEINIT:
+	{
+		osEventFlagsSet(utility_event_flags, AUTODEINIT_FLAG);
 		break;
 	}
-	case 0xAF: {
+
+	case CMD_SYNC_MODE:
+	{
 		osEventFlagsSet(mode_event_flags, SYNC_FLAG);
 		break;
 	}
-	case 0xBF: {
+
+	case CMD_SCIENCE_MODE:
+	{
 		osEventFlagsSet(mode_event_flags, SCIENCE_FLAG);
 		break;
 	}
-	case 0xCF: {
+
+	case CMD_IDLE_MODE:
+	{
 		osEventFlagsSet(mode_event_flags, IDLE_FLAG);
 		break;
 	}
-	case 0xDF: {
+
+	case CMD_RESET_ERROR_COUNTERS:
+	{
 		reset_error_counters();
 		break;
 	}
-	case 0xEF: {
+
+	case CMD_SEND_PREVIOUS_ERROR:
+	{
 #ifdef ERROR_HANDLING_ENABLED
 		send_previous_error_packet();
 #endif
 		break;
 	}
-	default: {
-		printf("Unknown Command\n");
+
+	default:
+	{
+		// Unknown command
 		break;
 	}
 	}
 }
 
+/**
+ * @brief Retrieves and handles the cause of a system reset.
+ *        Checks for watchdog and brownout reset conditions and reports errors.
+ */
 void get_reset_cause()
 {
 	ERROR_STRUCT error;
@@ -409,9 +568,7 @@ void get_reset_cause()
         __HAL_RCC_CLEAR_RESET_FLAGS();
         handle_error(error);
     }
-    // Needs to come *after* checking the `RCC_FLAG_PORRST` flag in order to
-    // ensure first that the reset cause is NOT a POR/PDR reset. See note
-    // below.
+
     else if (__HAL_RCC_GET_FLAG(RCC_FLAG_BORRST))
     {
         error.category = EC_brownout;
@@ -419,7 +576,6 @@ void get_reset_cause()
         __HAL_RCC_CLEAR_RESET_FLAGS();
         handle_error(error);
     }
-
 }
 
 /* USER CODE END 0 */
@@ -466,17 +622,13 @@ int main(void)
   MX_DAC1_Init();
   MX_SPI1_Init();
   MX_RTC_Init();
+#ifdef ERROR_HANDLING_ENABLED
   MX_IWDG1_Init();
   MX_RAMECC_Init();
+#endif
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
-
-  #ifdef ERROR_HANDLING_ENABLED
-  	error_counter_init();
-#endif
-
   system_setup();
-
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -488,7 +640,8 @@ int main(void)
   /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-	while (1) {
+	while (1)
+	{
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -585,115 +738,143 @@ void PeriphCommonClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-void system_setup() {
-	// 1 -- Init event flags
-	// 3 -- Init rail monitor
-	// 4 -- Start timer 3
-	// 5 -- Set timer 2 PWM
-	// 6 -- Init ADC DMA
-	// 7 -- Start UART receive interrupts
 
+/**
+ * @brief Initializes the system and its components.
+ *        Sets up error handling, event flags, timer, voltage monitoring, ADC, and UART reception.
+ */
+void system_setup()
+{
+#ifdef ERROR_HANDLING_ENABLED
+	error_counter_init();
 	init_flash_ecc();
+#endif
 
 	packet_event_flags = osEventFlagsNew(NULL);
-    if (packet_event_flags == NULL) {
-        while (1);
+    if (packet_event_flags == NULL)
+    {
+        Error_Handler();
     }
 
     utility_event_flags = osEventFlagsNew(NULL);
-    if (utility_event_flags == NULL) {
-        while (1);
+    if (utility_event_flags == NULL)
+    {
+        Error_Handler();
     }
 
     mode_event_flags = osEventFlagsNew(NULL);
-    if (mode_event_flags == NULL) {
-        while (1);
+    if (mode_event_flags == NULL)
+    {
+        Error_Handler();
     }
 
     TIM2->CCR4 = 0;
 	HAL_TIM_OC_Start_IT(&htim2, TIM_CHANNEL_4);
 
-#ifdef ERROR_HANDLING_ENABLED
-	if (!voltage_monitor_init()) {
-		while (1);
-	}
-#endif
+	voltage_monitor_init();
 
-	if (!init_adc_dma()) {
-		while (1);
-	}
+	init_adc_dma();
 
 	HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
-
-
 }
 
-void send_ACK() {
+/**
+ * @brief Sends an acknowledgment (ACK) over UART.
+ *        Transmits a single byte indicating a successful operation.
+ */
+void send_ACK()
+{
 	static uint8_t tx_buffer[1];
 
 	tx_buffer[0] = ACK;
-	HAL_UART_Transmit(&huart1, tx_buffer, 1, 100);
+	HAL_UART_Transmit(&huart1, tx_buffer, 1, UART_TIMEOUT_MS);
 }
 
-void send_NACK() {
+/**
+ * @brief Sends a negative acknowledgment (NACK) over UART.
+ *        Transmits a single byte indicating an unsuccessful operation.
+ */
+void send_NACK()
+{
 	static uint8_t tx_buffer[1];
 
 	tx_buffer[0] = NACK;
-	HAL_UART_Transmit(&huart1, tx_buffer, 1, 100);
-
+	HAL_UART_Transmit(&huart1, tx_buffer, 1, UART_TIMEOUT_MS);
 }
 
-uint8_t get_current_step() {
+/**
+ * @brief Retrieves the current step value based on the DAC output.
+ *
+ * @return The corresponding step value based on the DAC1 output, or -1 if out of range.
+ */
+STEP_VALUES get_current_step()
+{
 	int dac_value;
 
 	dac_value = DAC1->DHR12R1;
 
-	switch (dac_value) {
-	case 0:
-		return 0;
-	case 620:
-		return 1;
-	case 1241:
-		return 2;
-	case 1861:
-		return 3;
-	case 2482:
-		return 4;
-	case 3103:
-		return 5;
-	case 3723:
-		return 6;
-	case 4095:
-		return 7;
+	switch (dac_value)
+	{
+	case DAC_VALUE_0:
+		return STEP_0;
+
+	case DAC_VALUE_620:
+		return STEP_1;
+
+	case DAC_VALUE_1241:
+		return STEP_2;
+
+	case DAC_VALUE_1861:
+		return STEP_3;
+
+	case DAC_VALUE_2482:
+		return STEP_4;
+
+	case DAC_VALUE_3103:
+		return STEP_5;
+
+	case DAC_VALUE_3723:
+		return STEP_6;
+
+	case DAC_VALUE_4095:
+		return STEP_7;
+
 	default:
-		return -1;
+		return INVALID_STEP;
 	}
 }
 
-void enter_stop() {
+/**
+ * @brief Enters low-power stop mode after sending an acknowledgment.
+ *        Suspends all FreeRTOS tasks, enters stop mode, and resumes configuration upon wake-up.
+ */
+void enter_stop()
+{
 	  send_ACK();
 
 	  vTaskSuspendAll();
 	  HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
 
-		// When MCU is triggered to wake up, it resumes right here.
-		// That's why it looks like we enter stop mode and then instantly
-		// configure the clock and resume tasks, but in reality the MCU
-		// just stops right here.
+	  // MCU resumes here after waking from stop mode.
+
 	  NVIC_SystemReset();
 	  SystemClock_Config();
 	  reset_packet_sequence_numbers();
 	  xTaskResumeAll();
 }
 
-void init_flash_ecc() {
+/**
+ * @brief Initializes Flash ECC (Error Correction Code) settings.
+ *        Unlocks Flash memory, sets IRQ priority, and enables ECC correction and detection interrupts.
+ */
+void init_flash_ecc()
+{
 	HAL_FLASH_Unlock();
 
 	HAL_NVIC_SetPriority(FLASH_IRQn, 15, 0);
 	HAL_NVIC_EnableIRQ(FLASH_IRQn);
 	HAL_FLASHEx_EnableEccCorrectionInterrupt();
 	HAL_FLASHEx_EnableEccDetectionInterrupt();
-
 }
 
 /* USER CODE END 4 */
@@ -712,13 +893,15 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	HAL_IWDG_Refresh(&hiwdg1);
 
   /* USER CODE END Callback 0 */
-  if (htim->Instance == TIM6) {
+  if (htim->Instance == TIM6)
+  {
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
-	if (htim == &htim3) {
-		NVIC_SystemReset();
-	}
+  if (htim == &htim3)
+  {
+	NVIC_SystemReset();
+  }
   /* USER CODE END Callback 1 */
 }
 

@@ -1,22 +1,10 @@
 var searchData=
 [
-  ['hal_5fadc_5fmspdeinit_0',['HAL_ADC_MspDeInit',['../adc_8c.html#a3f61f2c2af0f122f81a87af8ad7b4360',1,'adc.c']]],
-  ['hal_5fadc_5fmspinit_1',['HAL_ADC_MspInit',['../adc_8c.html#ac3139540667c403c5dfd37a99c610b1c',1,'adc.c']]],
-  ['hal_5fdac_5fmspdeinit_2',['HAL_DAC_MspDeInit',['../dac_8c.html#a13b8fa4f908f78040536cc8cfc99231e',1,'dac.c']]],
-  ['hal_5fdac_5fmspinit_3',['HAL_DAC_MspInit',['../dac_8c.html#a8e4797900d3cb9171a484f2b955aba87',1,'dac.c']]],
-  ['hal_5fi2c_5fmspdeinit_4',['HAL_I2C_MspDeInit',['../i2c_8c.html#adaa17249f3d5001ad363c736df31c593',1,'i2c.c']]],
-  ['hal_5fi2c_5fmspinit_5',['HAL_I2C_MspInit',['../i2c_8c.html#a08b1eb7b7be5b94395127e2a33b1b67e',1,'i2c.c']]],
-  ['hal_5finittick_6',['HAL_InitTick',['../stm32h7xx__hal__timebase__tim_8c.html#a879cdb21ef051eb81ec51c18147397d5',1,'stm32h7xx_hal_timebase_tim.c']]],
-  ['hal_5fmspinit_7',['HAL_MspInit',['../stm32h7xx__hal__msp_8c.html#ae4fb8e66865c87d0ebab74a726a6891f',1,'stm32h7xx_hal_msp.c']]],
-  ['hal_5fresumetick_8',['HAL_ResumeTick',['../stm32h7xx__hal__timebase__tim_8c.html#a24e0ee9dae1ec0f9d19200f5575ff790',1,'stm32h7xx_hal_timebase_tim.c']]],
-  ['hal_5frtc_5fmspinit_9',['HAL_RTC_MspInit',['../rtc_8c.html#a453bd7b485bdb49c54872947f546655c',1,'rtc.c']]],
-  ['hal_5fspi_5fmspdeinit_10',['HAL_SPI_MspDeInit',['../spi_8c.html#af9af6cae4cb9386b709196d3a3ab4f78',1,'spi.c']]],
-  ['hal_5fspi_5fmspinit_11',['HAL_SPI_MspInit',['../spi_8c.html#a8e1dadd744299fa6f8bca0e1bcbd2c00',1,'spi.c']]],
-  ['hal_5fsuspendtick_12',['HAL_SuspendTick',['../stm32h7xx__hal__timebase__tim_8c.html#aaf651af2afe688a991c657f64f8fa5f9',1,'stm32h7xx_hal_timebase_tim.c']]],
-  ['hal_5ftim_5fmsppostinit_13',['HAL_TIM_MspPostInit',['../tim_8c.html#a708f19bbc41b292fccf38f2d9796c46a',1,'tim.c']]],
-  ['hal_5ftim_5fperiodelapsedcallback_14',['HAL_TIM_PeriodElapsedCallback',['../main_8c.html#a8a3b0ad512a6e6c6157440b68d395eac',1,'main.c']]],
-  ['hal_5fuart_5fmspdeinit_15',['HAL_UART_MspDeInit',['../usart_8c.html#a94cd2c58add4f2549895a03bf267622e',1,'usart.c']]],
-  ['hal_5fuart_5fmspinit_16',['HAL_UART_MspInit',['../usart_8c.html#a62a25476866998c7aadfb5c0864fa349',1,'usart.c']]],
-  ['handle_5ferror_17',['handle_error',['../error__packet__handler_8c.html#a8407dc8a2dc2749fc2a58460320c6195',1,'error_packet_handler.c']]],
-  ['hardfault_5fhandler_18',['HardFault_Handler',['../stm32h7xx__it_8c.html#a2bffc10d5bd4106753b7c30e86903bea',1,'stm32h7xx_it.c']]]
+  ['ecc_5firqhandler_0',['ECC_IRQHandler',['../stm32h7xx__it_8c.html#ad058519973ac5e9cc3fca85fad16be13',1,'stm32h7xx_it.c']]],
+  ['emergency_5fshutdown_1',['emergency_shutdown',['../error__packet__handler_8c.html#a2a595643a86dbbc243e7213e64b16b11',1,'error_packet_handler.c']]],
+  ['enable_5framecc_5fmonitor_5fnotifications_2',['enable_ramecc_monitor_notifications',['../ramecc_8c.html#a0292b376557bb96b00497e2dd2fe200d',1,'ramecc.c']]],
+  ['enter_5fstop_3',['enter_stop',['../main_8c.html#a0322b72ab110431a0425c2911346bb6a',1,'main.c']]],
+  ['erpa_5finit_4',['ERPA_init',['../freertos_8c.html#a7594dc6f42ed797c97c88068562de9c4',1,'freertos.c']]],
+  ['error_5fcounter_5finit_5',['error_counter_init',['../error__packet__handler_8c.html#a2de3b1d11097ae22d07e6b96f3278cad',1,'error_packet_handler.c']]],
+  ['error_5fhandler_6',['Error_Handler',['../main_8c.html#a1730ffe1e560465665eb47d9264826f9',1,'main.c']]]
 ];

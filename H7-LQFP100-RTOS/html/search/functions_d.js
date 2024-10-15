@@ -1,6 +1,7 @@
 var searchData=
 [
-  ['update_5ferror_5fcounter_0',['update_error_counter',['../error__packet__handler_8c.html#a52864e5e29f01761e5f96f11018582cb',1,'error_packet_handler.c']]],
-  ['usagefault_5fhandler_1',['UsageFault_Handler',['../stm32h7xx__it_8c.html#a1d98923de2ed6b7309b66f9ba2971647',1,'stm32h7xx_it.c']]],
-  ['usart1_5firqhandler_2',['USART1_IRQHandler',['../stm32h7xx__it_8c.html#a7139cd4baabbbcbab0c1fe6d7d4ae1cc',1,'stm32h7xx_it.c']]]
+  ['reset_5ferror_5fcounters_0',['reset_error_counters',['../error__packet__handler_8c.html#a19f04466415a2ecb349ba32fb4b81ee6',1,'error_packet_handler.c']]],
+  ['reset_5fpacket_5fsequence_5fnumbers_1',['reset_packet_sequence_numbers',['../packet__creation_8c.html#aa6f1f6df890cf6a90808fcff2661c28d',1,'packet_creation.c']]],
+  ['reset_5fprevious_5ferror_2',['reset_previous_error',['../error__packet__handler_8c.html#a19a647905636b18e6c21d342517792c6',1,'error_packet_handler.c']]],
+  ['rtc_5fsettime_3',['RTC_SetTime',['../time__tagging_8c.html#a02fe9cb2e022f600220884b83090e496',1,'time_tagging.c']]]
 ];

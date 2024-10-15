@@ -1,23 +1,24 @@
-/*
- * sample_data.h
- *
- *  Created on: Aug 6, 2024
- *      Author: 3ucubed
+/**
+ ******************************************************************************
+ * @file           : sample_data.h
+ * @author 		   : Jared Morrison
+ * @date	 	   : October 9, 2024
+ * @brief          : Header file for data sampling
+ ******************************************************************************
  */
 
 #ifndef INC_SAMPLE_DATA_H_
 #define INC_SAMPLE_DATA_H_
 
 
-#include <stdio.h>				// For uint data types
+#include <stdio.h>
 #include <adc.h>
 #include "spi.h"
 #include "i2c.h"
 #define ADC1_NUM_CHANNELS 11
 #define ADC3_NUM_CHANNELS 4
 
-
-uint8_t init_adc_dma();
+void init_adc_dma();
 void sample_pmt_spi(uint8_t *buffer);
 void sample_erpa_spi(uint8_t *buffer);
 void sample_erpa_adc(uint16_t *buffer);

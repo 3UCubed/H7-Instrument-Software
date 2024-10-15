@@ -89,37 +89,72 @@ $(function(){ initResizable(false); });
 <div id="doc-content">
 <div class="header">
   <div class="summary">
+<a href="#define-members">Macros</a> &#124;
 <a href="#func-members">Functions</a> &#124;
 <a href="#var-members">Variables</a>  </div>
   <div class="headertitle"><div class="title">error_packet_handler.c File Reference</div></div>
 </div><!--header-->
 <div class="contents">
 
-<p>Implementation of error packet handling.  
+<p>: Handles all errors in the system. If the built in HAL error handler is called by a peripheral, it redirects here.  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &quot;error_packet_handler.h&quot;</code><br />
 <code>#include &quot;usart.h&quot;</code><br />
 <code>#include &quot;main.h&quot;</code><br />
 <code>#include &quot;eeprom.h&quot;</code><br />
+<code>#include &quot;tim.h&quot;</code><br />
+<code>#include &quot;dac.h&quot;</code><br />
 </div><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+Macros</h2></td></tr>
+<tr class="memitem:aa1f19f43a9b6f10f9118a4eaeeed3a9b" id="r_aa1f19f43a9b6f10f9118a4eaeeed3a9b"><td class="memItemLeft" align="right" valign="top"><a id="aa1f19f43a9b6f10f9118a4eaeeed3a9b" name="aa1f19f43a9b6f10f9118a4eaeeed3a9b"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>ERROR_COUNTER_PACKET_SIZE</b>&#160;&#160;&#160;60</td></tr>
+<tr class="separator:aa1f19f43a9b6f10f9118a4eaeeed3a9b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a314adc7f17b903d5fcee7b6e6f136fef" id="r_a314adc7f17b903d5fcee7b6e6f136fef"><td class="memItemLeft" align="right" valign="top"><a id="a314adc7f17b903d5fcee7b6e6f136fef" name="a314adc7f17b903d5fcee7b6e6f136fef"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>PREV_ERROR_PACKET_SIZE</b>&#160;&#160;&#160;4</td></tr>
+<tr class="separator:a314adc7f17b903d5fcee7b6e6f136fef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4916d7a7342fb91d35cbacc18d0ecda4" id="r_a4916d7a7342fb91d35cbacc18d0ecda4"><td class="memItemLeft" align="right" valign="top"><a id="a4916d7a7342fb91d35cbacc18d0ecda4" name="a4916d7a7342fb91d35cbacc18d0ecda4"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>CURRENT_ERROR_PACKET_SIZE</b>&#160;&#160;&#160;10</td></tr>
+<tr class="separator:a4916d7a7342fb91d35cbacc18d0ecda4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa1299c054dfc47b08080b41179de6f86" id="r_aa1299c054dfc47b08080b41179de6f86"><td class="memItemLeft" align="right" valign="top"><a id="aa1299c054dfc47b08080b41179de6f86" name="aa1299c054dfc47b08080b41179de6f86"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>JUNK_PACKET_SIZE</b>&#160;&#160;&#160;1024</td></tr>
+<tr class="separator:aa1299c054dfc47b08080b41179de6f86"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4464e3c090618077c1d99491cd415a45" id="r_a4464e3c090618077c1d99491cd415a45"><td class="memItemLeft" align="right" valign="top"><a id="a4464e3c090618077c1d99491cd415a45" name="a4464e3c090618077c1d99491cd415a45"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>ERROR_COUNTER_PACKET_SYNC</b>&#160;&#160;&#160;0xCC</td></tr>
+<tr class="separator:a4464e3c090618077c1d99491cd415a45"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a703c8525e474924698f930d7b0a7eda9" id="r_a703c8525e474924698f930d7b0a7eda9"><td class="memItemLeft" align="right" valign="top"><a id="a703c8525e474924698f930d7b0a7eda9" name="a703c8525e474924698f930d7b0a7eda9"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>PREV_ERROR_PACKET_SYNC</b>&#160;&#160;&#160;0xAA</td></tr>
+<tr class="separator:a703c8525e474924698f930d7b0a7eda9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adc2a675007e5eb548d11e2c39626db75" id="r_adc2a675007e5eb548d11e2c39626db75"><td class="memItemLeft" align="right" valign="top"><a id="adc2a675007e5eb548d11e2c39626db75" name="adc2a675007e5eb548d11e2c39626db75"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>CURRENT_ERROR_PACKET_SYNC</b>&#160;&#160;&#160;0xBB</td></tr>
+<tr class="separator:adc2a675007e5eb548d11e2c39626db75"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac7256ef0fd7e13035be515a15079a280" id="r_ac7256ef0fd7e13035be515a15079a280"><td class="memItemLeft" align="right" valign="top"><a id="ac7256ef0fd7e13035be515a15079a280" name="ac7256ef0fd7e13035be515a15079a280"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>NUM_ERROR_COUNTERS</b>&#160;&#160;&#160;29</td></tr>
+<tr class="separator:ac7256ef0fd7e13035be515a15079a280"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa9c2e32d7ef25bf64345c5f4b5038493" id="r_aa9c2e32d7ef25bf64345c5f4b5038493"><td class="memItemLeft" align="right" valign="top"><a id="aa9c2e32d7ef25bf64345c5f4b5038493" name="aa9c2e32d7ef25bf64345c5f4b5038493"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>PREV_ERROR_CATEGORY_INDEX</b>&#160;&#160;&#160;29</td></tr>
+<tr class="separator:aa9c2e32d7ef25bf64345c5f4b5038493"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a00b39108de07c4082764d5a4284bd10b" id="r_a00b39108de07c4082764d5a4284bd10b"><td class="memItemLeft" align="right" valign="top"><a id="a00b39108de07c4082764d5a4284bd10b" name="a00b39108de07c4082764d5a4284bd10b"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>PREV_ERROR_DETAIL_INDEX</b>&#160;&#160;&#160;30</td></tr>
+<tr class="separator:a00b39108de07c4082764d5a4284bd10b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a8407dc8a2dc2749fc2a58460320c6195" id="r_a8407dc8a2dc2749fc2a58460320c6195"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8407dc8a2dc2749fc2a58460320c6195">handle_error</a> (ERROR_STRUCT error)</td></tr>
-<tr class="memdesc:a8407dc8a2dc2749fc2a58460320c6195"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handles all errors in the system.  <br /></td></tr>
-<tr class="separator:a8407dc8a2dc2749fc2a58460320c6195"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2de3b1d11097ae22d07e6b96f3278cad" id="r_a2de3b1d11097ae22d07e6b96f3278cad"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2de3b1d11097ae22d07e6b96f3278cad">error_counter_init</a> ()</td></tr>
-<tr class="separator:a2de3b1d11097ae22d07e6b96f3278cad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2a595643a86dbbc243e7213e64b16b11" id="r_a2a595643a86dbbc243e7213e64b16b11"><td class="memItemLeft" align="right" valign="top"><a id="a2a595643a86dbbc243e7213e64b16b11" name="a2a595643a86dbbc243e7213e64b16b11"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>emergency_shutdown</b> ()</td></tr>
+<tr class="memdesc:a2a595643a86dbbc243e7213e64b16b11"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initiates an emergency shutdown of the system. Disables timers, DAC, rail monitoring, and all power supply voltages, setting the system to idle. <br /></td></tr>
+<tr class="separator:a2a595643a86dbbc243e7213e64b16b11"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa15b7db23a8dc3e9f9104dceb73231e9" id="r_aa15b7db23a8dc3e9f9104dceb73231e9"><td class="memItemLeft" align="right" valign="top"><a id="aa15b7db23a8dc3e9f9104dceb73231e9" name="aa15b7db23a8dc3e9f9104dceb73231e9"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>flash_mass_erase</b> ()</td></tr>
+<tr class="memdesc:aa15b7db23a8dc3e9f9104dceb73231e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs a mass erase of Flash memory. Unlocks Flash and erases all sectors in Bank 2, handling errors if the erase fails. <br /></td></tr>
+<tr class="separator:aa15b7db23a8dc3e9f9104dceb73231e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a26dea563992120d994e008ed7b3afaeb" id="r_a26dea563992120d994e008ed7b3afaeb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a26dea563992120d994e008ed7b3afaeb">increment_error_counter</a> (ERROR_STRUCT error)</td></tr>
-<tr class="memdesc:a26dea563992120d994e008ed7b3afaeb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Increments the error counter for a given error, and updates the variable in the EE.  <br /></td></tr>
+<tr class="memdesc:a26dea563992120d994e008ed7b3afaeb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Increments the error counters for the specified error. Updates both the category and detail counters and saves the updated values.  <br /></td></tr>
 <tr class="separator:a26dea563992120d994e008ed7b3afaeb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a52864e5e29f01761e5f96f11018582cb" id="r_a52864e5e29f01761e5f96f11018582cb"><td class="memItemLeft" align="right" valign="top"><a id="a52864e5e29f01761e5f96f11018582cb" name="a52864e5e29f01761e5f96f11018582cb"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>update_error_counter</b> ()</td></tr>
 <tr class="memdesc:a52864e5e29f01761e5f96f11018582cb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Writes the contents of local_cpy to the EE, excluding the previous error codes. <br /></td></tr>
 <tr class="separator:a52864e5e29f01761e5f96f11018582cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a19f04466415a2ecb349ba32fb4b81ee6" id="r_a19f04466415a2ecb349ba32fb4b81ee6"><td class="memItemLeft" align="right" valign="top"><a id="a19f04466415a2ecb349ba32fb4b81ee6" name="a19f04466415a2ecb349ba32fb4b81ee6"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>reset_error_counters</b> ()</td></tr>
-<tr class="memdesc:a19f04466415a2ecb349ba32fb4b81ee6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resets all error counters in the EE to 0. <br /></td></tr>
-<tr class="separator:a19f04466415a2ecb349ba32fb4b81ee6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a19a647905636b18e6c21d342517792c6" id="r_a19a647905636b18e6c21d342517792c6"><td class="memItemLeft" align="right" valign="top"><a id="a19a647905636b18e6c21d342517792c6" name="a19a647905636b18e6c21d342517792c6"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>reset_previous_error</b> ()</td></tr>
 <tr class="memdesc:a19a647905636b18e6c21d342517792c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resets the previous error codes to 0xFF. 0xFF was chose because it doesn't correspond to any error code. <br /></td></tr>
@@ -130,36 +165,42 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>reset_previous_error<
 <tr class="memitem:abd725398ca96aa85e30a10c232038ae2" id="r_abd725398ca96aa85e30a10c232038ae2"><td class="memItemLeft" align="right" valign="top">ERROR_STRUCT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abd725398ca96aa85e30a10c232038ae2">get_previous_error</a> ()</td></tr>
 <tr class="memdesc:abd725398ca96aa85e30a10c232038ae2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads the previous error codes from EE.  <br /></td></tr>
 <tr class="separator:abd725398ca96aa85e30a10c232038ae2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad7a503293430e826fed773a9f2b0092a" id="r_ad7a503293430e826fed773a9f2b0092a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad7a503293430e826fed773a9f2b0092a">send_error_counter_packet</a> ()</td></tr>
-<tr class="memdesc:ad7a503293430e826fed773a9f2b0092a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates and sends a packet containing all 27 error counters.  <br /></td></tr>
-<tr class="separator:ad7a503293430e826fed773a9f2b0092a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa574bf051be4df536870e04c700276dc" id="r_aa574bf051be4df536870e04c700276dc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa574bf051be4df536870e04c700276dc">send_previous_error_packet</a> ()</td></tr>
-<tr class="memdesc:aa574bf051be4df536870e04c700276dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates and sends a packet containing the error codes for the previous error.  <br /></td></tr>
-<tr class="separator:aa574bf051be4df536870e04c700276dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3f1c92a52e81b3c48906860212263b2c" id="r_a3f1c92a52e81b3c48906860212263b2c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3f1c92a52e81b3c48906860212263b2c">send_current_error_packet</a> (ERROR_STRUCT error)</td></tr>
 <tr class="memdesc:a3f1c92a52e81b3c48906860212263b2c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates and sends a packet containing the error codes for the current error.  <br /></td></tr>
 <tr class="separator:a3f1c92a52e81b3c48906860212263b2c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a34102ff7288e524a4491e6ddb8544a2a" id="r_a34102ff7288e524a4491e6ddb8544a2a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a34102ff7288e524a4491e6ddb8544a2a">send_junk_packet</a> ()</td></tr>
 <tr class="memdesc:a34102ff7288e524a4491e6ddb8544a2a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates and sends a junk packet containing all 0xCE.  <br /></td></tr>
 <tr class="separator:a34102ff7288e524a4491e6ddb8544a2a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8407dc8a2dc2749fc2a58460320c6195" id="r_a8407dc8a2dc2749fc2a58460320c6195"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8407dc8a2dc2749fc2a58460320c6195">handle_error</a> (ERROR_STRUCT error)</td></tr>
+<tr class="memdesc:a8407dc8a2dc2749fc2a58460320c6195"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handles system errors based on the provided error structure. Initiates an emergency shutdown, manages Flash ECC-related errors, and sends error packets.  <br /></td></tr>
+<tr class="separator:a8407dc8a2dc2749fc2a58460320c6195"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2de3b1d11097ae22d07e6b96f3278cad" id="r_a2de3b1d11097ae22d07e6b96f3278cad"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2de3b1d11097ae22d07e6b96f3278cad">error_counter_init</a> ()</td></tr>
+<tr class="separator:a2de3b1d11097ae22d07e6b96f3278cad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a19f04466415a2ecb349ba32fb4b81ee6" id="r_a19f04466415a2ecb349ba32fb4b81ee6"><td class="memItemLeft" align="right" valign="top"><a id="a19f04466415a2ecb349ba32fb4b81ee6" name="a19f04466415a2ecb349ba32fb4b81ee6"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>reset_error_counters</b> ()</td></tr>
+<tr class="memdesc:a19f04466415a2ecb349ba32fb4b81ee6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resets all error counters in the EE to 0. <br /></td></tr>
+<tr class="separator:a19f04466415a2ecb349ba32fb4b81ee6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad7a503293430e826fed773a9f2b0092a" id="r_ad7a503293430e826fed773a9f2b0092a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad7a503293430e826fed773a9f2b0092a">send_error_counter_packet</a> ()</td></tr>
+<tr class="memdesc:ad7a503293430e826fed773a9f2b0092a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates and sends a packet containing all 27 error counters.  <br /></td></tr>
+<tr class="separator:ad7a503293430e826fed773a9f2b0092a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa574bf051be4df536870e04c700276dc" id="r_aa574bf051be4df536870e04c700276dc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa574bf051be4df536870e04c700276dc">send_previous_error_packet</a> ()</td></tr>
+<tr class="memdesc:aa574bf051be4df536870e04c700276dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates and sends a packet containing the error codes for the previous error.  <br /></td></tr>
+<tr class="separator:aa574bf051be4df536870e04c700276dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
-<tr class="memitem:a1fb74b26daf6fdfa3dc85e4232ef4769" id="r_a1fb74b26daf6fdfa3dc85e4232ef4769"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1fb74b26daf6fdfa3dc85e4232ef4769">VirtAddVarTab</a> [NB_OF_VAR] = {0x5550, 0x5551, 0x5552, 0x5553, 0x5554, 0x5555, 0x5556, 0x5557, 0x5558, 0x5559, 0x555A, 0x555B, 0x555C, 0x555D, 0x555E, 0x555F, 0x6660, 0x6661, 0x6662, 0x6663, 0x6664, 0x6665, 0x6666, 0x6667, 0x6668, 0x6669, 0x666A, 0x666B, 0x666C}</td></tr>
+<tr class="memitem:a1fb74b26daf6fdfa3dc85e4232ef4769" id="r_a1fb74b26daf6fdfa3dc85e4232ef4769"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1fb74b26daf6fdfa3dc85e4232ef4769">VirtAddVarTab</a> [NB_OF_VAR]</td></tr>
 <tr class="memdesc:a1fb74b26daf6fdfa3dc85e4232ef4769"><td class="mdescLeft">&#160;</td><td class="mdescRight">Array storing virtual addresses for EEPROM emulation variables.  <br /></td></tr>
 <tr class="separator:a1fb74b26daf6fdfa3dc85e4232ef4769"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaf49355162b21ca49d5b3396a9647822" id="r_aaf49355162b21ca49d5b3396a9647822"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aaf49355162b21ca49d5b3396a9647822">VarDataTab</a> [NB_OF_VAR] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}</td></tr>
-<tr class="memdesc:aaf49355162b21ca49d5b3396a9647822"><td class="mdescLeft">&#160;</td><td class="mdescRight">Array storing the data values for EEPROM emulation variables.  <br /></td></tr>
-<tr class="separator:aaf49355162b21ca49d5b3396a9647822"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aeca103e6eac9984a435459facf1d9733" id="r_aeca103e6eac9984a435459facf1d9733"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aeca103e6eac9984a435459facf1d9733">local_cpy</a> [NUM_ERROR_COUNTERS]</td></tr>
-<tr class="memdesc:aeca103e6eac9984a435459facf1d9733"><td class="mdescLeft">&#160;</td><td class="mdescRight">Array used to store the error counters.  <br /></td></tr>
+<tr class="memitem:aeca103e6eac9984a435459facf1d9733" id="r_aeca103e6eac9984a435459facf1d9733"><td class="memItemLeft" align="right" valign="top"><a id="aeca103e6eac9984a435459facf1d9733" name="aeca103e6eac9984a435459facf1d9733"></a>
+uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>local_cpy</b> [NUM_ERROR_COUNTERS]</td></tr>
+<tr class="memdesc:aeca103e6eac9984a435459facf1d9733"><td class="mdescLeft">&#160;</td><td class="mdescRight">Array used to store the error counters locally after fetching from flash. <br /></td></tr>
 <tr class="separator:aeca103e6eac9984a435459facf1d9733"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Implementation of error packet handling. </p>
-<p>Handles all errors in the system. If the built in HAL error handler is called by a peripheral, it redirects here.</p>
-<dl class="section author"><dt>Author</dt><dd>Jared Morrison </dd></dl>
-<dl class="section date"><dt>Date</dt><dd>September 4, 2024 </dd></dl>
+<div class="textblock"><p>: Handles all errors in the system. If the built in HAL error handler is called by a peripheral, it redirects here. </p>
+<dl class="section author"><dt>Author</dt><dd>: Jared Morrison </dd></dl>
+<dl class="section date"><dt>Date</dt><dd>: October 9, 2024  </dd></dl>
 </div><h2 class="groupheader">Function Documentation</h2>
 <a id="a2de3b1d11097ae22d07e6b96f3278cad" name="a2de3b1d11097ae22d07e6b96f3278cad"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a2de3b1d11097ae22d07e6b96f3278cad">&#9670;&#160;</a></span>error_counter_init()</h2>
@@ -214,11 +255,10 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Handles all errors in the system. </p>
-<p>Built in error handler calls this function instead of entering an infinite while loop. Before calling this function, the caller will create a new variable of type ERROR_STRUCT and populate the error_category and error_detail attributes with the respective codes. Given and error category and detail, this error handler proceeds with the appropriate actions. Regardless of what caused the error, this error handler will always increment the error counter, set the previous error to whatever error we are currently handling, send an error packet, and enter IDLE mode. Additional actions are taken depending on the error category.</p>
+<p>Handles system errors based on the provided error structure. Initiates an emergency shutdown, manages Flash ECC-related errors, and sends error packets. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">error</td><td>Error given by the caller. </td></tr>
+    <tr><td class="paramname">error</td><td>The error structure containing the error category and details. </td></tr>
   </table>
   </dd>
 </dl>
@@ -240,11 +280,10 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Increments the error counter for a given error, and updates the variable in the EE. </p>
-<p>I designed the error categories and codes such that they correspond to an index in our local_cpy array. To see what index a particular error is stored in, just check the value each category or detail is assigned in the header file.</p>
+<p>Increments the error counters for the specified error. Updates both the category and detail counters and saves the updated values. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">error</td><td>Error given by the caller. </td></tr>
+    <tr><td class="paramname">error</td><td>The error structure containing the error category and details. </td></tr>
   </table>
   </dd>
 </dl>
@@ -267,7 +306,7 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Creates and sends a packet containing the error codes for the current error. </p>
-<p>This type of packet is only sent when <a class="el" href="#a8407dc8a2dc2749fc2a58460320c6195" title="Handles all errors in the system.">handle_error()</a> is called. </p>
+<p>This type of packet is only sent when <a class="el" href="#a8407dc8a2dc2749fc2a58460320c6195" title="Handles system errors based on the provided error structure. Initiates an emergency shutdown,...">handle_error()</a> is called. </p>
 
 </div>
 </div>
@@ -357,40 +396,6 @@ Variables</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Variable Documentation</h2>
-<a id="aeca103e6eac9984a435459facf1d9733" name="aeca103e6eac9984a435459facf1d9733"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aeca103e6eac9984a435459facf1d9733">&#9670;&#160;</a></span>local_cpy</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">uint16_t local_cpy[NUM_ERROR_COUNTERS]</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Array used to store the error counters. </p>
-<p>The reason this array is of size NUM_ERROR_COUNTERS instead of NB_OF_VAR is because there are two extra variables stored in the EE used for keeping track of the last error that occurred. There are a total of 29 variables that we keep track of in the EE. The first 27 are the error counters, and the last two are the error codes for the last error that occurred. </p>
-
-</div>
-</div>
-<a id="aaf49355162b21ca49d5b3396a9647822" name="aaf49355162b21ca49d5b3396a9647822"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aaf49355162b21ca49d5b3396a9647822">&#9670;&#160;</a></span>VarDataTab</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">uint16_t VarDataTab[NB_OF_VAR] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Array storing the data values for EEPROM emulation variables. </p>
-<p>This array holds the data associated with each virtual address in the <code>VirtAddVarTab</code> array. Initially, all values are set to <code>0</code>, and they can be updated as needed during program execution. The size of the array is determined by the <code>NB_OF_VAR</code> constant. </p>
-
-</div>
-</div>
 <a id="a1fb74b26daf6fdfa3dc85e4232ef4769" name="a1fb74b26daf6fdfa3dc85e4232ef4769"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1fb74b26daf6fdfa3dc85e4232ef4769">&#9670;&#160;</a></span>VirtAddVarTab</h2>
 
@@ -398,13 +403,22 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">uint16_t VirtAddVarTab[NB_OF_VAR] = {0x5550, 0x5551, 0x5552, 0x5553, 0x5554, 0x5555, 0x5556, 0x5557, 0x5558, 0x5559, 0x555A, 0x555B, 0x555C, 0x555D, 0x555E, 0x555F, 0x6660, 0x6661, 0x6662, 0x6663, 0x6664, 0x6665, 0x6666, 0x6667, 0x6668, 0x6669, 0x666A, 0x666B, 0x666C}</td>
+          <td class="memname">uint16_t VirtAddVarTab[NB_OF_VAR]</td>
         </tr>
       </table>
 </div><div class="memdoc">
-
+<b>Initial value:</b><div class="fragment"><div class="line">=</div>
+<div class="line">{</div>
+<div class="line">        0x0001, 0x0002, 0x0003, 0x0004, 0x0005,</div>
+<div class="line">        0x0006, 0x0007, 0x0008, 0x0009, 0x0010,</div>
+<div class="line">        0x0011, 0x0012, 0x0013, 0x0014, 0x0015,</div>
+<div class="line">        0x0016, 0x0017, 0x0018, 0x0019, 0x0020,</div>
+<div class="line">        0x0021, 0x0022, 0x0023, 0x0024, 0x0025,</div>
+<div class="line">        0x0026, 0x0027, 0x0028, 0x0029, 0x0030,</div>
+<div class="line">        0x0031</div>
+<div class="line">}</div>
+</div><!-- fragment -->
 <p>Array storing virtual addresses for EEPROM emulation variables. </p>
-<p>This array holds the virtual addresses of the variables stored in the emulated EEPROM. The addresses are defined to start from <code>0x5550</code> and continue sequentially. The size of the array is determined by the <code>NB_OF_VAR</code> constant. </p>
 
 </div>
 </div>

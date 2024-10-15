@@ -1,24 +1,12 @@
 var searchData=
 [
-  ['hal_5fadc_5fmspdeinit_0',['HAL_ADC_MspDeInit',['../adc_8c.html#a3f61f2c2af0f122f81a87af8ad7b4360',1,'adc.c']]],
-  ['hal_5fadc_5fmspinit_1',['HAL_ADC_MspInit',['../adc_8c.html#ac3139540667c403c5dfd37a99c610b1c',1,'adc.c']]],
-  ['hal_5fdac_5fmspdeinit_2',['HAL_DAC_MspDeInit',['../dac_8c.html#a13b8fa4f908f78040536cc8cfc99231e',1,'dac.c']]],
-  ['hal_5fdac_5fmspinit_3',['HAL_DAC_MspInit',['../dac_8c.html#a8e4797900d3cb9171a484f2b955aba87',1,'dac.c']]],
-  ['hal_5fi2c_5fmspdeinit_4',['HAL_I2C_MspDeInit',['../i2c_8c.html#adaa17249f3d5001ad363c736df31c593',1,'i2c.c']]],
-  ['hal_5fi2c_5fmspinit_5',['HAL_I2C_MspInit',['../i2c_8c.html#a08b1eb7b7be5b94395127e2a33b1b67e',1,'i2c.c']]],
-  ['hal_5finittick_6',['HAL_InitTick',['../stm32h7xx__hal__timebase__tim_8c.html#a879cdb21ef051eb81ec51c18147397d5',1,'stm32h7xx_hal_timebase_tim.c']]],
-  ['hal_5fmspinit_7',['HAL_MspInit',['../stm32h7xx__hal__msp_8c.html#ae4fb8e66865c87d0ebab74a726a6891f',1,'stm32h7xx_hal_msp.c']]],
-  ['hal_5fresumetick_8',['HAL_ResumeTick',['../stm32h7xx__hal__timebase__tim_8c.html#a24e0ee9dae1ec0f9d19200f5575ff790',1,'stm32h7xx_hal_timebase_tim.c']]],
-  ['hal_5frtc_5fmspinit_9',['HAL_RTC_MspInit',['../rtc_8c.html#a453bd7b485bdb49c54872947f546655c',1,'rtc.c']]],
-  ['hal_5fspi_5fmspdeinit_10',['HAL_SPI_MspDeInit',['../spi_8c.html#af9af6cae4cb9386b709196d3a3ab4f78',1,'spi.c']]],
-  ['hal_5fspi_5fmspinit_11',['HAL_SPI_MspInit',['../spi_8c.html#a8e1dadd744299fa6f8bca0e1bcbd2c00',1,'spi.c']]],
-  ['hal_5fsuspendtick_12',['HAL_SuspendTick',['../stm32h7xx__hal__timebase__tim_8c.html#aaf651af2afe688a991c657f64f8fa5f9',1,'stm32h7xx_hal_timebase_tim.c']]],
-  ['hal_5ftim_5fmsppostinit_13',['HAL_TIM_MspPostInit',['../tim_8c.html#a708f19bbc41b292fccf38f2d9796c46a',1,'tim.c']]],
-  ['hal_5ftim_5fperiodelapsedcallback_14',['HAL_TIM_PeriodElapsedCallback',['../main_8c.html#a8a3b0ad512a6e6c6157440b68d395eac',1,'main.c']]],
-  ['hal_5fuart_5fmspdeinit_15',['HAL_UART_MspDeInit',['../usart_8c.html#a94cd2c58add4f2549895a03bf267622e',1,'usart.c']]],
-  ['hal_5fuart_5fmspinit_16',['HAL_UART_MspInit',['../usart_8c.html#a62a25476866998c7aadfb5c0864fa349',1,'usart.c']]],
-  ['handle_5ferror_17',['handle_error',['../error__packet__handler_8c.html#a8407dc8a2dc2749fc2a58460320c6195',1,'error_packet_handler.c']]],
-  ['hardfault_5fhandler_18',['HardFault_Handler',['../stm32h7xx__it_8c.html#a2bffc10d5bd4106753b7c30e86903bea',1,'stm32h7xx_it.c']]],
-  ['hse_5fvalue_19',['HSE_VALUE',['../group___s_t_m32_h7xx___system___private___includes.html#gaeafcff4f57440c60e64812dddd13e7cb',1,'system_stm32h7xx.c']]],
-  ['hsi_5fvalue_20',['HSI_VALUE',['../group___s_t_m32_h7xx___system___private___includes.html#gaaa8c76e274d0f6dd2cefb5d0b17fbc37',1,'system_stm32h7xx.c']]]
+  ['get_5fcurrent_5fstep_0',['get_current_step',['../main_8c.html#a93d72c19e6fe1b36d2b1e286cfcd62c5',1,'main.c']]],
+  ['get_5fprevious_5ferror_1',['get_previous_error',['../error__packet__handler_8c.html#abd725398ca96aa85e30a10c232038ae2',1,'error_packet_handler.c']]],
+  ['get_5frail_5fmonitor_2',['get_rail_monitor',['../voltage__monitor_8c.html#a5f62a1acee847939b7766470e9fac29a',1,'voltage_monitor.c']]],
+  ['get_5frail_5fname_5ferror_5fdetail_3',['get_rail_name_error_detail',['../voltage__monitor_8c.html#ac8391d12baf7cbb93a9b9cb570a23c0e',1,'voltage_monitor.c']]],
+  ['get_5freset_5fcause_4',['get_reset_cause',['../main_8c.html#acad8d8e00188ae6a02d298b85487c352',1,'main.c']]],
+  ['get_5funix_5ftime_5',['get_unix_time',['../time__tagging_8c.html#a9380ddfdb047510c2d91f0a4aa8741f2',1,'time_tagging.c']]],
+  ['get_5fuptime_6',['get_uptime',['../time__tagging_8c.html#ae0ddbac79bae3c5f0508df7d50196177',1,'time_tagging.c']]],
+  ['gpio_2ec_7',['gpio.c',['../gpio_8c.html',1,'']]],
+  ['gpios_8',['gpios',['../main_8c.html#a9090902cad57b8863e80ab36ee3ddb5e',1,'main.c']]]
 ];

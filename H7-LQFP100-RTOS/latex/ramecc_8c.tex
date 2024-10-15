@@ -1,0 +1,173 @@
+\doxysection{Core/src/ramecc.c File Reference}
+\hypertarget{ramecc_8c}{}\label{ramecc_8c}\index{Core/src/ramecc.c@{Core/src/ramecc.c}}
+
+
+\+: Implementation for initialization and handling of RAM ECC  
+
+
+{\ttfamily \#include "{}ramecc.\+h"{}}\newline
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{ramecc_8c_ad6afb67cc4407ecc3037e3e6c8923816}\label{ramecc_8c_ad6afb67cc4407ecc3037e3e6c8923816} 
+\#define {\bfseries ITCM\+\_\+\+START\+\_\+\+ADDRESS}~0x00000000
+\item 
+\Hypertarget{ramecc_8c_a941d67761c22f0eb77443f5787996f29}\label{ramecc_8c_a941d67761c22f0eb77443f5787996f29} 
+\#define {\bfseries ITCM\+\_\+\+END\+\_\+\+ADDRESS}~0x0000\+FFFF
+\item 
+\Hypertarget{ramecc_8c_a20f58ec6bc1437bc5390846dcdcbeba0}\label{ramecc_8c_a20f58ec6bc1437bc5390846dcdcbeba0} 
+\#define {\bfseries DTCM\+\_\+\+START\+\_\+\+ADDRESS}~0x20000000
+\item 
+\Hypertarget{ramecc_8c_a350955338a263fb4df33d6a5d6bbb499}\label{ramecc_8c_a350955338a263fb4df33d6a5d6bbb499} 
+\#define {\bfseries DTCM\+\_\+\+END\+\_\+\+ADDRESS}~0x2001\+FFFF
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{ramecc_8c_a0292b376557bb96b00497e2dd2fe200d}{enable\+\_\+ramecc\+\_\+monitor\+\_\+notifications}} (RAMECC\+\_\+\+Handle\+Type\+Def \texorpdfstring{$\ast$}{*}hramecc)
+\begin{DoxyCompactList}\small\item\em Enables notifications for RAMECC monitoring. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{ramecc_8c_a4a5c3c4e4821426c4e5d85d5705222cd}{write\+\_\+\+RAM}} (volatile uint32\+\_\+t \texorpdfstring{$\ast$}{*}start, volatile uint32\+\_\+t \texorpdfstring{$\ast$}{*}end)
+\begin{DoxyCompactList}\small\item\em Writes zeros to a specified range of RAM. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{ramecc_8c_a2b5b21768b19b777ac5b1547b4e3865c}{MX\+\_\+\+RAMECC\+\_\+\+Init}} (void)
+\begin{DoxyCompactList}\small\item\em Initializes the RAMECC (RAM Error Correction Code) monitors. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{ramecc_8c_a4c826b096334a32fb26f493e3fc64adb}{HAL\+\_\+\+RAMECC\+\_\+\+Detect\+Error\+Callback}} (RAMECC\+\_\+\+Handle\+Type\+Def \texorpdfstring{$\ast$}{*}hramecc)
+\begin{DoxyCompactList}\small\item\em Callback function for RAMECC error detection. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{ramecc_8c_a3b161e0140d9dbb62815abe34721c8d2}\label{ramecc_8c_a3b161e0140d9dbb62815abe34721c8d2} 
+RAMECC\+\_\+\+Handle\+Type\+Def {\bfseries hramecc1\+\_\+m1}
+\item 
+\Hypertarget{ramecc_8c_a241c5aef83d7c9998f548a4a50de8292}\label{ramecc_8c_a241c5aef83d7c9998f548a4a50de8292} 
+RAMECC\+\_\+\+Handle\+Type\+Def {\bfseries hramecc1\+\_\+m2}
+\item 
+\Hypertarget{ramecc_8c_a39e67f6b6aa67a88589b746eedb13d01}\label{ramecc_8c_a39e67f6b6aa67a88589b746eedb13d01} 
+RAMECC\+\_\+\+Handle\+Type\+Def {\bfseries hramecc1\+\_\+m3}
+\item 
+\Hypertarget{ramecc_8c_a945c0a1d2a143495f0ad2100658a90ad}\label{ramecc_8c_a945c0a1d2a143495f0ad2100658a90ad} 
+RAMECC\+\_\+\+Handle\+Type\+Def {\bfseries hramecc1\+\_\+m4}
+\item 
+\Hypertarget{ramecc_8c_a65501786a329590ea2e854d55e727483}\label{ramecc_8c_a65501786a329590ea2e854d55e727483} 
+RAMECC\+\_\+\+Handle\+Type\+Def {\bfseries hramecc1\+\_\+m5}
+\item 
+\Hypertarget{ramecc_8c_a04330f788754f8a73a17e375cb3f7868}\label{ramecc_8c_a04330f788754f8a73a17e375cb3f7868} 
+RAMECC\+\_\+\+Handle\+Type\+Def {\bfseries hramecc2\+\_\+m1}
+\item 
+\Hypertarget{ramecc_8c_a06b828c832125185aac5320378650c27}\label{ramecc_8c_a06b828c832125185aac5320378650c27} 
+RAMECC\+\_\+\+Handle\+Type\+Def {\bfseries hramecc2\+\_\+m2}
+\item 
+\Hypertarget{ramecc_8c_af55e4469a367b8e42ac1b65cdab99f5b}\label{ramecc_8c_af55e4469a367b8e42ac1b65cdab99f5b} 
+RAMECC\+\_\+\+Handle\+Type\+Def {\bfseries hramecc2\+\_\+m3}
+\item 
+\Hypertarget{ramecc_8c_a5f94c8d4b7d143c248d7b4084a94869f}\label{ramecc_8c_a5f94c8d4b7d143c248d7b4084a94869f} 
+RAMECC\+\_\+\+Handle\+Type\+Def {\bfseries hramecc2\+\_\+m4}
+\item 
+\Hypertarget{ramecc_8c_ae6d93d5f2b9da81782d62eacc0d18ecd}\label{ramecc_8c_ae6d93d5f2b9da81782d62eacc0d18ecd} 
+RAMECC\+\_\+\+Handle\+Type\+Def {\bfseries hramecc2\+\_\+m5}
+\item 
+\Hypertarget{ramecc_8c_af40517ea5254f4b7f3c57ad36ebb05cd}\label{ramecc_8c_af40517ea5254f4b7f3c57ad36ebb05cd} 
+RAMECC\+\_\+\+Handle\+Type\+Def {\bfseries hramecc3\+\_\+m1}
+\item 
+\Hypertarget{ramecc_8c_aa0702aa7db48edd750403f7b3cf7cf6d}\label{ramecc_8c_aa0702aa7db48edd750403f7b3cf7cf6d} 
+RAMECC\+\_\+\+Handle\+Type\+Def {\bfseries hramecc3\+\_\+m2}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\+: Implementation for initialization and handling of RAM ECC 
+
+\begin{DoxyAuthor}{Author}
+\+: Jared Morrison 
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+\+: October 9, 2024 
+\end{DoxyDate}
+\begin{DoxyAttention}{Attention}
+
+\end{DoxyAttention}
+Copyright (c) 2024 STMicroelectronics. All rights reserved.
+
+This software is licensed under terms that can be found in the LICENSE file in the root directory of this software component. If no LICENSE file comes with this software, it is provided AS-\/\+IS. 
+
+\doxysubsection{Function Documentation}
+\Hypertarget{ramecc_8c_a0292b376557bb96b00497e2dd2fe200d}\index{ramecc.c@{ramecc.c}!enable\_ramecc\_monitor\_notifications@{enable\_ramecc\_monitor\_notifications}}
+\index{enable\_ramecc\_monitor\_notifications@{enable\_ramecc\_monitor\_notifications}!ramecc.c@{ramecc.c}}
+\doxysubsubsection{\texorpdfstring{enable\_ramecc\_monitor\_notifications()}{enable\_ramecc\_monitor\_notifications()}}
+{\footnotesize\ttfamily \label{ramecc_8c_a0292b376557bb96b00497e2dd2fe200d} 
+void enable\+\_\+ramecc\+\_\+monitor\+\_\+notifications (\begin{DoxyParamCaption}\item[{RAMECC\+\_\+\+Handle\+Type\+Def \texorpdfstring{$\ast$}{*}}]{hramecc}{}\end{DoxyParamCaption})}
+
+
+
+Enables notifications for RAMECC monitoring. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em hramecc} & Pointer to the RAMECC handle. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{ramecc_8c_a4c826b096334a32fb26f493e3fc64adb}\index{ramecc.c@{ramecc.c}!HAL\_RAMECC\_DetectErrorCallback@{HAL\_RAMECC\_DetectErrorCallback}}
+\index{HAL\_RAMECC\_DetectErrorCallback@{HAL\_RAMECC\_DetectErrorCallback}!ramecc.c@{ramecc.c}}
+\doxysubsubsection{\texorpdfstring{HAL\_RAMECC\_DetectErrorCallback()}{HAL\_RAMECC\_DetectErrorCallback()}}
+{\footnotesize\ttfamily \label{ramecc_8c_a4c826b096334a32fb26f493e3fc64adb} 
+void HAL\+\_\+\+RAMECC\+\_\+\+Detect\+Error\+Callback (\begin{DoxyParamCaption}\item[{RAMECC\+\_\+\+Handle\+Type\+Def \texorpdfstring{$\ast$}{*}}]{hramecc}{}\end{DoxyParamCaption})}
+
+
+
+Callback function for RAMECC error detection. 
+
+This function handles single and double bit errors detected by RAMECC.
+
+
+\begin{DoxyParams}{Parameters}
+{\em hramecc} & Pointer to the RAMECC handle. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{ramecc_8c_a2b5b21768b19b777ac5b1547b4e3865c}\index{ramecc.c@{ramecc.c}!MX\_RAMECC\_Init@{MX\_RAMECC\_Init}}
+\index{MX\_RAMECC\_Init@{MX\_RAMECC\_Init}!ramecc.c@{ramecc.c}}
+\doxysubsubsection{\texorpdfstring{MX\_RAMECC\_Init()}{MX\_RAMECC\_Init()}}
+{\footnotesize\ttfamily \label{ramecc_8c_a2b5b21768b19b777ac5b1547b4e3865c} 
+void MX\+\_\+\+RAMECC\+\_\+\+Init (\begin{DoxyParamCaption}\item[{void}]{}{}\end{DoxyParamCaption})}
+
+
+
+Initializes the RAMECC (RAM Error Correction Code) monitors. 
+
+This function sets up the RAMECC for various RAM regions, ensuring that ECC errors are monitored and handled. It includes writing to the ITCM and DTCM on startup to avoid triggering errors. Initialize RAMECC1 M1 \+: AXI SRAM
+
+Initialize RAMECC1 M2 \+: ITCM-\/\+RAM
+
+Initialize RAMECC1 M3 \+: D0\+TCM-\/\+RAM
+
+Initialize RAMECC1 M4 \+: D1\+TCM-\/\+RAM
+
+Initialize RAMECC1 M5 \+: ETM RAM
+
+Initialize RAMECC2 M1 \+: SRAM1\+\_\+0
+
+Initialize RAMECC2 M2 SRAM1\+\_\+1
+
+Initialize RAMECC2 M3 \+: SRAM2\+\_\+0
+
+Initialize RAMECC2 M4 \+: SRAM2\+\_\+1
+
+Initialize RAMECC2 M5 \+: SRAM3
+
+Initialize RAMECC3 M1 \+: SRAM4
+
+Initialize RAMECC3 M2 \+: Backup RAM\Hypertarget{ramecc_8c_a4a5c3c4e4821426c4e5d85d5705222cd}\index{ramecc.c@{ramecc.c}!write\_RAM@{write\_RAM}}
+\index{write\_RAM@{write\_RAM}!ramecc.c@{ramecc.c}}
+\doxysubsubsection{\texorpdfstring{write\_RAM()}{write\_RAM()}}
+{\footnotesize\ttfamily \label{ramecc_8c_a4a5c3c4e4821426c4e5d85d5705222cd} 
+void write\+\_\+\+RAM (\begin{DoxyParamCaption}\item[{volatile uint32\+\_\+t \texorpdfstring{$\ast$}{*}}]{start}{, }\item[{volatile uint32\+\_\+t \texorpdfstring{$\ast$}{*}}]{end}{}\end{DoxyParamCaption})}
+
+
+
+Writes zeros to a specified range of RAM. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em start} & Pointer to the starting address of the RAM range. \\
+\hline
+{\em end} & Pointer to the ending address of the RAM range. \\
+\hline
+\end{DoxyParams}

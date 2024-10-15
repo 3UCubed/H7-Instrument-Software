@@ -1,11 +1,11 @@
 /**
- * @file error_packet_handler.c
- * @brief Implementation of error packet handling
- *
- * Handles all errors in the system. If the built in HAL error handler is called by a peripheral, it redirects here.
- *
- * @author Jared Morrison
- * @date September 4, 2024
+ ******************************************************************************
+ * @file           : error_packet_handler.c
+ * @author 		   : Jared Morrison
+ * @date	 	   : October 9, 2024
+ * @brief          : Handles all errors in the system. If the built in HAL
+ * 					 error handler is called by a peripheral, it redirects here.
+ ******************************************************************************
  */
 
 #include "error_packet_handler.h"
@@ -14,48 +14,64 @@
 #include "eeprom.h"
 #include "tim.h"
 #include "dac.h"
+
+#define ERROR_COUNTER_PACKET_SIZE 60
+#define PREV_ERROR_PACKET_SIZE 4
+#define CURRENT_ERROR_PACKET_SIZE 10
+#define JUNK_PACKET_SIZE 1024
+
+#define ERROR_COUNTER_PACKET_SYNC 0xCC
+#define PREV_ERROR_PACKET_SYNC 0xAA
+#define CURRENT_ERROR_PACKET_SYNC 0xBB
+
+#define NUM_ERROR_COUNTERS 29
+
+#define PREV_ERROR_CATEGORY_INDEX 29
+#define PREV_ERROR_DETAIL_INDEX 30
+
 void emergency_shutdown();
 void flash_mass_erase();
-/**
- * @brief Array storing virtual addresses for EEPROM emulation variables.
- *
- * This array holds the virtual addresses of the variables stored in the emulated EEPROM.
- * The addresses are defined to start from `0x5550` and continue sequentially.
- * The size of the array is determined by the `NB_OF_VAR` constant.
- */
-uint16_t VirtAddVarTab[NB_OF_VAR] = {0x5550, 0x5551, 0x5552, 0x5553, 0x5554, 0x5555, 0x5556, 0x5557, 0x5558, 0x5559, 0x555A, 0x555B, 0x555C, 0x555D, 0x555E, 0x555F, 0x6660, 0x6661, 0x6662, 0x6663, 0x6664, 0x6665, 0x6666, 0x6667, 0x6668, 0x6669, 0x666A, 0x666B, 0x666C, 0x666D, 0x666E};
+void increment_error_counter(ERROR_STRUCT error);
+void update_error_counter();
+void reset_previous_error();
+void set_previous_error(ERROR_STRUCT error);
+ERROR_STRUCT get_previous_error();
+void send_current_error_packet(ERROR_STRUCT error);
+void send_junk_packet();
 
 /**
- * @brief Array used to store the error counters.
- *
- * The reason this array is of size NUM_ERROR_COUNTERS instead of NB_OF_VAR is because
- * there are two extra variables stored in the EE used for keeping track of the last
- * error that occurred. There are a total of 29 variables that we keep track of in the
- * EE. The first 27 are the error counters, and the last two are the error codes for the
- * last error that occurred.
+ * @brief Array storing virtual addresses for EEPROM emulation variables.
+ */
+uint16_t VirtAddVarTab[NB_OF_VAR] =
+{
+		0x0001, 0x0002, 0x0003, 0x0004, 0x0005,
+		0x0006, 0x0007, 0x0008, 0x0009, 0x0010,
+		0x0011, 0x0012, 0x0013, 0x0014, 0x0015,
+		0x0016, 0x0017, 0x0018, 0x0019, 0x0020,
+		0x0021, 0x0022, 0x0023, 0x0024, 0x0025,
+		0x0026, 0x0027, 0x0028, 0x0029, 0x0030,
+		0x0031
+};
+
+/**
+ * @brief Array used to store the error counters locally after fetching from flash.
  */
 uint16_t local_cpy[NUM_ERROR_COUNTERS];
 
 /**
- * @brief Handles all errors in the system.
+ * @brief Handles system errors based on the provided error structure.
+ *        Initiates an emergency shutdown, manages Flash ECC-related errors, and sends error packets.
  *
- * Built in error handler calls this function instead of entering an infinite while loop.
- * Before calling this function, the caller will create a new variable of type ERROR_STRUCT
- * and populate the error_category and error_detail attributes with the respective codes.
- * Given and error category and detail, this error handler proceeds with the appropriate actions.
- * Regardless of what caused the error, this error handler will always increment the error counter,
- * set the previous error to whatever error we are currently handling, send an error packet,
- * and enter IDLE mode. Additional actions are taken depending on the error category.
- *
- * @param error Error given by the caller.
+ * @param error The error structure containing the error category and details.
  */
-void handle_error(ERROR_STRUCT error) {
+void handle_error(ERROR_STRUCT error)
+{
 #ifdef ERROR_HANDLING_ENABLED
-	// Turn off all power supply rails
 	emergency_shutdown();
 
 	// If error was caused by flash ECC...
-	if ((error.detail == ED_single_bit_error_flash) || (error.detail == ED_double_bit_error_flash)) {
+	if ((error.detail == ED_single_bit_error_flash) || (error.detail == ED_double_bit_error_flash))
+	{
 		// Erase user flash, reinit EE, reset error counters, increment error counter, set previous error
 		local_cpy[error.category]++;
 		local_cpy[error.detail]++;
@@ -66,7 +82,8 @@ void handle_error(ERROR_STRUCT error) {
 		set_previous_error(error);
 	}
 	// Otherwise, just increment error counter and set previous error
-	else {
+	else
+	{
 		increment_error_counter(error);
 		set_previous_error(error);
 	}
@@ -77,23 +94,28 @@ void handle_error(ERROR_STRUCT error) {
 	send_junk_packet();
 
 	HAL_TIM_Base_Start_IT(&htim3);
-
 #endif
 }
 
-void flash_mass_erase() {
+/**
+ * @brief Performs a mass erase of Flash memory.
+ *        Unlocks Flash and erases all sectors in Bank 2, handling errors if the erase fails.
+ */
+void flash_mass_erase()
+{
 	HAL_FLASH_Unlock();
 
 	static FLASH_EraseInitTypeDef EraseInitStruct;
-	/* Fill EraseInit structure*/
 	uint32_t SECTORError = 0;
+
 	EraseInitStruct.TypeErase = FLASH_TYPEERASE_SECTORS;
 	EraseInitStruct.VoltageRange = FLASH_VOLTAGE_RANGE_3;
 	EraseInitStruct.Banks = FLASH_BANK_2;
 	EraseInitStruct.Sector = FLASH_SECTOR_0;
 	EraseInitStruct.NbSectors = FLASH_SECTOR_TOTAL;
 
-	if (HAL_FLASHEx_Erase(&EraseInitStruct, &SECTORError) != HAL_OK) {
+	if (HAL_FLASHEx_Erase(&EraseInitStruct, &SECTORError) != HAL_OK)
+	{
 		Error_Handler();
 	}
 }
@@ -101,29 +123,31 @@ void flash_mass_erase() {
 /**
  * @breif Initializes the EE, reads the error counters from the EE, and stores them in local_cpy.
  */
-void error_counter_init() {
+void error_counter_init()
+{
 	HAL_FLASH_Unlock();
-	if (EE_Init() != EE_OK) {
+	if (EE_Init() != EE_OK)
+	{
 		Error_Handler();
 	}
 
-	for (int i = 0; i < NUM_ERROR_COUNTERS; i++) {
-		if ((EE_ReadVariable(VirtAddVarTab[i], &local_cpy[i])) != HAL_OK) {
+	for (int i = 0; i < NUM_ERROR_COUNTERS; i++)
+	{
+		if ((EE_ReadVariable(VirtAddVarTab[i], &local_cpy[i])) != HAL_OK)
+		{
 			Error_Handler();
 		}
 	}
 }
 
 /**
- * @brief Increments the error counter for a given error, and updates the variable in the EE.
+ * @brief Increments the error counters for the specified error.
+ *        Updates both the category and detail counters and saves the updated values.
  *
- * I designed the error categories and codes such that they correspond to an index in our
- * local_cpy array. To see what index a particular error is stored in, just check the value
- * each category or detail is assigned in the header file.
- *
- * @param error Error given by the caller.
+ * @param error The error structure containing the error category and details.
  */
-void increment_error_counter(ERROR_STRUCT error) {
+void increment_error_counter(ERROR_STRUCT error)
+{
 	local_cpy[error.category]++;
 	local_cpy[error.detail]++;
 	update_error_counter();
@@ -132,9 +156,12 @@ void increment_error_counter(ERROR_STRUCT error) {
 /**
  * @brief Writes the contents of local_cpy to the EE, excluding the previous error codes.
  */
-void update_error_counter(){
-	for (int i = 0; i < NUM_ERROR_COUNTERS; i++) {
-		if ((EE_WriteVariable(VirtAddVarTab[i], local_cpy[i])) != HAL_OK) {
+void update_error_counter()
+{
+	for (int i = 0; i < NUM_ERROR_COUNTERS; i++)
+	{
+		if ((EE_WriteVariable(VirtAddVarTab[i], local_cpy[i])) != HAL_OK)
+		{
 			Error_Handler();
 		}
 	}
@@ -143,9 +170,12 @@ void update_error_counter(){
 /**
  * @brief Resets all error counters in the EE to 0.
  */
-void reset_error_counters() {
-	for (int i = 0; i < NUM_ERROR_COUNTERS; i++) {
-		if ((EE_WriteVariable(VirtAddVarTab[i], 0)) != HAL_OK) {
+void reset_error_counters()
+{
+	for (int i = 0; i < NUM_ERROR_COUNTERS; i++)
+	{
+		if ((EE_WriteVariable(VirtAddVarTab[i], 0)) != HAL_OK)
+		{
 			Error_Handler();
 		}
 	}
@@ -154,11 +184,14 @@ void reset_error_counters() {
 /**
  * @brief Resets the previous error codes to 0xFF. 0xFF was chose because it doesn't correspond to any error code.
  */
-void reset_previous_error() {
-	if ((EE_WriteVariable(VirtAddVarTab[PREV_ERROR_CATEGORY_INDEX], 0xFF)) != HAL_OK) {
+void reset_previous_error()
+{
+	if ((EE_WriteVariable(VirtAddVarTab[PREV_ERROR_CATEGORY_INDEX], EC_UNDEFINED)) != HAL_OK)
+	{
 		Error_Handler();
 	}
-	if ((EE_WriteVariable(VirtAddVarTab[PREV_ERROR_DETAIL_INDEX], 0xFF)) != HAL_OK) {
+	if ((EE_WriteVariable(VirtAddVarTab[PREV_ERROR_DETAIL_INDEX], ED_UNDEFINED)) != HAL_OK)
+	{
 		Error_Handler();
 	}
 }
@@ -168,11 +201,14 @@ void reset_previous_error() {
  *
  * @param error Previous error code in EE is set to this.
  */
-void set_previous_error(ERROR_STRUCT error) {
-	if ((EE_WriteVariable(VirtAddVarTab[PREV_ERROR_CATEGORY_INDEX], error.category)) != HAL_OK) {
+void set_previous_error(ERROR_STRUCT error)
+{
+	if ((EE_WriteVariable(VirtAddVarTab[PREV_ERROR_CATEGORY_INDEX], error.category)) != HAL_OK)
+	{
 		Error_Handler();
 	}
-	if ((EE_WriteVariable(VirtAddVarTab[PREV_ERROR_DETAIL_INDEX], error.detail)) != HAL_OK) {
+	if ((EE_WriteVariable(VirtAddVarTab[PREV_ERROR_DETAIL_INDEX], error.detail)) != HAL_OK)
+	{
 		Error_Handler();
 	}
 }
@@ -182,15 +218,18 @@ void set_previous_error(ERROR_STRUCT error) {
  *
  * @return Error populated with retrieved category and detail.
  */
-ERROR_STRUCT get_previous_error() {
+ERROR_STRUCT get_previous_error()
+{
 	ERROR_STRUCT prev_error;
 	uint16_t category;
 	uint16_t detail;
 
-	if ((EE_ReadVariable(VirtAddVarTab[PREV_ERROR_CATEGORY_INDEX], &category)) != HAL_OK) {
+	if ((EE_ReadVariable(VirtAddVarTab[PREV_ERROR_CATEGORY_INDEX], &category)) != HAL_OK)
+	{
 		Error_Handler();
 	}
-	if ((EE_ReadVariable(VirtAddVarTab[PREV_ERROR_DETAIL_INDEX], &detail)) != HAL_OK) {
+	if ((EE_ReadVariable(VirtAddVarTab[PREV_ERROR_DETAIL_INDEX], &detail)) != HAL_OK)
+	{
 		Error_Handler();
 	}
 
@@ -206,7 +245,8 @@ ERROR_STRUCT get_previous_error() {
  * There is an error counter for every single category and detail.
  * This type of packet is only sent during sync.
  */
-void send_error_counter_packet() {
+void send_error_counter_packet()
+{
 	uint8_t buffer[ERROR_COUNTER_PACKET_SIZE];
 
 	buffer[0] = ERROR_COUNTER_PACKET_SYNC;
@@ -270,7 +310,7 @@ void send_error_counter_packet() {
 	buffer[58] = ((local_cpy[ED_UNDEFINED] & 0xFF00) >> 8);
 	buffer[59] = (local_cpy[ED_UNDEFINED] & 0xFF);
 
-	HAL_UART_Transmit(&huart1, buffer, ERROR_COUNTER_PACKET_SIZE, 100);
+	HAL_UART_Transmit(&huart1, buffer, ERROR_COUNTER_PACKET_SIZE, UART_TIMEOUT_MS);
 }
 
 /**
@@ -278,7 +318,8 @@ void send_error_counter_packet() {
  *
  * This type of packet is only sent on request.
  */
-void send_previous_error_packet() {
+void send_previous_error_packet()
+{
 	ERROR_STRUCT prev_error;
 	uint8_t buffer[PREV_ERROR_PACKET_SIZE];
 
@@ -289,7 +330,7 @@ void send_previous_error_packet() {
 	buffer[2] = prev_error.category;
 	buffer[3] = prev_error.detail;
 
-	HAL_UART_Transmit(&huart1, buffer, PREV_ERROR_PACKET_SIZE, 100);
+	HAL_UART_Transmit(&huart1, buffer, PREV_ERROR_PACKET_SIZE, UART_TIMEOUT_MS);
 }
 
 /**
@@ -297,11 +338,13 @@ void send_previous_error_packet() {
  *
  * This type of packet is only sent when handle_error() is called.
  */
-void send_current_error_packet(ERROR_STRUCT error) {
+void send_current_error_packet(ERROR_STRUCT error)
+{
 	uint8_t buffer[CURRENT_ERROR_PACKET_SIZE];
 
 	// If the error isn't a power supply rail, set the out of bounds values to 0
-	if (error.category != EC_power_supply_rail) {
+	if (error.category != EC_power_supply_rail)
+	{
 		error.OOB_1 = 0;
 		error.OOB_2 = 0;
 		error.OOB_3 = 0;
@@ -318,7 +361,7 @@ void send_current_error_packet(ERROR_STRUCT error) {
 	buffer[8] = ((error.OOB_3 & 0xFF00) >> 8);
 	buffer[9] = (error.OOB_3 & 0xFF);
 
-	HAL_UART_Transmit(&huart1, buffer, CURRENT_ERROR_PACKET_SIZE, 100);
+	HAL_UART_Transmit(&huart1, buffer, CURRENT_ERROR_PACKET_SIZE, UART_TIMEOUT_MS);
 }
 
 /**
@@ -326,42 +369,43 @@ void send_current_error_packet(ERROR_STRUCT error) {
  *
  * Used to clear out the buffer on the OBC.
  */
-void send_junk_packet() {	// TODO: Figure out if we still need this.
+void send_junk_packet()
+{
 	uint8_t buffer[JUNK_PACKET_SIZE];
 
 	for (int i = 0; i < JUNK_PACKET_SIZE; i++) {
 		buffer[i] = 0xCE;
 	}
 
-	HAL_UART_Transmit(&huart1, buffer, JUNK_PACKET_SIZE, 100);
+	HAL_UART_Transmit(&huart1, buffer, JUNK_PACKET_SIZE, UART_TIMEOUT_MS);
 }
 
-
-void emergency_shutdown() {
+/**
+ * @brief Initiates an emergency shutdown of the system.
+ *        Disables timers, DAC, rail monitoring, and all power supply voltages, setting the system to idle.
+ */
+void emergency_shutdown()
+{
 	ERPA_ENABLED = 0;
 	TIM2->CCR4 = 0;
-	HAL_TIM_OC_Stop_IT(&htim1, TIM_CHANNEL_1);			// PMT packet off
+	HAL_TIM_OC_Stop_IT(&htim1, TIM_CHANNEL_1);
 	HAL_TIM_OC_Stop_IT(&htim2, TIM_CHANNEL_4);
 
 	HK_ENABLED = 0;
-	HAL_DAC_Stop_DMA(&hdac1, DAC_CHANNEL_1);			// Disable auto sweep
-
+	HAL_DAC_Stop_DMA(&hdac1, DAC_CHANNEL_1);
 
 	// Telling rail monitor which voltages are now disabled
-	for (int i = RAIL_TMP1; i >= RAIL_busvmon; i--) {
+	for (int i = RAIL_TMP1; i >= RAIL_busvmon; i--)
+	{
 		set_rail_monitor_enable(i, 0);
 	}
 
 	// Disabling all voltages
-	for (int i = 8; i >= 0; i--) {
+	for (int i = GPIOS_INDEX_N800V; i >= GPIOS_INDEX_SDN1; i--)
+	{
 		HAL_GPIO_WritePin(gpios[i].gpio, gpios[i].pin, GPIO_PIN_RESET);
 	}
 	IDLING = 1;
 }
-
-
-
-
-
 
 
