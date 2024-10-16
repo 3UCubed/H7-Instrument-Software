@@ -24,17 +24,13 @@
 #define PREV_ERROR_PACKET_SYNC 0xAA
 #define CURRENT_ERROR_PACKET_SYNC 0xBB
 
-#define NUM_ERROR_COUNTERS 29
-
 #define PREV_ERROR_CATEGORY_INDEX 29
 #define PREV_ERROR_DETAIL_INDEX 30
 
 void emergency_shutdown();
 void flash_mass_erase();
-void increment_error_counter(ERROR_STRUCT error);
 void update_error_counter();
 void reset_previous_error();
-void set_previous_error(ERROR_STRUCT error);
 ERROR_STRUCT get_previous_error();
 void send_current_error_packet(ERROR_STRUCT error);
 void send_junk_packet();

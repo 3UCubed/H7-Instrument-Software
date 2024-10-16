@@ -12,7 +12,10 @@
 
 #include "time_tagging.h"
 #include "usart.h"
+#include "error_packet_handler.h"
 
+void create_sync_packet(ERROR_STRUCT reset_cause);
+void create_version_packet();
 void create_pmt_packet();
 void create_erpa_packet();
 void create_hk_packet();

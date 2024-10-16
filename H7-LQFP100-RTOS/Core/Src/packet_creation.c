@@ -9,19 +9,118 @@
 
 #include "packet_creation.h"
 
+#define SYNC_DATA_SIZE 65
+#define VERSION_DATA_SIZE 5
 #define PMT_DATA_SIZE 10
 #define ERPA_DATA_SIZE 14
 #define HK_DATA_SIZE 50
 #define UPTIME_SIZE 4
 #define TIMESTAMP_SIZE 6
 
-#define PMT_SYNC 0xFF
-#define ERPA_SYNC 0xEE
-#define HK_SYNC 0xDD
+#define SYNC_SYNCWORD 0x88
+#define VERSION_SYNCWORD 0x99
+#define PMT_SYNCWORD 0xFF
+#define ERPA_SYNCWORD 0xEE
+#define HK_SYNCWORD 0xDD
 
 uint16_t pmt_seq = 0;
 uint32_t erpa_seq = 0;
 uint16_t hk_seq = 0;
+
+void create_sync_packet(ERROR_STRUCT reset_cause)
+{
+	static uint8_t buffer[SYNC_DATA_SIZE];
+
+	buffer[0] = SYNC_SYNCWORD;
+	buffer[1] = SYNC_SYNCWORD;
+	buffer[2] = V_MAJOR;
+	buffer[3] = V_MINOR;
+	buffer[4] = V_PATCH;
+	buffer[5] = ((local_cpy[EC_power_supply_rail] & 0xFF00) >> 8);
+	buffer[6] = (local_cpy[EC_power_supply_rail] & 0xFF);
+	buffer[7] = ((local_cpy[EC_seu] & 0xFF00) >> 8);
+	buffer[8] = (local_cpy[EC_seu] & 0xFF);
+	buffer[9] = ((local_cpy[EC_peripheral] & 0xFF00) >> 8);
+	buffer[10] = (local_cpy[EC_peripheral] & 0xFF);
+	buffer[11] = ((local_cpy[EC_brownout] & 0xFF00) >> 8);
+	buffer[12] = (local_cpy[EC_brownout] & 0xFF);
+	buffer[13] = ((local_cpy[EC_watchdog] & 0xFF00) >> 8);
+	buffer[14] = (local_cpy[EC_watchdog] & 0xFF);
+	buffer[15] = ((local_cpy[EC_UNDEFINED] & 0xFF00) >> 8);
+	buffer[16] = (local_cpy[EC_UNDEFINED] & 0xFF);
+	buffer[17] = ((local_cpy[ED_vsense] & 0xFF00) >> 8);
+	buffer[18] = (local_cpy[ED_vsense] & 0xFF);
+	buffer[19] = ((local_cpy[ED_vrefint] & 0xFF00) >> 8);
+	buffer[20] = (local_cpy[ED_vrefint] & 0xFF);
+	buffer[21] = ((local_cpy[ED_TEMP1] & 0xFF00) >> 8);
+	buffer[22] = (local_cpy[ED_TEMP1] & 0xFF);
+	buffer[23] = ((local_cpy[ED_TEMP2] & 0xFF00) >> 8);
+	buffer[24] = (local_cpy[ED_TEMP2] & 0xFF);
+	buffer[25] = ((local_cpy[ED_TEMP3] & 0xFF00) >> 8);
+	buffer[26] = (local_cpy[ED_TEMP3] & 0xFF);
+	buffer[27] = ((local_cpy[ED_TEMP4] & 0xFF00) >> 8);
+	buffer[28] = (local_cpy[ED_TEMP4] & 0xFF);
+	buffer[29] = ((local_cpy[ED_busvmon] & 0xFF00) >> 8);
+	buffer[30] = (local_cpy[ED_busvmon] & 0xFF);
+	buffer[31] = ((local_cpy[ED_busimon] & 0xFF00) >> 8);
+	buffer[32] = (local_cpy[ED_busimon] & 0xFF);
+	buffer[33] = ((local_cpy[ED_2v5] & 0xFF00) >> 8);
+	buffer[34] = (local_cpy[ED_2v5] & 0xFF);
+	buffer[35] = ((local_cpy[ED_3v3] & 0xFF00) >> 8);
+	buffer[36] = (local_cpy[ED_3v3] & 0xFF);
+	buffer[37] = ((local_cpy[ED_5v] & 0xFF00) >> 8);
+	buffer[38] = (local_cpy[ED_5v] & 0xFF);
+	buffer[39] = ((local_cpy[ED_n3v3] & 0xFF00) >> 8);
+	buffer[40] = (local_cpy[ED_n3v3] & 0xFF);
+	buffer[41] = ((local_cpy[ED_n5v] & 0xFF00) >> 8);
+	buffer[42] = (local_cpy[ED_n5v] & 0xFF);
+	buffer[43] = ((local_cpy[ED_15v] & 0xFF00) >> 8);
+	buffer[44] = (local_cpy[ED_15v] & 0xFF);
+	buffer[45] = ((local_cpy[ED_5vref] & 0xFF00) >> 8);
+	buffer[46] = (local_cpy[ED_5vref] & 0xFF);
+	buffer[47] = ((local_cpy[ED_n200v] & 0xFF00) >> 8);
+	buffer[48] = (local_cpy[ED_n200v] & 0xFF);
+	buffer[49] = ((local_cpy[ED_n800v] & 0xFF00) >> 8);
+	buffer[50] = (local_cpy[ED_n800v] & 0xFF);
+	buffer[51] = ((local_cpy[ED_TMP1] & 0xFF00) >> 8);
+	buffer[52] = (local_cpy[ED_TMP1] & 0xFF);
+	buffer[53] = ((local_cpy[ED_single_bit_error_flash] & 0xFF00) >> 8);
+	buffer[54] = (local_cpy[ED_single_bit_error_flash] & 0xFF);
+	buffer[55] = ((local_cpy[ED_double_bit_error_flash] & 0xFF00) >> 8);
+	buffer[56] = (local_cpy[ED_double_bit_error_flash] & 0xFF);
+	buffer[57] = ((local_cpy[ED_single_bit_error_ram] & 0xFF00) >> 8);
+	buffer[58] = (local_cpy[ED_single_bit_error_ram] & 0xFF);
+	buffer[59] = ((local_cpy[ED_double_bit_error_ram] & 0xFF00) >> 8);
+	buffer[60] = (local_cpy[ED_double_bit_error_ram] & 0xFF);
+	buffer[61] = ((local_cpy[ED_UNDEFINED] & 0xFF00) >> 8);
+	buffer[62] = (local_cpy[ED_UNDEFINED] & 0xFF);
+	buffer[63] = reset_cause.category;
+	buffer[64] = reset_cause.detail;
+
+	HAL_UART_Transmit(&huart1, buffer, SYNC_DATA_SIZE, UART_TIMEOUT_MS);
+}
+
+/**
+ * @brief Creates and transmits a version packet.
+ *
+ * This function sends a packet containing the major,
+ * minor, and patch versions of the firmware and transmits
+ * it over UART.
+ *
+ * @note V_MAJOR, V_MINOR, and V_PATCH are defined in main.h.
+ */
+void create_version_packet()
+{
+	static uint8_t buffer[VERSION_DATA_SIZE];
+
+	buffer[0] = VERSION_SYNCWORD;
+	buffer[1] = VERSION_SYNCWORD;
+	buffer[2] = V_MAJOR;
+	buffer[3] = V_MINOR;
+	buffer[4] = V_PATCH;
+
+	HAL_UART_Transmit(&huart1, buffer, VERSION_DATA_SIZE, UART_TIMEOUT_MS);
+}
 
 /**
  * @brief Creates and transmits a PMT packet.
@@ -41,8 +140,8 @@ void create_pmt_packet()
 	get_uptime(uptime);
 	sample_pmt_spi(pmt_spi);
 
-	buffer[0] = PMT_SYNC;
-	buffer[1] = PMT_SYNC;
+	buffer[0] = PMT_SYNCWORD;
+	buffer[1] = PMT_SYNCWORD;
 	buffer[2] = ((pmt_seq & 0xFF00) >> 8);
 	buffer[3] = (pmt_seq & 0xFF);
 	buffer[4] = pmt_spi[0];
@@ -80,8 +179,8 @@ void create_erpa_packet()
 	sample_erpa_spi(erpa_spi);
 	sample_erpa_adc(erpa_adc);
 
-	buffer[0] = ERPA_SYNC;
-	buffer[1] = ERPA_SYNC;
+	buffer[0] = ERPA_SYNCWORD;
+	buffer[1] = ERPA_SYNCWORD;
 	buffer[2] = ((erpa_seq >> 16) & 0xFF);
 	buffer[3] = ((erpa_seq >> 8) & 0xFF);
 	buffer[4] = erpa_seq & 0xFF;
@@ -118,8 +217,8 @@ void create_hk_packet()
 	get_unix_time(timestamp);
 	rail_monitor_ptr = get_rail_monitor();
 
-	buffer[0] = HK_SYNC;                     	// HK SYNC 0xCC MSB
-	buffer[1] = HK_SYNC;                     	// HK SYNC 0xCC LSB
+	buffer[0] = HK_SYNCWORD;                     	// HK SYNC 0xCC MSB
+	buffer[1] = HK_SYNCWORD;                     	// HK SYNC 0xCC LSB
 	buffer[2] = ((hk_seq & 0xFF00) >> 8);    	// HK SEQ # MSB
 	buffer[3] = (hk_seq & 0xFF);             	// HK SEQ # LSB
 	buffer[4] = ((rail_monitor_ptr[RAIL_vsense].data & 0xFF00) >> 8);		// HK vsense MSB

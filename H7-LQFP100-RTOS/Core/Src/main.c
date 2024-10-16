@@ -3,7 +3,7 @@
  ******************************************************************************
  * @file           : main.c
  * @author 		   : Jared Morrison
- * @version 	   : 2.0.0-alpha
+ * @version 	   : 1.0.0
  * @brief          : Main program body
  ******************************************************************************
  * @attention
@@ -100,7 +100,8 @@ typedef enum
 	CMD_SCIENCE_MODE = 0xBF,
 	CMD_IDLE_MODE = 0xCF,
 	CMD_RESET_ERROR_COUNTERS = 0xDF,
-	CMD_SEND_PREVIOUS_ERROR = 0xEF
+	CMD_SEND_PREVIOUS_ERROR = 0xEF,
+	CMD_SEND_VERSION_PACKET = 0x1F
 }ACCEPTED_COMMANDS;
 
 /* USER CODE END PTD */
@@ -545,6 +546,12 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 		break;
 	}
 
+	case CMD_SEND_VERSION_PACKET:
+	{
+		create_version_packet();
+		break;
+	}
+
 	default:
 	{
 		// Unknown command
@@ -557,16 +564,19 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
  * @brief Retrieves and handles the cause of a system reset.
  *        Checks for watchdog and brownout reset conditions and reports errors.
  */
-void get_reset_cause()
+ERROR_STRUCT get_reset_cause()
 {
 	ERROR_STRUCT error;
+	error.category = EC_UNDEFINED;
+	error.detail = ED_UNDEFINED;
 
 	if (__HAL_RCC_GET_FLAG(RCC_FLAG_IWDG1RST))
     {
         error.category = EC_watchdog;
         error.detail = ED_UNDEFINED;
         __HAL_RCC_CLEAR_RESET_FLAGS();
-        handle_error(error);
+        increment_error_counter(error);
+        set_previous_error(error);
     }
 
     else if (__HAL_RCC_GET_FLAG(RCC_FLAG_BORRST))
@@ -574,8 +584,11 @@ void get_reset_cause()
         error.category = EC_brownout;
         error.detail = ED_UNDEFINED;
         __HAL_RCC_CLEAR_RESET_FLAGS();
-        handle_error(error);
+        increment_error_counter(error);
+        set_previous_error(error);
     }
+
+	return error;
 }
 
 /* USER CODE END 0 */
