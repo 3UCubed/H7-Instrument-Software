@@ -13,6 +13,7 @@
 #include "time_tagging.h"
 #include "usart.h"
 
+void create_version_packet();
 void create_pmt_packet();
 void create_erpa_packet();
 void create_hk_packet();

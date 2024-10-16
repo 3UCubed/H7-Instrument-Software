@@ -3,7 +3,7 @@
  ******************************************************************************
  * @file           : main.c
  * @author 		   : Jared Morrison
- * @version 	   : 2.0.0-alpha
+ * @version 	   : 1.0.0
  * @brief          : Main program body
  ******************************************************************************
  * @attention
@@ -100,7 +100,8 @@ typedef enum
 	CMD_SCIENCE_MODE = 0xBF,
 	CMD_IDLE_MODE = 0xCF,
 	CMD_RESET_ERROR_COUNTERS = 0xDF,
-	CMD_SEND_PREVIOUS_ERROR = 0xEF
+	CMD_SEND_PREVIOUS_ERROR = 0xEF,
+	CMD_SEND_VERSION_PACKET = 0x1F
 }ACCEPTED_COMMANDS;
 
 /* USER CODE END PTD */
@@ -542,6 +543,12 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 #ifdef ERROR_HANDLING_ENABLED
 		send_previous_error_packet();
 #endif
+		break;
+	}
+
+	case CMD_SEND_VERSION_PACKET:
+	{
+		create_version_packet();
 		break;
 	}
 

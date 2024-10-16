@@ -40,6 +40,10 @@ extern "C" {
 #include "sample_data.h"
 #include "time_tagging.h"
 
+#define V_MAJOR 1
+#define V_MINOR 0
+#define V_PATCH 0
+
 #define ERROR_HANDLING_ENABLED
 
 #define ERPA_PWM_FREQ 312
@@ -107,6 +111,7 @@ enum
 
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
+
 extern osEventFlagsId_t packet_event_flags;
 extern osEventFlagsId_t utility_event_flags;
 extern osEventFlagsId_t mode_event_flags;

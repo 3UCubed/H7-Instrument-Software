@@ -9,12 +9,14 @@
 
 #include "packet_creation.h"
 
+#define VERSION_DATA_SIZE 5
 #define PMT_DATA_SIZE 10
 #define ERPA_DATA_SIZE 14
 #define HK_DATA_SIZE 50
 #define UPTIME_SIZE 4
 #define TIMESTAMP_SIZE 6
 
+#define VERSION_SYNC 0x99
 #define PMT_SYNC 0xFF
 #define ERPA_SYNC 0xEE
 #define HK_SYNC 0xDD
@@ -22,6 +24,28 @@
 uint16_t pmt_seq = 0;
 uint32_t erpa_seq = 0;
 uint16_t hk_seq = 0;
+
+/**
+ * @brief Creates and transmits a version packet.
+ *
+ * This function sends a packet containing the major,
+ * minor, and patch versions of the firmware and transmits
+ * it over UART.
+ *
+ * @note V_MAJOR, V_MINOR, and V_PATCH are defined in main.h.
+ */
+void create_version_packet()
+{
+	static uint8_t buffer[VERSION_DATA_SIZE];
+
+	buffer[0] = VERSION_SYNC;
+	buffer[1] = VERSION_SYNC;
+	buffer[2] = V_MAJOR;
+	buffer[3] = V_MINOR;
+	buffer[4] = V_PATCH;
+
+	HAL_UART_Transmit(&huart1, buffer, VERSION_DATA_SIZE, UART_TIMEOUT_MS);
+}
 
 /**
  * @brief Creates and transmits a PMT packet.
