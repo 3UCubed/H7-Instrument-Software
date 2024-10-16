@@ -619,9 +619,13 @@ void Sync_init(void *argument)
 	  	} while (key != expected_key_value);
 
 	  	calibrateRTC(UART_RX_BUFFER);
-	  	osDelay(SYNC_DELAY);
 	  	HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
+
+	  	osDelay(SYNC_DELAY);
 	  	send_error_counter_packet();
+	  	osDelay(SYNC_DELAY);
+	  	create_version_packet();
+	  	osDelay(SYNC_DELAY);
 	    get_reset_cause();
   }
   /* USER CODE END Sync_init */
