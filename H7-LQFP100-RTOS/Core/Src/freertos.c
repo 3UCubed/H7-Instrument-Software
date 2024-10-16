@@ -609,6 +609,7 @@ void Sync_init(void *argument)
 	  	uint8_t key_index = 0;
 	  	uint8_t expected_key_value = 0xFF;
 	  	uint8_t rtc_buffer_size = 9;
+	  	ERROR_STRUCT reset_cause;
 
 	  	// Wait for 0xFF to be received
 	  	HAL_UART_AbortReceive(&huart1);
@@ -620,13 +621,9 @@ void Sync_init(void *argument)
 
 	  	calibrateRTC(UART_RX_BUFFER);
 	  	HAL_UART_Receive_IT(&huart1, UART_RX_BUFFER, 1);
-
 	  	osDelay(SYNC_DELAY);
-	  	send_error_counter_packet();
-	  	osDelay(SYNC_DELAY);
-	  	create_version_packet();
-	  	osDelay(SYNC_DELAY);
-	    get_reset_cause();
+	  	reset_cause = get_reset_cause();
+	  	create_sync_packet(reset_cause);
   }
   /* USER CODE END Sync_init */
 }

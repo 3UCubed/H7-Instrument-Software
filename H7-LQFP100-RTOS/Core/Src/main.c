@@ -564,16 +564,19 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
  * @brief Retrieves and handles the cause of a system reset.
  *        Checks for watchdog and brownout reset conditions and reports errors.
  */
-void get_reset_cause()
+ERROR_STRUCT get_reset_cause()
 {
 	ERROR_STRUCT error;
+	error.category = EC_UNDEFINED;
+	error.detail = ED_UNDEFINED;
 
 	if (__HAL_RCC_GET_FLAG(RCC_FLAG_IWDG1RST))
     {
         error.category = EC_watchdog;
         error.detail = ED_UNDEFINED;
         __HAL_RCC_CLEAR_RESET_FLAGS();
-        handle_error(error);
+        increment_error_counter(error);
+        set_previous_error(error);
     }
 
     else if (__HAL_RCC_GET_FLAG(RCC_FLAG_BORRST))
@@ -581,8 +584,11 @@ void get_reset_cause()
         error.category = EC_brownout;
         error.detail = ED_UNDEFINED;
         __HAL_RCC_CLEAR_RESET_FLAGS();
-        handle_error(error);
+        increment_error_counter(error);
+        set_previous_error(error);
     }
+
+	return error;
 }
 
 /* USER CODE END 0 */

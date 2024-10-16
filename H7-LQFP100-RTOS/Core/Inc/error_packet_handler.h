@@ -12,6 +12,8 @@
 
 #include <stdio.h>
 
+#define NUM_ERROR_COUNTERS 29
+
 typedef enum
 {
 	EC_power_supply_rail = 0x00,
@@ -59,10 +61,15 @@ typedef struct
 
 }ERROR_STRUCT;
 
+extern uint16_t local_cpy[NUM_ERROR_COUNTERS];
+
 void error_counter_init();
 void handle_error(ERROR_STRUCT error);
 void send_error_counter_packet();
 void send_previous_error_packet();
 void reset_error_counters();
+void increment_error_counter(ERROR_STRUCT error);
+void set_previous_error(ERROR_STRUCT error);
+
 
 #endif /* INC_ERROR_PACKET_HANDLER_H_ */

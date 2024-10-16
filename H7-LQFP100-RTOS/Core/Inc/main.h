@@ -138,7 +138,7 @@ STEP_VALUES get_current_step();
 void enter_stop();
 void send_ACK();
 void send_NACK();
-void get_reset_cause();
+ERROR_STRUCT get_reset_cause();
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
