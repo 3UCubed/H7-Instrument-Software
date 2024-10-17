@@ -194,11 +194,11 @@ void create_erpa_packet()
 	buffer[6] = ((erpa_seq >> 16) & 0xFF);
 	buffer[7] = ((erpa_seq >> 8) & 0xFF);
 	buffer[8] = erpa_seq & 0xFF;
-	buffer[11] = sweep_step;
-	buffer[12] = ((erpa_adc[0] & 0xFF00) >> 8);	// SWP Monitored MSB
-	buffer[13] = (erpa_adc[0] & 0xFF);           // SWP Monitored LSB
-	buffer[9] = erpa_spi[0];					// ERPA eADC MSB
-	buffer[10] = erpa_spi[1];					// ERPA eADC LSB
+	buffer[9] = sweep_step;
+	buffer[10] = ((erpa_adc[0] & 0xFF00) >> 8);	// SWP Monitored MSB
+	buffer[11] = (erpa_adc[0] & 0xFF);           // SWP Monitored LSB
+	buffer[12] = erpa_spi[0];					// ERPA eADC MSB
+	buffer[13] = erpa_spi[1];					// ERPA eADC LSB
 
 	HAL_UART_Transmit(&huart1, buffer, ERPA_DATA_SIZE, UART_TIMEOUT_MS);
 
