@@ -14,6 +14,18 @@
 #include "usart.h"
 #include "error_packet_handler.h"
 
+#define SYNC_DATA_SIZE 65
+#define VERSION_DATA_SIZE 5
+#define PMT_DATA_SIZE 10
+#define ERPA_DATA_SIZE 14
+#define HK_DATA_SIZE 50
+
+typedef struct
+{
+	uint8_t buffer[HK_DATA_SIZE];	// Size of largest packet
+	uint8_t size;
+}Packet_t;
+
 void create_sync_packet(ERROR_STRUCT reset_cause);
 void create_version_packet();
 void create_pmt_packet();

@@ -27,6 +27,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "packet_queue.h"
 #include "usart.h"
 #include "voltage_monitor.h"
 #include "packet_creation.h"
@@ -43,6 +44,7 @@ typedef StaticTask_t osStaticThreadDef_t;
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define PACKET_GAP 1
 #define PS_RAIL_DELAY 100
 #define IDLE_TO_SCIENCE_DELAY 1000
 #define IDLE_TO_VOLTAGE_MONITOR_DELAY 3500	// TODO: Reduce to 1000 for assembled instrument
@@ -178,6 +180,18 @@ const osThreadAttr_t Sync_task_attributes = {
   .stack_size = sizeof(Sync_taskBuffer),
   .priority = (osPriority_t) osPriorityNormal,
 };
+/* Definitions for Transmit_task */
+osThreadId_t Transmit_taskHandle;
+uint32_t Transmit_taskBuffer[ 128 ];
+osStaticThreadDef_t Transmit_taskControlBlock;
+const osThreadAttr_t Transmit_task_attributes = {
+  .name = "Transmit_task",
+  .cb_mem = &Transmit_taskControlBlock,
+  .cb_size = sizeof(Transmit_taskControlBlock),
+  .stack_mem = &Transmit_taskBuffer[0],
+  .stack_size = sizeof(Transmit_taskBuffer),
+  .priority = (osPriority_t) osPriorityLow,
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -194,6 +208,7 @@ void STOP_init(void *argument);
 void Science_init(void *argument);
 void Idle_init(void *argument);
 void Sync_init(void *argument);
+void Transmit_init(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -231,8 +246,7 @@ void vApplicationStackOverflowHook(xTaskHandle xTask, signed char *pcTaskName)
   * @param  None
   * @retval None
   */
-void MX_FREERTOS_Init(void)
-{
+void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
 
   /* USER CODE END Init */
@@ -283,6 +297,9 @@ void MX_FREERTOS_Init(void)
 
   /* creation of Sync_task */
   Sync_taskHandle = osThreadNew(Sync_init, NULL, &Sync_task_attributes);
+
+  /* creation of Transmit_task */
+  Transmit_taskHandle = osThreadNew(Transmit_init, NULL, &Transmit_task_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -625,6 +642,34 @@ void Sync_init(void *argument)
 	  	create_sync_packet(reset_cause);
   }
   /* USER CODE END Sync_init */
+}
+
+/* USER CODE BEGIN Header_Transmit_init */
+/**
+* @brief Function implementing the Transmit_task thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_Transmit_init */
+void Transmit_init(void *argument)
+{
+  /* USER CODE BEGIN Transmit_init */
+  /* Infinite loop */
+  for(;;)
+  {
+	Packet_t packet;
+	packet = dequeue();
+
+	while (packet.size == 0)
+	{
+		osThreadYield();
+	}
+
+	HAL_UART_Transmit(&huart1, packet.buffer, packet.size, UART_TIMEOUT_MS);
+
+    osDelay(PACKET_GAP);
+  }
+  /* USER CODE END Transmit_init */
 }
 
 /* Private application code --------------------------------------------------*/
