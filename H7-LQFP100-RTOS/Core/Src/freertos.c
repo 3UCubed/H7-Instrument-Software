@@ -214,7 +214,6 @@ void vApplicationTickHook( void )
    code must not attempt to block, and only the interrupt safe FreeRTOS API
    functions can be used (those that end in FromISR()). */
 	uptime_millis++;
-
 }
 /* USER CODE END 3 */
 

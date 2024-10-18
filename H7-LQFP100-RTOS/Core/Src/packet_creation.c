@@ -139,9 +139,9 @@ void create_pmt_packet()
 {
 	while (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_8)) {};
 
-	uint8_t buffer[PMT_DATA_SIZE];
-	uint8_t pmt_spi[2];
-	uint8_t uptime[UPTIME_SIZE];
+	static uint8_t buffer[PMT_DATA_SIZE];
+	static uint8_t pmt_spi[2];
+	static uint8_t uptime[UPTIME_SIZE];
 
 	get_uptime(uptime);
 	sample_pmt_spi(pmt_spi);
@@ -173,11 +173,11 @@ void create_erpa_packet()
 {
 	while (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_11)) {};
 
-	uint8_t buffer[ERPA_DATA_SIZE];
-	uint8_t erpa_spi[2];
-	uint16_t erpa_adc[1];
-	uint8_t uptime[UPTIME_SIZE];
-	STEP_VALUES sweep_step = INVALID_STEP;
+	static uint8_t buffer[ERPA_DATA_SIZE];
+	static uint8_t erpa_spi[2];
+	static uint16_t erpa_adc[1];
+	static uint8_t uptime[UPTIME_SIZE];
+	static STEP_VALUES sweep_step = INVALID_STEP;
 
 	get_uptime(uptime);
 	sweep_step = get_current_step();
@@ -214,10 +214,10 @@ void create_erpa_packet()
  */
 void create_hk_packet()
 {
-	VOLTAGE_RAIL *rail_monitor_ptr;
-	uint8_t buffer[HK_DATA_SIZE];
-	uint8_t timestamp[TIMESTAMP_SIZE];
-	uint8_t uptime[UPTIME_SIZE];
+	static VOLTAGE_RAIL *rail_monitor_ptr;
+	static uint8_t buffer[HK_DATA_SIZE];
+	static uint8_t timestamp[TIMESTAMP_SIZE];
+	static uint8_t uptime[UPTIME_SIZE];
 
 	get_uptime(uptime);
 	get_unix_time(timestamp);
