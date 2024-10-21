@@ -44,8 +44,6 @@ typedef StaticTask_t osStaticThreadDef_t;
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define TRUE 1
-#define FALSE 0
 #define RETRY_DELAY 1
 #define PACKET_GAP 1
 #define PS_RAIL_DELAY 100
@@ -61,6 +59,7 @@ typedef StaticTask_t osStaticThreadDef_t;
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
+
 /* USER CODE END Variables */
 /* Definitions for PMT_task */
 osThreadId_t PMT_taskHandle;
@@ -658,36 +657,28 @@ void Transmit_init(void *argument)
   /* USER CODE BEGIN Transmit_init */
   /* Infinite loop */
   Packet_t packet;
-  uint8_t delay_needed = TRUE;
   for(;;)
   {
-	delay_needed = TRUE;
 	packet = dequeue();
 
 	while (packet.size == 0)
 	{
 		vTaskDelay(pdMS_TO_TICKS(RETRY_DELAY));
 		packet = dequeue();
-		delay_needed = FALSE;
 	}
-
 
 	while(HAL_UART_Transmit_IT(&huart1, packet.buffer, packet.size) == HAL_BUSY)
 	{
 		vTaskDelay(pdMS_TO_TICKS(RETRY_DELAY));
-		delay_needed = FALSE;
 	}
 
-	if (delay_needed == TRUE)
-	{
-		vTaskDelay(pdMS_TO_TICKS(PACKET_GAP));
-	}
+	vTaskDelay(pdMS_TO_TICKS(PACKET_GAP)); // TODO: If this doesn't work, try changing gap to 2ms
+
   }
   /* USER CODE END Transmit_init */
 }
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
-
 /* USER CODE END Application */
 
