@@ -58,7 +58,7 @@ typedef StaticTask_t osStaticThreadDef_t;
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
-uint8_t tx_complete = 1;
+volatile uint8_t tx_complete = 1;
 /* USER CODE END Variables */
 /* Definitions for PMT_task */
 osThreadId_t PMT_taskHandle;
