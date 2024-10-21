@@ -10,7 +10,7 @@
 #include "cmsis_os2.h"
 
 #define MAX_MESSAGES 16
-#define MAX_MESSAGE_SIZE 50
+#define MAX_MESSAGE_SIZE sizeof(Packet_t)
 
 static StaticQueue_t queue_cb;
 static Packet_t queue_data[MAX_MESSAGES];
@@ -37,9 +37,14 @@ void enqueue(Packet_t packet)
 Packet_t dequeue()
 {
 	Packet_t dequeued_packet;
-	if (osMessageQueueGet(packet_queue, &dequeued_packet, 0U, 0U) != osOK)
+
+	if (osMessageQueueGetCount(packet_queue) == 0)
 	{
 		dequeued_packet.size = 0;
+	}
+	else
+	{
+		osMessageQueueGet(packet_queue, &dequeued_packet, 0U, 0U);
 	}
 	return dequeued_packet;
 }

@@ -1,6 +1,0 @@
-../Core/Src/packet_creation.c:32:6:create_sync_packet	16	static
-../Core/Src/packet_creation.c:115:6:create_version_packet	8	static
-../Core/Src/packet_creation.c:135:6:create_pmt_packet	64	static
-../Core/Src/packet_creation.c:171:6:create_erpa_packet	64	static
-../Core/Src/packet_creation.c:216:6:create_hk_packet	64	static
-../Core/Src/packet_creation.c:291:6:reset_packet_sequence_numbers	4	static

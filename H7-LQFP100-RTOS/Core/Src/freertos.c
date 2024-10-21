@@ -662,12 +662,13 @@ void Transmit_init(void *argument)
 
 	while (packet.size == 0)
 	{
-		osThreadYield();
+		packet = dequeue();
+		vTaskDelay(pdMS_TO_TICKS(10));
 	}
 
 	HAL_UART_Transmit(&huart1, packet.buffer, packet.size, UART_TIMEOUT_MS);
 
-    osDelay(PACKET_GAP);
+	vTaskDelay(pdMS_TO_TICKS(PACKET_GAP));
   }
   /* USER CODE END Transmit_init */
 }

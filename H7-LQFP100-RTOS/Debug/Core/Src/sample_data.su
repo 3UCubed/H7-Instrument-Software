@@ -1,8 +1,0 @@
-../Core/Src/sample_data.c:30:6:init_adc_dma	8	static
-../Core/Src/sample_data.c:61:6:sample_pmt_spi	24	static
-../Core/Src/sample_data.c:80:6:sample_erpa_spi	24	static
-../Core/Src/sample_data.c:98:6:sample_erpa_adc	24	static
-../Core/Src/sample_data.c:110:6:sample_hk_i2c	24	static
-../Core/Src/sample_data.c:128:6:sample_hk_adc1	40	static
-../Core/Src/sample_data.c:158:6:sample_hk_adc3	24	static
-../Core/Src/sample_data.c:177:9:poll_i2c_sensor	24	static

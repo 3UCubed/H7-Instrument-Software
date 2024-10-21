@@ -35,7 +35,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "packet_queue.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -636,7 +636,7 @@ int main(void)
   MX_SPI1_Init();
   MX_RTC_Init();
 #ifdef ERROR_HANDLING_ENABLED
-  MX_IWDG1_Init();
+ // MX_IWDG1_Init();
   MX_RAMECC_Init();
 #endif
   MX_TIM3_Init();
@@ -762,6 +762,7 @@ void system_setup()
 	error_counter_init();
 	init_flash_ecc();
 #endif
+	queue_init();
 
 	packet_event_flags = osEventFlagsNew(NULL);
     if (packet_event_flags == NULL)
