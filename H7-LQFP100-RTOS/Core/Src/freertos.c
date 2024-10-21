@@ -44,6 +44,9 @@ typedef StaticTask_t osStaticThreadDef_t;
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define TRUE 1
+#define FALSE 0
+#define RETRY_DELAY 1
 #define PACKET_GAP 1
 #define PS_RAIL_DELAY 100
 #define IDLE_TO_SCIENCE_DELAY 1000
@@ -58,7 +61,6 @@ typedef StaticTask_t osStaticThreadDef_t;
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
-volatile uint8_t tx_complete = 1;
 /* USER CODE END Variables */
 /* Definitions for PMT_task */
 osThreadId_t PMT_taskHandle;
@@ -655,34 +657,37 @@ void Transmit_init(void *argument)
 {
   /* USER CODE BEGIN Transmit_init */
   /* Infinite loop */
+  Packet_t packet;
+  uint8_t delay_needed = TRUE;
   for(;;)
   {
-	Packet_t packet;
+	delay_needed = TRUE;
+	packet = dequeue();
 
-	do
+	while (packet.size == 0)
 	{
+		vTaskDelay(pdMS_TO_TICKS(RETRY_DELAY));
 		packet = dequeue();
-		vTaskDelay(pdMS_TO_TICKS(PACKET_GAP));
-	}while (packet.size == 0);
+		delay_needed = FALSE;
+	}
 
-	while(!tx_complete)
+
+	while(HAL_UART_Transmit_IT(&huart1, packet.buffer, packet.size) == HAL_BUSY)
+	{
+		vTaskDelay(pdMS_TO_TICKS(RETRY_DELAY));
+		delay_needed = FALSE;
+	}
+
+	if (delay_needed == TRUE)
 	{
 		vTaskDelay(pdMS_TO_TICKS(PACKET_GAP));
-	};
-
-	tx_complete = 0;
-	HAL_UART_Transmit_IT(&huart1, packet.buffer, packet.size);
-
-	vTaskDelay(pdMS_TO_TICKS(PACKET_GAP));
+	}
   }
   /* USER CODE END Transmit_init */
 }
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
-void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
-{
-	tx_complete = 1;
-}
+
 /* USER CODE END Application */
 
