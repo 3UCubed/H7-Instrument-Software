@@ -1,0 +1,3 @@
+../Core/Src/packet_queue.c:27:6:queue_init	8	static
+../Core/Src/packet_queue.c:32:6:enqueue	8	static
+../Core/Src/packet_queue.c:37:10:dequeue	88	static

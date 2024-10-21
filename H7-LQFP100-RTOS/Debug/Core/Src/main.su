@@ -1,0 +1,17 @@
+../Drivers/CMSIS/Include/core_cm7.h:2156:34:__NVIC_SystemReset	4	static,ignoring_inline_asm
+../Core/Src/main.c:201:6:HAL_FLASHEx_EccCorrectionCallback	16	static
+../Core/Src/main.c:213:6:HAL_FLASHEx_EccDetectionCallback	16	static
+../Core/Src/main.c:227:6:HAL_TIM_OC_DelayElapsedCallback	16	static
+../Core/Src/main.c:263:6:HAL_UART_RxCpltCallback	40	static
+../Core/Src/main.c:567:14:get_reset_cause	24	static
+../Core/Src/main.c:600:5:main	8	static
+../Core/Src/main.c:669:6:SystemClock_Config	120	static
+../Core/Src/main.c:731:6:PeriphCommonClock_Config	200	static
+../Core/Src/main.c:759:6:system_setup	8	static
+../Core/Src/main.c:798:6:send_ACK	8	static
+../Core/Src/main.c:810:6:send_NACK	8	static
+../Core/Src/main.c:823:13:get_current_step	16	static
+../Core/Src/main.c:864:6:enter_stop	8	static
+../Core/Src/main.c:883:6:init_flash_ecc	8	static
+../Core/Src/main.c:903:6:HAL_TIM_PeriodElapsedCallback	16	static
+../Core/Src/main.c:924:6:Error_Handler	16	static

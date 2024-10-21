@@ -1,0 +1,8 @@
+../Core/Src/voltage_monitor.c:74:6:voltage_monitor_init	4	static
+../Core/Src/voltage_monitor.c:263:6:set_rail_monitor_enable	16	static
+../Core/Src/voltage_monitor.c:274:6:set_rail_monitor	48	static
+../Core/Src/voltage_monitor.c:309:15:get_rail_monitor	4	static
+../Core/Src/voltage_monitor.c:320:9:convert_ADT7410	24	static
+../Core/Src/voltage_monitor.c:342:9:check_bounds	32	static
+../Core/Src/voltage_monitor.c:374:9:monitor_rails	40	static
+../Core/Src/voltage_monitor.c:435:14:get_rail_name_error_detail	16	static

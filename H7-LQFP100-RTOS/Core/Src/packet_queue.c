@@ -9,11 +9,11 @@
 #include "FreeRTOS.h"
 #include "cmsis_os2.h"
 
-#define MAX_MESSAGES 32
+#define MAX_MESSAGES 16
 #define MAX_MESSAGE_SIZE 50
 
 static StaticQueue_t queue_cb;
-static uint8_t queue_data[MAX_MESSAGES * MAX_MESSAGE_SIZE];
+static Packet_t queue_data[MAX_MESSAGES];
 static osMessageQueueId_t packet_queue;
 
 osMessageQueueAttr_t queue_attribute = {
