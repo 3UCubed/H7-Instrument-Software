@@ -58,7 +58,7 @@ typedef StaticTask_t osStaticThreadDef_t;
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
-
+uint8_t tx_complete = 1;
 /* USER CODE END Variables */
 /* Definitions for PMT_task */
 osThreadId_t PMT_taskHandle;
@@ -658,15 +658,20 @@ void Transmit_init(void *argument)
   for(;;)
   {
 	Packet_t packet;
-	packet = dequeue();
 
-	while (packet.size == 0)
+	do
 	{
 		packet = dequeue();
-		vTaskDelay(pdMS_TO_TICKS(10));
-	}
+		vTaskDelay(pdMS_TO_TICKS(PACKET_GAP));
+	}while (packet.size == 0);
 
-	HAL_UART_Transmit(&huart1, packet.buffer, packet.size, UART_TIMEOUT_MS);
+	while(!tx_complete)
+	{
+		vTaskDelay(pdMS_TO_TICKS(PACKET_GAP));
+	};
+
+	tx_complete = 0;
+	HAL_UART_Transmit_IT(&huart1, packet.buffer, packet.size);
 
 	vTaskDelay(pdMS_TO_TICKS(PACKET_GAP));
   }
@@ -675,6 +680,9 @@ void Transmit_init(void *argument)
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
-
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
+{
+	tx_complete = 1;
+}
 /* USER CODE END Application */
 
