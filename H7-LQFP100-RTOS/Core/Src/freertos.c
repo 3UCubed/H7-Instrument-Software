@@ -181,18 +181,6 @@ const osThreadAttr_t Sync_task_attributes = {
   .stack_size = sizeof(Sync_taskBuffer),
   .priority = (osPriority_t) osPriorityNormal,
 };
-/* Definitions for Transmit_task */
-osThreadId_t Transmit_taskHandle;
-uint32_t Transmit_taskBuffer[ 128 ];
-osStaticThreadDef_t Transmit_taskControlBlock;
-const osThreadAttr_t Transmit_task_attributes = {
-  .name = "Transmit_task",
-  .cb_mem = &Transmit_taskControlBlock,
-  .cb_size = sizeof(Transmit_taskControlBlock),
-  .stack_mem = &Transmit_taskBuffer[0],
-  .stack_size = sizeof(Transmit_taskBuffer),
-  .priority = (osPriority_t) osPriorityLow,
-};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -209,7 +197,6 @@ void STOP_init(void *argument);
 void Science_init(void *argument);
 void Idle_init(void *argument);
 void Sync_init(void *argument);
-void Transmit_init(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -298,9 +285,6 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of Sync_task */
   Sync_taskHandle = osThreadNew(Sync_init, NULL, &Sync_task_attributes);
-
-  /* creation of Transmit_task */
-  Transmit_taskHandle = osThreadNew(Transmit_init, NULL, &Transmit_task_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -551,6 +535,7 @@ void Science_init(void *argument)
 		TIM2->CCR4 = ERPA_PWM_FREQ;
 		HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_1);
 		__enable_irq();
+		HAL_TIM_Base_Start_IT(&htim4);
 
 		osThreadYield();
   }
@@ -643,39 +628,6 @@ void Sync_init(void *argument)
 	  	create_sync_packet(reset_cause);
   }
   /* USER CODE END Sync_init */
-}
-
-/* USER CODE BEGIN Header_Transmit_init */
-/**
-* @brief Function implementing the Transmit_task thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_Transmit_init */
-void Transmit_init(void *argument)
-{
-  /* USER CODE BEGIN Transmit_init */
-  /* Infinite loop */
-  Packet_t packet;
-  for(;;)
-  {
-	packet = dequeue();
-
-	while (packet.size == 0)
-	{
-		vTaskDelay(pdMS_TO_TICKS(RETRY_DELAY));
-		packet = dequeue();
-	}
-
-	while(HAL_UART_Transmit_IT(&huart1, packet.buffer, packet.size) == HAL_BUSY)
-	{
-		vTaskDelay(pdMS_TO_TICKS(RETRY_DELAY));
-	}
-
-	vTaskDelay(pdMS_TO_TICKS(PACKET_GAP)); // TODO: If this doesn't work, try changing gap to 2ms
-
-  }
-  /* USER CODE END Transmit_init */
 }
 
 /* Private application code --------------------------------------------------*/

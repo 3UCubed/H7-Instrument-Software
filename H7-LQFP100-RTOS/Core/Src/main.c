@@ -635,11 +635,10 @@ int main(void)
   MX_DAC1_Init();
   MX_SPI1_Init();
   MX_RTC_Init();
-#ifdef ERROR_HANDLING_ENABLED
- // MX_IWDG1_Init();
+  MX_IWDG1_Init();
   MX_RAMECC_Init();
-#endif
   MX_TIM3_Init();
+  MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
   system_setup();
   /* USER CODE END 2 */
@@ -915,9 +914,23 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   {
 	NVIC_SystemReset();
   }
+
+  if (htim == &htim4)
+  {
+	  Packet_t packet;
+	  	packet = dequeue();
+
+	  	if(HAL_UART_Transmit_IT(&huart1, packet.buffer, packet.size) == HAL_OK)
+	  	{
+			HAL_TIM_Base_Stop_IT(&htim4);
+	  	}
+  }
   /* USER CODE END Callback 1 */
 }
-
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
+{
+	HAL_TIM_Base_Start_IT(&htim4);
+}
 /**
   * @brief  This function is executed in case of error occurrence.
   * @retval None

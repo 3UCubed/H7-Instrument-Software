@@ -37,14 +37,9 @@ void enqueue(Packet_t packet)
 Packet_t dequeue()
 {
 	Packet_t dequeued_packet;
-
-	if (osMessageQueueGetCount(packet_queue) == 0)
+	if(osMessageQueueGet(packet_queue, &dequeued_packet, 0U, 0U) != osOK)
 	{
 		dequeued_packet.size = 0;
-	}
-	else
-	{
-		osMessageQueueGet(packet_queue, &dequeued_packet, 0U, 0U);
 	}
 	return dequeued_packet;
 }
