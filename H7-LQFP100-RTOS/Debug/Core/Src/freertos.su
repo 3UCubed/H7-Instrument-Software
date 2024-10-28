@@ -1,0 +1,13 @@
+../Core/Src/freertos.c:212:6:vApplicationTickHook	4	static
+../Core/Src/freertos.c:224:6:vApplicationStackOverflowHook	16	static
+../Core/Src/freertos.c:237:6:MX_FREERTOS_Init	8	static
+../Core/Src/freertos.c:307:6:PMT_init	16	static
+../Core/Src/freertos.c:330:6:ERPA_init	16	static
+../Core/Src/freertos.c:353:6:HK_init	16	static
+../Core/Src/freertos.c:377:6:AUTOINIT_init	24	static
+../Core/Src/freertos.c:411:6:AUTODEINIT_init	24	static
+../Core/Src/freertos.c:446:6:Voltage_Monitor_init	24	static
+../Core/Src/freertos.c:477:6:STOP_init	16	static
+../Core/Src/freertos.c:503:6:Science_init	32	static,ignoring_inline_asm
+../Core/Src/freertos.c:554:6:Idle_init	24	static
+../Core/Src/freertos.c:601:6:Sync_init	32	static

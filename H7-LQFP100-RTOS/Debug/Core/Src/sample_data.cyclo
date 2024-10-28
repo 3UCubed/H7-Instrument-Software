@@ -1,0 +1,8 @@
+sample_data.c:30:6:init_adc_dma	5
+sample_data.c:61:6:sample_pmt_spi	1
+sample_data.c:80:6:sample_erpa_spi	1
+sample_data.c:98:6:sample_erpa_adc	1
+sample_data.c:110:6:sample_hk_i2c	1
+sample_data.c:128:6:sample_hk_adc1	1
+sample_data.c:158:6:sample_hk_adc3	1
+sample_data.c:177:9:poll_i2c_sensor	5
