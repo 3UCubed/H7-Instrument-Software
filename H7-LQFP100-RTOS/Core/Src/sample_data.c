@@ -160,12 +160,10 @@ void sample_hk_adc3(uint16_t *buffer)
 	uint16_t vsense = ADC3_raw_data[0];
 	uint16_t vrefint = ADC3_raw_data[1];
 	uint16_t PC2 = ADC3_raw_data[2];
-	uint16_t PC3 = ADC3_raw_data[3];
 
 	buffer[0] = vsense;
 	buffer[1] = vrefint;
 	buffer[2] = PC2;
-	buffer[3] = PC3;
 }
 
 /**

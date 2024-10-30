@@ -10,7 +10,7 @@
 #ifndef INC_VOLTAGE_MONITOR_H_
 #define INC_VOLTAGE_MONITOR_H_
 
-#define NUM_VOLTAGE_RAILS 18
+#define NUM_VOLTAGE_RAILS 17
 
 #include <stdio.h>
 #include "sample_data.h"
@@ -26,15 +26,14 @@ typedef enum {
 	RAIL_busvmon,	// 6
 	RAIL_busimon,	// 7
 	RAIL_2v5,		// 8
-	RAIL_3v3,		// 9
-	RAIL_5v,		// 10
-	RAIL_n3v3,		// 11
-	RAIL_n5v,		// 12
-	RAIL_15v,		// 13
-	RAIL_5vref,		// 14
-	RAIL_n200v,		// 15
-	RAIL_n800v,		// 16
-	RAIL_TMP1		// 17
+	RAIL_5v,		// 9
+	RAIL_n3v3,		// 10
+	RAIL_n5v,		// 11
+	RAIL_15v,		// 12
+	RAIL_5vref,		// 13
+	RAIL_n200v,		// 14
+	RAIL_n800v,		// 15
+	RAIL_TMP1		// 16
 } VOLTAGE_RAIL_NAME;
 
 typedef struct {

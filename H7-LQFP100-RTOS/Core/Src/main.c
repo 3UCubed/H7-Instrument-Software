@@ -67,41 +67,39 @@ typedef enum
 	CMD_SDN1_OFF = 0x00,
 	CMD_SYS_ON = 0x11,
 	CMD_SYS_OFF = 0x01,
-	CMD_3V3_ON = 0x12,
-	CMD_3V3_OFF = 0x02,
-	CMD_5V_ON = 0x13,
-	CMD_5V_OFF = 0x03,
-	CMD_N3V3_ON = 0x14,
-	CMD_N3V3_OFF = 0x04,
-	CMD_N5V_ON = 0x15,
-	CMD_N5V_OFF = 0x05,
-	CMD_15V_ON = 0x16,
-	CMD_15V_OFF = 0x06,
-	CMD_N200V_ON = 0x17,
-	CMD_N200V_OFF = 0x07,
-	CMD_N800V_ON = 0x18,
-	CMD_N800V_OFF = 0x08,
-	CMD_AUTOSWEEP_ON = 0x19,
-	CMD_AUTOSWEEP_OFF = 0x09,
-	CMD_ERPA_ON = 0x1A,
-	CMD_ERPA_OFF = 0x0A,
-	CMD_PMT_ON = 0x1B,
-	CMD_PMT_OFF = 0x0B,
-	CMD_HK_ON = 0x1C,
-	CMD_HK_OFF = 0x0C,
-	CMD_STEP_UP = 0x1D,
-	CMD_STEP_DOWN = 0x0D,
-	CMD_FACTOR_UP = 0x1E,
-	CMD_FACTOR_DOWN = 0x0E,
-	CMD_ENTER_STOP = 0x0F,
-	CMD_AUTO_INIT = 0xE0,
-	CMD_AUTO_DEINIT = 0xD0,
-	CMD_SYNC_MODE = 0xAF,
-	CMD_SCIENCE_MODE = 0xBF,
-	CMD_IDLE_MODE = 0xCF,
-	CMD_RESET_ERROR_COUNTERS = 0xDF,
-	CMD_SEND_PREVIOUS_ERROR = 0xEF,
-	CMD_SEND_VERSION_PACKET = 0x1F
+	CMD_5V_ON = 0x12,
+	CMD_5V_OFF = 0x02,
+	CMD_N3V3_ON = 0x13,
+	CMD_N3V3_OFF = 0x03,
+	CMD_N5V_ON = 0x14,
+	CMD_N5V_OFF = 0x04,
+	CMD_15V_ON = 0x15,
+	CMD_15V_OFF = 0x05,
+	CMD_N200V_ON = 0x16,
+	CMD_N200V_OFF = 0x06,
+	CMD_N800V_ON = 0x17,
+	CMD_N800V_OFF = 0x07,
+	CMD_AUTOSWEEP_ON = 0x18,
+	CMD_AUTOSWEEP_OFF = 0x08,
+	CMD_ERPA_ON = 0x19,
+	CMD_ERPA_OFF = 0x09,
+	CMD_PMT_ON = 0x1A,
+	CMD_PMT_OFF = 0x0A,
+	CMD_HK_ON = 0x1B,
+	CMD_HK_OFF = 0x0B,
+	CMD_STEP_UP = 0x1C,
+	CMD_STEP_DOWN = 0x0C,
+	CMD_FACTOR_UP = 0x1D,
+	CMD_FACTOR_DOWN = 0x0D,
+	CMD_AUTO_INIT = 0x1E,
+	CMD_AUTO_DEINIT = 0x0E,
+	CMD_SYNC_MODE = 0xA0,
+	CMD_SCIENCE_MODE = 0xA1,
+	CMD_IDLE_MODE = 0xA2,
+	CMD_ENTER_STOP = 0xA3,
+	CMD_RESET_ERROR_COUNTERS = 0xA4,
+	CMD_SEND_PREVIOUS_ERROR = 0xA5,
+	CMD_SEND_VERSION_PACKET = 0xA6
 }ACCEPTED_COMMANDS;
 
 /* USER CODE END PTD */
@@ -131,13 +129,12 @@ const gpio_pins gpios[] =
 {
 		{ GPIOB, GPIO_PIN_2 	},	// 0 -- SDN1
 		{ GPIOB, GPIO_PIN_5 	},	// 1 -- SYS_ON
-		{ GPIOC, GPIO_PIN_10 	},	// 2 -- 3v3_EN
-		{ GPIOC, GPIO_PIN_7 	},	// 3 -- 5v_EN
-		{ GPIOC, GPIO_PIN_6 	},	// 4 -- N3V3_EN
-		{ GPIOC, GPIO_PIN_8 	},	// 5 -- N5V_EN
-		{ GPIOC, GPIO_PIN_9 	},	// 6 -- 15V_EN
-		{ GPIOC, GPIO_PIN_13 	},	// 7 -- N150V_EN
-		{ GPIOB, GPIO_PIN_6 	}	// 8 -- 800HVON
+		{ GPIOC, GPIO_PIN_7 	},	// 2 -- 5v_EN
+		{ GPIOC, GPIO_PIN_6 	},	// 3 -- N3V3_EN
+		{ GPIOC, GPIO_PIN_8 	},	// 4 -- N5V_EN
+		{ GPIOC, GPIO_PIN_9 	},	// 5 -- 15V_EN
+		{ GPIOC, GPIO_PIN_13 	},	// 6 -- N150V_EN
+		{ GPIOB, GPIO_PIN_6 	}	// 7 -- 800HVON
 };
 
 /**
@@ -298,20 +295,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 		{
 			set_rail_monitor_enable(i, DISABLED);
 		}
-		break;
-	}
-
-	case CMD_3V3_ON:
-	{
-		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_3V3].gpio, gpios[GPIOS_INDEX_3V3].pin, GPIO_PIN_SET);
-		set_rail_monitor_enable(RAIL_3v3, ENABLED);
-		break;
-	}
-
-	case CMD_3V3_OFF:
-	{
-		HAL_GPIO_WritePin(gpios[GPIOS_INDEX_3V3].gpio, gpios[GPIOS_INDEX_3V3].pin, GPIO_PIN_RESET);
-		set_rail_monitor_enable(RAIL_3v3, DISABLED);
 		break;
 	}
 
@@ -635,10 +618,8 @@ int main(void)
   MX_DAC1_Init();
   MX_SPI1_Init();
   MX_RTC_Init();
-#ifdef ERROR_HANDLING_ENABLED
   MX_IWDG1_Init();
   MX_RAMECC_Init();
-#endif
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
   system_setup();
@@ -906,8 +887,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	HAL_IWDG_Refresh(&hiwdg1);
 
   /* USER CODE END Callback 0 */
-  if (htim->Instance == TIM6)
-  {
+  if (htim->Instance == TIM6) {
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */

@@ -12,7 +12,7 @@
 
 #include <stdio.h>
 
-#define NUM_ERROR_COUNTERS 29
+#define NUM_ERROR_COUNTERS 28
 
 typedef enum
 {
@@ -35,20 +35,19 @@ typedef enum
 	ED_busvmon = 0x0C,
 	ED_busimon = 0x0D,
 	ED_2v5 = 0x0E,
-	ED_3v3 = 0x0F,
-	ED_5v = 0x10,
-	ED_n3v3 = 0x11,
-	ED_n5v = 0x12,
-	ED_15v = 0x13,
-	ED_5vref = 0x14,
-	ED_n200v = 0x15,
-	ED_n800v = 0x16,
-	ED_TMP1 = 0x17,
-	ED_single_bit_error_flash = 0x18,
-	ED_double_bit_error_flash = 0x19,
-	ED_single_bit_error_ram = 0x1A,
-	ED_double_bit_error_ram = 0x1B,
-	ED_UNDEFINED = 0x1C
+	ED_5v = 0x0F,
+	ED_n3v3 = 0x10,
+	ED_n5v = 0x11,
+	ED_15v = 0x12,
+	ED_5vref = 0x13,
+	ED_n200v = 0x14,
+	ED_n800v = 0x15,
+	ED_TMP1 = 0x16,
+	ED_single_bit_error_flash = 0x17,
+	ED_double_bit_error_flash = 0x18,
+	ED_single_bit_error_ram = 0x19,
+	ED_double_bit_error_ram = 0x1A,
+	ED_UNDEFINED = 0x1B
 }ERROR_DETAIL;
 
 typedef struct

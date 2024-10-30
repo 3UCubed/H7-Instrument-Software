@@ -9,11 +9,11 @@
 
 #include "packet_creation.h"
 
-#define SYNC_DATA_SIZE 65
+#define SYNC_DATA_SIZE 63
 #define VERSION_DATA_SIZE 5
 #define PMT_DATA_SIZE 10
 #define ERPA_DATA_SIZE 14
-#define HK_DATA_SIZE 50
+#define HK_DATA_SIZE 48
 #define UPTIME_SIZE 4
 #define TIMESTAMP_SIZE 6
 
@@ -72,36 +72,34 @@ void create_sync_packet(ERROR_STRUCT reset_cause)
 	buffer[32] = (local_cpy[ED_busimon] & 0xFF);
 	buffer[33] = ((local_cpy[ED_2v5] & 0xFF00) >> 8);
 	buffer[34] = (local_cpy[ED_2v5] & 0xFF);
-	buffer[35] = ((local_cpy[ED_3v3] & 0xFF00) >> 8);
-	buffer[36] = (local_cpy[ED_3v3] & 0xFF);
-	buffer[37] = ((local_cpy[ED_5v] & 0xFF00) >> 8);
-	buffer[38] = (local_cpy[ED_5v] & 0xFF);
-	buffer[39] = ((local_cpy[ED_n3v3] & 0xFF00) >> 8);
-	buffer[40] = (local_cpy[ED_n3v3] & 0xFF);
-	buffer[41] = ((local_cpy[ED_n5v] & 0xFF00) >> 8);
-	buffer[42] = (local_cpy[ED_n5v] & 0xFF);
-	buffer[43] = ((local_cpy[ED_15v] & 0xFF00) >> 8);
-	buffer[44] = (local_cpy[ED_15v] & 0xFF);
-	buffer[45] = ((local_cpy[ED_5vref] & 0xFF00) >> 8);
-	buffer[46] = (local_cpy[ED_5vref] & 0xFF);
-	buffer[47] = ((local_cpy[ED_n200v] & 0xFF00) >> 8);
-	buffer[48] = (local_cpy[ED_n200v] & 0xFF);
-	buffer[49] = ((local_cpy[ED_n800v] & 0xFF00) >> 8);
-	buffer[50] = (local_cpy[ED_n800v] & 0xFF);
-	buffer[51] = ((local_cpy[ED_TMP1] & 0xFF00) >> 8);
-	buffer[52] = (local_cpy[ED_TMP1] & 0xFF);
-	buffer[53] = ((local_cpy[ED_single_bit_error_flash] & 0xFF00) >> 8);
-	buffer[54] = (local_cpy[ED_single_bit_error_flash] & 0xFF);
-	buffer[55] = ((local_cpy[ED_double_bit_error_flash] & 0xFF00) >> 8);
-	buffer[56] = (local_cpy[ED_double_bit_error_flash] & 0xFF);
-	buffer[57] = ((local_cpy[ED_single_bit_error_ram] & 0xFF00) >> 8);
-	buffer[58] = (local_cpy[ED_single_bit_error_ram] & 0xFF);
-	buffer[59] = ((local_cpy[ED_double_bit_error_ram] & 0xFF00) >> 8);
-	buffer[60] = (local_cpy[ED_double_bit_error_ram] & 0xFF);
-	buffer[61] = ((local_cpy[ED_UNDEFINED] & 0xFF00) >> 8);
-	buffer[62] = (local_cpy[ED_UNDEFINED] & 0xFF);
-	buffer[63] = reset_cause.category;
-	buffer[64] = reset_cause.detail;
+	buffer[35] = ((local_cpy[ED_5v] & 0xFF00) >> 8);
+	buffer[36] = (local_cpy[ED_5v] & 0xFF);
+	buffer[37] = ((local_cpy[ED_n3v3] & 0xFF00) >> 8);
+	buffer[38] = (local_cpy[ED_n3v3] & 0xFF);
+	buffer[39] = ((local_cpy[ED_n5v] & 0xFF00) >> 8);
+	buffer[40] = (local_cpy[ED_n5v] & 0xFF);
+	buffer[41] = ((local_cpy[ED_15v] & 0xFF00) >> 8);
+	buffer[42] = (local_cpy[ED_15v] & 0xFF);
+	buffer[43] = ((local_cpy[ED_5vref] & 0xFF00) >> 8);
+	buffer[44] = (local_cpy[ED_5vref] & 0xFF);
+	buffer[45] = ((local_cpy[ED_n200v] & 0xFF00) >> 8);
+	buffer[46] = (local_cpy[ED_n200v] & 0xFF);
+	buffer[47] = ((local_cpy[ED_n800v] & 0xFF00) >> 8);
+	buffer[48] = (local_cpy[ED_n800v] & 0xFF);
+	buffer[49] = ((local_cpy[ED_TMP1] & 0xFF00) >> 8);
+	buffer[50] = (local_cpy[ED_TMP1] & 0xFF);
+	buffer[51] = ((local_cpy[ED_single_bit_error_flash] & 0xFF00) >> 8);
+	buffer[52] = (local_cpy[ED_single_bit_error_flash] & 0xFF);
+	buffer[53] = ((local_cpy[ED_double_bit_error_flash] & 0xFF00) >> 8);
+	buffer[54] = (local_cpy[ED_double_bit_error_flash] & 0xFF);
+	buffer[55] = ((local_cpy[ED_single_bit_error_ram] & 0xFF00) >> 8);
+	buffer[56] = (local_cpy[ED_single_bit_error_ram] & 0xFF);
+	buffer[57] = ((local_cpy[ED_double_bit_error_ram] & 0xFF00) >> 8);
+	buffer[58] = (local_cpy[ED_double_bit_error_ram] & 0xFF);
+	buffer[59] = ((local_cpy[ED_UNDEFINED] & 0xFF00) >> 8);
+	buffer[60] = (local_cpy[ED_UNDEFINED] & 0xFF);
+	buffer[61] = reset_cause.category;
+	buffer[62] = reset_cause.detail;
 
 	HAL_UART_Transmit(&huart1, buffer, SYNC_DATA_SIZE, UART_TIMEOUT_MS);
 }
@@ -247,32 +245,30 @@ void create_hk_packet()
 	buffer[21] = (rail_monitor_ptr[RAIL_busimon].data & 0xFF);				// HK BUSimon LSB
 	buffer[22] = ((rail_monitor_ptr[RAIL_2v5].data & 0xFF00) >> 8);		// HK 2v5mon MSB
 	buffer[23] = (rail_monitor_ptr[RAIL_2v5].data & 0xFF);					// HK 2v5mon LSB
-	buffer[24] = ((rail_monitor_ptr[RAIL_3v3].data & 0xFF00) >> 8);		// HK 3v3mon MSB
-	buffer[25] = (rail_monitor_ptr[RAIL_3v3].data & 0xFF);					// HK 3v3mon LSB
-	buffer[26] = ((rail_monitor_ptr[RAIL_5v].data & 0xFF00) >> 8);			// HK 5vmon MSB
-	buffer[27] = (rail_monitor_ptr[RAIL_5v].data & 0xFF);					// HK 5vmon LSB
-	buffer[28] = ((rail_monitor_ptr[RAIL_n3v3].data & 0xFF00) >> 8);		// HK n3v3mon MSB
-	buffer[29] = (rail_monitor_ptr[RAIL_n3v3].data & 0xFF);				// HK n3v3mon LSB
-	buffer[30] = ((rail_monitor_ptr[RAIL_n5v].data & 0xFF00) >> 8);		// HK n5vmon MSB
-	buffer[31] = (rail_monitor_ptr[RAIL_n5v].data & 0xFF);					// HK n5vmon LSB
-	buffer[32] = ((rail_monitor_ptr[RAIL_15v].data & 0xFF00) >> 8);		// HK 15vmon MSB
-	buffer[33] = (rail_monitor_ptr[RAIL_15v].data & 0xFF);					// HK 15vmon LSB
-	buffer[34] = ((rail_monitor_ptr[RAIL_5vref].data & 0xFF00) >> 8);		// HK 5vrefmon MSB
-	buffer[35] = (rail_monitor_ptr[RAIL_5vref].data & 0xFF);				// HK 5vrefmon LSB
-	buffer[36] = ((rail_monitor_ptr[RAIL_n200v].data & 0xFF00) >> 8);		// HK n150vmon MSB
-	buffer[37] = (rail_monitor_ptr[RAIL_n200v].data & 0xFF);				// HK n150vmon LSB
-	buffer[38] = ((rail_monitor_ptr[RAIL_n800v].data & 0xFF00) >> 8);		// HK n800vmon MSB
-	buffer[39] = (rail_monitor_ptr[RAIL_n800v].data & 0xFF);				// HK n800vmon LSB
-	buffer[40] = ((rail_monitor_ptr[RAIL_TEMP1].data & 0xFF00) >> 8);	// HK TEMP1 MSB
-	buffer[41] = (rail_monitor_ptr[RAIL_TEMP1].data & 0xFF);				// HK TEMP1 LSB
-	buffer[42] = ((rail_monitor_ptr[RAIL_TEMP2].data & 0xFF00) >> 8);	// HK TEMP2 MSB
-	buffer[43] = (rail_monitor_ptr[RAIL_TEMP2].data & 0xFF);			// HK TEMP2 LSB
-	buffer[44] = ((rail_monitor_ptr[RAIL_TEMP3].data & 0xFF00) >> 8);	// HK TEMP3 MSB
-	buffer[45] = (rail_monitor_ptr[RAIL_TEMP3].data & 0xFF);			// HK TEMP3 LSB
-	buffer[46] = ((rail_monitor_ptr[RAIL_TEMP4].data & 0xFF00) >> 8);	// HK TEMP4 MSB
-	buffer[47] = (rail_monitor_ptr[RAIL_TEMP4].data & 0xFF);			// HK TEMP4 LSB
-	buffer[48] = ((rail_monitor_ptr[RAIL_TMP1].data & 0xFF00) >> 8);  // TEMPURATURE 1 MSB
-	buffer[49] = (rail_monitor_ptr[RAIL_TMP1].data & 0xFF);           // TEMPURATURE 1 LSB
+	buffer[24] = ((rail_monitor_ptr[RAIL_5v].data & 0xFF00) >> 8);			// HK 5vmon MSB
+	buffer[25] = (rail_monitor_ptr[RAIL_5v].data & 0xFF);					// HK 5vmon LSB
+	buffer[26] = ((rail_monitor_ptr[RAIL_n3v3].data & 0xFF00) >> 8);		// HK n3v3mon MSB
+	buffer[27] = (rail_monitor_ptr[RAIL_n3v3].data & 0xFF);				// HK n3v3mon LSB
+	buffer[28] = ((rail_monitor_ptr[RAIL_n5v].data & 0xFF00) >> 8);		// HK n5vmon MSB
+	buffer[29] = (rail_monitor_ptr[RAIL_n5v].data & 0xFF);					// HK n5vmon LSB
+	buffer[30] = ((rail_monitor_ptr[RAIL_15v].data & 0xFF00) >> 8);		// HK 15vmon MSB
+	buffer[31] = (rail_monitor_ptr[RAIL_15v].data & 0xFF);					// HK 15vmon LSB
+	buffer[32] = ((rail_monitor_ptr[RAIL_5vref].data & 0xFF00) >> 8);		// HK 5vrefmon MSB
+	buffer[33] = (rail_monitor_ptr[RAIL_5vref].data & 0xFF);				// HK 5vrefmon LSB
+	buffer[34] = ((rail_monitor_ptr[RAIL_n200v].data & 0xFF00) >> 8);		// HK n150vmon MSB
+	buffer[35] = (rail_monitor_ptr[RAIL_n200v].data & 0xFF);				// HK n150vmon LSB
+	buffer[36] = ((rail_monitor_ptr[RAIL_n800v].data & 0xFF00) >> 8);		// HK n800vmon MSB
+	buffer[37] = (rail_monitor_ptr[RAIL_n800v].data & 0xFF);				// HK n800vmon LSB
+	buffer[38] = ((rail_monitor_ptr[RAIL_TEMP1].data & 0xFF00) >> 8);	// HK TEMP1 MSB
+	buffer[39] = (rail_monitor_ptr[RAIL_TEMP1].data & 0xFF);				// HK TEMP1 LSB
+	buffer[40] = ((rail_monitor_ptr[RAIL_TEMP2].data & 0xFF00) >> 8);	// HK TEMP2 MSB
+	buffer[41] = (rail_monitor_ptr[RAIL_TEMP2].data & 0xFF);			// HK TEMP2 LSB
+	buffer[42] = ((rail_monitor_ptr[RAIL_TEMP3].data & 0xFF00) >> 8);	// HK TEMP3 MSB
+	buffer[43] = (rail_monitor_ptr[RAIL_TEMP3].data & 0xFF);			// HK TEMP3 LSB
+	buffer[44] = ((rail_monitor_ptr[RAIL_TEMP4].data & 0xFF00) >> 8);	// HK TEMP4 MSB
+	buffer[45] = (rail_monitor_ptr[RAIL_TEMP4].data & 0xFF);			// HK TEMP4 LSB
+	buffer[46] = ((rail_monitor_ptr[RAIL_TMP1].data & 0xFF00) >> 8);  // TEMPURATURE 1 MSB
+	buffer[47] = (rail_monitor_ptr[RAIL_TMP1].data & 0xFF);           // TEMPURATURE 1 LSB
 
 	HAL_UART_Transmit(&huart1, buffer, HK_DATA_SIZE, UART_TIMEOUT_MS);
 

@@ -16,7 +16,7 @@
 #include "spi.h"
 #include "i2c.h"
 #define ADC1_NUM_CHANNELS 11
-#define ADC3_NUM_CHANNELS 4
+#define ADC3_NUM_CHANNELS 3
 
 void init_adc_dma();
 void sample_pmt_spi(uint8_t *buffer);

@@ -17,7 +17,7 @@
  *
  ******************************************************************************
  */
- /* USER CODE END Header */
+/* USER CODE END Header */
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __RAMECC_H__
 #define __RAMECC_H__
@@ -34,22 +34,35 @@ extern "C" {
 /* USER CODE END Includes */
 
 extern RAMECC_HandleTypeDef hramecc1_m1;
+
 extern RAMECC_HandleTypeDef hramecc1_m2;
+
 extern RAMECC_HandleTypeDef hramecc1_m3;
+
 extern RAMECC_HandleTypeDef hramecc1_m4;
+
 extern RAMECC_HandleTypeDef hramecc1_m5;
+
 extern RAMECC_HandleTypeDef hramecc2_m1;
+
 extern RAMECC_HandleTypeDef hramecc2_m2;
+
 extern RAMECC_HandleTypeDef hramecc2_m3;
+
 extern RAMECC_HandleTypeDef hramecc2_m4;
+
 extern RAMECC_HandleTypeDef hramecc2_m5;
+
 extern RAMECC_HandleTypeDef hramecc3_m1;
+
 extern RAMECC_HandleTypeDef hramecc3_m2;
 
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
+
 void MX_RAMECC_Init(void);
+
 /* USER CODE BEGIN Prototypes */
 
 /* USER CODE END Prototypes */

@@ -36,9 +36,6 @@
 #define RAIL_2V5_MAX 3414		// 2.75v
 #define RAIL_2V5_MIN 2792		// 2.25v
 
-#define RAIL_3V3_MAX 1596		// 1.29
-#define RAIL_3V3_MIN 1306		// 1.05
-
 #define RAIL_5V_MAX 4095		// 3.30v
 #define RAIL_5V_MIN 3350		// 2.70v
 
@@ -163,16 +160,6 @@ void voltage_monitor_init()
 	rail_monitor[RAIL_2v5].OOB_2 = 0;
 	rail_monitor[RAIL_2v5].OOB_3 = 0;
 
-	rail_monitor[RAIL_3v3].name = RAIL_3v3;
-	rail_monitor[RAIL_3v3].error_count = 0;
-	rail_monitor[RAIL_3v3].is_enabled = DISABLED;
-	rail_monitor[RAIL_3v3].data = 0;
-	rail_monitor[RAIL_3v3].max_voltage = RAIL_3V3_MAX;
-	rail_monitor[RAIL_3v3].min_voltage = RAIL_3V3_MIN;
-	rail_monitor[RAIL_3v3].OOB_1 = 0;
-	rail_monitor[RAIL_3v3].OOB_2 = 0;
-	rail_monitor[RAIL_3v3].OOB_3 = 0;
-
 	rail_monitor[RAIL_5v].name = RAIL_5v;
 	rail_monitor[RAIL_5v].error_count = 0;
 	rail_monitor[RAIL_5v].is_enabled = DISABLED;
@@ -274,7 +261,7 @@ void set_rail_monitor_enable(VOLTAGE_RAIL_NAME rail_name, uint8_t enable_value)
 void set_rail_monitor()
 {
 	uint16_t hk_adc1[10];
-	uint16_t hk_adc3[4];
+	uint16_t hk_adc3[3];
 	int16_t hk_i2c[4];
 
 	sample_hk_i2c(hk_i2c);
@@ -290,7 +277,6 @@ void set_rail_monitor()
 	memcpy(&rail_monitor[RAIL_busvmon].data, &hk_adc1[0], sizeof(uint16_t));
 	memcpy(&rail_monitor[RAIL_busimon].data, &hk_adc1[1], sizeof(uint16_t));
 	memcpy(&rail_monitor[RAIL_2v5].data, &hk_adc1[2], sizeof(uint16_t));
-	memcpy(&rail_monitor[RAIL_3v3].data, &hk_adc3[3], sizeof(uint16_t));
 	memcpy(&rail_monitor[RAIL_5v].data, &hk_adc1[6], sizeof(uint16_t));
 	memcpy(&rail_monitor[RAIL_n3v3].data, &hk_adc1[3], sizeof(uint16_t));
 	memcpy(&rail_monitor[RAIL_n5v].data, &hk_adc3[2], sizeof(uint16_t));
@@ -461,9 +447,6 @@ ERROR_DETAIL get_rail_name_error_detail(VOLTAGE_RAIL_NAME rail_name)
 
 	case RAIL_2v5:
 		return ED_2v5;
-
-	case RAIL_3v3:
-		return ED_3v3;
 
 	case RAIL_5v:
 		return ED_5v;

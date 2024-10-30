@@ -15,7 +15,7 @@
 #include "tim.h"
 #include "dac.h"
 
-#define ERROR_COUNTER_PACKET_SIZE 60
+#define ERROR_COUNTER_PACKET_SIZE 58
 #define PREV_ERROR_PACKET_SIZE 4
 #define CURRENT_ERROR_PACKET_SIZE 10
 #define JUNK_PACKET_SIZE 1024
@@ -24,8 +24,8 @@
 #define PREV_ERROR_PACKET_SYNC 0xAA
 #define CURRENT_ERROR_PACKET_SYNC 0xBB
 
-#define PREV_ERROR_CATEGORY_INDEX 29
-#define PREV_ERROR_DETAIL_INDEX 30
+#define PREV_ERROR_CATEGORY_INDEX 28
+#define PREV_ERROR_DETAIL_INDEX 29
 
 void emergency_shutdown();
 void flash_mass_erase();
@@ -45,8 +45,7 @@ uint16_t VirtAddVarTab[NB_OF_VAR] =
 		0x0011, 0x0012, 0x0013, 0x0014, 0x0015,
 		0x0016, 0x0017, 0x0018, 0x0019, 0x0020,
 		0x0021, 0x0022, 0x0023, 0x0024, 0x0025,
-		0x0026, 0x0027, 0x0028, 0x0029, 0x0030,
-		0x0031
+		0x0026, 0x0027, 0x0028, 0x0029, 0x0030
 };
 
 /**
@@ -277,34 +276,32 @@ void send_error_counter_packet()
 	buffer[29] = (local_cpy[ED_busimon] & 0xFF);
 	buffer[30] = ((local_cpy[ED_2v5] & 0xFF00) >> 8);
 	buffer[31] = (local_cpy[ED_2v5] & 0xFF);
-	buffer[32] = ((local_cpy[ED_3v3] & 0xFF00) >> 8);
-	buffer[33] = (local_cpy[ED_3v3] & 0xFF);
-	buffer[34] = ((local_cpy[ED_5v] & 0xFF00) >> 8);
-	buffer[35] = (local_cpy[ED_5v] & 0xFF);
-	buffer[36] = ((local_cpy[ED_n3v3] & 0xFF00) >> 8);
-	buffer[37] = (local_cpy[ED_n3v3] & 0xFF);
-	buffer[38] = ((local_cpy[ED_n5v] & 0xFF00) >> 8);
-	buffer[39] = (local_cpy[ED_n5v] & 0xFF);
-	buffer[40] = ((local_cpy[ED_15v] & 0xFF00) >> 8);
-	buffer[41] = (local_cpy[ED_15v] & 0xFF);
-	buffer[42] = ((local_cpy[ED_5vref] & 0xFF00) >> 8);
-	buffer[43] = (local_cpy[ED_5vref] & 0xFF);
-	buffer[44] = ((local_cpy[ED_n200v] & 0xFF00) >> 8);
-	buffer[45] = (local_cpy[ED_n200v] & 0xFF);
-	buffer[46] = ((local_cpy[ED_n800v] & 0xFF00) >> 8);
-	buffer[47] = (local_cpy[ED_n800v] & 0xFF);
-	buffer[48] = ((local_cpy[ED_TMP1] & 0xFF00) >> 8);
-	buffer[49] = (local_cpy[ED_TMP1] & 0xFF);
-	buffer[50] = ((local_cpy[ED_single_bit_error_flash] & 0xFF00) >> 8);
-	buffer[51] = (local_cpy[ED_single_bit_error_flash] & 0xFF);
-	buffer[52] = ((local_cpy[ED_double_bit_error_flash] & 0xFF00) >> 8);
-	buffer[53] = (local_cpy[ED_double_bit_error_flash] & 0xFF);
-	buffer[54] = ((local_cpy[ED_single_bit_error_ram] & 0xFF00) >> 8);
-	buffer[55] = (local_cpy[ED_single_bit_error_ram] & 0xFF);
-	buffer[56] = ((local_cpy[ED_double_bit_error_ram] & 0xFF00) >> 8);
-	buffer[57] = (local_cpy[ED_double_bit_error_ram] & 0xFF);
-	buffer[58] = ((local_cpy[ED_UNDEFINED] & 0xFF00) >> 8);
-	buffer[59] = (local_cpy[ED_UNDEFINED] & 0xFF);
+	buffer[32] = ((local_cpy[ED_5v] & 0xFF00) >> 8);
+	buffer[33] = (local_cpy[ED_5v] & 0xFF);
+	buffer[34] = ((local_cpy[ED_n3v3] & 0xFF00) >> 8);
+	buffer[35] = (local_cpy[ED_n3v3] & 0xFF);
+	buffer[36] = ((local_cpy[ED_n5v] & 0xFF00) >> 8);
+	buffer[37] = (local_cpy[ED_n5v] & 0xFF);
+	buffer[38] = ((local_cpy[ED_15v] & 0xFF00) >> 8);
+	buffer[39] = (local_cpy[ED_15v] & 0xFF);
+	buffer[40] = ((local_cpy[ED_5vref] & 0xFF00) >> 8);
+	buffer[41] = (local_cpy[ED_5vref] & 0xFF);
+	buffer[42] = ((local_cpy[ED_n200v] & 0xFF00) >> 8);
+	buffer[43] = (local_cpy[ED_n200v] & 0xFF);
+	buffer[44] = ((local_cpy[ED_n800v] & 0xFF00) >> 8);
+	buffer[45] = (local_cpy[ED_n800v] & 0xFF);
+	buffer[46] = ((local_cpy[ED_TMP1] & 0xFF00) >> 8);
+	buffer[47] = (local_cpy[ED_TMP1] & 0xFF);
+	buffer[48] = ((local_cpy[ED_single_bit_error_flash] & 0xFF00) >> 8);
+	buffer[49] = (local_cpy[ED_single_bit_error_flash] & 0xFF);
+	buffer[50] = ((local_cpy[ED_double_bit_error_flash] & 0xFF00) >> 8);
+	buffer[51] = (local_cpy[ED_double_bit_error_flash] & 0xFF);
+	buffer[52] = ((local_cpy[ED_single_bit_error_ram] & 0xFF00) >> 8);
+	buffer[53] = (local_cpy[ED_single_bit_error_ram] & 0xFF);
+	buffer[54] = ((local_cpy[ED_double_bit_error_ram] & 0xFF00) >> 8);
+	buffer[55] = (local_cpy[ED_double_bit_error_ram] & 0xFF);
+	buffer[56] = ((local_cpy[ED_UNDEFINED] & 0xFF00) >> 8);
+	buffer[57] = (local_cpy[ED_UNDEFINED] & 0xFF);
 
 	HAL_UART_Transmit(&huart1, buffer, ERROR_COUNTER_PACKET_SIZE, UART_TIMEOUT_MS);
 }
