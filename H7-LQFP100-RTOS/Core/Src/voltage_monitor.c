@@ -45,8 +45,8 @@
 #define RAIL_N5V_MAX 10000		// TODO: Erroring out at 0v, wait for Sanj
 #define RAIL_N5V_MIN 0			// 		 Real values are 4150, 3.34v and 3395, 2.74v
 
-#define RAIL_15V_MAX 4095		// 3.30v
-#define RAIL_15V_MIN 3350		// 2.70v
+#define RAIL_15V_MAX 3262		// 3.30v
+#define RAIL_15V_MIN 2669		// 2.70v
 
 #define RAIL_5VREF_MAX 4095		// 3.30v
 #define RAIL_5VREF_MIN 3350		// 2.70v
