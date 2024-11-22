@@ -51,6 +51,7 @@ MEMORY
 }
 
 /* Define output sections */
+
 SECTIONS
 {
   /* The startup code goes first into RAM_EXEC */
@@ -160,6 +161,11 @@ SECTIONS
     . = . + _Min_Stack_Size;
     . = ALIGN(8);
   } >DTCMRAM
+  
+  .hk_buffer (NOLOAD) :
+{
+    *(.hk_buffer)
+} > RAM_D3 0x38001000
 
   /* Remove information from the standard libraries */
   /DISCARD/ :

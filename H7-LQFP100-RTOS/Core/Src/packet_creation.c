@@ -215,7 +215,7 @@ void create_erpa_packet()
  */
 void create_hk_packet()
 {
-	static Packet_t hk;
+	static Packet_t hk __attribute__((section(".hk_buffer"), aligned(4)));
 	hk.size = HK_DATA_SIZE;
 
 	static VOLTAGE_RAIL *rail_monitor_ptr;
