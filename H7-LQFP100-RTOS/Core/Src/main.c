@@ -101,9 +101,11 @@ typedef enum
 	CMD_IDLE_MODE = 0xCF,
 	CMD_RESET_ERROR_COUNTERS = 0xDF,
 	CMD_SEND_PREVIOUS_ERROR = 0xEF,
-	CMD_SEND_VERSION_PACKET = 0x1F
+	CMD_SEND_VERSION_PACKET = 0x1F,
+	CMD_UPDATE_FIRMWARE = 0x2A
 }ACCEPTED_COMMANDS;
 
+typedef  void (*pFunction)(void);
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -112,6 +114,10 @@ typedef enum
 
 #define ACK 0xFF
 #define NACK 0x00
+
+#define BOOTLOADER_FLAG_VALUE 0xDEADBEEF
+#define BOOTLOADER_FLAG_OFFSET 1000
+#define BOOTLOADER_ADDRESS 0x1FF09800
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -180,6 +186,11 @@ volatile uint32_t cadence = 3125;
 volatile uint32_t uptime_millis = 0;
 volatile uint8_t HK_100_ms_counter = 0;
 volatile uint8_t IDLING = 1;
+
+extern int _estack;
+uint32_t *bootloader_flag;
+pFunction JumpToApplication;
+uint32_t JumpAddress;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -193,6 +204,33 @@ void init_flash_ecc();
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+/**
+ * @brief Prepares for system reset and jump to bootloader
+ */
+void SetBootloaderFlag() {
+	__disable_irq();
+	*bootloader_flag = BOOTLOADER_FLAG_VALUE;
+	HAL_UART_DeInit(&huart1);
+	HAL_NVIC_SystemReset();
+}
+
+/**
+ * @brief Recognizes if we want to jump to the bootloader and does so
+ */
+void JumpToBootloader(void)
+{
+	bootloader_flag = (uint32_t*) (&_estack - BOOTLOADER_FLAG_OFFSET); // below top of stack
+	if (*bootloader_flag == BOOTLOADER_FLAG_VALUE) {
+		*bootloader_flag = 0;
+		/* Jump to system memory bootloader */
+		JumpAddress = *(__IO uint32_t*) (BOOTLOADER_ADDRESS + 4);
+		JumpToApplication = (pFunction) JumpAddress;
+		__set_MSP(*(__IO uint32_t*) BOOTLOADER_ADDRESS);
+		JumpToApplication();
+	}
+		*bootloader_flag = 0; // So next boot won't be affected
+}
 
 /**
  * @brief Callback function for handling ECC correction in flash memory.
@@ -552,6 +590,14 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 		break;
 	}
 
+	case CMD_UPDATE_FIRMWARE:
+	{
+		uint8_t msg = 0x79;
+		HAL_UART_Transmit(&huart1, &msg, 1, 1000);
+		SetBootloaderFlag();
+		break;
+	}
+
 	default:
 	{
 		// Unknown command
@@ -600,7 +646,7 @@ ERROR_STRUCT get_reset_cause()
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+	JumpToBootloader();
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
