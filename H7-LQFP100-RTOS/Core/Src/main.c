@@ -646,7 +646,6 @@ ERROR_STRUCT get_reset_cause()
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
 	JumpToBootloader();
   /* USER CODE END 1 */
 
