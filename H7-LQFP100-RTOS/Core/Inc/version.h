@@ -1,0 +1,1 @@
+#define FIRMWARE_VERSION "6d7f924"
