@@ -32,6 +32,7 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
+#include "version.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -102,6 +103,7 @@ typedef enum
 	CMD_RESET_ERROR_COUNTERS = 0xDF,
 	CMD_SEND_PREVIOUS_ERROR = 0xEF,
 	CMD_SEND_VERSION_PACKET = 0x1F,
+	CMD_SEND_VERSION_INFO = 0x2F,
 	CMD_UPDATE_FIRMWARE = 0x2A
 }ACCEPTED_COMMANDS;
 
@@ -587,6 +589,20 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	case CMD_SEND_VERSION_PACKET:
 	{
 		create_version_packet();
+		break;
+	}
+
+	case CMD_SEND_VERSION_INFO:
+	{
+		// Ensure the GIT_INFO macro is defined
+		#ifdef GIT_INFO_PRESENT
+			// Transmit the version information via UART
+			HAL_UART_Transmit(&huart1, (uint8_t*)GIT_INFO, strlen(GIT_INFO), HAL_MAX_DELAY);
+		#else
+			// Transmit a fallback message if version information is unavailable
+			const char* fallback_message = "Version information unavailable.\r\n";
+			HAL_UART_Transmit(&huart1, (uint8_t*)fallback_message, strlen(fallback_message), HAL_MAX_DELAY);
+		#endif
 		break;
 	}
 
