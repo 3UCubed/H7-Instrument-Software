@@ -50,8 +50,8 @@ This project involves a microcontroller-based system designed to handle and tran
 ## Usage
 | Command | Action | Meaning |
 |---------|--------|---------|
-| `0x10` | SDN1 ON | Turn on SDN1 |
-| `0x00` | SDN1 OFF | Turn off SDN1 |
+| `0x10` | SDN1 ON | Turn on SDN1 (High) |
+| `0x00` | SDN1 OFF | Turn off SDN1 (Low) |
 | `0x11` | SYS ON PB5 | Turn on system on PB5 |
 | `0x01` | SYS OFF PB5 | Turn off system on PB5 |
 | `0x12` | 3V3 ON PC10 | Turn on 3.3V on PC10 |
@@ -86,6 +86,12 @@ This project involves a microcontroller-based system designed to handle and tran
 | `0xD0` | AUTO DEINIT | Automatic deinitialization |
 | `0xAF` | SYNC | Synchronize |
 | `0xBF` | FLIGHT MODE | Enter flight mode |
+| `0xCF` | IDLE MODE | Enter Idle mode |
+| `0xDF` | RESET ERROR COUNTERS | Reset error counters |
+| `0xEF` | SEND PREVIOUS ERROR | Send the last error packet |
+| `0x1F` | SEND VERSION PACKET | Send the version packet |
+| `0x2F` | SEND VERSION INFO | Send the version information |
+| `0x2A` | ENTER BOOTLOADER | Enter the integrated bootloader |
 ## License
 
 This project is licensed under the [MIT License](LICENSE). See the [LICENSE](LICENSE) file for details.
