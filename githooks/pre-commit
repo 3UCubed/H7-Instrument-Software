@@ -1,0 +1,55 @@
+#!/bin/bash
+
+# Define version file path
+VERSION_FILE="H7-LQFP100-RTOS/Core/Inc/version.h"
+
+# Ensure the directory exists
+if [ ! -d "H7-LQFP100-RTOS/Core/Inc" ]; then
+    echo "Error: Directory H7-LQFP100-RTOS/Core/Inc does not exist!" >&2
+    exit 1
+fi
+
+# Ensure version.h exists
+if [ ! -f "$VERSION_FILE" ]; then
+    echo "#ifndef VERSION_H" > "$VERSION_FILE"
+    echo "#define VERSION_H" >> "$VERSION_FILE"
+    echo "" >> "$VERSION_FILE"
+    echo "#define V_MAJOR 1" >> "$VERSION_FILE"
+    echo "#define V_MINOR 0" >> "$VERSION_FILE"
+    echo "#define V_PATCH 0" >> "$VERSION_FILE"
+    echo "" >> "$VERSION_FILE"
+    echo "#endif // VERSION_H" >> "$VERSION_FILE"
+fi
+
+# Read current version numbers from version.h
+V_MAJOR=$(grep "#define V_MAJOR" "$VERSION_FILE" | awk '{print $3}')
+V_MINOR=$(grep "#define V_MINOR" "$VERSION_FILE" | awk '{print $3}')
+V_PATCH=$(grep "#define V_PATCH" "$VERSION_FILE" | awk '{print $3}')
+
+# Get the last committed version before changes
+LAST_VERSION=$(git show HEAD:$VERSION_FILE 2>/dev/null || echo "#define V_MAJOR 1\n#define V_MINOR 0\n#define V_PATCH 0")
+LAST_MAJOR=$(echo "$LAST_VERSION" | grep "#define V_MAJOR" | awk '{print $3}')
+LAST_MINOR=$(echo "$LAST_VERSION" | grep "#define V_MINOR" | awk '{print $3}')
+LAST_PATCH=$(echo "$LAST_VERSION" | grep "#define V_PATCH" | awk '{print $3}')
+
+# Detect if the user manually incremented the minor or major number
+if [[ "$V_MINOR" -gt "$LAST_MINOR" || "$V_MAJOR" -gt "$LAST_MAJOR" ]]; then
+    V_PATCH=0  # Reset patch if minor/major was manually changed
+else
+    V_PATCH=$((V_PATCH + 1))  # Auto-increment patch indefinitely
+fi
+
+# Update version.h with new version numbers
+echo "#ifndef VERSION_H" > "$VERSION_FILE"
+echo "#define VERSION_H" >> "$VERSION_FILE"
+echo "" >> "$VERSION_FILE"
+echo "#define V_MAJOR $V_MAJOR" >> "$VERSION_FILE"
+echo "#define V_MINOR $V_MINOR" >> "$VERSION_FILE"
+echo "#define V_PATCH $V_PATCH" >> "$VERSION_FILE"
+echo "" >> "$VERSION_FILE"
+echo "#endif // VERSION_H" >> "$VERSION_FILE"
+
+# Stage the file for commit
+git add "$VERSION_FILE"
+
+echo "Updated firmware version to v$V_MAJOR.$V_MINOR.$V_PATCH"
