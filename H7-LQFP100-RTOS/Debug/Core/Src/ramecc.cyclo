@@ -1,4 +1,0 @@
-ramecc.c:56:6:MX_RAMECC_Init	13
-ramecc.c:189:6:write_RAM	2
-ramecc.c:203:6:enable_ramecc_monitor_notifications	3
-ramecc.c:222:6:HAL_RAMECC_DetectErrorCallback	3

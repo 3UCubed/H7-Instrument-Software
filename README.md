@@ -90,7 +90,8 @@ This project involves a microcontroller-based system designed to handle and tran
 | `0xDF` | RESET ERROR COUNTERS | Reset error counters |
 | `0xEF` | SEND PREVIOUS ERROR | Send the last error packet |
 | `0x1F` | SEND VERSION PACKET | Send the version packet |
-| `0x2F` | SEND VERSION INFO | Send the version information |
+| `0x2F` | SEND VERSION NUMBERING | Send the version number |
+| `0x3F` | SEND VERSION INFO | Send the version information |
 | `0x2A` | ENTER BOOTLOADER | Enter the integrated bootloader |
 ## License
 
