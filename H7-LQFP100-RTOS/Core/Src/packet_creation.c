@@ -8,6 +8,7 @@
  */
 
 #include "packet_creation.h"
+#include "version.h"
 
 #define SYNC_DATA_SIZE 65
 #define VERSION_DATA_SIZE 5

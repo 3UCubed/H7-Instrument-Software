@@ -40,10 +40,6 @@ extern "C" {
 #include "sample_data.h"
 #include "time_tagging.h"
 
-#define V_MAJOR 1
-#define V_MINOR 0
-#define V_PATCH 0
-
 #define ERROR_HANDLING_ENABLED
 
 #define ERPA_PWM_FREQ 312
