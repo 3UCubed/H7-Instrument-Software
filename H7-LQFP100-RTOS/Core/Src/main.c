@@ -114,6 +114,10 @@ typedef  void (*pFunction)(void);
 
 #define ACK 0xFF
 #define NACK 0x00
+
+#define BOOTLOADER_FLAG_VALUE 0xDEADBEEF
+#define BOOTLOADER_FLAG_OFFSET 1000
+#define BOOTLOADER_ADDRESS 0x1FF09800
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
