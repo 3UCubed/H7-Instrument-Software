@@ -216,6 +216,23 @@ void SetBootloaderFlag() {
 }
 
 /**
+ * @brief Recognizes if we want to jump to the bootloader and does so
+ */
+void JumpToBootloader(void)
+{
+	bootloader_flag = (uint32_t*) (&_estack - BOOTLOADER_FLAG_OFFSET); // below top of stack
+	if (*bootloader_flag == BOOTLOADER_FLAG_VALUE) {
+		*bootloader_flag = 0;
+		/* Jump to system memory bootloader */
+		JumpAddress = *(__IO uint32_t*) (BOOTLOADER_ADDRESS + 4);
+		JumpToApplication = (pFunction) JumpAddress;
+		__set_MSP(*(__IO uint32_t*) BOOTLOADER_ADDRESS);
+		JumpToApplication();
+	}
+		*bootloader_flag = 0; // So next boot won't be affected
+}
+
+/**
  * @brief Callback function for handling ECC correction in flash memory.
  *        Detects and handles single-bit flash ECC errors.
  */
