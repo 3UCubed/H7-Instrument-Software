@@ -206,6 +206,16 @@ void init_flash_ecc();
 /* USER CODE BEGIN 0 */
 
 /**
+ * @brief Prepares for system reset and jump to bootloader
+ */
+void SetBootloaderFlag() {
+	__disable_irq();
+	*bootloader_flag = BOOTLOADER_FLAG_VALUE;
+	HAL_UART_DeInit(&huart1);
+	HAL_NVIC_SystemReset();
+}
+
+/**
  * @brief Callback function for handling ECC correction in flash memory.
  *        Detects and handles single-bit flash ECC errors.
  */
