@@ -104,6 +104,7 @@ typedef enum
 	CMD_SEND_VERSION_PACKET = 0x1F
 }ACCEPTED_COMMANDS;
 
+typedef  void (*pFunction)(void);
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
