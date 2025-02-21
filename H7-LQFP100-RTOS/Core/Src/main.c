@@ -590,6 +590,14 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 		break;
 	}
 
+	case CMD_UPDATE_FIRMWARE:
+	{
+		uint8_t msg = 0x79;
+		HAL_UART_Transmit(&huart1, &msg, 1, 1000);
+		SetBootloaderFlag();
+		break;
+	}
+
 	default:
 	{
 		// Unknown command
