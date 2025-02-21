@@ -186,6 +186,11 @@ volatile uint32_t cadence = 3125;
 volatile uint32_t uptime_millis = 0;
 volatile uint8_t HK_100_ms_counter = 0;
 volatile uint8_t IDLING = 1;
+
+extern int _estack;
+uint32_t *bootloader_flag;
+pFunction JumpToApplication;
+uint32_t JumpAddress;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
