@@ -21,4 +21,8 @@ void create_erpa_packet();
 void create_hk_packet();
 void reset_packet_sequence_numbers();
 
+extern uint16_t pmt_seq;
+extern uint32_t erpa_seq;
+extern uint16_t hk_seq;
+
 #endif /* INC_PACKET_CREATION_H_ */

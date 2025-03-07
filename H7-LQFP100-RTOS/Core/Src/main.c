@@ -20,6 +20,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "packet_creation.h"
 #include "cmsis_os.h"
 #include "adc.h"
 #include "dac.h"

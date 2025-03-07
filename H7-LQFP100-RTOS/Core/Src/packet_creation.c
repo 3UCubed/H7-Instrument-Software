@@ -23,7 +23,7 @@
 #define ERPA_SYNCWORD 0xEE
 #define HK_SYNCWORD 0xDD
 
-uint16_t pmt_seq = 0;
+uint16_t pmt_seq = 1;
 uint32_t erpa_seq = 0;
 uint16_t hk_seq = 0;
 
@@ -283,7 +283,7 @@ void create_hk_packet()
  */
 void reset_packet_sequence_numbers()
 {
-	pmt_seq = 0;
+	pmt_seq = 1;
 	erpa_seq = 0;
 	hk_seq = 0;
 }

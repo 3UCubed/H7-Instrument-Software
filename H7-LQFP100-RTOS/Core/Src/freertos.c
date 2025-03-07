@@ -528,6 +528,7 @@ void Science_init(void *argument)
 		HK_ENABLED = ENABLED;
 		ERPA_ENABLED = ENABLED;
 		uptime_millis = 0;
+
 		reset_packet_sequence_numbers();
 		osEventFlagsSet(packet_event_flags, HK_FLAG);
 		TIM2->CCR4 = ERPA_PWM_FREQ;
