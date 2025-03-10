@@ -178,6 +178,9 @@ volatile uint32_t cadence = 3125;
 volatile uint32_t uptime_millis = 0;
 volatile uint8_t HK_100_ms_counter = 0;
 volatile uint8_t IDLING = 1;
+volatile uint8_t startup_pmt_sent = 0;
+volatile uint8_t startup_erpa_sent = 0;
+volatile uint8_t startup_hk_sent = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -224,10 +227,10 @@ void HAL_FLASHEx_EccDetectionCallback()
  */
 void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 {
-	static uint8_t startup_pmt_sent = 0;
 	if (htim == &htim1)
 	{
-		if (startup_pmt_sent == 0) {
+		if (startup_pmt_sent == 0)
+		{
 			pmt_seq = 0;
 			startup_pmt_sent = 1;
 		}
@@ -237,6 +240,11 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 	{
 		if (ERPA_ENABLED)
 		{
+			if (startup_erpa_sent == 0)
+			{
+				erpa_seq = 0;
+				startup_erpa_sent = 1;
+			}
 			osEventFlagsSet(packet_event_flags, ERPA_FLAG);
 		}
 		if (HK_100_ms_counter == HK_100MS_COUNTER_MAX)
@@ -245,6 +253,11 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 
 			if (HK_ENABLED)
 			{
+				if (startup_hk_sent == 0)
+				{
+					hk_seq = 0;
+					startup_hk_sent = 1;
+				}
 				osEventFlagsSet(packet_event_flags, HK_FLAG);
 			}
 			HK_100_ms_counter = 0;
