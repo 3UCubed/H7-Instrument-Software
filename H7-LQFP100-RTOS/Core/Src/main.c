@@ -224,8 +224,13 @@ void HAL_FLASHEx_EccDetectionCallback()
  */
 void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 {
+	static uint8_t startup_pmt_sent = 0;
 	if (htim == &htim1)
 	{
+		if (startup_pmt_sent == 0) {
+			pmt_seq = 0;
+			startup_pmt_sent = 1;
+		}
 		osEventFlagsSet(packet_event_flags, PMT_FLAG);
 	}
 	else if (htim == &htim2)
