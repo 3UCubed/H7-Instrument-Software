@@ -238,26 +238,25 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 	}
 	else if (htim == &htim2)
 	{
+		if (startup_erpa_sent == 0)
+		{
+			erpa_seq = 0;
+			startup_erpa_sent = 1;
+		}
 		if (ERPA_ENABLED)
 		{
-			if (startup_erpa_sent == 0)
-			{
-				erpa_seq = 0;
-				startup_erpa_sent = 1;
-			}
 			osEventFlagsSet(packet_event_flags, ERPA_FLAG);
 		}
 		if (HK_100_ms_counter == HK_100MS_COUNTER_MAX)
 		{
 			osEventFlagsSet(utility_event_flags, VOLTAGE_MONITOR_FLAG);
-
+			if (startup_hk_sent == 0)
+			{
+				hk_seq = 0;
+				startup_hk_sent = 1;
+			}
 			if (HK_ENABLED)
 			{
-				if (startup_hk_sent == 0)
-				{
-					hk_seq = 0;
-					startup_hk_sent = 1;
-				}
 				osEventFlagsSet(packet_event_flags, HK_FLAG);
 			}
 			HK_100_ms_counter = 0;
