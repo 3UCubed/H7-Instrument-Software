@@ -179,7 +179,6 @@ volatile uint32_t uptime_millis = 0;
 volatile uint8_t HK_100_ms_counter = 0;
 volatile uint8_t IDLING = 1;
 volatile uint8_t startup_pmt_sent = 0;
-volatile uint8_t startup_erpa_sent = 0;
 volatile uint8_t startup_hk_sent = 0;
 /* USER CODE END PV */
 
@@ -230,17 +229,11 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 	if (htim == &htim1)
 	{
 		// Not the prettiest or best way to go about it, but
-		// this will make a startup packet for ERPA, HK, and PMT when right when science mode is triggered
+		// this will make a startup packet for HK and PMT (NO ERPA STARTUP) when right when science mode is triggered
 		if (startup_pmt_sent == 0)
 		{
 			pmt_seq = 0;
 			startup_pmt_sent = 1;
-			if (startup_erpa_sent == 0)
-			{
-				erpa_seq = 0;
-				startup_erpa_sent = 1;
-				osEventFlagsSet(packet_event_flags, ERPA_FLAG);
-			}
 			if (startup_hk_sent == 0)
 			{
 				hk_seq = 0;
