@@ -104,6 +104,7 @@ typedef enum
 	CMD_UPDATE_FIRMWARE = 0x2A
 }ACCEPTED_COMMANDS;
 
+typedef  void (*pFunction)(void);
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
