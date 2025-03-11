@@ -229,20 +229,29 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	if (htim == &htim1)
 	{
+		// Not the prettiest or best way to go about it, but
+		// this will make a startup packet for ERPA, HK, and PMT when right when science mode is triggered
 		if (startup_pmt_sent == 0)
 		{
 			pmt_seq = 0;
 			startup_pmt_sent = 1;
+			if (startup_erpa_sent == 0)
+			{
+				erpa_seq = 0;
+				startup_erpa_sent = 1;
+				osEventFlagsSet(packet_event_flags, ERPA_FLAG);
+			}
+			if (startup_hk_sent == 0)
+			{
+				hk_seq = 0;
+				startup_hk_sent = 1;
+				osEventFlagsSet(packet_event_flags, HK_FLAG);
+			}
 		}
 		osEventFlagsSet(packet_event_flags, PMT_FLAG);
 	}
 	else if (htim == &htim2)
 	{
-		if (startup_erpa_sent == 0)
-		{
-			erpa_seq = 0;
-			startup_erpa_sent = 1;
-		}
 		if (ERPA_ENABLED)
 		{
 			osEventFlagsSet(packet_event_flags, ERPA_FLAG);
@@ -250,11 +259,6 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 		if (HK_100_ms_counter == HK_100MS_COUNTER_MAX)
 		{
 			osEventFlagsSet(utility_event_flags, VOLTAGE_MONITOR_FLAG);
-			if (startup_hk_sent == 0)
-			{
-				hk_seq = 0;
-				startup_hk_sent = 1;
-			}
 			if (HK_ENABLED)
 			{
 				osEventFlagsSet(packet_event_flags, HK_FLAG);
@@ -607,7 +611,8 @@ int main(void)
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
+
+	HAL_Init();
 
   /* USER CODE BEGIN Init */
 
