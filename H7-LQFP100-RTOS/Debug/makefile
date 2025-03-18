@@ -56,12 +56,10 @@ default.size.stdout \
 OBJDUMP_LIST += \
 H7-LQFP100-RTOS.list \
 
-OBJCOPY_BIN += \
-H7-LQFP100-RTOS.bin \
-
 
 # All Target
-all: main-build
+all:
+	+@$(MAKE) --no-print-directory pre-build && $(MAKE) --no-print-directory main-build
 
 # Main-build Target
 main-build: H7-LQFP100-RTOS.elf secondary-outputs
@@ -82,17 +80,16 @@ H7-LQFP100-RTOS.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	@echo 'Finished building: $@'
 	@echo ' '
 
-H7-LQFP100-RTOS.bin: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-objcopy  -O binary $(EXECUTABLES) "H7-LQFP100-RTOS.bin"
-	@echo 'Finished building: $@'
-	@echo ' '
-
 # Other Targets
 clean:
-	-$(RM) H7-LQFP100-RTOS.bin H7-LQFP100-RTOS.elf H7-LQFP100-RTOS.list H7-LQFP100-RTOS.map default.size.stdout
+	-$(RM) H7-LQFP100-RTOS.elf H7-LQFP100-RTOS.list H7-LQFP100-RTOS.map default.size.stdout
 	-@echo ' '
 
-secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST) $(OBJCOPY_BIN)
+pre-build:
+	git log --pretty=format:'#define GIT_COMMIT_HASH%n static const char* GIT_INFO = "Version Information=[%H,%d]\r\n";' -n 1 > ../Core/Inc/version_info.h
+	-@echo ' '
+
+secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)
 
 fail-specified-linker-script-missing:
 	@echo 'Error: Cannot find the specified linker script. Check the linker settings in the build configuration.'
@@ -101,6 +98,6 @@ fail-specified-linker-script-missing:
 warn-no-linker-script-specified:
 	@echo 'Warning: No linker script specified. Check the linker settings in the build configuration.'
 
-.PHONY: all clean dependents main-build fail-specified-linker-script-missing warn-no-linker-script-specified
+.PHONY: all clean dependents main-build fail-specified-linker-script-missing warn-no-linker-script-specified pre-build
 
 -include ../makefile.targets
