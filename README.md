@@ -88,8 +88,7 @@ This project involves a microcontroller-based system designed to handle and tran
 | `0xA4` | RESET ERROR COUNTERS | Reset error counters |
 | `0xA5` | SEND PREVIOUS ERROR | Send the last error packet |
 | `0xA6` | SEND VERSION PACKET | Send the version packet |
-| `0xA7` | SEND VERSION NUMBERING | Send the version number |
-| `0xA8` | SEND VERSION INFO | Send the version information |
+| `0xA7` | SEND VERSION INFO | Send the version information |
 | `0x2A` | ENTER BOOTLOADER | Enter the integrated bootloader |
 ## License
 
