@@ -530,7 +530,7 @@ void Science_init(void *argument)
 		uptime_millis = 0;
 
 		reset_packet_sequence_numbers();
-		osEventFlagsSet(packet_event_flags, HK_FLAG);
+		//osEventFlagsSet(packet_event_flags, HK_FLAG);
 		TIM2->CCR4 = ERPA_PWM_FREQ;
 		HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_1);
 		__enable_irq();
