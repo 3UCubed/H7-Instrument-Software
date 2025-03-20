@@ -136,7 +136,17 @@ void create_version_packet()
 void create_pmt_packet()
 {
 	while (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_8)) {};
-
+//	// Check if the current pmt_seq is in a skipped range
+//	if ((pmt_seq >= 3 && pmt_seq <= 5) ||
+//		(pmt_seq >= 15 && pmt_seq <= 30) ||
+//		(pmt_seq >= 500 && pmt_seq <= 505) ||
+//		(pmt_seq >= 700 && pmt_seq <= 715) ||
+//		(pmt_seq >= 1000 && pmt_seq <= 1010))
+//	{
+//		// Skip this PMT packet and increment sequence number
+//		pmt_seq++;
+//		return;  // Exit without transmitting the packet
+//	}
 	uint8_t buffer[PMT_DATA_SIZE];
 	uint8_t pmt_spi[2];
 	uint8_t uptime[UPTIME_SIZE];
@@ -170,7 +180,17 @@ void create_pmt_packet()
 void create_erpa_packet()
 {
 	while (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_11)) {};
-
+//	// Check if the current erpa_seq is in a skipped range
+//	if ((erpa_seq >= 3 && erpa_seq <= 5) ||
+//		(erpa_seq >= 15 && erpa_seq <= 30) ||
+//		(erpa_seq >= 500 && erpa_seq <= 505) ||
+//		(erpa_seq >= 700 && erpa_seq <= 715) ||
+//		(erpa_seq >= 1000 && erpa_seq <= 1010))
+//	{
+//		// Skip this ERPA packet and increment sequence number
+//		erpa_seq++;
+//		return;  // Exit without transmitting the packet
+//	}
 	uint8_t buffer[ERPA_DATA_SIZE];
 	uint8_t erpa_spi[2];
 	uint16_t erpa_adc[1];
@@ -212,6 +232,17 @@ void create_erpa_packet()
  */
 void create_hk_packet()
 {
+	// Check if the current hk_seq is in a skipped range
+	if ((hk_seq >= 3 && hk_seq <= 5) ||
+		(hk_seq >= 15 && hk_seq <= 30) ||
+		(hk_seq >= 500 && hk_seq <= 505) ||
+		(hk_seq >= 700 && hk_seq <= 715) ||
+		(hk_seq >= 1000 && hk_seq <= 1010))
+	{
+		// Skip this HK packet and increment sequence number
+		hk_seq++;
+		return;  // Exit without transmitting the packet
+	}
 	VOLTAGE_RAIL *rail_monitor_ptr;
 	uint8_t buffer[HK_DATA_SIZE];
 	uint8_t timestamp[TIMESTAMP_SIZE];
