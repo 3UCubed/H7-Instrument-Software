@@ -274,6 +274,7 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 		{
 			pmt_seq = 0;
 			startup_pmt_sent = 1;
+			hk_seq = 0;
 			osEventFlagsSet(packet_event_flags, HK_FLAG);
 		}
 		osEventFlagsSet(packet_event_flags, PMT_FLAG);
