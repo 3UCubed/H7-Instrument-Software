@@ -41,8 +41,8 @@ extern "C" {
 #include "time_tagging.h"
 
 #define V_MAJOR 4
-#define V_MINOR 2
-#define V_PATCH 3
+#define V_MINOR 3
+#define V_PATCH 0
 
 #define ERROR_HANDLING_ENABLED
 
