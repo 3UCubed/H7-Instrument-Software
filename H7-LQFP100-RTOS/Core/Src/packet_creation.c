@@ -137,11 +137,11 @@ void create_pmt_packet()
 {
 	while (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_8)) {};
 	// Check if the current pmt_seq is in a skipped range
-	if ((pmt_seq >= 1 && pmt_seq <= 1) ||
-		(pmt_seq >= 32 && pmt_seq <= 64) ||
-		(pmt_seq >= 97 && pmt_seq <= 129) ||
-		(pmt_seq >= 131 && pmt_seq <= 150) ||
-		(pmt_seq >= 208 && pmt_seq <= 308))
+	if ((pmt_seq >= 1 && pmt_seq <= 4) ||
+		(pmt_seq >= 31 && pmt_seq <= 63) ||
+		(pmt_seq >= 65 && pmt_seq <= 69) ||
+		(pmt_seq >= 75 && pmt_seq <= 105) ||
+		(pmt_seq >= 155 && pmt_seq <= 255))
 	{
 		// Skip this PMT packet and increment sequence number
 		pmt_seq++;
@@ -181,11 +181,11 @@ void create_erpa_packet()
 {
 	while (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_11)) {};
 	// Check if the current erpa_seq is in a skipped range
-	if ((erpa_seq >= 1 && erpa_seq <= 33) ||
-		(erpa_seq >= 35 && erpa_seq <= 65) ||
-		(erpa_seq >= 75 && erpa_seq <= 125) ||
-		(erpa_seq >= 128 && erpa_seq <= 160) ||
-		(erpa_seq >= 162 && erpa_seq <= 195))
+	if ((erpa_seq >= 1 && erpa_seq <= 49) ||
+		(erpa_seq >= 63 && erpa_seq <= 73) ||
+		(erpa_seq >= 94 && erpa_seq <= 101) ||
+		(erpa_seq >= 160 && erpa_seq <= 192) ||
+		(erpa_seq >= 212 && erpa_seq <= 312))
 	{
 		// Skip this ERPA packet and increment sequence number
 		erpa_seq++;
