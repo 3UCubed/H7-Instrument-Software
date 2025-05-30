@@ -506,6 +506,27 @@ void Science_init(void *argument)
   for(;;)
   {
 		osEventFlagsWait(mode_event_flags, SCIENCE_FLAG, osFlagsWaitAny, osWaitForever);
+		// === TEMP CHECK BEFORE HARDWARE INIT ===
+		const uint16_t ENTRY_TEMP_LIMIT_RAW = 720; // 45°C × 16
+		bool temp_ok = true;
+
+		if (rail_monitor[RAIL_TEMP1].data >= ENTRY_TEMP_LIMIT_RAW) temp_ok = false;
+		if (rail_monitor[RAIL_TEMP2].data >= ENTRY_TEMP_LIMIT_RAW) temp_ok = false;
+		if (rail_monitor[RAIL_TEMP3].data >= ENTRY_TEMP_LIMIT_RAW) temp_ok = false;
+		if (rail_monitor[RAIL_TEMP4].data >= ENTRY_TEMP_LIMIT_RAW) temp_ok = false;
+
+		if (!temp_ok)
+		{
+			// Abort Science mode entry
+			IDLING = 1;  // Mark system idle again
+
+			// Forcefully switch back to IDLE mode
+			osEventFlagsSet(mode_event_flags, IDLE_FLAG);
+
+			// Prevent proceeding with science init
+			osThreadYield();  // Allow other threads to take over
+			continue;
+		}
 		osThreadSuspend(Voltage_MonitorHandle);
 		IDLING = 0;
 
