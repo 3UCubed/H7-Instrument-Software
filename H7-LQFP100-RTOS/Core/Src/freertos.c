@@ -24,6 +24,7 @@
 #include "task.h"
 #include "main.h"
 #include "cmsis_os.h"
+#include <stdbool.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -509,11 +510,12 @@ void Science_init(void *argument)
 		// === TEMP CHECK BEFORE HARDWARE INIT ===
 		const uint16_t ENTRY_TEMP_LIMIT_RAW = 720; // 45°C × 16
 		bool temp_ok = true;
+		VOLTAGE_RAIL* rails = get_rail_monitor();
 
-		if (rail_monitor[RAIL_TEMP1].data >= ENTRY_TEMP_LIMIT_RAW) temp_ok = false;
-		if (rail_monitor[RAIL_TEMP2].data >= ENTRY_TEMP_LIMIT_RAW) temp_ok = false;
-		if (rail_monitor[RAIL_TEMP3].data >= ENTRY_TEMP_LIMIT_RAW) temp_ok = false;
-		if (rail_monitor[RAIL_TEMP4].data >= ENTRY_TEMP_LIMIT_RAW) temp_ok = false;
+		if (rails[RAIL_TEMP1].data >= ENTRY_TEMP_LIMIT_RAW) temp_ok = false;
+		if (rails[RAIL_TEMP2].data >= ENTRY_TEMP_LIMIT_RAW) temp_ok = false;
+		if (rails[RAIL_TEMP3].data >= ENTRY_TEMP_LIMIT_RAW) temp_ok = false;
+		if (rails[RAIL_TEMP4].data >= ENTRY_TEMP_LIMIT_RAW) temp_ok = false;
 
 		if (!temp_ok)
 		{
