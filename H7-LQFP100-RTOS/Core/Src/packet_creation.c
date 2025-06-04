@@ -137,16 +137,16 @@ void create_pmt_packet()
 {
 	while (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_8)) {};
 	// Check if the current pmt_seq is in a skipped range
-	if ((pmt_seq >= 1 && pmt_seq <= 4) ||
-		(pmt_seq >= 31 && pmt_seq <= 63) ||
-		(pmt_seq >= 65 && pmt_seq <= 69) ||
-		(pmt_seq >= 75 && pmt_seq <= 105) ||
-		(pmt_seq >= 155 && pmt_seq <= 255))
-	{
-		// Skip this PMT packet and increment sequence number
-		pmt_seq++;
-		return;  // Exit without transmitting the packet
-	}
+//	if ((pmt_seq >= 1 && pmt_seq <= 4) ||
+//		(pmt_seq >= 31 && pmt_seq <= 63) ||
+//		(pmt_seq >= 65 && pmt_seq <= 69) ||
+//		(pmt_seq >= 75 && pmt_seq <= 105) ||
+//		(pmt_seq >= 155 && pmt_seq <= 255))
+//	{
+//		// Skip this PMT packet and increment sequence number
+//		pmt_seq++;
+//		return;  // Exit without transmitting the packet
+//	}
 	uint8_t buffer[PMT_DATA_SIZE];
 	uint8_t pmt_spi[2];
 	uint8_t uptime[UPTIME_SIZE];
@@ -181,16 +181,16 @@ void create_erpa_packet()
 {
 	while (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_11)) {};
 	// Check if the current erpa_seq is in a skipped range
-	if ((erpa_seq >= 1 && erpa_seq <= 49) ||
-		(erpa_seq >= 63 && erpa_seq <= 73) ||
-		(erpa_seq >= 94 && erpa_seq <= 101) ||
-		(erpa_seq >= 160 && erpa_seq <= 192) ||
-		(erpa_seq >= 212 && erpa_seq <= 312))
-	{
-		// Skip this ERPA packet and increment sequence number
-		erpa_seq++;
-		return;  // Exit without transmitting the packet
-	}
+//	if ((erpa_seq >= 1 && erpa_seq <= 49) ||
+//		(erpa_seq >= 63 && erpa_seq <= 73) ||
+//		(erpa_seq >= 94 && erpa_seq <= 101) ||
+//		(erpa_seq >= 160 && erpa_seq <= 192) ||
+//		(erpa_seq >= 212 && erpa_seq <= 312))
+//	{
+//		// Skip this ERPA packet and increment sequence number
+//		erpa_seq++;
+//		return;  // Exit without transmitting the packet
+//	}
 	uint8_t buffer[ERPA_DATA_SIZE];
 	uint8_t erpa_spi[2];
 	uint16_t erpa_adc[1];
@@ -233,16 +233,16 @@ void create_erpa_packet()
 void create_hk_packet()
 {
 	// Check if the current hk_seq is in a skipped range
-	if ((hk_seq >= 1 && hk_seq <= 1) ||
-		(hk_seq >= 5 && hk_seq <= 10) ||
-		(hk_seq >= 31 && hk_seq <= 72) ||
-		(hk_seq >= 126 && hk_seq <= 135) ||
-		(hk_seq >= 255 && hk_seq <= 275))
-	{
-		// Skip this HK packet and increment sequence number
-		hk_seq++;
-		return;  // Exit without transmitting the packet
-	}
+//	if ((hk_seq >= 1 && hk_seq <= 1) ||
+//		(hk_seq >= 5 && hk_seq <= 10) ||
+//		(hk_seq >= 31 && hk_seq <= 72) ||
+//		(hk_seq >= 126 && hk_seq <= 135) ||
+//		(hk_seq >= 255 && hk_seq <= 275))
+//	{
+//		// Skip this HK packet and increment sequence number
+//		hk_seq++;
+//		return;  // Exit without transmitting the packet
+//	}
 	VOLTAGE_RAIL *rail_monitor_ptr;
 	uint8_t buffer[HK_DATA_SIZE];
 	uint8_t timestamp[TIMESTAMP_SIZE];
