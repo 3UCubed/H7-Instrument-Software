@@ -34,6 +34,7 @@
 #include "usart.h"
 #include "gpio.h"
 #include "version_info.h"
+#include "voltage_monitor.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -119,6 +120,7 @@ typedef  void (*pFunction)(void);
 #define BOOTLOADER_FLAG_VALUE 0xDEADBEEF
 #define BOOTLOADER_FLAG_OFFSET 1000
 #define BOOTLOADER_ADDRESS 0x1FF09800
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -189,10 +191,14 @@ volatile uint8_t IDLING = 1;
 volatile uint8_t startup_pmt_sent = 0;
 volatile uint8_t startup_hk_sent = 0;
 
+uint8_t HAS_SCIENCE = 0;
+
 extern int _estack;
 uint32_t *bootloader_flag;
 pFunction JumpToApplication;
 uint32_t JumpAddress;
+uint32_t *temp1_flag_ptr;
+uint8_t temp1_error_triggered = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -696,6 +702,12 @@ int main(void)
   MX_RAMECC_Init();
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
+  temp1_flag_ptr = (uint32_t*) ((uint32_t)&_estack - TEMP1_FLAG_OFFSET);
+  if (*temp1_flag_ptr == TEMP1_FLAG_VALUE) {
+      temp1_error_triggered = 1;
+      *temp1_flag_ptr = 0;  // Clear for next boot
+  }
+
   system_setup();
   /* USER CODE END 2 */
 

@@ -56,7 +56,7 @@ typedef StaticTask_t osStaticThreadDef_t;
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
-
+extern uint8_t HAS_SCIENCE;
 /* USER CODE END Variables */
 /* Definitions for PMT_task */
 osThreadId_t PMT_taskHandle;
@@ -534,7 +534,7 @@ void Science_init(void *argument)
 		TIM2->CCR4 = ERPA_PWM_FREQ;
 		HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_1);
 		__enable_irq();
-
+		HAS_SCIENCE = 1;  // after successfully entering science mode once
 		osThreadYield();
   }
   /* USER CODE END Science_init */

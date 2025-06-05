@@ -12,6 +12,9 @@
 
 #define NUM_VOLTAGE_RAILS 17
 
+#define TEMP1_FLAG_VALUE   0xA5A5A5A5
+#define TEMP1_FLAG_OFFSET  1001  // different from BOOTLOADER_FLAG_OFFSET!
+
 #include <stdio.h>
 #include "sample_data.h"
 #include "error_packet_handler.h"
