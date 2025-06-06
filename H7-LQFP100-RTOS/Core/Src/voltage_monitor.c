@@ -59,7 +59,6 @@
 
 #define RAIL_TMP1_MAX 2720		// -40c NOTE: these are swapped because the conversion from int -> temp is inverse
 #define RAIL_TMP1_MIN 2023		// 85c
-extern uint8_t temp1_error_triggered;
 
 extern uint8_t HAS_SCIENCE;
 
@@ -276,11 +275,7 @@ void set_rail_monitor()
 	memcpy(&rail_monitor[RAIL_vsense].data, &hk_adc3[0], sizeof(uint16_t));
 	memcpy(&rail_monitor[RAIL_vrefint].data, &hk_adc3[1], sizeof(uint16_t));
 //	memcpy(&rail_monitor[RAIL_TEMP1].data, &hk_i2c[0], sizeof(uint16_t));
-<<<<<<< HEAD
-	if (temp1_error_triggered == 0) {
-=======
 	if (HAS_SCIENCE && temp1_error_triggered == 0) {
->>>>>>> change to persist between power cycles and not system reset
 	    // Inject a deliberate over-temperature to trigger TEMP1 error
 	    rail_monitor[RAIL_TEMP1].data = 1200;  // ~75°C, over max (800)
 	} else {
@@ -419,13 +414,7 @@ uint8_t monitor_rails()
 				error.OOB_3 = rail_monitor[i].OOB_3;
 				handle_error(error);
 				if (rail_monitor[i].name == RAIL_TEMP1) {
-<<<<<<< HEAD
 				    temp1_error_triggered = 1;
-=======
-					extern uint32_t *temp1_flag_ptr;
-					*temp1_flag_ptr = TEMP1_FLAG_VALUE;
-
->>>>>>> change to persist between power cycles and not system reset
 				}
 				break;
 			default:
