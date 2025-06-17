@@ -111,7 +111,8 @@ typedef  void (*pFunction)(void);
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define HK_100MS_COUNTER_MAX 32
+//#define HK_100MS_COUNTER_MAX 32
+#define HK_100MS_COUNTER_MAX 3200
 
 #define ACK 0xFF
 #define NACK 0x00
