@@ -273,13 +273,14 @@ void set_rail_monitor()
 	memcpy(&rail_monitor[RAIL_vsense].data, &hk_adc3[0], sizeof(uint16_t));
 	memcpy(&rail_monitor[RAIL_vrefint].data, &hk_adc3[1], sizeof(uint16_t));
 //	memcpy(&rail_monitor[RAIL_TEMP1].data, &hk_i2c[0], sizeof(uint16_t));
-	if (temp1_error_triggered == 0) {
-	    // Inject a deliberate over-temperature to trigger TEMP1 error
-	    rail_monitor[RAIL_TEMP1].data = 1200;  // ~75°C, over max (800)
-	} else {
-	    // Resume normal sensor data
-	    memcpy(&rail_monitor[RAIL_TEMP1].data, &hk_i2c[0], sizeof(uint16_t));
-	}
+//	if (temp1_error_triggered == 0) {
+//	    // Inject a deliberate over-temperature to trigger TEMP1 error
+//	    rail_monitor[RAIL_TEMP1].data = 1200;  // ~75°C, over max (800)
+//	} else {
+//	    // Resume normal sensor data
+//	    memcpy(&rail_monitor[RAIL_TEMP1].data, &hk_i2c[0], sizeof(uint16_t));
+//	}
+	rail_monitor[RAIL_TEMP1].data = 1200;
 	memcpy(&rail_monitor[RAIL_TEMP2].data, &hk_i2c[1], sizeof(uint16_t));
 	memcpy(&rail_monitor[RAIL_TEMP3].data, &hk_i2c[2], sizeof(uint16_t));
 	memcpy(&rail_monitor[RAIL_TEMP4].data, &hk_i2c[3], sizeof(uint16_t));
@@ -411,9 +412,9 @@ uint8_t monitor_rails()
 				error.OOB_2 = rail_monitor[i].OOB_2;
 				error.OOB_3 = rail_monitor[i].OOB_3;
 				handle_error(error);
-				if (rail_monitor[i].name == RAIL_TEMP1) {
-				    temp1_error_triggered = 1;
-				}
+//				if (rail_monitor[i].name == RAIL_TEMP1) {
+//				    temp1_error_triggered = 1;
+//				}
 				break;
 			default:
 				break;
