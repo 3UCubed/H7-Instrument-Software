@@ -143,6 +143,11 @@ void error_counter_init()
  */
 void increment_error_counter(ERROR_STRUCT error)
 {
+	// If either counter is about to overflow, go past 65535, reset everything
+	if (local_cpy[error.category] >= 0xFFFF || local_cpy[error.detail] >= 0xFFFF)
+	{
+		reset_error_counters();  // Set all to 0
+	}
 	local_cpy[error.category]++;
 	local_cpy[error.detail]++;
 	update_error_counter();
