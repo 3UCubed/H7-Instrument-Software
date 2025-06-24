@@ -214,6 +214,26 @@ void set_previous_error(ERROR_STRUCT error)
 }
 
 /**
+ * @brief Manually sets a specific error counter to a given value and updates EEPROM.
+ *
+ * @param category_or_detail Index in local_cpy[] (should match an EC_* or ED_* enum)
+ * @param value The value to assign (must be <= 0xFFFF)
+ */
+void set_error_counter(uint8_t category_or_detail, uint16_t value)
+{
+	if (category_or_detail >= NUM_ERROR_COUNTERS)
+		return; // Out of bounds, ignore
+
+	local_cpy[category_or_detail] = value;
+
+	if (EE_WriteVariable(VirtAddVarTab[category_or_detail], value) != HAL_OK)
+	{
+		Error_Handler();
+	}
+}
+
+
+/**
  * @brief Reads the previous error codes from EE
  *
  * @return Error populated with retrieved category and detail.

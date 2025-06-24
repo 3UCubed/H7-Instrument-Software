@@ -11,6 +11,7 @@
 #define INC_ERROR_PACKET_HANDLER_H_
 
 #include <stdio.h>
+#include <stdint.h>
 
 #define NUM_ERROR_COUNTERS 28
 
@@ -69,6 +70,7 @@ void send_previous_error_packet();
 void reset_error_counters();
 void increment_error_counter(ERROR_STRUCT error);
 void set_previous_error(ERROR_STRUCT error);
+void set_error_counter(uint8_t category_or_detail, uint16_t value);
 
 
 #endif /* INC_ERROR_PACKET_HANDLER_H_ */

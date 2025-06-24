@@ -34,6 +34,7 @@
 #include "usart.h"
 #include "gpio.h"
 #include "version_info.h"
+#include "error_packet_handler.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -697,6 +698,13 @@ int main(void)
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
   system_setup();
+
+//  // --- SET ERROR COUNTER FOR TESTING ---
+//  // Example: Pretend we already had 700 TEMP1 errors
+//  // Set error detail counter
+//  set_error_counter(ED_TEMP1, 700);
+//  // Set error category counter
+//  set_error_counter(EC_power_supply_rail, 700);
   /* USER CODE END 2 */
 
   /* Init scheduler */
