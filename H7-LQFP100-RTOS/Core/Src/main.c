@@ -705,6 +705,7 @@ int main(void)
 //  set_error_counter(ED_TEMP1, 700);
 //  // Set error category counter
 //  set_error_counter(EC_power_supply_rail, 700);
+//  simulate_error_overflow();
   /* USER CODE END 2 */
 
   /* Init scheduler */
