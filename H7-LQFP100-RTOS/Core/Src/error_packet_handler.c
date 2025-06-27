@@ -147,6 +147,7 @@ void increment_error_counter(ERROR_STRUCT error)
 	if (local_cpy[error.category] >= 0xFFFF || local_cpy[error.detail] >= 0xFFFF)
 	{
 		reset_error_counters();  // Set all to 0
+		update_error_counter();
 	}
 	local_cpy[error.category]++;
 	local_cpy[error.detail]++;
@@ -174,6 +175,7 @@ void reset_error_counters()
 {
 	for (int i = 0; i < NUM_ERROR_COUNTERS; i++)
 	{
+		local_cpy[i] = 0;  // Reset RAM copy too
 		if ((EE_WriteVariable(VirtAddVarTab[i], 0)) != HAL_OK)
 		{
 			Error_Handler();
