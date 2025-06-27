@@ -427,5 +427,22 @@ void emergency_shutdown()
 	}
 	IDLING = 1;
 }
+void simulate_error_overflow()
+{
+    // Manually set a category and detail to 0xFFFF - 1 to simulate imminent overflow
+    set_error_counter(EC_power_supply_rail, 0xFFFE);
+    set_error_counter(ED_TEMP1, 0xFFFE);
+
+    // Now create an error that triggers the overflow
+    ERROR_STRUCT simulated_error = {
+        .category = EC_power_supply_rail,
+        .detail = ED_TEMP1,
+        .OOB_1 = 0,
+        .OOB_2 = 0,
+        .OOB_3 = 0
+    };
+
+    handle_error(simulated_error); // This will increment, detect overflow, reset, and start again
+}
 
 
