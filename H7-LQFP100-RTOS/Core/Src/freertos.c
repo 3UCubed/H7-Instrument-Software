@@ -512,10 +512,37 @@ void Science_init(void *argument)
 		bool temp_ok = true;
 		VOLTAGE_RAIL* rails = get_rail_monitor();
 
-		if (rails[RAIL_TEMP1].data >= ENTRY_TEMP_LIMIT_RAW) temp_ok = false;
-		if (rails[RAIL_TEMP2].data >= ENTRY_TEMP_LIMIT_RAW) temp_ok = false;
-		if (rails[RAIL_TEMP3].data >= ENTRY_TEMP_LIMIT_RAW) temp_ok = false;
-		if (rails[RAIL_TEMP4].data >= ENTRY_TEMP_LIMIT_RAW) temp_ok = false;
+		for (int i = RAIL_TEMP1; i <= RAIL_TEMP4; i++) {
+		    if (rails[i].data >= ENTRY_TEMP_LIMIT_RAW) {
+		        temp_ok = false;
+
+		        // Increment and track OOB
+		        rails[i].error_count++;
+		        switch (rails[i].error_count) {
+		            case 1:
+		                rails[i].OOB_1 = rails[i].data;
+		                break;
+		            case 2:
+		                rails[i].OOB_2 = rails[i].data;
+		                break;
+		            case 3:
+		            {
+		                rails[i].OOB_3 = rails[i].data;
+
+		                ERROR_STRUCT error;
+		                error.detail = get_rail_name_error_detail(rails[i].name);
+		                error.category = EC_power_supply_rail;
+		                error.OOB_1 = rails[i].OOB_1;
+		                error.OOB_2 = rails[i].OOB_2;
+		                error.OOB_3 = rails[i].OOB_3;
+		                handle_error(error);
+		                break;
+		            }
+		            default:
+		                break;
+		        }
+		    }
+		}
 
 		if (!temp_ok)
 		{
