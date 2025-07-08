@@ -143,6 +143,12 @@ void error_counter_init()
  */
 void increment_error_counter(ERROR_STRUCT error)
 {
+	// If either counter is about to overflow, go past 65535, reset everything
+	if (local_cpy[error.category] >= 0xFFFE || local_cpy[error.detail] >= 0xFFFE)
+	{
+		reset_error_counters();  // Set all to 0
+		update_error_counter();
+	}
 	local_cpy[error.category]++;
 	local_cpy[error.detail]++;
 	update_error_counter();
@@ -169,6 +175,7 @@ void reset_error_counters()
 {
 	for (int i = 0; i < NUM_ERROR_COUNTERS; i++)
 	{
+		local_cpy[i] = 0;  // Reset RAM copy too
 		if ((EE_WriteVariable(VirtAddVarTab[i], 0)) != HAL_OK)
 		{
 			Error_Handler();
@@ -203,6 +210,25 @@ void set_previous_error(ERROR_STRUCT error)
 		Error_Handler();
 	}
 	if ((EE_WriteVariable(VirtAddVarTab[PREV_ERROR_DETAIL_INDEX], error.detail)) != HAL_OK)
+	{
+		Error_Handler();
+	}
+}
+
+/**
+ * @brief Manually sets a specific error counter to a given value and updates EEPROM.
+ *
+ * @param category_or_detail Index in local_cpy[] (should match an EC_* or ED_* enum)
+ * @param value The value to assign (must be <= 0xFFFF)
+ */
+void set_error_counter(uint8_t category_or_detail, uint16_t value)
+{
+	if (category_or_detail >= NUM_ERROR_COUNTERS)
+		return; // Out of bounds, ignore
+
+	local_cpy[category_or_detail] = value;
+
+	if (EE_WriteVariable(VirtAddVarTab[category_or_detail], value) != HAL_OK)
 	{
 		Error_Handler();
 	}
@@ -401,4 +427,20 @@ void emergency_shutdown()
 	IDLING = 1;
 }
 
-
+//void simulate_error_overflow()
+//{
+//    // Manually set a category and detail to 0xFFFF - 1 to simulate imminent overflow
+//    set_error_counter(EC_power_supply_rail, 0xFFFE);
+//    set_error_counter(ED_TEMP1, 0xFFFE);
+//
+//    // Now create an error that triggers the overflow
+//    ERROR_STRUCT simulated_error = {
+//        .category = EC_power_supply_rail,
+//        .detail = ED_TEMP1,
+//        .OOB_1 = 0,
+//        .OOB_2 = 0,
+//        .OOB_3 = 0
+//    };
+//
+//    handle_error(simulated_error); // This will increment, detect overflow, reset, and start again
+//}

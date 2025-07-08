@@ -34,6 +34,7 @@
 #include "usart.h"
 #include "gpio.h"
 #include "version_info.h"
+#include "error_packet_handler.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */

@@ -42,7 +42,7 @@ extern "C" {
 
 #define V_MAJOR 4
 #define V_MINOR 4
-#define V_PATCH 1
+#define V_PATCH 2
 
 #define ERROR_HANDLING_ENABLED
 
