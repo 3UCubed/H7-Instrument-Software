@@ -118,6 +118,7 @@ typedef  void (*pFunction)(void);
 #define ACK 0xFF
 #define NACK 0x00
 
+#define BOOTLOADER_FLAG_ADDR ((uint32_t*)0x2001FFF0)
 #define BOOTLOADER_FLAG_VALUE 0xDEADBEEF
 #define BOOTLOADER_FLAG_OFFSET 1000
 #define BOOTLOADER_ADDRESS 0x1FF09800
@@ -214,7 +215,8 @@ void init_flash_ecc();
  */
 void SetBootloaderFlag() {
 	__disable_irq();
-	*bootloader_flag = BOOTLOADER_FLAG_VALUE;
+//	*bootloader_flag = BOOTLOADER_FLAG_VALUE;
+	*BOOTLOADER_FLAG_ADDR = BOOTLOADER_FLAG_VALUE;
 	HAL_UART_DeInit(&huart1);
 	HAL_NVIC_SystemReset();
 }
