@@ -1,6 +1,6 @@
 ################################################################################
 # Automatically-generated file. Do not edit!
-# Toolchain: GNU Tools for STM32 (10.3-2021.10)
+# Toolchain: GNU Tools for STM32 (13.3.rel1)
 ################################################################################
 
 -include ../makefile.init
@@ -56,17 +56,20 @@ default.size.stdout \
 OBJDUMP_LIST += \
 H7-LQFP100-RTOS.list \
 
+OBJCOPY_BIN += \
+H7-LQFP100-RTOS.bin \
+
 
 # All Target
 all:
-	+@$(MAKE) --no-print-directory pre-build && $(MAKE) --no-print-directory main-build
+	+@$(MAKE) --no-print-directory pre-build && $(MAKE) --no-print-directory main-build && $(MAKE) --no-print-directory post-build
 
 # Main-build Target
 main-build: H7-LQFP100-RTOS.elf secondary-outputs
 
 # Tool invocations
-H7-LQFP100-RTOS.elf H7-LQFP100-RTOS.map: $(OBJS) $(USER_OBJS) /Users/3ucubed/Documents/GitHub/H7-Instrument-Software/H7-LQFP100-RTOS/STM32H753VITX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "H7-LQFP100-RTOS.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"/Users/3ucubed/Documents/GitHub/H7-Instrument-Software/H7-LQFP100-RTOS/STM32H753VITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="H7-LQFP100-RTOS.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+H7-LQFP100-RTOS.elf H7-LQFP100-RTOS.map: $(OBJS) $(USER_OBJS) C:\Users\Santo\STM32CubeIDE\IMAP_Stuff\H7-Instrument-Software\Firmware_H753\H7-LQFP100-RTOS\STM32H753VITX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "H7-LQFP100-RTOS.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"C:\Users\Santo\STM32CubeIDE\IMAP_Stuff\H7-Instrument-Software\Firmware_H753\H7-LQFP100-RTOS\STM32H753VITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="H7-LQFP100-RTOS.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -80,16 +83,25 @@ H7-LQFP100-RTOS.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	@echo 'Finished building: $@'
 	@echo ' '
 
+H7-LQFP100-RTOS.bin: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objcopy  -O binary $(EXECUTABLES) "H7-LQFP100-RTOS.bin"
+	@echo 'Finished building: $@'
+	@echo ' '
+
 # Other Targets
 clean:
-	-$(RM) H7-LQFP100-RTOS.elf H7-LQFP100-RTOS.list H7-LQFP100-RTOS.map default.size.stdout
+	-$(RM) H7-LQFP100-RTOS.bin H7-LQFP100-RTOS.elf H7-LQFP100-RTOS.list H7-LQFP100-RTOS.map default.size.stdout
 	-@echo ' '
 
 pre-build:
 	git log --pretty=format:'#define GIT_COMMIT_HASH%n static const char* GIT_INFO = "Version Information=[%H,%d]\r\n";' -n 1 > ../Core/Inc/version_info.h
 	-@echo ' '
 
-secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)
+post-build:
+	python ../patch_crc.py ../Debug/H7-LQFP100-RTOS.elf
+	-@echo ' '
+
+secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST) $(OBJCOPY_BIN)
 
 fail-specified-linker-script-missing:
 	@echo 'Error: Cannot find the specified linker script. Check the linker settings in the build configuration.'
@@ -98,6 +110,6 @@ fail-specified-linker-script-missing:
 warn-no-linker-script-specified:
 	@echo 'Warning: No linker script specified. Check the linker settings in the build configuration.'
 
-.PHONY: all clean dependents main-build fail-specified-linker-script-missing warn-no-linker-script-specified pre-build
+.PHONY: all clean dependents main-build fail-specified-linker-script-missing warn-no-linker-script-specified pre-build post-build
 
 -include ../makefile.targets

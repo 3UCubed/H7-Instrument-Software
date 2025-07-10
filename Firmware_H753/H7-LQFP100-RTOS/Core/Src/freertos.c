@@ -24,7 +24,6 @@
 #include "task.h"
 #include "main.h"
 #include "cmsis_os.h"
-#include <stdbool.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -34,6 +33,7 @@
 #include "dac.h"
 #include "tim.h"
 #include "iwdg.h"
+#include <stdbool.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/

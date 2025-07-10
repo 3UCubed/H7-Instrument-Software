@@ -18,12 +18,12 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include <stdio.h>
-#include <stdbool.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdio.h>
+#include <stdbool.h>
+#include <string.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -37,6 +37,8 @@ typedef  void (*pFunction)(void);
 #define BOOTLOADER_FLAG_VALUE 0xDEADBEEF
 #define BOOTLOADER_ADDRESS 0x1FF09800
 #define APP_ADDRESS  0x08020000
+#define APP_CRC_ADDRESS 0x080FF000
+#define APP_CRC_LENGTH (APP_CRC_ADDRESS - APP_ADDRESS)
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -46,6 +48,8 @@ typedef  void (*pFunction)(void);
 
 /* Private variables ---------------------------------------------------------*/
 
+CRC_HandleTypeDef hcrc;
+
 RTC_HandleTypeDef hrtc;
 
 UART_HandleTypeDef huart1;
@@ -53,7 +57,7 @@ UART_HandleTypeDef huart1;
 /* USER CODE BEGIN PV */
 uint32_t *bootloader_flag;
 pFunction JumpToBootloader;
-pFunction JumpToApplication;
+pFunction JumpToApp;
 uint32_t JumpAddressBoot;
 uint32_t JumpAddressApp;
 /* USER CODE END PV */
@@ -64,6 +68,7 @@ static void MPU_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_RTC_Init(void);
 static void MX_USART1_UART_Init(void);
+static void MX_CRC_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -72,29 +77,69 @@ static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN 0 */
 void JumpToSystemBootloader(void)
 {
-    JumpAddressBoot = *(__IO uint32_t*) (BOOTLOADER_ADDRESS + 4);
-	JumpToBootloader = (pFunction) JumpAddressBoot;
+	uint32_t i=0;
+	void (*SysMemBootJump)(void);
+
 	__disable_irq();
-	__set_MSP(*(__IO uint32_t*) BOOTLOADER_ADDRESS);
-	JumpToBootloader();
+	HAL_UART_DeInit(&huart1);
+	HAL_CRC_DeInit(&hcrc);
+	__HAL_RCC_CRC_CLK_DISABLE();
+
+	// Disable Systick
+	SysTick->CTRL = 0;
+	SysTick->LOAD = 0;
+	SysTick->VAL = 0;
+
+	// Reset clock config
+	HAL_RCC_DeInit();
+
+	// Clear NVIC interrupt enable and pending registers
+	for (i=0;i<5;i++)
+	{
+		NVIC->ICER[i]=0xFFFFFFFF;
+		NVIC->ICPR[i]=0xFFFFFFFF;
+	}
+
+	// Re-enable all interrupts
+	__enable_irq();
+
+	SysMemBootJump = (void (*)(void)) (*((uint32_t *) ((BOOTLOADER_ADDRESS + 4))));
+	__set_MSP(*(uint32_t *) BOOTLOADER_ADDRESS);
+	SysMemBootJump();
 }
 
 void JumpToApplication(void)
 {
-    // Get the application's reset handler address
-	JumpAddressApp = *(__IO uint32_t*) (APP_ADDRESS + 4);
-	JumpToApplication = (pFunction) JumpAddressApp;
+	__disable_irq();
 
-    // Deinitialize HAL and disable interrupts
-    HAL_RCC_DeInit();
-    HAL_DeInit();
-    __disable_irq();
+	// Optional but good practice
+	HAL_UART_DeInit(&huart1);
+	HAL_RCC_DeInit();
+	HAL_DeInit();
+	HAL_CRC_DeInit(&hcrc);
+	__HAL_RCC_CRC_CLK_DISABLE();
 
-    // Set Main Stack Pointer to application's stack pointer
-    __set_MSP(*(__IO uint32_t*) APP_ADDRESS);
+	// Kill SysTick
+	SysTick->CTRL = 0;
+	SysTick->LOAD = 0;
+	SysTick->VAL  = 0;
 
-    // Jump to application
-    JumpToApplication();
+	// Disable all NVIC IRQs
+	for (int i = 0; i < 5; i++) {
+		NVIC->ICER[i] = 0xFFFFFFFF;
+		NVIC->ICPR[i] = 0xFFFFFFFF;
+	}
+
+	SCB->VTOR = APP_ADDRESS;
+
+	// Set MSP and jump
+	uint32_t app_stack = *(volatile uint32_t*)APP_ADDRESS;
+	uint32_t app_reset = *(volatile uint32_t*)(APP_ADDRESS + 4);
+	__set_MSP(app_stack);
+	void (*app_entry)(void) = (void*)app_reset;
+
+	app_entry();
+	while(1);
 }
 
 bool IsApplicationValid(void)
@@ -102,12 +147,45 @@ bool IsApplicationValid(void)
     uint32_t appStack = *(__IO uint32_t*)APP_ADDRESS;
     uint32_t appResetHandler = *(__IO uint32_t*)(APP_ADDRESS + 4);
 
-    bool stack_valid = (appStack >= 0x20000000U && appStack <= 0x20080000U); // whole SRAM
+    // Reject if either value is erased / corrupt
+   if (appStack == 0xFFFFFFFF || appResetHandler == 0xFFFFFFFF)
+	   return false;
+
+    bool stack_valid =
+        ((appStack >= 0x24000000U && appStack <= 0x2407FFFFU) ||
+         (appStack >= 0x20000000U && appStack <= 0x2001FFFFU) ||
+         (appStack >= 0x30000000U && appStack <= 0x30047FFFU) ||
+         (appStack >= 0x38000000U && appStack <= 0x3800FFFFU));
     bool reset_valid = (appResetHandler >= APP_ADDRESS &&
                         appResetHandler <= 0x080FFFFF &&
                         (appResetHandler & 0x1)); // Thumb bit set
-
+    char msg[100];
+        snprintf(msg, sizeof(msg), "Validating App:\r\n  SP Valid: %s\r\n  PC Valid: %s\r\n",
+                 stack_valid ? "YES" : "NO",
+                 reset_valid ? "YES" : "NO");
+        HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
     return stack_valid && reset_valid;
+}
+
+
+bool IsApplicationValidCRC(void)
+{
+    __HAL_RCC_CRC_CLK_ENABLE();
+    HAL_CRC_DeInit(&hcrc);
+    HAL_CRC_Init(&hcrc);
+
+    uint32_t calculated_crc = HAL_CRC_Calculate(&hcrc,
+                            (uint32_t*)APP_ADDRESS,
+                            APP_CRC_LENGTH);  // No division
+
+    uint32_t stored_crc = *(volatile uint32_t*)APP_CRC_ADDRESS;
+
+    char crc_msg[64];
+    snprintf(crc_msg, sizeof(crc_msg), "App CRC: Calc=0x%08lX, Stored=0x%08lX\r\n",
+             calculated_crc, stored_crc);
+    HAL_UART_Transmit(&huart1, (uint8_t*)crc_msg, strlen(crc_msg), HAL_MAX_DELAY);
+
+    return (calculated_crc == stored_crc);
 }
 
 /* USER CODE END 0 */
@@ -146,15 +224,16 @@ int main(void)
   MX_GPIO_Init();
   MX_RTC_Init();
   MX_USART1_UART_Init();
+  MX_CRC_Init();
   /* USER CODE BEGIN 2 */
   if (*BOOTLOADER_FLAG_ADDR == BOOTLOADER_FLAG_VALUE) {
       *BOOTLOADER_FLAG_ADDR = 0;  // Clear flag
-      HAL_UART_Transmit(&huart1, (uint8_t*)"BootMgr: Entering ST bootloader...\r\n", 36, HAL_MAX_DELAY);
+      HAL_UART_Transmit(&huart1, (uint8_t*)"BootMgr: Bootloader flag triggered, entering ST bootloader...\r\n", 36, HAL_MAX_DELAY);
       HAL_Delay(1000);
       JumpToSystemBootloader();
   }
 
-  if (IsApplicationValid()) {
+  if (IsApplicationValid() && IsApplicationValidCRC()) {
       HAL_UART_Transmit(&huart1, (uint8_t*)"BootMgr: Jumping to application...\r\n", 36, HAL_MAX_DELAY);
       HAL_Delay(1000);
       JumpToApplication();
@@ -234,6 +313,39 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+}
+
+/**
+  * @brief CRC Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_CRC_Init(void)
+{
+
+  /* USER CODE BEGIN CRC_Init 0 */
+
+  /* USER CODE END CRC_Init 0 */
+
+  /* USER CODE BEGIN CRC_Init 1 */
+
+  /* USER CODE END CRC_Init 1 */
+  hcrc.Instance = CRC;
+  hcrc.Init.DefaultPolynomialUse = DEFAULT_POLYNOMIAL_DISABLE;
+  hcrc.Init.GeneratingPolynomial = 0x04C11DB7;
+  hcrc.Init.DefaultInitValueUse = DEFAULT_INIT_VALUE_DISABLE;
+  hcrc.Init.InitValue = 0x00000000;
+  hcrc.Init.InputDataInversionMode = CRC_INPUTDATA_INVERSION_BYTE;
+  hcrc.Init.OutputDataInversionMode = CRC_OUTPUTDATA_INVERSION_ENABLE;
+  hcrc.InputDataFormat = CRC_INPUTDATA_FORMAT_BYTES;
+  if (HAL_CRC_Init(&hcrc) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN CRC_Init 2 */
+
+  /* USER CODE END CRC_Init 2 */
+
 }
 
 /**

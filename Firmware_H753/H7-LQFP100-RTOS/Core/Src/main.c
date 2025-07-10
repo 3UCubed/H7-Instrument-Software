@@ -20,7 +20,6 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "packet_creation.h"
 #include "cmsis_os.h"
 #include "adc.h"
 #include "dac.h"
@@ -33,8 +32,6 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
-#include "version_info.h"
-#include "error_packet_handler.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -196,6 +193,9 @@ extern int _estack;
 uint32_t *bootloader_flag;
 pFunction JumpToApplication;
 uint32_t JumpAddress;
+
+__attribute__((section(".firmware_crc")))
+const uint32_t firmware_crc_placeholder = 0xFFFFFFFF;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -666,8 +666,7 @@ int main(void)
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-
-	HAL_Init();
+  HAL_Init();
 
   /* USER CODE BEGIN Init */
 

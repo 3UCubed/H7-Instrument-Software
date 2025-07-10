@@ -35,7 +35,7 @@
 ENTRY(Reset_Handler)
 
 /* Highest address of the user mode stack */
-_estack = ORIGIN(RAM_D1) + LENGTH(RAM_D1);    /* end of RAM */
+_estack = ORIGIN(RAM_D1) + LENGTH(RAM_D1) - 0x20;    /* end of RAM */
 /* Generate a link error if heap and stack don't fit into RAM */
 _Min_Heap_Size = 0x200;      /* required amount of heap  */
 _Min_Stack_Size = 0x400; /* required amount of stack */
@@ -43,7 +43,7 @@ _Min_Stack_Size = 0x400; /* required amount of stack */
 /* Specify the memory areas */
 MEMORY
 {
-  FLASH (rx)     : ORIGIN = 0x08000000, LENGTH = 2048K
+  FLASH (rx)     : ORIGIN = 0x08020000, LENGTH = 1792K	/* 2048K - 256K = 1792K  We are allowing space for the Boot Manager */
   DTCMRAM (xrw)  : ORIGIN = 0x20000000, LENGTH = 128K
   RAM_D1 (xrw)   : ORIGIN = 0x24000000, LENGTH = 512K
   RAM_D2 (xrw)   : ORIGIN = 0x30000000, LENGTH = 288K
@@ -117,6 +117,13 @@ SECTIONS
     KEEP (*(.fini_array*))
     PROVIDE_HIDDEN (__fini_array_end = .);
   } >FLASH
+  
+   /* Reserve space for application CRC */
+	.firmware_crc 0x080FF000 :
+	{
+	    KEEP(*(.firmware_crc))
+	    LONG(0xFFFFFFFF)  /* Placeholder value to be patched */
+	} >FLASH
 
   /* used by the startup to initialize data */
   _sidata = LOADADDR(.data);
