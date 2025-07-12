@@ -184,7 +184,7 @@ volatile uint8_t ERPA_ENABLED = DISABLED;
 volatile uint8_t step = 0;
 volatile uint32_t cadence = 3125;
 volatile uint32_t uptime_millis = 0;
-volatile uint8_t HK_100_ms_counter = 0;
+volatile uint32_t HK_100_ms_counter = 0;
 volatile uint8_t IDLING = 1;
 volatile uint8_t startup_pmt_sent = 0;
 volatile uint8_t startup_hk_sent = 0;
@@ -194,8 +194,8 @@ uint32_t *bootloader_flag;
 pFunction JumpToApplication;
 uint32_t JumpAddress;
 
-__attribute__((section(".firmware_crc")))
-const uint32_t firmware_crc_placeholder = 0xFFFFFFFF;
+__attribute__((section(".app_crc"))) __attribute__((used))
+const uint32_t app_crc_placeholder = 0xFFFFFFFF;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/

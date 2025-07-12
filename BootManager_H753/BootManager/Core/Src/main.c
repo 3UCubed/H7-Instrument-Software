@@ -2,7 +2,9 @@
 /**
   ******************************************************************************
   * @file           : main.c
-  * @brief          : Main program body
+  * @author 		: Jared Morrison
+  * @version 	  	: 1.0.0
+  * @brief          : Boot manager entry point and application validation logic
   ******************************************************************************
   * @attention
   *
@@ -60,6 +62,7 @@ pFunction JumpToBootloader;
 pFunction JumpToApp;
 uint32_t JumpAddressBoot;
 uint32_t JumpAddressApp;
+extern uint32_t _app_image_end;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -75,6 +78,12 @@ static void MX_CRC_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+/**
+ * @brief  Jump to the STM32 System Bootloader (e.g. during corrupt state or UART-based flashing).
+ *         Cleans up peripherals and disables interrupts before jumping to the
+ *         system memory bootloader address.
+ */
 void JumpToSystemBootloader(void)
 {
 	uint32_t i=0;
@@ -82,7 +91,10 @@ void JumpToSystemBootloader(void)
 
 	__disable_irq();
 	HAL_UART_DeInit(&huart1);
+	HAL_RCC_DeInit();
+	HAL_RTC_DeInit(&hrtc);
 	HAL_CRC_DeInit(&hcrc);
+	HAL_DeInit();
 	__HAL_RCC_CRC_CLK_DISABLE();
 
 	// Disable Systick
@@ -108,6 +120,11 @@ void JumpToSystemBootloader(void)
 	SysMemBootJump();
 }
 
+
+/**
+ * @brief  Jump to user application code located at APP_ADDRESS.
+ *         Verifies and sets the application's stack pointer and PC.
+ */
 void JumpToApplication(void)
 {
 	__disable_irq();
@@ -115,8 +132,9 @@ void JumpToApplication(void)
 	// Optional but good practice
 	HAL_UART_DeInit(&huart1);
 	HAL_RCC_DeInit();
-	HAL_DeInit();
+	HAL_RTC_DeInit(&hrtc);
 	HAL_CRC_DeInit(&hcrc);
+	HAL_DeInit();
 	__HAL_RCC_CRC_CLK_DISABLE();
 
 	// Kill SysTick
@@ -142,6 +160,10 @@ void JumpToApplication(void)
 	while(1);
 }
 
+/**
+ * @brief  Validates application code by checking its initial stack pointer and reset vector.
+ * @retval true if both SP and PC are in valid memory ranges and the PC has the Thumb bit set.
+ */
 bool IsApplicationValid(void)
 {
     uint32_t appStack = *(__IO uint32_t*)APP_ADDRESS;
@@ -168,24 +190,37 @@ bool IsApplicationValid(void)
 }
 
 
+/**
+ * @brief  Validates the application using CRC32.
+ *         Computes CRC over app region and compares it with stored value at APP_CRC_ADDRESS.
+ * @retval true if CRC matches
+ */
 bool IsApplicationValidCRC(void)
 {
     __HAL_RCC_CRC_CLK_ENABLE();
     HAL_CRC_DeInit(&hcrc);
     HAL_CRC_Init(&hcrc);
+    __HAL_CRC_DR_RESET(&hcrc);
 
-    uint32_t calculated_crc = HAL_CRC_Calculate(&hcrc,
-                            (uint32_t*)APP_ADDRESS,
-                            APP_CRC_LENGTH);  // No division
+    uint8_t* app_bytes = (uint8_t*)APP_ADDRESS;
+    uint32_t length_bytes = (APP_CRC_ADDRESS - APP_ADDRESS);
 
-    uint32_t stored_crc = *(volatile uint32_t*)APP_CRC_ADDRESS;
+    uint32_t crc_value = 0xFFFFFFFF;
+    for (uint32_t i = 0; i < length_bytes; ++i)
+    {
+        uint32_t i_data = app_bytes[i];
+        crc_value = HAL_CRC_Accumulate(&hcrc, &i_data, 1);
+    }
 
-    char crc_msg[64];
-    snprintf(crc_msg, sizeof(crc_msg), "App CRC: Calc=0x%08lX, Stored=0x%08lX\r\n",
-             calculated_crc, stored_crc);
-    HAL_UART_Transmit(&huart1, (uint8_t*)crc_msg, strlen(crc_msg), HAL_MAX_DELAY);
+    uint32_t stored_crc = *(uint32_t*)APP_CRC_ADDRESS;
 
-    return (calculated_crc == stored_crc);
+    char msg[128];
+    snprintf(msg, sizeof(msg),
+             "Validating App CRC (bytewise):\r\n  Calculated: 0x%08lX\r\n  Stored:     0x%08lX\r\n  Match:      %s\r\n",
+             crc_value, stored_crc, (crc_value == stored_crc) ? "YES" : "NO");
+    HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
+
+    return crc_value == stored_crc;
 }
 
 /* USER CODE END 0 */
@@ -331,13 +366,11 @@ static void MX_CRC_Init(void)
 
   /* USER CODE END CRC_Init 1 */
   hcrc.Instance = CRC;
-  hcrc.Init.DefaultPolynomialUse = DEFAULT_POLYNOMIAL_DISABLE;
-  hcrc.Init.GeneratingPolynomial = 0x04C11DB7;
-  hcrc.Init.DefaultInitValueUse = DEFAULT_INIT_VALUE_DISABLE;
-  hcrc.Init.InitValue = 0x00000000;
-  hcrc.Init.InputDataInversionMode = CRC_INPUTDATA_INVERSION_BYTE;
-  hcrc.Init.OutputDataInversionMode = CRC_OUTPUTDATA_INVERSION_ENABLE;
-  hcrc.InputDataFormat = CRC_INPUTDATA_FORMAT_BYTES;
+  hcrc.Init.DefaultPolynomialUse = DEFAULT_POLYNOMIAL_ENABLE;
+  hcrc.Init.DefaultInitValueUse = DEFAULT_INIT_VALUE_ENABLE;
+  hcrc.Init.InputDataInversionMode = CRC_INPUTDATA_INVERSION_NONE;
+  hcrc.Init.OutputDataInversionMode = CRC_OUTPUTDATA_INVERSION_DISABLE;
+  hcrc.InputDataFormat = CRC_INPUTDATA_FORMAT_WORDS;
   if (HAL_CRC_Init(&hcrc) != HAL_OK)
   {
     Error_Handler();

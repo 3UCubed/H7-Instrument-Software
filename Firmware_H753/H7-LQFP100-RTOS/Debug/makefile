@@ -56,6 +56,9 @@ default.size.stdout \
 OBJDUMP_LIST += \
 H7-LQFP100-RTOS.list \
 
+OBJCOPY_HEX += \
+H7-LQFP100-RTOS.hex \
+
 OBJCOPY_BIN += \
 H7-LQFP100-RTOS.bin \
 
@@ -83,6 +86,11 @@ H7-LQFP100-RTOS.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	@echo 'Finished building: $@'
 	@echo ' '
 
+H7-LQFP100-RTOS.hex: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objcopy  -O ihex $(EXECUTABLES) "H7-LQFP100-RTOS.hex"
+	@echo 'Finished building: $@'
+	@echo ' '
+
 H7-LQFP100-RTOS.bin: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	arm-none-eabi-objcopy  -O binary $(EXECUTABLES) "H7-LQFP100-RTOS.bin"
 	@echo 'Finished building: $@'
@@ -90,7 +98,7 @@ H7-LQFP100-RTOS.bin: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 
 # Other Targets
 clean:
-	-$(RM) H7-LQFP100-RTOS.bin H7-LQFP100-RTOS.elf H7-LQFP100-RTOS.list H7-LQFP100-RTOS.map default.size.stdout
+	-$(RM) H7-LQFP100-RTOS.bin H7-LQFP100-RTOS.elf H7-LQFP100-RTOS.hex H7-LQFP100-RTOS.list H7-LQFP100-RTOS.map default.size.stdout
 	-@echo ' '
 
 pre-build:
@@ -98,10 +106,11 @@ pre-build:
 	-@echo ' '
 
 post-build:
-	python ../patch_crc.py ../Debug/H7-LQFP100-RTOS.elf
+	python ../patch_crc.py ../Debug/H7-LQFP100-RTOS.bin
+	arm-none-eabi-objcopy -I binary -O ihex --change-addresses=0x08020000 ../Debug/H7-LQFP100-RTOS.bin ../Debug/H7-LQFP100-RTOS.hex
 	-@echo ' '
 
-secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST) $(OBJCOPY_BIN)
+secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST) $(OBJCOPY_HEX) $(OBJCOPY_BIN)
 
 fail-specified-linker-script-missing:
 	@echo 'Error: Cannot find the specified linker script. Check the linker settings in the build configuration.'

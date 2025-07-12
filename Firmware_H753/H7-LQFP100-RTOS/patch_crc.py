@@ -1,53 +1,54 @@
 import sys
 import struct
 
-def reflect_byte(byte):
-    return int('{:08b}'.format(byte)[::-1], 2)
+APP_BASE = 0x08020000
+CRC_ADDR = 0x080FF000
 
-def stm32_crc(data: bytes) -> int:
-    poly = 0x04C11DB7
-    crc = 0x00000000
-
-    for b in data:
-        b = reflect_byte(b)  # Byte-wise inversion
-        crc ^= (b << 24)
-        for _ in range(8):
-            if (crc & 0x80000000):
-                crc = ((crc << 1) ^ poly) & 0xFFFFFFFF
+def compute_crc(data):
+    crc = 0xFFFFFFFF
+    for byte in data:
+        crc ^= byte
+        for _ in range(32):
+            if crc & 0x80000000:
+                crc = (crc << 1) ^ 0x04C11DB7
             else:
-                crc = (crc << 1) & 0xFFFFFFFF
+                crc <<= 1
+            crc &= 0xFFFFFFFF
+    return crc
 
-    return ~crc & 0xFFFFFFFF  # Output inversion
+def main(bin_path):
+    with open(bin_path, 'rb') as f:
+        data = bytearray(f.read())
 
-def patch_crc(elf_path):
-    from elftools.elf.elffile import ELFFile
+    crc_offset = CRC_ADDR - APP_BASE
+    final_size = crc_offset + 4
 
-    with open(elf_path, 'rb+') as f:
-        elf = ELFFile(f)
-        symtab = elf.get_section_by_name('.symtab')
-        sym = symtab.get_symbol_by_name('firmware_crc_placeholder')[0]
-        crc_addr = sym['st_value']
+    if len(data) < final_size:
+        padding = final_size - len(data)
+        print(f"Extending binary by {padding} bytes to reach CRC location.")
+        data += b'\x00' * padding
 
-        # Find file offset of CRC placeholder
-        for segment in elf.iter_segments():
-            if segment['p_vaddr'] <= crc_addr < segment['p_vaddr'] + segment['p_memsz']:
-                offset = segment['p_offset'] + (crc_addr - segment['p_vaddr'])
-                break
-        else:
-            print("CRC address not found in any segment")
-            return
+    # Zero the CRC field before computing CRC
+    data[crc_offset:crc_offset + 4] = b'\x00' * 4
 
-        # Read everything up to the placeholder
-        f.seek(0)
-        data = f.read(offset)
+    # Calculate CRC over range [0, crc_offset)
+    crc_data = data[:crc_offset]
+    # Optional 4-byte alignment (only if your bootloader requires it)
+    pad_len = (4 - (len(crc_data) % 4)) % 4
+    crc_data += b'\x00' * pad_len
 
-        crc = stm32_crc(data)
-        print(f"STM32-matching CRC: 0x{crc:08X}")
+    crc = compute_crc(crc_data)
+    print(f"Patching CRC32: 0x{crc:08X} at offset 0x{crc_offset:X}")
 
-        # Patch the CRC into the ELF
-        f.seek(offset)
-        f.write(struct.pack('<I', crc))
-        print("Patched CRC.")
+    # Patch it into the correct location
+    data[crc_offset:crc_offset + 4] = struct.pack('<I', crc)
+
+    with open(bin_path, 'wb') as f:
+        f.write(data)
 
 if __name__ == "__main__":
-    patch_crc(sys.argv[1])
+    if len(sys.argv) != 2:
+        print("Usage: python patch_crc_append.py firmware.bin")
+        sys.exit(1)
+
+    main(sys.argv[1])

@@ -117,13 +117,6 @@ SECTIONS
     KEEP (*(.fini_array*))
     PROVIDE_HIDDEN (__fini_array_end = .);
   } >FLASH
-  
-   /* Reserve space for application CRC */
-	.firmware_crc 0x080FF000 :
-	{
-	    KEEP(*(.firmware_crc))
-	    LONG(0xFFFFFFFF)  /* Placeholder value to be patched */
-	} >FLASH
 
   /* used by the startup to initialize data */
   _sidata = LOADADDR(.data);
@@ -178,6 +171,12 @@ SECTIONS
   }
 
   .ARM.attributes 0 : { *(.ARM.attributes) }
+  /* Reserve 4 bytes at a fixed address for CRC */
+	.crc_section 0x080FF000 (NOLOAD) :
+	{
+	    KEEP(*(.app_crc))
+	} >FLASH
+	  
 }
 
 
