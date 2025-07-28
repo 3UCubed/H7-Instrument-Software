@@ -263,17 +263,20 @@ int main(void)
   /* USER CODE BEGIN 2 */
   if (*BOOTLOADER_FLAG_ADDR == BOOTLOADER_FLAG_VALUE) {
       *BOOTLOADER_FLAG_ADDR = 0;  // Clear flag
-      HAL_UART_Transmit(&huart1, (uint8_t*)"BootMgr: Bootloader flag triggered, entering ST bootloader...\r\n", 36, HAL_MAX_DELAY);
+      const char *msg = "BootMgr: Bootloader flag triggered. Jumping to ST bootloader...\r\n";
+      HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
       HAL_Delay(1000);
       JumpToSystemBootloader();
   }
 
   if (IsApplicationValid() && IsApplicationValidCRC()) {
-      HAL_UART_Transmit(&huart1, (uint8_t*)"BootMgr: Jumping to application...\r\n", 36, HAL_MAX_DELAY);
+	  const char *msg = "BootMgr: Application valid. Jumping to application...\r\n";
+	  HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
       HAL_Delay(1000);
       JumpToApplication();
   } else {
-      HAL_UART_Transmit(&huart1, (uint8_t*)"BootMgr: App invalid, going to ST bootloader...\r\n", 50, HAL_MAX_DELAY);
+	  const char *msg = "BootMgr: Application invalid. Jumping to ST bootloader...\r\n";
+	  HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
       HAL_Delay(1000);
       JumpToSystemBootloader();
   }
@@ -433,10 +436,10 @@ static void MX_USART1_UART_Init(void)
 
   /* USER CODE END USART1_Init 1 */
   huart1.Instance = USART1;
-  huart1.Init.BaudRate = 460800;
-  huart1.Init.WordLength = UART_WORDLENGTH_8B;
+  huart1.Init.BaudRate = 115200;
+  huart1.Init.WordLength = UART_WORDLENGTH_9B;
   huart1.Init.StopBits = UART_STOPBITS_1;
-  huart1.Init.Parity = UART_PARITY_NONE;
+  huart1.Init.Parity = UART_PARITY_EVEN;
   huart1.Init.Mode = UART_MODE_TX_RX;
   huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
   huart1.Init.OverSampling = UART_OVERSAMPLING_16;
