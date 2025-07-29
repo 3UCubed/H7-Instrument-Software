@@ -1,2 +1,7 @@
 .DS_Store
-.project
+/build/
+/Debug/
+/Release/
+/.settings/
+/.metadata/
+/*.launch
