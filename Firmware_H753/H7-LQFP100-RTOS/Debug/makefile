@@ -106,7 +106,7 @@ pre-build:
 	-@echo ' '
 
 post-build:
-	python ../patch_crc.py ../Debug/H7-LQFP100-RTOS.bin
+	python3 ../patch_crc.py ../Debug/H7-LQFP100-RTOS.bin
 	arm-none-eabi-objcopy -I binary -O ihex --change-addresses=0x08020000 ../Debug/H7-LQFP100-RTOS.bin ../Debug/H7-LQFP100-RTOS.hex
 	-@echo ' '
 
