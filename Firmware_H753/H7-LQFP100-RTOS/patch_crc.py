@@ -2,7 +2,7 @@ import sys
 import struct
 
 APP_BASE = 0x08020000
-CRC_ADDR = 0x080FF000
+CRC_ADDR = 0x08040000
 
 def compute_crc(data):
     crc = 0xFFFFFFFF

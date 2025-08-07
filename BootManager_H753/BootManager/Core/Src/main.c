@@ -39,7 +39,7 @@ typedef  void (*pFunction)(void);
 #define BOOTLOADER_FLAG_VALUE 0xDEADBEEF
 #define BOOTLOADER_ADDRESS 0x1FF09800
 #define APP_ADDRESS  0x08020000
-#define APP_CRC_ADDRESS 0x080FF000
+#define APP_CRC_ADDRESS 0x08040000
 #define APP_CRC_LENGTH (APP_CRC_ADDRESS - APP_ADDRESS)
 /* USER CODE END PD */
 
@@ -265,19 +265,19 @@ int main(void)
       *BOOTLOADER_FLAG_ADDR = 0;  // Clear flag
       const char *msg = "BootMgr: Bootloader flag triggered. Jumping to ST bootloader...\r\n";
       HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
-      HAL_Delay(1000);
+//      HAL_Delay(1000);
       JumpToSystemBootloader();
   }
 
   if (IsApplicationValid() && IsApplicationValidCRC()) {
 	  const char *msg = "BootMgr: Application valid. Jumping to application...\r\n";
 	  HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
-      HAL_Delay(1000);
+//      HAL_Delay(1000);
       JumpToApplication();
   } else {
 	  const char *msg = "BootMgr: Application invalid. Jumping to ST bootloader...\r\n";
 	  HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
-      HAL_Delay(1000);
+//      HAL_Delay(1000);
       JumpToSystemBootloader();
   }
   /* USER CODE END 2 */
