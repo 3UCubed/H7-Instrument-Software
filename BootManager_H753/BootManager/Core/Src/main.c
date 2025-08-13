@@ -79,6 +79,53 @@ static void MX_CRC_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+/* USER CODE BEGIN 0 */
+
+/**
+ * @brief  A manual boot window upon this bootmanagers startup that waits for command 2B.
+ * 		   Upon the command being triggered we will jump to bootloader.
+ * 		   If no command is sent over UART, code continues as normal.
+ */
+static void WaitForManualBootWindow(void)
+{
+    // Flush any stale RX data so we only react to *new* traffic
+    __HAL_UART_FLUSH_DRREGISTER(&huart1);
+    __HAL_UART_CLEAR_OREFLAG(&huart1);
+    __HAL_UART_CLEAR_NEFLAG(&huart1);
+    __HAL_UART_CLEAR_FEFLAG(&huart1);
+    __HAL_UART_CLEAR_PEFLAG(&huart1);
+
+    const char *msg = "BootMgr: 1s window open — send 0x2B to enter ST bootloader...\r\n";
+    HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
+
+    uint32_t start = HAL_GetTick();
+    uint8_t byte = 0;
+
+    while ((HAL_GetTick() - start) < 1000UL)   // ~1 second window
+    {
+        // Short, non-blocking-ish read (10 ms slices)
+        if (HAL_UART_Receive(&huart1, &byte, 1, 10) == HAL_OK)
+        {
+            if (byte == 0x2B) // '+' == 0x2B
+            {
+                const char *trig = "BootMgr: Manual bootloader request detected. Jumping...\r\n";
+                HAL_UART_Transmit(&huart1, (uint8_t*)trig, strlen(trig), HAL_MAX_DELAY);
+
+                // Optional: clear any RAM flag so we don't loop back here later by accident
+                // *BOOTLOADER_FLAG_ADDR = 0;
+
+                JumpToSystemBootloader();
+                // no return
+            }
+            // If you expect larger protocol frames later, you could keep consuming here;
+            // for now, any non-0x2B byte is ignored and the window continues.
+        }
+        // else: timeout -> keep looping until 1s total has elapsed
+    }
+}
+/* USER CODE END 0 */
+
+
 /**
  * @brief  Jump to the STM32 System Bootloader (e.g. during corrupt state or UART-based flashing).
  *         Cleans up peripherals and disables interrupts before jumping to the
@@ -261,6 +308,8 @@ int main(void)
   MX_USART1_UART_Init();
   MX_CRC_Init();
   /* USER CODE BEGIN 2 */
+  WaitForManualBootWindow();
+
   if (*BOOTLOADER_FLAG_ADDR == BOOTLOADER_FLAG_VALUE) {
       *BOOTLOADER_FLAG_ADDR = 0;  // Clear flag
       const char *msg = "BootMgr: Bootloader flag triggered. Jumping to ST bootloader...\r\n";
