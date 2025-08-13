@@ -102,7 +102,8 @@ typedef enum
 	CMD_SEND_PREVIOUS_ERROR = 0xA5,
 	CMD_SEND_VERSION_PACKET = 0xA6,
 	CMD_SEND_VERSION_INFO = 0xA7,
-	CMD_UPDATE_FIRMWARE = 0x2A
+	CMD_UPDATE_FIRMWARE = 0x2A,
+	CMD_ST_BL_SYNC = 0x7F
 }ACCEPTED_COMMANDS;
 
 typedef  void (*pFunction)(void);
@@ -611,6 +612,13 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 		HAL_UART_Transmit(&huart1, &msg, 1, 1000);
 		SetBootloaderFlag();
 		break;
+	}
+
+	case CMD_ST_BL_SYNC:
+	{
+	    uint8_t ack = 0x79;
+	    HAL_UART_Transmit(&huart1, &ack, 1, 1000);
+	    break;
 	}
 
 	default:
