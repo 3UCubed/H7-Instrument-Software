@@ -2,7 +2,7 @@
 /**
   ******************************************************************************
   * @file           : main.c
-  * @author 		: Jared Morrison
+  * @author 		: Anthony Santos
   * @version 	  	: 1.0.0
   * @brief          : Boot manager entry point and application validation logic
   ******************************************************************************
