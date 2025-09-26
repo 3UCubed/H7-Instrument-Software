@@ -66,5 +66,3 @@ Its purpose is to validate and chain-load the primary application firmware, or f
   - Erases/writes only `>= 0x08020000`.
   - Appends CRC word at `0x08040000` after flashing.
 - **Option bytes**: must boot from Flash (`0x08000000`), not ROM.
-
----

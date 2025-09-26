@@ -41,5 +41,5 @@ The Instrument MCU runs a **dual-image architecture**:
 
 ## Documentation
 
-- [BootManager README](bootmanager/README.md) – covers startup logic, memory layout, validation, and update flow.
-- [H7 Instrument Firmware README](h7-instrument-firmware/README.md) – covers main app features, tasks, commands, and packet handling.
+- [BootManager README](BootManager_H753/README.md) – covers startup logic, memory layout, validation, and update flow.
+- [H7 Instrument Firmware README](Firmware_H753/README.md) – covers main app features, tasks, commands, and packet handling.
